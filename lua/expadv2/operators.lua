@@ -4,6 +4,33 @@ local LEMON_INLINEPREPARE = 3
 local LEMON_FUNCTION = 4
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Server -> Client control.
+   --- */
+
+local LoadOnServer = true
+
+local LoadOnClient = true
+
+function EXPADV.ServerOperators( )
+	LoadOnServer = true
+
+	LoadOnClient = false
+end
+
+function EXPADV.ClientOperators( )
+	LoadOnClient = true
+
+	LoadOnServer = false
+end
+
+function EXPADV.SharedOperators( )
+	LoadOnClient = true
+
+	LoadOnServer = true
+end
+
+EXPADV.BaseClassObj.LoadOnClient = true
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Register our operators!
    --- */
 
@@ -11,6 +38,9 @@ local Temp_Operators = { }
 
 function EXPADV.AddInlineOperator( Component, Name, Input, Return, Inline )
 	Temp_Operators[ #Temp_Operators + 1 ] = { 
+		LoadOnClient = LoadOnServer,
+		LoadOnServer = LoadOnServer,
+
 		Component = Component,
 		Name = Name,
 		Input = Input,
@@ -22,6 +52,9 @@ end
 
 function EXPADV.AddPreparedOperator( Component, Name, Input, Return, Prepare, Inline )
 	Temp_Operators[ #Temp_Operators + 1 ] = { 
+		LoadOnClient = LoadOnServer,
+		LoadOnServer = LoadOnServer,
+		 
 		Component = Component,
 		Name = Name,
 		Input = Input,
@@ -32,8 +65,11 @@ function EXPADV.AddPreparedOperator( Component, Name, Input, Return, Prepare, In
 	}
 end
 
-function EXPADV.AddPreparedOperator( Component, Name, Input, Return, Function )
+function EXPADV.AddVMOperator( Component, Name, Input, Return, Function )
 	Temp_Operators[ #Temp_Operators + 1 ] = { 
+		LoadOnClient = LoadOnServer,
+		LoadOnServer = LoadOnServer,
+		 
 		Component = Component,
 		Name = Name,
 		Input = Input,
@@ -126,8 +162,11 @@ end
 
 local Temp_Functions = { }
 
-function EXPADV.AddInlineOperator( Component, Name, Input, Return, Inline )
-	Temp_Functions[ #Temp_Functions + 1 ] = { 
+function EXPADV.AddInlineFunction( Component, Name, Input, Return, Inline )
+	Temp_Functions[ #Temp_Functions + 1 ] = {  
+		LoadOnClient = LoadOnServer,
+		LoadOnServer = LoadOnServer,
+		
 		Component = Component,
 		Name = Name,
 		Input = Input,
@@ -137,8 +176,11 @@ function EXPADV.AddInlineOperator( Component, Name, Input, Return, Inline )
 	}
 end
 
-function EXPADV.AddPreparedOperator( Component, Name, Input, Return, Prepare, Inline )
-	Temp_Functions[ #Temp_Functions + 1 ] = { 
+function EXPADV.AddPreparedFunction( Component, Name, Input, Return, Prepare, Inline )
+	Temp_Functions[ #Temp_Functions + 1 ] = {  
+		LoadOnClient = LoadOnServer,
+		LoadOnServer = LoadOnServer,
+		
 		Component = Component,
 		Name = Name,
 		Input = Input,
@@ -149,14 +191,34 @@ function EXPADV.AddPreparedOperator( Component, Name, Input, Return, Prepare, In
 	}
 end
 
-function EXPADV.AddPreparedOperator( Component, Name, Input, Return, Function )
-	Temp_Functions[ #Temp_Functions + 1 ] = { 
+function EXPADV.AddVMFunction( Component, Name, Input, Return, Function )
+	Temp_Functions[ #Temp_Functions + 1 ] = {  
+		LoadOnClient = LoadOnServer,
+		LoadOnServer = LoadOnServer,
+		
 		Component = Component,
 		Name = Name,
 		Input = Input,
 		Return = Return,
 		Function = Function,
 		FLAG = LEMON_FUNCTION
+	}
+end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Helper Support
+   --- */
+
+local Temp_HelperData = { }
+
+function EXPADV.AddFunctionHelper( Component, Name, Input, Description )
+	if SERVER then return end
+
+	Temp_HelperData[#Temp_HelperData + 1] = {
+		Component = Component,
+		Name = Name,
+		Input = Input,
+		Description = Description
 	}
 end
 
@@ -188,6 +250,7 @@ function EXPADV.LoadOperators( )
 		local ShouldNotLoad = false
 
 		if Operator.Input and Operator.Input ~= "" then
+			
 			local Signature = { }
 
 			local Start, End = string.find( Operator.Input, "^()[a-z0-9]+():" )
@@ -252,6 +315,26 @@ function EXPADV.LoadOperators( )
 		EXPADV.BuildLuaOperator( Operator )
 
 		EXPADV.Functions[ Operator.Signature ] = Operator
+	end
+
+	if CLIENT then
+
+		EXPADV.Functions = { }
+
+		for I = 1, #Temp_HelperData do
+			local Helper = Temp_HelperData[I]
+			
+			if Helper.Component and !Helper.Component.Enabled then continue end
+
+			local Signature = string.format( "%s(%s)", Helper.Name, Helper.Input or "" )
+
+			local Operator = EXPADV.Functions[Signature]
+
+			if !Operator then continue end
+
+			Operator.Description = Helper.Description
+		end
+		
 	end
 end
 
@@ -495,6 +578,10 @@ function EXPADV.BuildLuaOperator( Operator )
 			end
 
 			OpPrepare = string.gsub( OpPrepare, "(%%[a-zA-Z0-9_]+)", Definitions )
+
+			--TODO: Externals!
+
+			--TODO: Imports!
 		end
 
 		-- Now lets format the inline
