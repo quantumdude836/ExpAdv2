@@ -3,13 +3,13 @@ local LEMON_PREPARE = 2
 local LEMON_INLINEPREPARE = 3
 local LEMON_FUNCTION = 4
 
-/* ---
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Register our operators!
    --- */
 
 local Temp_Operators = { }
 
-function AddInlineOperator( Component, Name, Input, Return, Inline )
+function EXPADV.AddInlineOperator( Component, Name, Input, Return, Inline )
 	Temp_Operators[ #Temp_Operators + 1 ] = { 
 		Component = Component,
 		Name = Name,
@@ -20,7 +20,7 @@ function AddInlineOperator( Component, Name, Input, Return, Inline )
 	}
 end
 
-function AddPreparedOperator( Component, Name, Input, Return, Prepare, Inline )
+function EXPADV.AddPreparedOperator( Component, Name, Input, Return, Prepare, Inline )
 	Temp_Operators[ #Temp_Operators + 1 ] = { 
 		Component = Component,
 		Name = Name,
@@ -32,7 +32,7 @@ function AddPreparedOperator( Component, Name, Input, Return, Prepare, Inline )
 	}
 end
 
-function AddPreparedOperator( Component, Name, Input, Return, Function )
+function EXPADV.AddPreparedOperator( Component, Name, Input, Return, Function )
 	Temp_Operators[ #Temp_Operators + 1 ] = { 
 		Component = Component,
 		Name = Name,
@@ -43,13 +43,13 @@ function AddPreparedOperator( Component, Name, Input, Return, Function )
 	}
 end
 
-/* ---
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Load out operators
    --- */
 
-Operators = { }
+function EXPADV.LoadOperators( )
+	EXPADV.Operators = { }
 
-function LoadOperators( )
 	for I = 1, #Temp_Operators do
 		local Operator = Temp_Operators[I]
 
@@ -72,6 +72,141 @@ function LoadOperators( )
 
 		if Operator.Input and Operator.Input ~= "" then
 			local Signature = { }
+
+			for I, Input in string.gmatch( Operator.Input, "()([%w%?!%*]+)%s*([%[%]]?)()" ) do
+
+				-- First lets check for varargs.
+				if Input == "..." then
+					
+					if I ~= #string.Explode( ",", Operator.Input ) then 
+						ShouldNotLoad = true
+						break -- Vararg is in the wrong place =(
+					end
+
+					Signature[ I ] = "..."
+					Operator.UsesVarg = true
+					break
+				end
+
+				-- Next, check for valid input classes.
+				local Class = GetClass( Input, false, true )
+				
+				if !Class then 
+					ShouldNotLoad = true
+					break
+				end
+
+				Signature[ I ] = Class.Short
+			end
+
+			Operator.Input = Signature
+			Operator.InputCount = #Signature
+			Operator.Signature = string.format( "%s(%s)", Operator.Name, table.concat( Signature, "" ) )
+
+			if Operator.UsesVarg then Operator.InputCount = Operator.InputCount - 1 end
+		else
+			Operator.Input = { }
+			Operator.InputCount = 0
+			Operator.Signature = string.format( "%s()", Operator.Name )
+		end
+
+		-- Do we still need to load this?
+		if ShouldNotLoad then continue end
+
+		-- Lets build this operator.
+		EXPADV.BuildLuaOperator( Operator )
+
+		EXPADV.Operators[ Operator.Signature ] = Operator
+	end
+end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Register our functions
+   --- */
+
+local Temp_Functions = { }
+
+function EXPADV.AddInlineOperator( Component, Name, Input, Return, Inline )
+	Temp_Functions[ #Temp_Functions + 1 ] = { 
+		Component = Component,
+		Name = Name,
+		Input = Input,
+		Return = Return,
+		Inline = Inline,
+		FLAG = LEMON_INLINE
+	}
+end
+
+function EXPADV.AddPreparedOperator( Component, Name, Input, Return, Prepare, Inline )
+	Temp_Functions[ #Temp_Functions + 1 ] = { 
+		Component = Component,
+		Name = Name,
+		Input = Input,
+		Return = Return,
+		Prepare = Prepare,
+		Inline = Inline,
+		FLAG = Inline and LEMON_INLINEPREPARE or LEMON_PREPARE
+	}
+end
+
+function EXPADV.AddPreparedOperator( Component, Name, Input, Return, Function )
+	Temp_Functions[ #Temp_Functions + 1 ] = { 
+		Component = Component,
+		Name = Name,
+		Input = Input,
+		Return = Return,
+		Function = Function,
+		FLAG = LEMON_FUNCTION
+	}
+end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Load out functions
+   --- */
+
+function EXPADV.LoadOperators( )
+	EXPADV.Functions = { }
+
+	for I = 1, #Temp_Functions do
+		local Operator = Temp_Functions[I]
+
+		-- Checks if the operator requires an enabled component.
+		if Operator.Component and !Operator.Component.Enabled then continue end
+
+		-- First of all, Check the return type!
+		if Operator.Return and Operator.Return == "" then
+			if Operator.FLAG = LEMON_INLINE then continue end
+			Operator.Return = nil -- ^ Inlined operators must return somthing!
+		elseif Operator.Return and Operator.Return == "..." then
+			Operator.ReturnsVarg = true
+		else
+			local Class = GetClass( Operator.Return, false, true )
+			if !Class then continue end -- return Class does not exits!
+		end
+
+		-- Second we check the input types, and build our signatures!
+		local ShouldNotLoad = false
+
+		if Operator.Input and Operator.Input ~= "" then
+			local Signature = { }
+
+			local Start, End = string.find( Operator.Input, "^()[a-z0-9]+():" )
+
+			if Start then
+				local Meta = string.sub( Operator.Input, Start, End - 1 )
+
+				Operator.Input = string.sub( Operator.Input, End + 1 )
+
+				-- Next, check for valid input classes.
+				local Class = GetClass( Meta, false, true )
+				
+				if !Class then 
+					ShouldNotLoad = true
+					break
+				end
+
+				Signature[1] = Class.Short .. ":"
+			end
 
 			for I, Input in string.gmatch( Operator.Input, "()([%w%?!%*]+)%s*([%[%]]?)()" ) do
 
@@ -114,17 +249,18 @@ function LoadOperators( )
 		if ShouldNotLoad then continue end
 
 		-- Lets build this operator.
-		BuildLuaOperator( Operator )
+		EXPADV.BuildLuaOperator( Operator )
 
-		Operators[Operator.Signature] = Operator
+		EXPADV.Functions[ Operator.Signature ] = Operator
 	end
 end
 
-/* ---
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Operator to Lua
    --- */
 
-function BuildVMOperator( Operator )
+function EXPADV.BuildVMOperator( Operator )
 	if Operator.InputCount == 0 then
 		return function( Compiler, Trace )
 			return Compiler:NewVMInstruction( Trace, Operator, Operator.Function )
@@ -175,7 +311,7 @@ function BuildVMOperator( Operator )
 	end
 end
 
-function BuildLuaOperator( Operator )
+function EXPADV.BuildLuaOperator( Operator )
 	if Operator.FLAG == LEMON_FUNCTION then
 		return BuildVMOperator( Operator )
 	end
@@ -333,68 +469,38 @@ function BuildLuaOperator( Operator )
 		end
 
 		-- Oh god, now we need to format our preperation.
-		local Local_Values = { }
+		local Definitions = { }
 
 		if Input.FLAG == LEMON_PREPARE or Input.FLAG == LEMON_INLINEPREPARE then
-			local NewLines, Spaces = { }, 0
-			local OldLines = string.Explode( "[\n;]", OpPrepare, true )
+			local DefinedLines = { }
 
-			for I = 1, #OldLines do
-				--First lets remove spacing!
-				local Line = string.Trim( string.Trim( OldLines[I], " " ), "\t" )
+			for StartPos, EndPos in string.gmatch( OpPrepare, "()%%define [a-zA-Z_0-9%%, \t]+()" ) do
+				DefinedLines[ #DefinedLines + 1 ] = { StartPos, EndPos }
+			end
 
-				-- Now lets find the locals!
-				if string.StartWith( Line, "local ") then
-					local NewLine = Line
+			for I = #DefinedLines, 1, -1 do -- Work backwards, so we dont break our preparation.
+				local NewLine = { }
+				local Start, End = unpack( DefinedLines[I] ) -- Oh God unpack, meh.
+				local Line = string.sub( Start + 8, End - 1,  )
 
-					for Variable in string.gmatch( Line, "(%%[a-zA-Z0-9_]+)" ) do
-						local Local = string.format( "Context.Locals[%s]", Compiler:NextLocal( ) )
-						Local_Values[ Variable ] = Local
+				for Name in string.gmatch( Line, "([a-zA-Z0-9_]+)" ) do
+					local Lua = Compiler:NextLocal( )
 
-						NewLine = string.gsub( NewLine, "%" .. Variable, Local )
-					end
+					NewLine[ #NewLine + 1 ] = Lua
 
-					if NewLine ~= Line then
-						NewLine = string.sub( NewLine, 7, #NewLine ) -- Strip of local!
-						NewLines[ #NewLines + 1 ] = string.rep( " ", Spaces ) .. NewLine
-					else
-						NewLines[ #NewLines + 1 ] = string.rep( " ", Spaces ) .. Line
-					end
-				-- Anything ending with 'do' or 'then' needs to indent.
-				elseif string.EndsWith( Line, "then") or string.EndsWith( Line, "do") then
-					NewLines[ #NewLines + 1 ] = string.rep( " ", Spaces ) .. Line
-					Spaces = Spaces + 1
-				
-				-- Functions need to indent too.
-				elseif string.StartWith( Line, "function") and !string.EndsWith( Line, "end") then
-					NewLines[ #NewLines + 1 ] = string.rep( " ", Spaces ) .. Line
-					Spaces = Spaces + 1
-
-				-- Anything ending with 'end' needs to unindent.
-				elseif string.StartWith( Line, "end") then
-					Spaces = Spaces - 1
-					NewLines[ #NewLines + 1 ] = string.rep( " ", Spaces ) .. Line
-				
-				else -- Now we just indent as normal!
-					NewLines[ #NewLines + 1 ] = string.rep( " ", Spaces ) .. Line
+					Definitions[ "%" .. Name ] = Lua
 				end
 
-				-- Rebuild the new lines.
-				OpPrepare = table.concat( NewLines, "\n" )
-
-				-- Replace the locals in our prepare!
-				OpPrepare = string.gsub( OpPrepare, "(%%[a-zA-Z0-9_]+)", Local_Values )
-
-				--TODO: Externals!
-
-				--TODO: Imports!
+				OpPrepare = string.sub( OpPrepare, 1, Start ) .. table.concat( NewLine, "," ) .. string.sub( OpPrepare, End - 1 )
 			end
+
+			OpPrepare = string.gsub( OpPrepare, "(%%[a-zA-Z0-9_]+)", Definitions )
 		end
 
 		-- Now lets format the inline
 		if Operator.FLAG == LEMON_INLINE or Operator.FLAG == LEMON_INLINEPREPARE then
 			-- Replace the locals in our prepare!
-			OpInline = string.gsub( OpInline, "(%%[a-zA-Z0-9_]+)", Local_Values )
+			OpInline = string.gsub( OpInline, "(%%[a-zA-Z0-9_]+)", Definitions )
 
 			--TODO: Externals!
 
@@ -443,6 +549,7 @@ function Compiler:NewVMInstruction( Trace, Operator, Function, Inputs )
 		Function = Function,
 		Return = Operator.Return,
 		Inputs = Inputs or { self:CompileTrace( Trace ), "Context" },
+		Evaluated = true,
 		FLAG = Operator.FLAG
 	}
 end

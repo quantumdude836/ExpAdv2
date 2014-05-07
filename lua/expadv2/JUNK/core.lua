@@ -125,9 +125,6 @@ function EXPADV.ReadSetting( Name, Default )
 end
 
 
-
-
-
 function BuildComponents( )
 	MsgN( "ExpAdv: Loading components:")
 

@@ -1,104 +1,252 @@
-/* ---
-	@: Expression Advanced 2.
-	@: Because the old one was shit.
-	@: Team SpaceTown -> Rusketh, Oskar_
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Create base class
    --- */
 
-/* ---
-	@: Class system.
+EXPADV.BaseClassObj = { }
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Basic Support
    --- */
 
-local ClassTable = { }
+function EXPADV.BaseClassObj:DefaultAsLua( Default ) -- Object / function( Trace, Context )
+	if istable( Default ) then
+		Default = function( ) return table.Copy( Default ) end
+	elseif !isfunction( Default ) then
+		Default = function( ) return Default end
+	end
 
-local ClassID, ClassName = { }, { }
-
-local BaseClass = { Name = "BASE", ID = "#" }
-
-BaseClass.__index = BaseClass
-
-function GetBaseClass( )
-	return BaseClass
+	self.CreateNew = Default
 end
 
-function EXPADV.NewClass( Name, ID )
-	ID = string.lower( ID )
-	Name = string.lower( Name )
+EXPADV.BaseClassObj.DeriveFrom = "generic"
 
-	local Class = setmetatable( { Name = Name, ID = ID }, BaseClass )
-	
-	if #ID >= 2 then ID = "_" .. ID end
+function EXPADV.BaseClassObj:ExtendClass( ExtendClass )
+	self.DeriveFrom = ExtendClass
+end
 
-	table.insert( ClassTable, Class )
+function EXPADV.BaseClassObj:ExtendClass( ExtendClass )
+	self.DeriveFrom = ExtendClass
+end
+
+local Temp_Aliases = { }
+
+function EXPADV.BaseClassObj:AddAlias( Alias )
+	Temp_Aliases[ Alias ] = self
+end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Wire Support
+   --- */
+
+if WireLib then
+
+	local function WireOut( Context, MemoryRef ) return Context.Memory[ MemoryRef ] end
+
+	function EXPADV.BaseClassObj:WireOutput( WireType, Function ) -- function( Context, MemoryRef ) return Converted end
+		self.Wire_Out_Type = string.upper( WireType )
+
+		self.Wire_Out_Util = Function or WireOut
+	end
+
+	local function WireIn( Context, MemoryRef, InValue ) Context.Memory[ MemoryRef ] = InValue end
+
+	function EXPADV.BaseClassObj:WireOutput( WireType, Function ) -- function( Context, MemoryRef,  InValue) end
+		self.Wire_In_Type = string.upper( WireType )
+		
+		self.Wire_In_Util = Function or WireIn
+	end
+
+end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Seralization Support
+   --- */
+
+function EXPADV.BaseClassObj:Serialize( Function ) -- function( Value ) return String end
+	self.SerializeAsString = Function
+end
+
+function EXPADV.BaseClassObj:Deserialize( Function ) -- function( String ) return Value end
+	self.DeserializeFromString = Function
+end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Server -> Client Support
+   --- */
+
+EXPADV.BaseClassObj.LoadOnServer = true
+
+EXPADV.BaseClassObj.LoadOnClient = true
+
+function EXPADV.BaseClassObj:MakeServerOnly( )
+	self.LoadOnClient = false
+end
+
+function EXPADV.BaseClassObj:MakeClientOnly( )
+	self.LoadOnServer = false
+end
+
+function EXPADV.BaseClassObj:NetSend( Function ) -- function( Value ) return String end
+	self.SendToClient = Function
+end
+
+function EXPADV.BaseClassObj:NetReceive( Function ) -- function( Value ) return String end
+	self.ReceiveFromServer = Function
+end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Class framework
+   --- */
+
+local Temp_Classes = { }
+
+function EXPADV.AddClass( Component, Name, Short )
+	if #Short > 1 then Short = "x" .. Short end
+
+	local Class = setmetatable( { Component = Component, Name = Name }, EXPADV.BaseClassObj )
+
+	Temp_Classes[ #Temp_Classes + 1 ] = Class
 
 	return Class
 end
 
-function EXPADV.GetClass( _Name , bNameOnly, bNoError )
-	Name = string.lower( _Name )
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Define generic Class
+   --- */
 
-	local Class = ClassName[ Name ]
-	if Class or !bNameOnly then return Class end
+local Class_Generic = EXPADV.AddClass( nil, "generic", "g" )
 
-	if #Name >= 2 and Name[1] ~= "_" then
-		Name = "_" .. Name
-	end
-	
-	Class = ClassID[ Name ]
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Define Null Class
+   --- */
 
-	if Class then return Class end
+   -- TODO
 
-	if bNoError then
-		error( "ExprAdv: Could not find class " .. _Name )
-	end
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Define boolean class
+   --- */
+
+local Class_Boolean = EXPADV.AddClass( nil, "boolean", "g" )
+	  
+	  Class_Boolean:AddAlias( "bool" )
+
+	  Class_Boolean:DefaultAsLua( false )
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Register variant class!
+   --- */
+
+local Class_Variant = EXPADV.AddClass( nil, "variant", "vr" )
+		
+	  Class_Variant:DefaultAsLua( { false, "b" } )
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: GetClass
+   --- */
+
+function EXPADV.GetClass( Name )
+	if !Name then return end
+
+	if EXPADV.Classes[ Name ] then return EXPADV.Classes[ Name ] end
+
+	if EXPADV.ClassAliases[ Name ] then return EXPADV.ClassAliases[ Name ] end
+
+	if Name > 1 then Name = "x" .. Name end
+
+	if EXPADV.ClassShorts[ Name ] then return EXPADV.ClassShorts[ Name ] end
 end
 
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Load classes!
+   --- */
 
-function BaseClass:Extends( ClassName )
-	self.Extends = ClassName
-end
+function EXPADV.LoadClasses( )
+ 	EXPADV.Classes = { }
 
-function BaseClass:Default( Value )
-	self.asNative = toLua( Value, false )
-end
+ 	EXPADV.ClassShorts = { }
 
-function EXPADV.BuildClasses( )
+ 	EXPADV.ClassAliases = { }
 
-	ClassID = { }
-	ClassName  = { }
+ 	-- EXPADV.RunHook( "LoadClasses" )
 
-	EXPADV.APICall( "PreBuildClass" )
+ 	for I = 1, #Temp_Classes do
+ 		local Class = Temp_Classes[I]
 
-	for _, Class in pairs( ClassTable ) do
+ 		if Class.Component and !Class.Component.Enabled then continue end
 
-		if Class.Component and !Class.Component.Enabled then
-			continue -- We wont load any disabled class.
-		elseif Class.Component then
-			Class.Component = Class.Component.Name
+ 		EXPADV.Classes[ Class.Name ] = Class
+
+ 		EXPADV.ClassShorts[ Class.Short ] = Class
+ 	end
+
+ 	for _, Class in pairs( EXPADV.Classes ) do
+
+ 		local DeriveClass = EXPADV.GetClass( Class.DeriveFrom )
+
+ 		Class.DerivedClass = DeriveClass
+
+ 		if !DeriveClass then
+ 			EXPADV.Classes[ Class.Name ] = nil
+
+ 			EXPADV.ClassShorts[ Class.Short ] = nil
+
+ 			continue
+ 		end
+
+ 		EXPADV.ClassAliases[ Class.Name ] = Class
+
+ 		if Class.CreateNew then
+ 			EXPADV.AddVMOperator( Class.Component, "default", Class.Short , Class.Short, Class.CreateNew )
+ 		end -- ^ Add default operator, can now do this :D
+
+ 		if DeriveClass == Class_Generic then continue end
+
+ 		Class.LoadOnServer = DeriveClass.LoadOnServer
+
+		Class.LoadOnClient = DeriveClass.LoadOnClient
+
+ 		if !Class.CreateNew then
+ 			Class.CreateNew = DeriveClass.CreateNew
+ 		end
+ 			
+ 		if WireLib then
+
+ 			if !Class.Wire_Out_Type then
+ 				Class.Wire_Out_Type = DeriveClass.Wire_Out_Type
+
+ 				Class.Wire_Out_Util = DeriveClass.Wire_Out_Util
+ 			end
+
+ 			if !Class.Wire_In_Type then
+ 				Class.Wire_In_Type = DeriveClass.Wire_In_Type
+
+ 				Class.Wire_In_Util = DeriveClass.Wire_In_Util
+ 			end
+
+ 		end
+
+		if !Class.SerializeAsString then
+			Class.SerializeAsString = DeriveClass.SerializeAsString
 		end
 
-		ClassID[ Class.ID ] = Class
-		ClassName[ Class.Name ] = Class
-
-	end
-
-	for _, Class in pairs( ClassTable ) do
-		if Class.Extends then
-			local Extends = GetClass( Class.Extends, false, true )
-
-			if !Extends then
-				ClassID[ Class.ID ] = nil
-				ClassName[ Class.Name ] = nil
-				MsgN( string.format( "ExpAdv: Failed to load %q, extends invalid class %q", Class.Name, Class.Extends )
-				continue
-			end
-
-			Class.Extends = Extends
+		if !Class.DeserializeFromString then
+			Class.DeserializeFromString = DeriveClass.DeserializeFromString
 		end
 
-		if !Class.asNative and Class.Extends then
-			Class.asNative = Class.Extends.asNative
-		end
-	end
+		-- TODO: Extend net usage?
 
-	EXPADV.APICall( "PostBuildClass" )
-end
+ 	end
+
+ 	for _, Class in pairs( EXPADV.Classes ) do
+ 		-- EXPADV.RunHook( "RegisterClass", Class )
+ 	end
+
+ 	for Alias, Class in pairs( EXPADV.ClassAliases ) do
+ 		
+ 		if Class.Component and !Class.Component.Enabled then
+ 			EXPADV.ClassAliases[Alias] = nil
+ 		end
+
+ 	end
+
+ end
