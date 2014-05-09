@@ -38,7 +38,7 @@ local Temp_Operators = { }
 
 function EXPADV.AddInlineOperator( Component, Name, Input, Return, Inline )
 	Temp_Operators[ #Temp_Operators + 1 ] = { 
-		LoadOnClient = LoadOnServer,
+		LoadOnClient = LoadOnClient,
 		LoadOnServer = LoadOnServer,
 
 		Component = Component,
@@ -52,7 +52,7 @@ end
 
 function EXPADV.AddPreparedOperator( Component, Name, Input, Return, Prepare, Inline )
 	Temp_Operators[ #Temp_Operators + 1 ] = { 
-		LoadOnClient = LoadOnServer,
+		LoadOnClient = LoadOnClient,
 		LoadOnServer = LoadOnServer,
 		 
 		Component = Component,
@@ -67,7 +67,7 @@ end
 
 function EXPADV.AddVMOperator( Component, Name, Input, Return, Function )
 	Temp_Operators[ #Temp_Operators + 1 ] = { 
-		LoadOnClient = LoadOnServer,
+		LoadOnClient = LoadOnClient,
 		LoadOnServer = LoadOnServer,
 		 
 		Component = Component,
@@ -94,12 +94,12 @@ function EXPADV.LoadOperators( )
 
 		-- First of all, Check the return type!
 		if Operator.Return and Operator.Return == "" then
-			if Operator.FLAG = LEMON_INLINE then continue end
+			if Operator.FLAG == LEMON_INLINE then continue end
 			Operator.Return = nil -- ^ Inlined operators must return somthing!
 		elseif Operator.Return and Operator.Return == "..." then
 			Operator.ReturnsVarg = true
 		else
-			local Class = GetClass( Operator.Return, false, true )
+			local Class = EXPADV.GetClass( Operator.Return, false, true )
 			if !Class then continue end -- return Class does not exits!
 		end
 
@@ -125,7 +125,7 @@ function EXPADV.LoadOperators( )
 				end
 
 				-- Next, check for valid input classes.
-				local Class = GetClass( Input, false, true )
+				local Class = EXPADV.GetClass( Input, false, true )
 				
 				if !Class then 
 					ShouldNotLoad = true
@@ -164,7 +164,7 @@ local Temp_Functions = { }
 
 function EXPADV.AddInlineFunction( Component, Name, Input, Return, Inline )
 	Temp_Functions[ #Temp_Functions + 1 ] = {  
-		LoadOnClient = LoadOnServer,
+		LoadOnClient = LoadOnClient,
 		LoadOnServer = LoadOnServer,
 		
 		Component = Component,
@@ -178,7 +178,7 @@ end
 
 function EXPADV.AddPreparedFunction( Component, Name, Input, Return, Prepare, Inline )
 	Temp_Functions[ #Temp_Functions + 1 ] = {  
-		LoadOnClient = LoadOnServer,
+		LoadOnClient = LoadOnClient,
 		LoadOnServer = LoadOnServer,
 		
 		Component = Component,
@@ -193,7 +193,7 @@ end
 
 function EXPADV.AddVMFunction( Component, Name, Input, Return, Function )
 	Temp_Functions[ #Temp_Functions + 1 ] = {  
-		LoadOnClient = LoadOnServer,
+		LoadOnClient = LoadOnClient,
 		LoadOnServer = LoadOnServer,
 		
 		Component = Component,
@@ -226,7 +226,7 @@ end
 	@: Load out functions
    --- */
 
-function EXPADV.LoadOperators( )
+function EXPADV.LoadFunctions( )
 	EXPADV.Functions = { }
 
 	for I = 1, #Temp_Functions do
@@ -237,12 +237,12 @@ function EXPADV.LoadOperators( )
 
 		-- First of all, Check the return type!
 		if Operator.Return and Operator.Return == "" then
-			if Operator.FLAG = LEMON_INLINE then continue end
+			if Operator.FLAG == LEMON_INLINE then continue end
 			Operator.Return = nil -- ^ Inlined operators must return somthing!
 		elseif Operator.Return and Operator.Return == "..." then
 			Operator.ReturnsVarg = true
 		else
-			local Class = GetClass( Operator.Return, false, true )
+			local Class = EXPADV.GetClass( Operator.Return, false, true )
 			if !Class then continue end -- return Class does not exits!
 		end
 
@@ -261,7 +261,7 @@ function EXPADV.LoadOperators( )
 				Operator.Input = string.sub( Operator.Input, End + 1 )
 
 				-- Next, check for valid input classes.
-				local Class = GetClass( Meta, false, true )
+				local Class = EXPADV.GetClass( Meta, false, true )
 				
 				if !Class then 
 					ShouldNotLoad = true
@@ -287,7 +287,7 @@ function EXPADV.LoadOperators( )
 				end
 
 				-- Next, check for valid input classes.
-				local Class = GetClass( Input, false, true )
+				local Class = EXPADV.GetClass( Input, false, true )
 				
 				if !Class then 
 					ShouldNotLoad = true
@@ -334,10 +334,21 @@ function EXPADV.LoadOperators( )
 
 			Operator.Description = Helper.Description
 		end
-		
+
 	end
 end
 
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Server and Client Operator Checks
+   --- */
+
+function EXPADV.CanBuildOperator( Compiler, Trace, Operator )
+	if Compiler.IsServerScript and !Operator.LoadOnServer then
+		Compiler:TraceError( Trace, "%s Must not appear in serverside scripts.", Operator.Signature )
+	elseif  Compiler.IsClientScript and !Operator.LoadOnClient then
+		Compiler:TraceError( Trace, "%s Must not appear in clientside scripts.", Operator.Signature )
+	end
+end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Operator to Lua
@@ -351,6 +362,8 @@ function EXPADV.BuildVMOperator( Operator )
 	end
 
 	return function( Compiler, Trace, ... )
+		EXPADV.CanBuildOperator( Compiler, Trace, Operator )
+
 		local Inputs = { Compiler:CompileTrace( Trace ), "Context" }
 
 		for I = Operator.InputCount, 1, -1 do
@@ -365,24 +378,24 @@ function EXPADV.BuildVMOperator( Operator )
 				continue
 			elseif Input.FLAG == LEMON_INLINE then
 
-				if string.StartWith( Input.Inline, "Context.Locals" ) then
+				if string.StartWith( Input.Inline, "Context.Dinfinitions" ) then
 					Inputs[I + 2] = Input.Inline
 					continue
 				end -- Already a varible
 
-				local O, E = pcall( RunString, "setfenv(1, LEMON_COMPILER_ENV ); LEMON_NATIVE = function( Trace, Context ) " .. Input.Inline .. " end")
+				local O, E = pcall( RunString, "setfenv(1, EXPADV.COMPILER_ENV ); LEMON_NATIVE = function( Trace, Context ) " .. Input.Inline .. " end")
 				if !O then self:Error( "Failed to compile instruction: %s -> %s", Operator.Signature, E ) end
 				
 				Inputs[I + 2] = Compiler:VMToLua( LEMON_NATIVE )
 				LEMON_NATIVE = nil
 			elseif Input.FLAG == LEMON_PREPARE then
-				local O, E = pcall( RunString, "setfenv(1, LEMON_COMPILER_ENV ); LEMON_NATIVE = function( Trace, Context )\n" .. Input.Prepare .. "\nend")
+				local O, E = pcall( RunString, "setfenv(1, EXPADV.COMPILER_ENV ); LEMON_NATIVE = function( Trace, Context )\n" .. Input.Prepare .. "\nend")
 				if !O then self:Error( "Failed to compile instruction: %s -> %s", Operator.Signature, E ) end
 				
 				Inputs[I + 2] = Compiler:VMToLua( LEMON_NATIVE )
 				LEMON_NATIVE = nil
 			else
-				local O, E = pcall( RunString, "setfenv(1, LEMON_COMPILER_ENV ); LEMON_NATIVE = function( Trace, Context )\n" .. Input.Prepare .. "\n" .. "return " .. Input.Inline .. "\nend")
+				local O, E = pcall( RunString, "setfenv(1, EXPADV.COMPILER_ENV ); LEMON_NATIVE = function( Trace, Context )\n" .. Input.Prepare .. "\n" .. "return " .. Input.Inline .. "\nend")
 				if !O then self:Error( "Failed to compile instruction: %s -> %s", Operator.Signature, E ) end
 
 				Inputs[I + 2] = Compiler:VMToLua( LEMON_NATIVE )
@@ -396,10 +409,12 @@ end
 
 function EXPADV.BuildLuaOperator( Operator )
 	if Operator.FLAG == LEMON_FUNCTION then
-		return BuildVMOperator( Operator )
+		return EXPADV.BuildVMOperator( Operator )
 	end
 
 	return function( Compiler, Trace, ... )
+		EXPADV.CanBuildOperator( Compiler, Trace, Operator )
+
 		local Trace = table.Copy( Trace )
 		local Inputs = { ... }
 
@@ -446,10 +461,10 @@ function EXPADV.BuildLuaOperator( Operator )
 				if Uses >= 2 and InputInline then
 					
 					-- First we check to see if it is local, before we localise it.
-					if !string.StartWith( InputInline, "Context.Locals" ) then
+					if !string.StartWith( InputInline, "Context.Dinfinitions" ) then
 						local Local = Compiler:NextLocal( )
-						InputPrepare = string.format( "%s\nContext.Locals[%s] = %s", InputPrepare, Local, InputInline )
-						InputInline = string.format( "Context.Locals[%s]", Local )
+						InputPrepare = string.format( "%s\nContext.Dinfinitions[%s] = %s", InputPrepare, Local, InputInline )
+						InputInline = string.format( "Context.Dinfinitions[%s]", Local )
 					end
 				end
 
@@ -518,7 +533,7 @@ function EXPADV.BuildLuaOperator( Operator )
 
 		-- Now lets check cpu time, note we will let the trace system below, insert our traces.
 		if Input.FLAG == LEMON_PREPARE or Input.FLAG == LEMON_INLINEPREPARE then
-			OpPrepare = string.gsub( OpPrepare, "%%cpu", "Context:UpdateBenchMark( %%trace )" )
+			OpPrepare = string.gsub( OpPrepare, "%%cpu", "Context:UpdateCPUQuota( %%trace )" )
 		end
 
 		--Now lets handel traces!
@@ -564,7 +579,7 @@ function EXPADV.BuildLuaOperator( Operator )
 			for I = #DefinedLines, 1, -1 do -- Work backwards, so we dont break our preparation.
 				local NewLine = { }
 				local Start, End = unpack( DefinedLines[I] ) -- Oh God unpack, meh.
-				local Line = string.sub( Start + 8, End - 1,  )
+				local Line = string.sub( OpPrepare, Start + 8, End - 1  )
 
 				for Name in string.gmatch( Line, "([a-zA-Z0-9_]+)" ) do
 					local Lua = Compiler:NextLocal( )
@@ -596,47 +611,4 @@ function EXPADV.BuildLuaOperator( Operator )
 
 		return Compiler:NewLuaInstruction( Trace, Operator, OpPrepare, OpInline )
 	end
-end
-
-/* ---
-	@: This should not be here!
-   --- */
-
-function Compiler:VMToLua( Instruction )
-	if Instruction.FLAG ~= LEMON_FUNCTION then
-		self:TokenError( "COMPILER: VMToLua recieved a Lua instruction." )
-	end
-
-	local ID = #self.VMInstructions + 1
-	self.VMInstructions[ID] = Instruction.Function
-	return string.format( "Context.Instructions[%i]( %s )", ID, table.concat( Instruction.Inputs, "," ) )
-end
-
-function Compiler:NewLuaInstruction( Trace, Operator, Prepare, Inline )
-	local Flag = LEMON_INLINEPREPARE
-
-	if !Prepare or Prepare == "" then
-		Flag = LEMON_INLINE
-	elseif !Inline or Inline == "" then
-		Flag = LEMON_PREPARE
-	end
-
-	return {
-		Trace = Trace
-		Inline = Inline,
-		Prepare = Prepare,
-		Return = Operator.Return,
-		FLAG = Flag
-	}
-end
-
-function Compiler:NewVMInstruction( Trace, Operator, Function, Inputs )
-	return {
-		Trace = Trace
-		Function = Function,
-		Return = Operator.Return,
-		Inputs = Inputs or { self:CompileTrace( Trace ), "Context" },
-		Evaluated = true,
-		FLAG = Operator.FLAG
-	}
 end

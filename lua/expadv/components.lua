@@ -24,7 +24,7 @@ function EXPADV.BaseCompoent:AddPreparedOperator( Name, Input, Return, Prepare, 
 	return EXPADV.AddPreparedOperator( self, Name, Input, Return, Prepare, Inline )
 end
 
-function EXPADV.BaseCompoent:AddVMOperator( Name, Input, Return, Function )
+function EXPADV.BaseCompoent:AddVMOperator( Name, Input, Return, Function ) -- function( Trace, Context, ... )
 	return EXPADV.AddVMOperator( self, Name, Input, Return, Function )
 end
 
@@ -40,7 +40,7 @@ function EXPADV.BaseCompoent:AddPreparedFunction( Name, Input, Return, Prepare, 
 	return EXPADV.AddPreparedFunction( self, Name, Input, Return, Prepare, Inline )
 end
 
-function EXPADV.BaseCompoent:AddVMFunction( Name, Input, Return, Function )
+function EXPADV.BaseCompoent:AddVMFunction( Name, Input, Return, Function ) -- function( Trace, Context, ... )
 	return EXPADV.AddVMFunction( self, Name, Input, Return, Function )
 end
 

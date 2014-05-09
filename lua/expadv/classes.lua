@@ -4,6 +4,8 @@
 
 EXPADV.BaseClassObj = { }
 
+EXPADV.BaseClassObj .__index = EXPADV.BaseClassObj 
+
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Basic Support
    --- */
@@ -19,10 +21,6 @@ function EXPADV.BaseClassObj:DefaultAsLua( Default ) -- Object / function( Trace
 end
 
 EXPADV.BaseClassObj.DeriveFrom = "generic"
-
-function EXPADV.BaseClassObj:ExtendClass( ExtendClass )
-	self.DeriveFrom = ExtendClass
-end
 
 function EXPADV.BaseClassObj:ExtendClass( ExtendClass )
 	self.DeriveFrom = ExtendClass
@@ -50,7 +48,7 @@ if WireLib then
 
 	local function WireIn( Context, MemoryRef, InValue ) Context.Memory[ MemoryRef ] = InValue end
 
-	function EXPADV.BaseClassObj:WireOutput( WireType, Function ) -- function( Context, MemoryRef,  InValue) end
+	function EXPADV.BaseClassObj:WireOutput( WireType, Function ) -- function( Context, MemoryRef,  InValue ) end
 		self.Wire_In_Type = string.upper( WireType )
 		
 		self.Wire_In_Util = Function or WireIn
@@ -103,7 +101,7 @@ local Temp_Classes = { }
 function EXPADV.AddClass( Component, Name, Short )
 	if #Short > 1 then Short = "x" .. Short end
 
-	local Class = setmetatable( { Component = Component, Name = Name }, EXPADV.BaseClassObj )
+	local Class = setmetatable( { Component = Component, Name = Name, Short = Short }, EXPADV.BaseClassObj )
 
 	Temp_Classes[ #Temp_Classes + 1 ] = Class
 
@@ -151,7 +149,7 @@ function EXPADV.GetClass( Name )
 
 	if EXPADV.ClassAliases[ Name ] then return EXPADV.ClassAliases[ Name ] end
 
-	if Name > 1 then Name = "x" .. Name end
+	if #Name > 1 then Name = "x" .. Name end
 
 	if EXPADV.ClassShorts[ Name ] then return EXPADV.ClassShorts[ Name ] end
 end
