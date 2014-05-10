@@ -33,9 +33,7 @@ function Compiler:NextPattern( Pattern, Exact )
 	if self.Char then
 		local Start, End, String = self.Buffer:find( Pattern, self.Pos, Exact )
 		if Start == self.Pos then
-			if !String then
-				String = self.Buffer:sub( Start, End )
-			end
+			String = String or self.Buffer:sub( Start, End )
 
 			self.Pos = End + 1
 			self.PatternMatch = String
@@ -63,13 +61,11 @@ function Compiler:NextPattern( Pattern, Exact )
 end
 
 function Compiler:ManualPattern( Pattern, Exact )
-	local Char, ReadData = self.Char, self.ReadData
-
-	local Result = self:NextPattern( Pattern, Exact )
-
-	self.Char, self.ReadData = Char, ReadData
-
-	return Result
+	local Start, End, String = self.Buffer:find( Pattern, self.Pos, Exact )
+	
+	if Start == self.Pos then
+		return String or self.Buffer:sub( Start, End )
+	end
 end
 
 function Compiler:SkipSpaces( )
@@ -317,7 +313,7 @@ end
 /* ---------------------------------------------------------------------------------------------------------------------------------------------- */
 
 function Compiler:WordToken( )
-	if self:NextPattern( "^[a-zA-Z][a-zA-Z0-9_]*" ) then
+	if self:NextPattern( "^[a-zA-Z0-9_]*" ) then
 		local RawData = self.ReadData
 
 	-- KEYWORDS:
@@ -359,8 +355,8 @@ function Compiler:WordToken( )
 			return self:NewToken( "tre", "true")
 		elseif RawData == "false" then
 			return self:NewToken( "fls", "false")
-		-- elseif RawData == "null" then -- Removed because im lazy!
-			-- return self:NewToken( "nll", "null")
+		elseif RawData == "null" then
+			return self:NewToken( "nll", "null")
 
 
 	-- SUB KEYWORDS:
@@ -371,8 +367,6 @@ function Compiler:WordToken( )
 			return self:NewToken( "cnt", "continue" )
 		elseif RawData == "return" then
 			return self:NewToken( "ret", "return" )
-		-- elseif RawData == "error" then
-			-- return self:NewToken( "err", "error" )
 
 	-- DECLERATION:
 
@@ -384,16 +378,11 @@ function Compiler:WordToken( )
 			return self:NewToken( "out", "output" )
 		elseif RawData == "static" then
 			return self:NewToken( "stc", "static" )
-	
-	-- VARIABLE:
-	
-		elseif RawData[1] == RawData[1]:upper( ) then
-			return self:NewToken( "var", "variable" )
 		end
-	
-	-- FUNCTION:
-	
-		return self:NewToken( "fun", "function")
+
+	-- VARIABLE:
+
+		return self:NewToken( "var", "variable")
 	end
 end
 

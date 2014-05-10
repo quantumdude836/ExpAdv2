@@ -87,6 +87,42 @@ table.sort( Compiler.RawTokens, function( Token, Token2 )
 end )
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Error Functions.
+   --- */
+
+function Compiler:GetTokenTrace( Trace )
+	if !Trace then return { self.ReadLine, self.ReadChar } end
+	return 
+end
+
+function Compiler:CompileTrace( Trace )
+	return -- TODO: this!
+end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Error Functions.
+   --- */
+
+function Compiler:Error( Offset, Message, A, ... )
+	if A then Message = Format( Message, A, ... ) end
+	error( Format( "%s at line %i, char %i", Message, self.ReadLine, self.ReadChar + Offset ), 0 )
+end
+
+function Compiler:TraceError( Trace, ... )
+	if type( Trace ) ~= "table" then
+		print( Trace, ... )
+		debug.Trace( )
+	end
+	
+	self.ReadLine, self.ReadChar = Trace[1], Trace[2]
+	self:Error( 0, ... )
+end
+
+function Compiler:TokenError( ... )
+	self:TraceError( self:TokenTrace( ), ... )
+end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Instruction based functions:
    --- */
 
@@ -371,7 +407,11 @@ end
 
 local Coroutines = { }
 
-local function SoftCompile( self, Script, Files, OnError, OnSucess )
+local function SoftCompile( self, Script, Files, bIsClientSide, OnError, OnSucess )
+
+	-- Client and Server
+		self.IsServerScript = !bIsClientSide
+		self.IsClientScript = bIsClientSide or false
 
 	-- Instance:
 		self.Pos = 0
@@ -381,7 +421,7 @@ local function SoftCompile( self, Script, Files, OnError, OnSucess )
 		self.Files = Files or { }
 		self.Enviroment = { }
 		self.Yield = SysTime( ) + 0.001
-		
+
 	-- Tokenizer:
 		self.TokenPos = -1
 		self.Char = ""
@@ -439,10 +479,10 @@ hook.Add( "Tick", "ExpAdv.Compile", function( )
 	end
 end )
 
-function EXPADV.Compile( Script, Files, OnError, OnSucess )
+function EXPADV.Compile( Script, Files, bIsClientSide, OnError, OnSucess )
 	local self = setmetatable( { }, Compiler )
 	
-	Coroutines[ self ] = coroutine.create( SoftCompile, self, Script, Files, OnError, OnSucess )
+	Coroutines[ self ] = coroutine.create( SoftCompile, self, Script, Files, bIsClientSide, OnError, OnSucess )
 
 	return Coroutines[ self ], self
 end
