@@ -59,12 +59,14 @@ end
 	@: Lets loads the core.
    --- */
 
+if SERVER then util.AddNetworkString( "expadv.config" ) end
+
 function EXPADV.LoadCore( )
 	EXPADV.LoadConfig( )
 
 	EXPADV.IncludeCore( )
 
-	-- TODO: Load component files.
+	include( "expadv/components/number.lua" )
 
 	EXPADV.LoadComponents( )
 
@@ -73,13 +75,42 @@ function EXPADV.LoadCore( )
 	EXPADV.LoadOperators( )
 
 	EXPADV.LoadFunctions( )
+
+	include( "expadv/compiler/main.lua" )
+
+	if SERVER then
+		net.Start( "expadv.config")
+			net.WriteTable( EXPADV.Config )
+		net.Broadcast( )
+
+		hook.Add( "PlayerInitialSpawn", "lemon.config", function( Player )
+			net.Start( "expadv.config")
+				net.WriteTable( EXPADV.Config )
+			net.Send( Player )
+		end )
+	end
+		
 end
 
-EXPADV.LoadCore( ) -- Remove this, once tested.
+if CLIET then
+	net.Receive( "expadv.config", function( )
+		EXPADV.Config = net.ReadTable ( )
+
+		EXPADV.LoadCore( )
+	end )
+end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Entity Registery.
    --- */
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Test Build.
+   --- */
+
+EXPADV.LoadCore( )
+
+EXPADV.Example( player.GetByID( 1 ) )
 
 
 

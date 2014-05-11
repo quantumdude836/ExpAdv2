@@ -80,11 +80,19 @@ Compiler.RawTokens = {
 		{ "...", "varg", "varargs" },
 }
 
-EXPADV.RunHook( "RegisterClass", Compiler.RawTokens )
+--EXPADV.RunHook( "RegisterClass", Compiler.RawTokens )
 
 table.sort( Compiler.RawTokens, function( Token, Token2 )
 	return #Token[1] > #Token2[1]
 end )
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: First teach the compiler, our tokens.
+   --- */
+
+include( "tokenizer.lua" )
+include( "parser.lua" )
+include( "instructions.lua" )
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Error Functions.
@@ -100,7 +108,7 @@ function Compiler:CompileTrace( Trace )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
-	@: Error Functions.
+	@: Error Functions:
    --- */
 
 function Compiler:Error( Offset, Message, A, ... )
@@ -123,11 +131,25 @@ function Compiler:TokenError( ... )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Class functions:
+   --- */
+
+function Compiler:NiceClass( Name, Name2, ... )
+	local Class = EXPADV.GetClass( Name )
+	
+	Name = Class and Class.Name or "void"
+
+	if Name2 then return Name, self:NiceClass( Name2, ... ) end
+
+	return Name
+end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Instruction based functions:
    --- */
 
- function Compiler:VMToLua( Instruction )
-	if Instruction.FLAG ~= LEMON_FUNCTION then
+function Compiler:VMToLua( Instruction )
+	if Instruction.FLAG ~= EXPADV_FUNCTION then
 		self:TokenError( "COMPILER: VMToLua recieved a Lua instruction." )
 	end
 
@@ -137,12 +159,12 @@ end
 end
 
 function Compiler:NewLuaInstruction( Trace, Operator, Prepare, Inline )
-	local Flag = LEMON_INLINEPREPARE
+	local Flag = EXPADV_INLINEPREPARE
 
 	if !Prepare or Prepare == "" then
-		Flag = LEMON_INLINE
+		Flag = EXPADV_INLINE
 	elseif !Inline or Inline == "" then
-		Flag = LEMON_PREPARE
+		Flag = EXPADV_PREPARE
 	end
 
 	return {
@@ -446,19 +468,21 @@ local function SoftCompile( self, Script, Files, bIsClientSide, OnError, OnSuces
 		
 	-- Run:
 		self:NextChar( )
-		self.Tokens = { self:GetNextToken( ), self:GetNextToken( )
+		self.Tokens = { self:GetNextToken( ), self:GetNextToken( ) }
 		self:NextToken( )
 
 	-- Wait for next tick to begin:
 		coroutine.yield( )
 
 	-- Ok, Run the compiler.
-		local Compiled, Result = Pcall( self.Execute, self )
+		local Compiled, Result = Pcall( self.Expression, self )
 
 	-- Finish!
 		Coroutines[self] = nil -- Because we compile inside a coroutine now =D
 
 		if !Compiled then return OnError( Result ) end
+
+		self.Expression = Compiled
 
 		return OnSucess( self )
 end
@@ -494,4 +518,26 @@ end
 function Compiler:PercentCompiled( )
 	if self.Pos <= 0 or self.Len <= 0 then return 0 end
 	return self.Pos / self.Len * 100
+end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Example Compiler Usage
+   --- */
+
+function EXPADV.Example( Player )
+	local Expression = "1 + 1"
+
+	local _, Instance = EXPADV.Compile( Expression, { }, CLIENT,
+		function( Error ) -- OnError
+			MsgN( "Compiler, Failed -> " .. Error )
+		end,
+		function( self ) -- OnSucess
+			MsgN( "Do you know what ", Expression, "  is?" )
+			local Execute = ComileString( "function( Context )\nprint( Daddy, the answer is " .. self.Expression.Prepare .. ")\n" )
+			if isstring( Execute ) then return MsgN( "Compiler, Failed -> ", Execute ) end
+
+			local Context = EXPADV.BuildNewContext( Player, Player )
+			
+			Execute( Context )
+		end )
 end

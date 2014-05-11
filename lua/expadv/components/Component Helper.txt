@@ -1,0 +1,56 @@
+/*=================================================================================
+	Expression Advanced 2 : Component -> [Component Name]
+
+=================================================================================*/
+
+/*=================================================================================
+		Section: Class
+=================================================================================*/
+local BaseComponent = EXPADV.AddComponent( Name, Enabled )
+-- This creates the Component. 			 ( Name, Enabled )
+
+local ClassName = BaseComponent:AddClass( Type, Short )
+-- Adds a new class type such a string, number, hologram to the component
+
+Number:DefaultAsLua( Object / Function( Trace, Context )
+-- The default value / object when declared
+
+Number:AddAlias( Name )
+-- An alias for the Class.
+
+-- the below if statement checks if wiremod is installed.
+if WireLib then
+	Number:WireInput( "NUMBER" ) -- function( Context, MemoryRef ) return Converted end
+	Number:WireOutput( "NUMBER" ) -- function( Context, MemoryRef,  InValue ) end
+end
+
+local Hologram = HologramComponent:ExtendClass( "e" )
+-- This will derive a new class from an old one (such as entity for holograms )
+
+/*=================================================================================
+		Section: Operators
+=================================================================================*/
+/*
+Number:AddInlineOperator( Name, Input, Return, Inline )
+Number:AddPreparedOperator( Name, Input, Return, Prepare, Inline )
+
+These are collision values - to prevent collision with other variables.
+%define A,B,C = 1,2,3
+print(%A)
+
+Number:AddVMOperator( Name, Input, Return, Function ) -- function( Trace, Context, ... )
+*/
+
+
+/*=================================================================================
+		Section:  Functions
+=================================================================================*/
+Number:AddInlineFunction( Name, input, Return, Inline)
+Number:AddPreparedFunction( Name, Input, Return, Prepare, Inline)
+Number:AddVMFunction( Name, Input, Return, Function) -- function( Trace, Context, ... )
+Number:AddFunctionHelper(Name, Input, Description )
+
+%context - Context
+%memory - Context.Memory
+%trigger - Context.Trigger
+%delta - Context.Delta

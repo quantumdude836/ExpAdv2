@@ -1,7 +1,7 @@
-local LEMON_INLINE = 1
-local LEMON_PREPARE = 2
-local LEMON_INLINEPREPARE = 3
-local LEMON_FUNCTION = 4
+EXPADV_INLINE = 1
+EXPADV_PREPARE = 2
+EXPADV_INLINEPREPARE = 3
+EXPADV_FUNCTION = 4
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Server -> Client control.
@@ -46,7 +46,7 @@ function EXPADV.AddInlineOperator( Component, Name, Input, Return, Inline )
 		Input = Input,
 		Return = Return,
 		Inline = Inline,
-		FLAG = LEMON_INLINE
+		FLAG = EXPADV_INLINE
 	}
 end
 
@@ -61,7 +61,7 @@ function EXPADV.AddPreparedOperator( Component, Name, Input, Return, Prepare, In
 		Return = Return,
 		Prepare = Prepare,
 		Inline = Inline,
-		FLAG = Inline and LEMON_INLINEPREPARE or LEMON_PREPARE
+		FLAG = Inline and EXPADV_INLINEPREPARE or EXPADV_PREPARE
 	}
 end
 
@@ -75,7 +75,7 @@ function EXPADV.AddVMOperator( Component, Name, Input, Return, Function )
 		Input = Input,
 		Return = Return,
 		Function = Function,
-		FLAG = LEMON_FUNCTION
+		FLAG = EXPADV_FUNCTION
 	}
 end
 
@@ -94,7 +94,7 @@ function EXPADV.LoadOperators( )
 
 		-- First of all, Check the return type!
 		if Operator.Return and Operator.Return == "" then
-			if Operator.FLAG == LEMON_INLINE then continue end
+			if Operator.FLAG == EXPADV_INLINE then continue end
 			Operator.Return = nil -- ^ Inlined operators must return somthing!
 		elseif Operator.Return and Operator.Return == "..." then
 			Operator.ReturnsVarg = true
@@ -172,7 +172,7 @@ function EXPADV.AddInlineFunction( Component, Name, Input, Return, Inline )
 		Input = Input,
 		Return = Return,
 		Inline = Inline,
-		FLAG = LEMON_INLINE
+		FLAG = EXPADV_INLINE
 	}
 end
 
@@ -187,7 +187,7 @@ function EXPADV.AddPreparedFunction( Component, Name, Input, Return, Prepare, In
 		Return = Return,
 		Prepare = Prepare,
 		Inline = Inline,
-		FLAG = Inline and LEMON_INLINEPREPARE or LEMON_PREPARE
+		FLAG = Inline and EXPADV_INLINEPREPARE or EXPADV_PREPARE
 	}
 end
 
@@ -201,7 +201,7 @@ function EXPADV.AddVMFunction( Component, Name, Input, Return, Function )
 		Input = Input,
 		Return = Return,
 		Function = Function,
-		FLAG = LEMON_FUNCTION
+		FLAG = EXPADV_FUNCTION
 	}
 end
 
@@ -237,7 +237,7 @@ function EXPADV.LoadFunctions( )
 
 		-- First of all, Check the return type!
 		if Operator.Return and Operator.Return == "" then
-			if Operator.FLAG == LEMON_INLINE then continue end
+			if Operator.FLAG == EXPADV_INLINE then continue end
 			Operator.Return = nil -- ^ Inlined operators must return somthing!
 		elseif Operator.Return and Operator.Return == "..." then
 			Operator.ReturnsVarg = true
@@ -356,12 +356,12 @@ end
 
 function EXPADV.BuildVMOperator( Operator )
 	if Operator.InputCount == 0 then
-		return function( Compiler, Trace )
+		Operator.Compile = function( Compiler, Trace )
 			return Compiler:NewVMInstruction( Trace, Operator, Operator.Function )
 		end
 	end
 
-	return function( Compiler, Trace, ... )
+	Operator.Compile = function( Compiler, Trace, ... )
 		EXPADV.CanBuildOperator( Compiler, Trace, Operator )
 
 		local Inputs = { Compiler:CompileTrace( Trace ), "Context" }
@@ -373,33 +373,33 @@ function EXPADV.BuildVMOperator( Operator )
 				Inputs[I + 2] = Input
 			elseif isstring( Input ) then
 				Inputs[I + 2] = "\"" .. Input .. "\""
-			elseif Input.FLAG == LEMON_FUNCTION then
+			elseif Input.FLAG == EXPADV_FUNCTION then
 				Inputs[I + 2] = Compiler:VMToLua( Input.Function )
 				continue
-			elseif Input.FLAG == LEMON_INLINE then
+			elseif Input.FLAG == EXPADV_INLINE then
 
 				if string.StartWith( Input.Inline, "Context.Dinfinitions" ) then
 					Inputs[I + 2] = Input.Inline
 					continue
 				end -- Already a varible
 
-				local O, E = pcall( RunString, "setfenv(1, EXPADV.COMPILER_ENV ); LEMON_NATIVE = function( Trace, Context ) " .. Input.Inline .. " end")
+				local O, E = pcall( RunString, "setfenv(1, EXPADV.COMPILER_ENV ); EXPADV_NATIVE = function( Trace, Context ) " .. Input.Inline .. " end")
 				if !O then self:Error( "Failed to compile instruction: %s -> %s", Operator.Signature, E ) end
 				
-				Inputs[I + 2] = Compiler:VMToLua( LEMON_NATIVE )
-				LEMON_NATIVE = nil
-			elseif Input.FLAG == LEMON_PREPARE then
-				local O, E = pcall( RunString, "setfenv(1, EXPADV.COMPILER_ENV ); LEMON_NATIVE = function( Trace, Context )\n" .. Input.Prepare .. "\nend")
+				Inputs[I + 2] = Compiler:VMToLua( EXPADV_NATIVE )
+				EXPADV_NATIVE = nil
+			elseif Input.FLAG == EXPADV_PREPARE then
+				local O, E = pcall( RunString, "setfenv(1, EXPADV.COMPILER_ENV ); EXPADV_NATIVE = function( Trace, Context )\n" .. Input.Prepare .. "\nend")
 				if !O then self:Error( "Failed to compile instruction: %s -> %s", Operator.Signature, E ) end
 				
-				Inputs[I + 2] = Compiler:VMToLua( LEMON_NATIVE )
-				LEMON_NATIVE = nil
+				Inputs[I + 2] = Compiler:VMToLua( EXPADV_NATIVE )
+				EXPADV_NATIVE = nil
 			else
-				local O, E = pcall( RunString, "setfenv(1, EXPADV.COMPILER_ENV ); LEMON_NATIVE = function( Trace, Context )\n" .. Input.Prepare .. "\n" .. "return " .. Input.Inline .. "\nend")
+				local O, E = pcall( RunString, "setfenv(1, EXPADV.COMPILER_ENV ); EXPADV_NATIVE = function( Trace, Context )\n" .. Input.Prepare .. "\n" .. "return " .. Input.Inline .. "\nend")
 				if !O then self:Error( "Failed to compile instruction: %s -> %s", Operator.Signature, E ) end
 
-				Inputs[I + 2] = Compiler:VMToLua( LEMON_NATIVE )
-				LEMON_NATIVE = nil
+				Inputs[I + 2] = Compiler:VMToLua( EXPADV_NATIVE )
+				EXPADV_NATIVE = nil
 			end
 		end
 
@@ -408,11 +408,11 @@ function EXPADV.BuildVMOperator( Operator )
 end
 
 function EXPADV.BuildLuaOperator( Operator )
-	if Operator.FLAG == LEMON_FUNCTION then
+	if Operator.FLAG == EXPADV_FUNCTION then
 		return EXPADV.BuildVMOperator( Operator )
 	end
 
-	return function( Compiler, Trace, ... )
+	Operator.Compile = function( Compiler, Trace, ... )
 		EXPADV.CanBuildOperator( Compiler, Trace, Operator )
 
 		local Trace = table.Copy( Trace )
@@ -427,12 +427,12 @@ function EXPADV.BuildLuaOperator( Operator )
 			-- How meany times do we need this Var?
 			local Uses = 0
 
-			if Operator.FLAG == LEMON_INLINE or Operator.FLAG == LEMON_INLINEPREPARE then
+			if Operator.FLAG == EXPADV_INLINE or Operator.FLAG == EXPADV_INLINEPREPARE then
 				local _, Add = string.gsub( OpInline, "value %%" .. I, "" )
 				Uses = Add
 			end
 
-			if Operator.FLAG == LEMON_PREPARE or Operator.FLAG == LEMON_INLINEPREPARE then
+			if Operator.FLAG == EXPADV_PREPARE or Operator.FLAG == EXPADV_INLINEPREPARE then
 				local _, Add = string.gsub( OpPrepare, "value %%" .. I, "" )
 				Uses = Uses + Add
 			end
@@ -440,13 +440,13 @@ function EXPADV.BuildLuaOperator( Operator )
 			-- Generate the inline and preperation.
 			if Uses == 0 then
 				InputInline = nil -- This should never happen!
-			elseif Input.FLAG == LEMON_FUNCTION then
+			elseif Input.FLAG == EXPADV_FUNCTION then
 				InputInline = Compiler:VMToLua( Input )
 
-			elseif Input.FLAG == LEMON_INLINE then
+			elseif Input.FLAG == EXPADV_INLINE then
 				InputInline = Input.Inline
 
-			elseif Input.FLAG == LEMON_PREPARE then
+			elseif Input.FLAG == EXPADV_PREPARE then
 				InputInline = nil
 				InputPrepare = Input.Prepare
 			else
@@ -455,7 +455,7 @@ function EXPADV.BuildLuaOperator( Operator )
 			end
 
 			-- Here we deal with inlining anything, that needs to be inlined!
-			if Input.FLAG == LEMON_INLINE or Input.FLAG == LEMON_INLINEPREPARE then
+			if Input.FLAG == EXPADV_INLINE or Input.FLAG == EXPADV_INLINEPREPARE then
 				
 				-- If Inline is used more then once, then we need to make it local.
 				if Uses >= 2 and InputInline then
@@ -469,19 +469,19 @@ function EXPADV.BuildLuaOperator( Operator )
 				end
 
 				-- Place the inputs into the generated code.
-				if Input.FLAG == LEMON_PREPARE or Input.FLAG == LEMON_INLINEPREPARE then
+				if Input.FLAG == EXPADV_PREPARE or Input.FLAG == EXPADV_INLINEPREPARE then
 					OpPrepare = string.gsub( OpPrepare, "value %%" .. I, InputInline )
 					OpPrepare = string.gsub( OpPrepare, "type %%" .. I, Format( "%q", Input.Return or Operator.Input[I] ) )
 				end
 
-				if Input.FLAG == LEMON_INLINE or Input.FLAG == LEMON_INLINEPREPARE then
+				if Input.FLAG == EXPADV_INLINE or Input.FLAG == EXPADV_INLINEPREPARE then
 					OpInline = string.gsub( OpInline, "value %%" .. I, InputInline )
 					OpInline = string.gsub( OpInline, "type %%" .. I, Format( "%q", Input.Return or Operator.Input[I] ) )
 				end
 			end
 
 			-- Now we handel preperation.
-			if Input.FLAG == LEMON_PREPARE or Input.FLAG == LEMON_INLINEPREPARE then
+			if Input.FLAG == EXPADV_PREPARE or Input.FLAG == EXPADV_INLINEPREPARE then
 
 				-- First check for manual prepare
 				if string.find( OpPrepare, "prepare %%" .. I ) then
@@ -502,11 +502,11 @@ function EXPADV.BuildLuaOperator( Operator )
 				for I = Operator.InputCount + 1, #Inputs do
 					local Input = Inputs.Input[I]
 
-					if Input.FLAG == LEMON_FUNCTION then
+					if Input.FLAG == EXPADV_FUNCTION then
 						VAInline[ #VAInline + 1 ] = string.format( "{%s,%q}", Compiler:VMToLua( Input ), Input.Return or "NIL" )
-					elseif Input.FLAG == LEMON_INLINE then
+					elseif Input.FLAG == EXPADV_INLINE then
 						VAInline[ #VAInline + 1 ] = string.format( "{%s,%q}", Input.Inline, Input.Return or "NIL" )
-					elseif Input.FLAG == LEMON_PREPARE then
+					elseif Input.FLAG == EXPADV_PREPARE then
 						InputInline = "{nil,\"NIL\"}"
 						VAPrepare[ #VAPrepare + 1 ] = Input.Prepare
 					else
@@ -520,11 +520,11 @@ function EXPADV.BuildLuaOperator( Operator )
 					OpPrepare = (OpPrepare or "") .. "\n" .. table.concat( VAPrepare, "\n" )
 				end
 
-				if Input.FLAG == LEMON_PREPARE or Input.FLAG == LEMON_INLINEPREPARE then
+				if Input.FLAG == EXPADV_PREPARE or Input.FLAG == EXPADV_INLINEPREPARE then
 					OpPrepare = string.gsub( OpPrepare, "(%%%.%.%.)" .. I, table.concat( VAInline, "," ) )
 				end
 
-				if Input.FLAG == LEMON_INLINE or Input.FLAG == LEMON_INLINEPREPARE then
+				if Input.FLAG == EXPADV_INLINE or Input.FLAG == EXPADV_INLINEPREPARE then
 					OpInline = string.gsub( OpInline, "(%%%.%.%.)" .. I, table.concat( VAInline, "," ) )
 				end
 
@@ -532,19 +532,19 @@ function EXPADV.BuildLuaOperator( Operator )
 		end
 
 		-- Now lets check cpu time, note we will let the trace system below, insert our traces.
-		if Input.FLAG == LEMON_PREPARE or Input.FLAG == LEMON_INLINEPREPARE then
+		if Input.FLAG == EXPADV_PREPARE or Input.FLAG == EXPADV_INLINEPREPARE then
 			OpPrepare = string.gsub( OpPrepare, "%%cpu", "Context:UpdateCPUQuota( %%trace )" )
 		end
 
 		--Now lets handel traces!
 		local Uses = 0
 
-		if Operator.FLAG == LEMON_INLINE or Operator.FLAG == LEMON_INLINEPREPARE then
+		if Operator.FLAG == EXPADV_INLINE or Operator.FLAG == EXPADV_INLINEPREPARE then
 			local _, Add = string.gsub( OpInline, "%%trace", "" )
 			Uses = Add
 		end
 
-		if Operator.FLAG == LEMON_PREPARE or Operator.FLAG == LEMON_INLINEPREPARE then
+		if Operator.FLAG == EXPADV_PREPARE or Operator.FLAG == EXPADV_INLINEPREPARE then
 			local _, Add = string.gsub( OpPrepare, "%%trace", "" )
 			Uses = Uses + Add
 		end
@@ -557,11 +557,11 @@ function EXPADV.BuildLuaOperator( Operator )
 				Trace = "Trace"
 			end
 
-			if Input.FLAG == LEMON_PREPARE or Input.FLAG == LEMON_INLINEPREPARE then
+			if Input.FLAG == EXPADV_PREPARE or Input.FLAG == EXPADV_INLINEPREPARE then
 				OpPrepare = string.gsub( OpPrepare, "%%trace", Trace )
 			end
 
-			if Input.FLAG == LEMON_INLINE or Input.FLAG == LEMON_INLINEPREPARE then
+			if Input.FLAG == EXPADV_INLINE or Input.FLAG == EXPADV_INLINEPREPARE then
 				OpInline = string.gsub( OpInline, "%%trace", Trace )
 			end
 		end
@@ -569,7 +569,7 @@ function EXPADV.BuildLuaOperator( Operator )
 		-- Oh god, now we need to format our preperation.
 		local Definitions = { }
 
-		if Input.FLAG == LEMON_PREPARE or Input.FLAG == LEMON_INLINEPREPARE then
+		if Input.FLAG == EXPADV_PREPARE or Input.FLAG == EXPADV_INLINEPREPARE then
 			local DefinedLines = { }
 
 			for StartPos, EndPos in string.gmatch( OpPrepare, "()%%define [a-zA-Z_0-9%%, \t]+()" ) do
@@ -600,7 +600,7 @@ function EXPADV.BuildLuaOperator( Operator )
 		end
 
 		-- Now lets format the inline
-		if Operator.FLAG == LEMON_INLINE or Operator.FLAG == LEMON_INLINEPREPARE then
+		if Operator.FLAG == EXPADV_INLINE or Operator.FLAG == EXPADV_INLINEPREPARE then
 			-- Replace the locals in our prepare!
 			OpInline = string.gsub( OpInline, "(%%[a-zA-Z0-9_]+)", Definitions )
 

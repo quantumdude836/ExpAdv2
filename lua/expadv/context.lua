@@ -29,28 +29,34 @@ function EXPADV.RootContext:Push( Cells )
 	-- if self.__deph > 50 then self:Throw( ) end -- TODO!
 
 	local Memory = {
-		__index = fucntion( Table, Key ) return Cells[Key] and rawget( Table, Key ) or self.Memory[Key] end,
-		__newindex = fucntion( Table, Key, Value ) if Cells[Key] then rawset( Table, Key, Value ) else self.Memory[Key] = Value end
-	}; setmetatable( Memory, Memory )
+		__index = function( Table, Key ) return Cells[Key] and rawget( Table, Key ) or self.Memory[Key] end,
+		__newindex = function( Table, Key, Value ) if Cells[Key] then rawset( Table, Key, Value ) else self.Memory[Key] = Value end end,
+	}
+
+	setmetatable( Memory, Memory )
 
 	local Delta = {
-		__index = fucntion( Table, Key ) return Cells[Key] and rawget( Table, Key ) or self.Memory[Key] end,
-		__newindex = fucntion( Table, Key, Value ) if Cells[Key] then rawset( Table, Key, Value ) else self.Memory[Key] = Value end
-	}; setmetatable( Delta, Delta )
+		__index = function( Table, Key ) return Cells[Key] and rawget( Table, Key ) or self.Memory[Key] end,
+		__newindex = function( Table, Key, Value ) if Cells[Key] then rawset( Table, Key, Value ) else self.Memory[Key] = Value end end,
+	}
+
+	setmetatable( Delta, Delta )
 
 	local Changed = {
-		__index = fucntion( Table, Key ) return Cells[Key] and rawget( Table, Key ) or self.Memory[Key] end,
-		__newindex = fucntion( Table, Key, Value ) if Cells[Key] then rawset( Table, Key, Value ) else self.Memory[Key] = Value end
-	}; setmetatable( Changed, Changed )
+		__index = function( Table, Key ) return Cells[Key] and rawget( Table, Key ) or self.Memory[Key] end,
+		__newindex = function( Table, Key, Value ) if Cells[Key] then rawset( Table, Key, Value ) else self.Memory[Key] = Value end end,
+	}
+
+	setmetatable( Changed, Changed )
 
 	local Context = {
 		__deph = self.__deph + 1,
 		__parent = self.__parent or self,
-		__index = fucntion( Table, Key ) return rawget( Table, Key ) or self[Key] end,
-		__newindex = fucntion( Table, Key, Value ) Table.__parent[Key] = Value end
-	}; setmetatable( Context, Context )
+		__index = function( Table, Key ) return rawget( Table, Key ) or self[Key] end,
+		__newindex = function( Table, Key, Value ) Table.__parent[Key] = Value end,
+	}
 
-	return Context
+	return setmetatable( Context, Context )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
