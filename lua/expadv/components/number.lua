@@ -2,7 +2,6 @@
 	@: Server -> Math Component
 ---	*/
 
-   
 local MathComponent = EXPADV.AddComponent( "math" , true )
 local Number = MathComponent:AddClass( "number" , "n" )
 

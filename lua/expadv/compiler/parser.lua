@@ -104,17 +104,19 @@ function Compiler:GetValue( Trace )
 
 	-- Raw Values:
 		if self:AcceptToken( "tre" ) then
-			return self:Compile_BOOL( self:TokenTrace( Trace ), true )
+			return self:Compile_BOOL( self:GetTokenTrace( Trace ), true )
 		elseif self:AcceptToken( "fls" ) then
-			return self:Compile_BOOL( self:TokenTrace( Trace ), false )
+			return self:Compile_BOOL( self:GetTokenTrace( Trace ), false )
 		elseif self:AcceptToken( "num" ) then
-			return self:Compile_NUM( self:TokenTrace( Trace ), self.TokenData )
+			return self:Compile_NUM( self:GetTokenTrace( Trace ), self.TokenData )
 		end
 
 	-- Varibles:
 end
 
 function Compiler:Expression( Trace )
+	MsgN( "Compiling Expression" )
+
 	local _ExprnRoot = self.ExpressionRoot
 	self.ExpressionRoot = self:GetTokenTrace( Trace )
 

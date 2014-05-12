@@ -313,7 +313,7 @@ end
 /* ---------------------------------------------------------------------------------------------------------------------------------------------- */
 
 function Compiler:WordToken( )
-	if self:NextPattern( "^[a-zA-Z0-9_]*" ) then
+	if self:NextPattern( "^[a-zA-Z][a-zA-Z0-9_]*" ) then
 		local RawData = self.ReadData
 
 	-- KEYWORDS:
@@ -393,9 +393,10 @@ end
 function Compiler:GetNextToken( )
 	if self.Char then
 
-		if self.Yield > SysTime( ) then
+		/*if self.Yield and self.Yield < SysTime( ) then
+			MsgN( "Yeild: ", self.Pos )
 			coroutine.yield( )
-		end
+		end*/
 
 		self:SkipSpaces( )
 

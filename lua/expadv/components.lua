@@ -4,29 +4,31 @@
 
 EXPADV.EXPADV_BaseComponent = { Default_Enabled = false }
 
+EXPADV.EXPADV_BaseComponent.__index = EXPADV.EXPADV_BaseComponent
+
+local BaseComponent = EXPADV.EXPADV_BaseComponent
+
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Class Support
    --- */
 
-function EXPADV.EXPADV_BaseComponent:AddClass( Name, Short )
+function BaseComponent:AddClass( Name, Short )
 	return EXPADV.AddClass( self, Name, Short )
 end
-
-print( "Yes." )
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Operator Support
    --- */
 
-function EXPADV.EXPADV_BaseComponent:AddInlineOperator( Name, Input, Return, Inline )
+function BaseComponent:AddInlineOperator( Name, Input, Return, Inline )
 	return EXPADV.AddInlineOperator( self, Name, Input, Return, Inline )
 end
 
-function EXPADV.EXPADV_BaseComponent:AddPreparedOperator( Name, Input, Return, Prepare, Inline )
+function BaseComponent:AddPreparedOperator( Name, Input, Return, Prepare, Inline )
 	return EXPADV.AddPreparedOperator( self, Name, Input, Return, Prepare, Inline )
 end
 
-function EXPADV.EXPADV_BaseComponent:AddVMOperator( Name, Input, Return, Function ) -- function( Trace, Context, ... )
+function BaseComponent:AddVMOperator( Name, Input, Return, Function ) -- function( Trace, Context, ... )
 	return EXPADV.AddVMOperator( self, Name, Input, Return, Function )
 end
 
@@ -34,15 +36,15 @@ end
 	@: Function Support
    --- */
 
-function EXPADV.EXPADV_BaseComponent:AddInlineFunction( Name, Input, Return, Inline )
+function BaseComponent:AddInlineFunction( Name, Input, Return, Inline )
 	return EXPADV.AddInlineFunction( self, Name, Input, Return, Inline )
 end
 
-function EXPADV.EXPADV_BaseComponent:AddPreparedFunction( Name, Input, Return, Prepare, Inline )
+function BaseComponent:AddPreparedFunction( Name, Input, Return, Prepare, Inline )
 	return EXPADV.AddPreparedFunction( self, Name, Input, Return, Prepare, Inline )
 end
 
-function EXPADV.EXPADV_BaseComponent:AddVMFunction( Name, Input, Return, Function ) -- function( Trace, Context, ... )
+function BaseComponent:AddVMFunction( Name, Input, Return, Function ) -- function( Trace, Context, ... )
 	return EXPADV.AddVMFunction( self, Name, Input, Return, Function )
 end
 
@@ -50,7 +52,7 @@ end
 	@: Function Helper Data
    --- */
 
-function EXPADV.EXPADV_BaseComponent:AddFunctionHelper( Name, Input, Description )
+function BaseComponent:AddFunctionHelper( Name, Input, Description )
 	return EXPADV.AddFunctionHelper( self, Name, Input, Description )
 end
 
@@ -67,7 +69,7 @@ end
 local Temp_Components = { }
 
 function EXPADV.AddComponent( Name, Enabled )
-	local Component = setmetatable( { Name = Name, Default_Enabled = Enabled }, EXPADV.EXPADV_BaseComponent )
+	local Component = setmetatable( { Name = Name, Default_Enabled = Enabled }, BaseComponent )
 
 	Temp_Components[Name] = Component
 
@@ -86,8 +88,8 @@ function EXPADV.LoadComponents( )
 		if EXPADV.Config.EnabledComponents[ Component.Name ] ~= nil then
 			Component.Enabled = EXPADV.Config.EnabledComponents[ Component.Name ]
 		else
-			Component.Enabled = Default_Enabled
-			EXPADV.Config.EnabledComponents[ Component.Name ] = Default_Enabled
+			Component.Enabled = Component.Default_Enabled
+			EXPADV.Config.EnabledComponents[ Component.Name ] = Component.Default_Enabled
 		end
 
 		if !Component.Enabled then return end

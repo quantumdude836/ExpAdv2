@@ -29,7 +29,7 @@ function EXPADV.LoadConfig( )
 end
 
 function EXPADV.SaveConfig( )
-	EXPADV.RunHook( "PreSaveConfig", EXPADV.Config )
+	-- EXPADV.RunHook( "PreSaveConfig", EXPADV.Config )
 
 	file.Write( "expadv.txt", util.TableToKeyValues( EXPADV.Config ) )
 end
@@ -78,6 +78,8 @@ function EXPADV.LoadCore( )
 
 	include( "expadv/compiler/main.lua" )
 
+	EXPADV.SaveConfig( )
+
 	if SERVER then
 		net.Start( "expadv.config")
 			net.WriteTable( EXPADV.Config )
@@ -108,10 +110,11 @@ end
 	@: Test Build.
    --- */
 
-EXPADV.LoadCore( )
+hook.Add( "Initialize", "lemon.babysteps", function( )
+	EXPADV.LoadCore( )
 
-EXPADV.Example( player.GetByID( 1 ) )
-
+	EXPADV.Example( player.GetByID( 1 ) )
+end )
 
 
 

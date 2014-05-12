@@ -127,7 +127,7 @@ function Compiler:TraceError( Trace, ... )
 end
 
 function Compiler:TokenError( ... )
-	self:TraceError( self:TokenTrace( ), ... )
+	self:TraceError( self:GetTokenTrace( ), ... )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -423,6 +423,16 @@ function Compiler:IsOutput( Trace, MemRef )
 	return self.OutPorts[MemRef] ~= nil
 end
 
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Operator Look Up
+   --- */
+
+function Compiler:LookUpOperator( Name, ... )
+	MsgN( "LookUp Operator: " .. string.format( "%s(%s)", Name, table.concat( { ... }, "" ) ) )
+	return EXPADV.Operators[ string.format( "%s(%s)", Name, table.concat( { ... }, "" ) ) ]
+end
+
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Compile Code
    --- */
@@ -442,7 +452,6 @@ local function SoftCompile( self, Script, Files, bIsClientSide, OnError, OnSuces
 		self.Buffer = Script
 		self.Files = Files or { }
 		self.Enviroment = { }
-		self.Yield = SysTime( ) + 0.001
 
 	-- Tokenizer:
 		self.TokenPos = -1
@@ -453,7 +462,7 @@ local function SoftCompile( self, Script, Files, bIsClientSide, OnError, OnSuces
 		self:NextChar( )
 
 	-- Memory:
-		self:InitScopes( )
+		self:BuildScopes( )
 
 		self.Cells = { }
 		self.InPorts = { }
@@ -472,28 +481,26 @@ local function SoftCompile( self, Script, Files, bIsClientSide, OnError, OnSuces
 		self:NextToken( )
 
 	-- Wait for next tick to begin:
-		coroutine.yield( )
+		-- coroutine.yield( )
 
 	-- Ok, Run the compiler.
-		local Compiled, Result = Pcall( self.Expression, self )
+		local Compiled, Instruction = pcall( self.Expression, self, { 0, 0 } )
 
 	-- Finish!
 		Coroutines[self] = nil -- Because we compile inside a coroutine now =D
 
-		if !Compiled then return OnError( Result ) end
+		if !Compiled then return OnError( Instruction ) end
 
-		self.Expression = Compiled
-
-		return OnSucess( self )
+		return OnSucess( self, Instruction )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Compiler Handeler, From now on we will compile over time!
    --- */
 
-hook.Add( "Tick", "ExpAdv.Compile", function( )
+/*hook.Add( "Tick", "ExpAdv.Compile", function( )
 	for Instance, Coroutine in pairs( Coroutines ) do
-		Instance.Yield = SysTime( ) + 0.001
+		Instance.Yield = SysTime( ) + 1--0.001
 
 		EXPADV.COMPILER_ENV = Instance.Enviroment
 
@@ -501,14 +508,14 @@ hook.Add( "Tick", "ExpAdv.Compile", function( )
 
 		EXPADV.COMPILER_ENV = nil
 	end
-end )
+end )*/
 
 function EXPADV.Compile( Script, Files, bIsClientSide, OnError, OnSucess )
 	local self = setmetatable( { }, Compiler )
 	
-	Coroutines[ self ] = coroutine.create( SoftCompile, self, Script, Files, bIsClientSide, OnError, OnSucess )
+	SoftCompile( self, Script, Files, bIsClientSide, OnError, OnSucess )
 
-	return Coroutines[ self ], self
+	return self
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -525,19 +532,32 @@ end
    --- */
 
 function EXPADV.Example( Player )
-	local Expression = "1 + 1"
-
+	local Expression = "+1 + 2 * 9"
 	local _, Instance = EXPADV.Compile( Expression, { }, CLIENT,
+		
 		function( Error ) -- OnError
 			MsgN( "Compiler, Failed -> " .. Error )
 		end,
-		function( self ) -- OnSucess
+
+		function( self, Instruction ) -- OnSucess
+
 			MsgN( "Do you know what ", Expression, "  is?" )
-			local Execute = ComileString( "function( Context )\nprint( Daddy, the answer is " .. self.Expression.Prepare .. ")\n" )
-			if isstring( Execute ) then return MsgN( "Compiler, Failed -> ", Execute ) end
+			
+			local CompiledLua = CompileString( [[return function( Context )
+				]] .. (Instruction.Prepare or "") .. [[
+				print( "Daddy, the answer is", ]] .. (Instruction.Inline or "nil") .. [[)
+			end]], "EXPADV2", false )
+
+			if isstring( CompiledLua ) then
+				return MsgN( "Compiler, Failed -> ", CompiledLua )
+			end
+
+			local Execute = CompiledLua( )
 
 			local Context = EXPADV.BuildNewContext( Player, Player )
 			
 			Execute( Context )
 		end )
+
+	print( "Compiling: ", Instance )
 end

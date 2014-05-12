@@ -4,13 +4,15 @@
 
 EXPADV.BaseClassObj = { }
 
-EXPADV.BaseClassObj .__index = EXPADV.BaseClassObj 
+EXPADV.BaseClassObj.__index = EXPADV.BaseClassObj 
+
+local BaseClassObj = EXPADV.BaseClassObj
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Basic Support
    --- */
 
-function EXPADV.BaseClassObj:DefaultAsLua( Default ) -- Object / function( Trace, Context )
+function BaseClassObj:DefaultAsLua( Default ) -- Object / function( Trace, Context )
 	if istable( Default ) then
 		Default = function( ) return table.Copy( Default ) end
 	elseif !isfunction( Default ) then
@@ -22,13 +24,13 @@ end
 
 EXPADV.BaseClassObj.DeriveFrom = "generic"
 
-function EXPADV.BaseClassObj:ExtendClass( ExtendClass )
+function BaseClassObj:ExtendClass( ExtendClass )
 	self.DeriveFrom = ExtendClass
 end
 
 local Temp_Aliases = { }
 
-function EXPADV.BaseClassObj:AddAlias( Alias )
+function BaseClassObj:AddAlias( Alias )
 	Temp_Aliases[ Alias ] = self
 end
 
@@ -40,7 +42,7 @@ if WireLib then
 
 	local function WireOut( Context, MemoryRef ) return Context.Memory[ MemoryRef ] end
 
-	function EXPADV.BaseClassObj:WireOutput( WireType, Function ) -- function( Context, MemoryRef ) return Converted end
+	function BaseClassObj:WireOutput( WireType, Function ) -- function( Context, MemoryRef ) return Converted end
 		self.Wire_Out_Type = string.upper( WireType )
 
 		self.Wire_Out_Util = Function or WireOut
@@ -48,7 +50,7 @@ if WireLib then
 
 	local function WireIn( Context, MemoryRef, InValue ) Context.Memory[ MemoryRef ] = InValue end
 
-	function EXPADV.BaseClassObj:WireOutput( WireType, Function ) -- function( Context, MemoryRef,  InValue ) end
+	function BaseClassObj:WireInput( WireType, Function ) -- function( Context, MemoryRef,  InValue ) end
 		self.Wire_In_Type = string.upper( WireType )
 		
 		self.Wire_In_Util = Function or WireIn
@@ -60,11 +62,11 @@ end
 	@: Seralization Support
    --- */
 
-function EXPADV.BaseClassObj:Serialize( Function ) -- function( Value ) return String end
+function BaseClassObj:Serialize( Function ) -- function( Value ) return String end
 	self.SerializeAsString = Function
 end
 
-function EXPADV.BaseClassObj:Deserialize( Function ) -- function( String ) return Value end
+function BaseClassObj:Deserialize( Function ) -- function( String ) return Value end
 	self.DeserializeFromString = Function
 end
 
@@ -76,19 +78,19 @@ EXPADV.BaseClassObj.LoadOnServer = true
 
 EXPADV.BaseClassObj.LoadOnClient = true
 
-function EXPADV.BaseClassObj:MakeServerOnly( )
+function BaseClassObj:MakeServerOnly( )
 	self.LoadOnClient = false
 end
 
-function EXPADV.BaseClassObj:MakeClientOnly( )
+function BaseClassObj:MakeClientOnly( )
 	self.LoadOnServer = false
 end
 
-function EXPADV.BaseClassObj:NetSend( Function ) -- function( Value ) return String end
+function BaseClassObj:NetSend( Function ) -- function( Value ) return String end
 	self.SendToClient = Function
 end
 
-function EXPADV.BaseClassObj:NetReceive( Function ) -- function( Value ) return String end
+function BaseClassObj:NetReceive( Function ) -- function( Value ) return String end
 	self.ReceiveFromServer = Function
 end
 
@@ -196,6 +198,8 @@ function EXPADV.LoadClasses( )
  		if Class.CreateNew then
  			EXPADV.AddVMOperator( Class.Component, "default", Class.Short , Class.Short, Class.CreateNew )
  		end -- ^ Add default operator, can now do this :D
+
+ 		MsgN( "Registered Class: " .. Class.Name )
 
  		if DeriveClass == Class_Generic then continue end
 

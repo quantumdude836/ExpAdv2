@@ -109,7 +109,7 @@ function EXPADV.LoadOperators( )
 		if Operator.Input and Operator.Input ~= "" then
 			local Signature = { }
 
-			for I, Input in string.gmatch( Operator.Input, "()([%w%?!%*]+)%s*([%[%]]?)()" ) do
+			for I, Input in pairs( string.Explode( ",", Operator.Input ) ) do//string.gmatch( Operator.Input, "()([%w%?!%*]+)%s*([%[%]]?)()" ) do
 
 				-- First lets check for varargs.
 				if Input == "..." then
@@ -138,6 +138,8 @@ function EXPADV.LoadOperators( )
 			Operator.Input = Signature
 			Operator.InputCount = #Signature
 			Operator.Signature = string.format( "%s(%s)", Operator.Name, table.concat( Signature, "" ) )
+
+			MsgN( "Built Operator: " .. Operator.Signature )
 
 			if Operator.UsesVarg then Operator.InputCount = Operator.InputCount - 1 end
 		else
@@ -271,7 +273,7 @@ function EXPADV.LoadFunctions( )
 				Signature[1] = Class.Short .. ":"
 			end
 
-			for I, Input in string.gmatch( Operator.Input, "()([%w%?!%*]+)%s*([%[%]]?)()" ) do
+			for I, Input in string.Explode( ",", Operator.Input ) do//string.gmatch( Operator.Input, "()([%w%?!%*]+)%s*([%[%]]?)()" ) do
 
 				-- First lets check for varargs.
 				if Input == "..." then
@@ -421,7 +423,7 @@ function EXPADV.BuildLuaOperator( Operator )
 		local OpPrepare, OpInline = Operator.Prepare, Operator.Inline
 
 		for I = Operator.InputCount, 1, -1 do
-			local Input = Inputs.Input[I]
+			local Input = Inputs[I]
 			local InputInline, InputPrepare = "nil", ""
 			
 			-- How meany times do we need this Var?
@@ -454,30 +456,22 @@ function EXPADV.BuildLuaOperator( Operator )
 				InputPrepare = Input.Prepare
 			end
 
-			-- Here we deal with inlining anything, that needs to be inlined!
+			-- Lets see if we need to localize the inline
+			if Uses >= 2 and !string.StartWith( InputInline, "Context.Dinfinitions" ) then
+				local Local = Compiler:NextLocal( )
+				InputPrepare = string.format( "%s\nContext.Dinfinitions[%s] = %s", InputPrepare, Local, InputInline )
+				InputInline = string.format( "Context.Dinfinitions[%s]", Local )
+			end
+
+			-- Place inputs into generated code
+			if Input.FLAG == EXPADV_PREPARE or Input.FLAG == EXPADV_INLINEPREPARE then
+				OpPrepare = string.gsub( OpPrepare, "value %%" .. I, InputInline )
+				OpPrepare = string.gsub( OpPrepare, "type %%" .. I, Format( "%q", Input.Return or Operator.Input[I] ) )
+			end
+
 			if Input.FLAG == EXPADV_INLINE or Input.FLAG == EXPADV_INLINEPREPARE then
-				
-				-- If Inline is used more then once, then we need to make it local.
-				if Uses >= 2 and InputInline then
-					
-					-- First we check to see if it is local, before we localise it.
-					if !string.StartWith( InputInline, "Context.Dinfinitions" ) then
-						local Local = Compiler:NextLocal( )
-						InputPrepare = string.format( "%s\nContext.Dinfinitions[%s] = %s", InputPrepare, Local, InputInline )
-						InputInline = string.format( "Context.Dinfinitions[%s]", Local )
-					end
-				end
-
-				-- Place the inputs into the generated code.
-				if Input.FLAG == EXPADV_PREPARE or Input.FLAG == EXPADV_INLINEPREPARE then
-					OpPrepare = string.gsub( OpPrepare, "value %%" .. I, InputInline )
-					OpPrepare = string.gsub( OpPrepare, "type %%" .. I, Format( "%q", Input.Return or Operator.Input[I] ) )
-				end
-
-				if Input.FLAG == EXPADV_INLINE or Input.FLAG == EXPADV_INLINEPREPARE then
-					OpInline = string.gsub( OpInline, "value %%" .. I, InputInline )
-					OpInline = string.gsub( OpInline, "type %%" .. I, Format( "%q", Input.Return or Operator.Input[I] ) )
-				end
+				OpInline = string.gsub( OpInline, "value %%" .. I, InputInline )
+				OpInline = string.gsub( OpInline, "type %%" .. I, Format( "%q", Input.Return or Operator.Input[I] ) )
 			end
 
 			-- Now we handel preperation.
@@ -500,7 +494,7 @@ function EXPADV.BuildLuaOperator( Operator )
 				local VAPrepare, VAInline = { }, { }
 
 				for I = Operator.InputCount + 1, #Inputs do
-					local Input = Inputs.Input[I]
+					local Input = Input[I]
 
 					if Input.FLAG == EXPADV_FUNCTION then
 						VAInline[ #VAInline + 1 ] = string.format( "{%s,%q}", Compiler:VMToLua( Input ), Input.Return or "NIL" )
@@ -532,7 +526,7 @@ function EXPADV.BuildLuaOperator( Operator )
 		end
 
 		-- Now lets check cpu time, note we will let the trace system below, insert our traces.
-		if Input.FLAG == EXPADV_PREPARE or Input.FLAG == EXPADV_INLINEPREPARE then
+		if Operator.FLAG == EXPADV_PREPARE or Operator.FLAG == EXPADV_INLINEPREPARE then
 			OpPrepare = string.gsub( OpPrepare, "%%cpu", "Context:UpdateCPUQuota( %%trace )" )
 		end
 
@@ -557,11 +551,11 @@ function EXPADV.BuildLuaOperator( Operator )
 				Trace = "Trace"
 			end
 
-			if Input.FLAG == EXPADV_PREPARE or Input.FLAG == EXPADV_INLINEPREPARE then
+			if Operator.FLAG == EXPADV_PREPARE or Operator.FLAG == EXPADV_INLINEPREPARE then
 				OpPrepare = string.gsub( OpPrepare, "%%trace", Trace )
 			end
 
-			if Input.FLAG == EXPADV_INLINE or Input.FLAG == EXPADV_INLINEPREPARE then
+			if Operator.FLAG == EXPADV_INLINE or Operator.FLAG == EXPADV_INLINEPREPARE then
 				OpInline = string.gsub( OpInline, "%%trace", Trace )
 			end
 		end
@@ -569,7 +563,7 @@ function EXPADV.BuildLuaOperator( Operator )
 		-- Oh god, now we need to format our preperation.
 		local Definitions = { }
 
-		if Input.FLAG == EXPADV_PREPARE or Input.FLAG == EXPADV_INLINEPREPARE then
+		if Operator.FLAG == EXPADV_PREPARE or Operator.FLAG == EXPADV_INLINEPREPARE then
 			local DefinedLines = { }
 
 			for StartPos, EndPos in string.gmatch( OpPrepare, "()%%define [a-zA-Z_0-9%%, \t]+()" ) do
