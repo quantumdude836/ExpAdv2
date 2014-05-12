@@ -452,14 +452,14 @@ local function SoftCompile( self, Script, Files, bIsClientSide, OnError, OnSuces
 		self.Buffer = Script
 		self.Files = Files or { }
 		self.Enviroment = { }
-
+		EXPADV.COMPILER_ENV = self.Enviroment
+		
 	-- Tokenizer:
 		self.TokenPos = -1
 		self.Char = ""
 		self.ReadData = ""
 		self.ReadChar = 1
 		self.ReadLine = 1
-		self:NextChar( )
 
 	-- Memory:
 		self:BuildScopes( )
@@ -532,7 +532,7 @@ end
    --- */
 
 function EXPADV.Example( Player )
-	local Expression = "+1 + 2 * 9"
+	local Expression = "2 % 2"
 	local _, Instance = EXPADV.Compile( Expression, { }, CLIENT,
 		
 		function( Error ) -- OnError

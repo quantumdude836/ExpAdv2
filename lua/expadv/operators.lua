@@ -109,7 +109,7 @@ function EXPADV.LoadOperators( )
 		if Operator.Input and Operator.Input ~= "" then
 			local Signature = { }
 
-			for I, Input in pairs( string.Explode( ",", Operator.Input ) ) do//string.gmatch( Operator.Input, "()([%w%?!%*]+)%s*([%[%]]?)()" ) do
+			for I, Input in pairs( string.Explode( ",", Operator.Input ) ) do //string.gmatch( Operator.Input, "()([%w%?!%*]+)%s*([%[%]]?)()" ) do
 
 				-- First lets check for varargs.
 				if Input == "..." then
@@ -273,7 +273,7 @@ function EXPADV.LoadFunctions( )
 				Signature[1] = Class.Short .. ":"
 			end
 
-			for I, Input in string.Explode( ",", Operator.Input ) do//string.gmatch( Operator.Input, "()([%w%?!%*]+)%s*([%[%]]?)()" ) do
+			for I, Input in pairs( string.Explode( ",", Operator.Input ) ) do //string.gmatch( Operator.Input, "()([%w%?!%*]+)%s*([%[%]]?)()" ) do
 
 				-- First lets check for varargs.
 				if Input == "..." then
@@ -430,12 +430,12 @@ function EXPADV.BuildLuaOperator( Operator )
 			local Uses = 0
 
 			if Operator.FLAG == EXPADV_INLINE or Operator.FLAG == EXPADV_INLINEPREPARE then
-				local _, Add = string.gsub( OpInline, "value %%" .. I, "" )
+				local _, Add = string.gsub( OpInline, "@value " .. I, "" )
 				Uses = Add
 			end
 
 			if Operator.FLAG == EXPADV_PREPARE or Operator.FLAG == EXPADV_INLINEPREPARE then
-				local _, Add = string.gsub( OpPrepare, "value %%" .. I, "" )
+				local _, Add = string.gsub( OpPrepare, "@value " .. I, "" )
 				Uses = Uses + Add
 			end
 
@@ -465,21 +465,21 @@ function EXPADV.BuildLuaOperator( Operator )
 
 			-- Place inputs into generated code
 			if Input.FLAG == EXPADV_PREPARE or Input.FLAG == EXPADV_INLINEPREPARE then
-				OpPrepare = string.gsub( OpPrepare, "value %%" .. I, InputInline )
-				OpPrepare = string.gsub( OpPrepare, "type %%" .. I, Format( "%q", Input.Return or Operator.Input[I] ) )
+				OpPrepare = string.gsub( OpPrepare, "@value " .. I, InputInline )
+				OpPrepare = string.gsub( OpPrepare, "@type " .. I, Format( "%q", Input.Return or Operator.Input[I] ) )
 			end
 
 			if Input.FLAG == EXPADV_INLINE or Input.FLAG == EXPADV_INLINEPREPARE then
-				OpInline = string.gsub( OpInline, "value %%" .. I, InputInline )
-				OpInline = string.gsub( OpInline, "type %%" .. I, Format( "%q", Input.Return or Operator.Input[I] ) )
+				OpInline = string.gsub( OpInline, "@value " .. I, InputInline )
+				OpInline = string.gsub( OpInline, "@type " .. I, Format( "%q", Input.Return or Operator.Input[I] ) )
 			end
 
 			-- Now we handel preperation.
 			if Input.FLAG == EXPADV_PREPARE or Input.FLAG == EXPADV_INLINEPREPARE then
 
 				-- First check for manual prepare
-				if string.find( OpPrepare, "prepare %%" .. I ) then
-					OpPrepare = string.gsub( OpPrepare, "prepare %%" .. I, InputPrepare )
+				if string.find( OpPrepare, "@prepare " .. I ) then
+					OpPrepare = string.gsub( OpPrepare, "@prepare " .. I, InputPrepare )
 				else
 					-- Ok, now prepare this ourself.
 					OpPrepare = OpPrepare .. "\n" .. InputPrepare
@@ -490,7 +490,7 @@ function EXPADV.BuildLuaOperator( Operator )
 
 		-- Now we handel any varargs!
 		if Operator.UsesVarg and #Inputs > Operator.InputCount then
-			if ( OpPrepare and string.find( OpPrepare, "(%%%.%.%.)" ) ) or ( OpInline and string.find( OpInline, "(%%%.%.%.)" ) ) then
+			if ( OpPrepare and string.find( OpPrepare, "(@%.%.%.)" ) ) or ( OpInline and string.find( OpInline, "(@%.%.%.)" ) ) then
 				local VAPrepare, VAInline = { }, { }
 
 				for I = Operator.InputCount + 1, #Inputs do
@@ -515,11 +515,11 @@ function EXPADV.BuildLuaOperator( Operator )
 				end
 
 				if Input.FLAG == EXPADV_PREPARE or Input.FLAG == EXPADV_INLINEPREPARE then
-					OpPrepare = string.gsub( OpPrepare, "(%%%.%.%.)" .. I, table.concat( VAInline, "," ) )
+					OpPrepare = string.gsub( OpPrepare, "(@%.%.%.)" .. I, table.concat( VAInline, "," ) )
 				end
 
 				if Input.FLAG == EXPADV_INLINE or Input.FLAG == EXPADV_INLINEPREPARE then
-					OpInline = string.gsub( OpInline, "(%%%.%.%.)" .. I, table.concat( VAInline, "," ) )
+					OpInline = string.gsub( OpInline, "(@%.%.%.)" .. I, table.concat( VAInline, "," ) )
 				end
 
 			end
@@ -534,12 +534,12 @@ function EXPADV.BuildLuaOperator( Operator )
 		local Uses = 0
 
 		if Operator.FLAG == EXPADV_INLINE or Operator.FLAG == EXPADV_INLINEPREPARE then
-			local _, Add = string.gsub( OpInline, "%%trace", "" )
+			local _, Add = string.gsub( OpInline, "@trace", "" )
 			Uses = Add
 		end
 
 		if Operator.FLAG == EXPADV_PREPARE or Operator.FLAG == EXPADV_INLINEPREPARE then
-			local _, Add = string.gsub( OpPrepare, "%%trace", "" )
+			local _, Add = string.gsub( OpPrepare, "@trace", "" )
 			Uses = Uses + Add
 		end
 
@@ -552,11 +552,11 @@ function EXPADV.BuildLuaOperator( Operator )
 			end
 
 			if Operator.FLAG == EXPADV_PREPARE or Operator.FLAG == EXPADV_INLINEPREPARE then
-				OpPrepare = string.gsub( OpPrepare, "%%trace", Trace )
+				OpPrepare = string.gsub( OpPrepare, "@trace", Trace )
 			end
 
 			if Operator.FLAG == EXPADV_INLINE or Operator.FLAG == EXPADV_INLINEPREPARE then
-				OpInline = string.gsub( OpInline, "%%trace", Trace )
+				OpInline = string.gsub( OpInline, "@trace", Trace )
 			end
 		end
 
@@ -566,7 +566,7 @@ function EXPADV.BuildLuaOperator( Operator )
 		if Operator.FLAG == EXPADV_PREPARE or Operator.FLAG == EXPADV_INLINEPREPARE then
 			local DefinedLines = { }
 
-			for StartPos, EndPos in string.gmatch( OpPrepare, "()%%define [a-zA-Z_0-9%%, \t]+()" ) do
+			for StartPos, EndPos in string.gmatch( OpPrepare, "()@define [a-zA-Z_0-9%%, \t]+()" ) do
 				DefinedLines[ #DefinedLines + 1 ] = { StartPos, EndPos }
 			end
 
@@ -580,13 +580,13 @@ function EXPADV.BuildLuaOperator( Operator )
 
 					NewLine[ #NewLine + 1 ] = Lua
 
-					Definitions[ "%" .. Name ] = Lua
+					Definitions[ "@" .. Name ] = Lua
 				end
 
 				OpPrepare = string.sub( OpPrepare, 1, Start ) .. table.concat( NewLine, "," ) .. string.sub( OpPrepare, End - 1 )
 			end
 
-			OpPrepare = string.gsub( OpPrepare, "(%%[a-zA-Z0-9_]+)", Definitions )
+			OpPrepare = string.gsub( OpPrepare, "(@[a-zA-Z0-9_]+)", Definitions )
 
 			--TODO: Externals!
 
@@ -596,7 +596,7 @@ function EXPADV.BuildLuaOperator( Operator )
 		-- Now lets format the inline
 		if Operator.FLAG == EXPADV_INLINE or Operator.FLAG == EXPADV_INLINEPREPARE then
 			-- Replace the locals in our prepare!
-			OpInline = string.gsub( OpInline, "(%%[a-zA-Z0-9_]+)", Definitions )
+			OpInline = string.gsub( OpInline, "(@[a-zA-Z0-9_]+)", Definitions )
 
 			--TODO: Externals!
 

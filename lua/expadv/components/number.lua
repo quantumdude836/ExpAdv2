@@ -23,7 +23,7 @@ MathComponent:AddPreparedOperator( Name, Input, Return, Prepare, Inline )
 -- TODO: COMPONENT NOT YET SUPPORTEDs
 MathComponent:AddPreparedOperator("=","n","n",[[
 	
-]], "value %2")
+]], "@value 2")
 
 -- TODO: COMPONENT NOT YET SUPPORTED
 MathComponent:AddPreparedOperator("~","n","b",[[
@@ -34,32 +34,32 @@ MathComponent:AddPreparedOperator("~","n","b",[[
 	@Compare:
 ---	*/
 
-MathComponent:AddInlineOperator("==", "n,n", "b", "(value %1 == value %2)" )
-MathComponent:AddInlineOperator("!=", "n,n", "b", "(value %1 != value %2)" )
-MathComponent:AddInlineOperator(">", "n,n", "b", "(value %1 > value %2)" )
-MathComponent:AddInlineOperator("<", "n,n", "b", "(value %1 < value %2)" )
-MathComponent:AddInlineOperator(">=","n,n", "b", "(value %1 >= value %2)" )
-MathComponent:AddInlineOperator("<=","n,n", "b", "(value %1 <= value %2)" )
+MathComponent:AddInlineOperator("==", "n,n", "b", "(@value 1 == @value 2)" )
+MathComponent:AddInlineOperator("!=", "n,n", "b", "(@value 1 != @value 2)" )
+MathComponent:AddInlineOperator(">", "n,n", "b", "(@value 1 > @value 2)" )
+MathComponent:AddInlineOperator("<", "n,n", "b", "(@value 1 < @value 2)" )
+MathComponent:AddInlineOperator(">=","n,n", "b", "(@value 1 >= @value 2)" )
+MathComponent:AddInlineOperator("<=","n,n", "b", "(@value 1 <= @value 2)" )
 
 /*	---
 	@Arithmatic:
 ---	*/
 
-MathComponent:AddInlineOperator("+", "n,n", "n", "(value %1 + value %2)" )
-MathComponent:AddInlineOperator("-", "n,n", "n", "(value %1 - value %2)" )
-MathComponent:AddInlineOperator("*", "n,n", "n", "(value %1 * value %2)" )
-MathComponent:AddInlineOperator("/", "n,n", "n", "(value %1 / value %2)" )
-MathComponent:AddInlineOperator("%", "n,n", "n", "(value %1 modulus value %2)" )
-MathComponent:AddInlineOperator("^", "n,n", "n", "(value %1 ^ value %2)" )
+MathComponent:AddInlineOperator("+", "n,n", "n", "(@value 1 + @value 2)" )
+MathComponent:AddInlineOperator("-", "n,n", "n", "(@value 1 - @value 2)" )
+MathComponent:AddInlineOperator("*", "n,n", "n", "(@value 1 * @value 2)" )
+MathComponent:AddInlineOperator("/", "n,n", "n", "(@value 1 / @value 2)" )
+MathComponent:AddInlineOperator("%", "n,n", "n", "(@value 1 % @value 2)" )
+MathComponent:AddInlineOperator("^", "n,n", "n", "(@value 1 ^ @value 2)" )
 
 /*	---
 	@General:
 ---	*/
 
-MathComponent:AddInlineOperator("is", "n", "b", "(value %1 >= 1)" )
-MathComponent:AddInlineOperator("not", "n", "b", "(value %1 < 1)" )
-MathComponent:AddInlineOperator("-", "n", "b", "(-value %1)" )
-MathComponent:AddInlineOperator("$", "n", "n", "((%memory[value %1] or 0) - (%delta[value %1] or 0))" )
+MathComponent:AddInlineOperator("is", "n", "b", "(@value 1 >= 1)" )
+MathComponent:AddInlineOperator("not", "n", "b", "(@value 1 < 1)" )
+MathComponent:AddInlineOperator("-", "n", "b", "(-@value 1)" )
+MathComponent:AddInlineOperator("$", "n", "n", "((%memory[@value 1] or 0) - (%delta[@value 1] or 0))" )
 
 /*	---	---------------------------------------------------------------------------------
 	@:Section -> Assignment Operators

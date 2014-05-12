@@ -4,7 +4,6 @@ local Compiler = EXPADV.Compiler
 	@: Token Checking
    --- */
 
-
 function Compiler:HasTokens( )
 	return self.PrepToken ~= nil
 end
@@ -32,6 +31,23 @@ function Compiler:CheckToken( Type, Type2, ... )
 	end
 	
 	return false
+end
+
+function Compiler:CheckSequence( ... )
+	local Sequence = { ... }
+	
+	for I, Type in pairs( Sequence ) do
+		if !self:AcceptToken( Type ) then
+			self.TokenPos = self.TokenPos - I
+			self:NextToken( )
+			return false
+		end
+	end
+	
+	self.TokenPos = self.TokenPos - #Sequence
+	self:NextToken( )
+	
+	return true
 end
 
 function Compiler:RequireToken( Type, Message, ... )
@@ -119,7 +135,9 @@ function Compiler:Expression( Trace )
 
 	local _ExprnRoot = self.ExpressionRoot
 	self.ExpressionRoot = self:GetTokenTrace( Trace )
-
+	
+		local Expression
+	
 	-- Casting Operator:
 		local CastCheck = self:ManualPattern( "%(()[a-z][A-Z0-9]+()%)" )
 
@@ -127,20 +145,15 @@ function Compiler:Expression( Trace )
 			self:TokenError( "Casting is not yet supported :(" )
 		end
 
-	-- Group Equation:
+	-- First Expression / Grouped Expression:
 		if self:AcceptToken( "lpa" ) then
-			local Expresion = self:Expression( Trace )
-
-			self:RequireToken( "rpa", "Right parenthesis ( )) missing, to close grouped equation." )
+			Expresion = self:Expression( Trace )
 			
-			self.ExpressionRoot = _ExprnRoot
-
-			return Expresion
+			self:RequireToken( "rpa", "Right parenthesis ( )) missing, to close grouped equation." )
+		else
+			Expresion = self:GetValue( Trace )
 		end
-
-	-- Get First Expression
-		local Expresion = self:GetValue( Trace )
-
+		
 	-- Error, if no expression.
 		if !Expresion then return self:ExpressionError( Trace ) end
 
