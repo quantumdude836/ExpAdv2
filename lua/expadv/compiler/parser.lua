@@ -163,7 +163,8 @@ function Compiler:Expression( Trace )
 	end
 
 	self.ExpressionRoot = _ExprRoot
-	return Expression
+
+	return self:Expression_Postfix( Expression )
 end
 
 -- Stage 1: Grouped Equation, In/Dec
@@ -387,11 +388,23 @@ end
 function Compiler:Expression_Variable( Trace )
 	if self:AcceptToken( "inc" ) then
 		self:RequireToken( "var", "Assigment operator (increment), must be preceeded by variable" )
+		
 		return self:Compile_INC( Trace, false, self.TokenData )
 	
 	elseif self:AcceptToken( "dec" ) then
 		self:RequireToken( "var", "Assigment operator (decrement), must be preceeded by variable" )
+		
 		return self:Compile_DEC( Trace, false, self.TokenData )
+	
+	elseif self:AcceptToken( "cng" ) then
+		self:RequireToken( "var", "Memory operator (changed), must be preceeded by variable" )
+		
+		return self:Compile_CHANGED( Trace, self.TokenData )
+
+	elseif self:AcceptToken( "dlt" ) then
+		self:RequireToken( "var", "Memory operator (delta), must be preceeded by variable" )
+		
+		return self:Compile_DELTA( Trace, self.TokenData )
 	
 	elseif self:AcceptToken( "var" ) then
 
@@ -410,11 +423,207 @@ end
 -- Stage 15: Indexing, Calling
 function Compiler:Expression_Postfix( Trace, Expression )
 
+	while self:CheckToken( "prd", "lsb", "lpa" ) do
+
+		-- Methods
+			if self:AcceptToken( "prd" ) then
+				local Trace = self:GetTokenTrace( Trace )
+
+				self:RequireToken( "var", "Method operator (.) must be followed by method name" )
+
+				local Method = self.TokenData
+
+				self:RequireToken( "lpa", "Left parenthesis (( ) missing, after method name" )
+
+				local Inputs = { }
+
+				if !self:CheckToken( "rpa" ) then
+					
+					Inputs[1] = self:Expression( Trace )
+
+					while self:AcceptToken( "com" ) do
+
+						Inputs[#Inputs + 1] = self:Expression( Trace )
+
+					end
+				end
+
+				self:RequireToken( "rpa", "Right parenthesis ( )) missing, to close method parameters" )
+
+				Expression = self:Compile_METHOD( Trace, Expression, Method, Inputs )
+			end
+
+		-- Members
+			if self:AcceptToken( "lsb" ) then
+				local Trace = self:GetTokenTrace( Trace )
+
+				local Index = self:Expression( Trace )
+
+				if !self:AcceptToken( "com" ) then
+					self:RequireToken( "rsb", "Right square bracket (]) missing, to close indexing operator [Index]" )
+
+					Expression = self:Compile_GET( Trace, Expression, Index )
+				
+				elseif !self:AcceptToken( "var", "func" ) then
+					self:TraceError( Trace, "Right square bracket (]) expected, to close indexing operator [Index]" )
+				else
+					local Class = self:GetClass( Trace, self.TokenData, false )
+
+					self:RequireToken( "rsb", "Right square bracket (]) missing, to close indexing operator [Index]" )
+
+					Expression = self:Compile_GET( Trace, Expression, Index, Class.Short )
+				end
+
+			end
+
+		-- Call
+
+			if self:AcceptToken( "lpa" ) then
+				local Trace = self:GetTokenTrace( Trace )
+
+				local Inputs = { }
+
+				if !self:CheckToken( "rpa" ) then
+					
+					Inputs[1] = self:Expression( Trace )
+
+					while self:AcceptToken( "com" ) do
+
+						Inputs[#Inputs + 1] = self:Expression( Trace )
+
+					end
+				end
+
+				self:RequireToken( "rpa", "Right parenthesis ( ), expected to close function perameters" )
+
+				Expression = self:Compile_CALL( Trace, Expression, Inputs )
+			end
+		end
+
+	return Expression
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Statments
    --- */
 
--- Stage 1: If Statments
+function Compiler:Statement( Trace )
+	local _StmtRoot = self.StatmentRoot
+	self.StatmentRoot = self:GetTokenTrace( Trace )
+	
+	local Statement = self:Statement_1( Trace )
 
+	self.StatmentRoot = _StmtRoot
+
+	return Statement
+end
+
+function Compiler:Sequence( Trace, ExitToken )
+	local Sequence = { }
+
+	while true do
+
+		if !self:HasTokens( ) then
+			break
+		elseif ExitToken and self:CheckToken( ExitToken ) then
+			break
+		end
+
+		Sequence[#Sequence + 1] = self:Statement( Trace ) 
+
+		if !self:AcceptSeperator( ) and self.PrepTokenLine == self.TokenLine then
+			self:TokenError( "Statements must be separated by semicolon (;) or newline" )
+		end
+
+		-- TODO: Prevent code after, Break, Continue and Return
+	end
+
+	return self:Compile_SEQ( Trace, Sequence )
+end
+
+-- Stage 1: If statments
+function Compiler:Statement_1( Trace )
+	if self:AcceptToken( "if" ) then
+		self:RequireToken( "lpa", "Left parenthesis (( ) missing, to open condition" )
+
+		local Expression = self:Expression( Trace )
+
+		self:RequireToken( "rpa", "Right parenthesis ( )) missing, to close condition" )
+
+		if self:AcceptToken( "lcb" ) then
+			self:PushScope( )
+
+			local Sequence = self:Sequence( Trace, "rcb" )
+
+			self:PopScope( )
+
+			self:RequireToken( "rcb", "Right curly bracket (}) missing, to close if statement" )
+
+			return self:Compile_IF( Trace, Expression, Sequence, self:Statement_2( Trace ) )
+		end
+
+		self:PushScope( )
+
+		local Statement = self:Statement( Trace )
+
+		self:PopScope( )
+
+		return self:Compile_IF( Trace, Expression, Statement, self:Statement_2( Trace ) )
+	end
+
+	return self:Statement_3( Trace )
+end
+
+-- Stage 2: elseif, else statments
+function Compiler:Statement_2( Trace )
+	if self:AcceptToken( "eif" ) then
+		self:RequireToken( "lpa", "Left parenthesis (( ) missing, to open condition" )
+
+		local Expression = self:Expression( Trace )
+
+		self:RequireToken( "rpa", "Right parenthesis ( )) missing, to close condition" )
+
+		if self:AcceptToken( "lcb" ) then
+			self:PushScope( )
+
+			local Sequence = self:Sequence( Trace, "rcb" )
+
+			self:PopScope( )
+
+			self:RequireToken( "rcb", "Right curly bracket (}) missing, to close elseif statement" )
+
+			return self:Compile_ELSEIF( Trace, Expression, Sequence, self:Statement_2( Trace ) )
+		end
+
+		self:PushScope( )
+
+		local Statement = self:Statement( Trace )
+
+		self:PopScope( )
+
+		return self:Compile_ELSEIF( Trace, Expression, Statement, self:Statement_2( Trace ) )
+
+	elseif self:AcceptToken( "els" ) then
+
+		if self:AcceptToken( "lcb" ) then
+			self:PushScope( )
+
+			local Sequence = self:Sequence( Trace, "rcb" )
+
+			self:PopScope( )
+
+			self:RequireToken( "rcb", "Right curly bracket (}) missing, to close elseif statement" )
+
+			return self:Compile_ELSE( Trace, Expression, Sequence )
+		end
+
+		self:PushScope( )
+
+		local Statement = self:Statement( Trace )
+
+		self:PopScope( )
+
+		return self:Compile_ELSE( Trace, Expression, Statement )
+
+	end
+end

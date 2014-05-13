@@ -61,7 +61,7 @@ Compiler.RawTokens = {
 		{ ",", "com", "comma" },
 		{ "$", "dlt", "delta" },
 		{ "#", "len", "length" },
-		{ "~", "trg", "trigger" },
+		{ "~", "cng", "changed" },
 		{ "->", "wc", "connect" },
 		{ ".", "prd", "period" },
 
