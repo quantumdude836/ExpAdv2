@@ -89,136 +89,332 @@ function Compiler:AcceptSeperator( )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
-	@: Expressions
+	@: Expression Error
    --- */
 
 function Compiler:ExpressionError( Trace )
 	self:ExcludeWhiteSpace( "Further input required at end of code, incomplete expression" )
 
+	self:ExcludeToken( "add", "Arithmetic operator (+) must be preceded by equation or value" )
+	self:ExcludeToken( "sub", "Arithmetic operator (-) must be preceded by equation or value" )
+	self:ExcludeToken( "mul", "Arithmetic operator (*) must be preceded by equation or value" )
+	self:ExcludeToken( "div", "Arithmetic operator (/) must be preceded by equation or value" )
+	self:ExcludeToken( "mod", "Arithmetic operator (%) must be preceded by equation or value" )
+	self:ExcludeToken( "exp", "Arithmetic operator (^) must be preceded by equation or value" )
+
+	self:ExcludeToken( "ass", "Assignment operator (=) must be preceded by variable" )
+	self:ExcludeToken( "aadd", "Assignment operator (+=) must be preceded by variable" )
+	self:ExcludeToken( "asub", "Assignment operator (-=) must be preceded by variable" )
+	self:ExcludeToken( "amul", "Assignment operator (*=) must be preceded by variable" )
+	self:ExcludeToken( "adiv", "Assignment operator (/=) must be preceded by variable" )
+
+	self:ExcludeToken( "and", "Logical operator (&&) must be preceded by equation or value" )
+	self:ExcludeToken( "or", "Logical operator (||) must be preceded by equation or value" )
+
+	self:ExcludeToken( "eq", "Comparason operator (==) must be preceded by equation or value" )
+	self:ExcludeToken( "neq", "Comparason operator (!=) must be preceded by equation or value" )
+	self:ExcludeToken( "gth", "Comparason operator (>=) must be preceded by equation or value" )
+	self:ExcludeToken( "lth", "Comparason operator (<=) must be preceded by equation or value" )
+	self:ExcludeToken( "geq", "Comparason operator (>) must be preceded by equation or value" )
+	self:ExcludeToken( "leq", "Comparason operator (<) must be preceded by equation or value" )
+
+	self:ExcludeToken( "inc", "Increment operator (++) must be preceded by variable" )
+	self:ExcludeToken( "dec", "Decrement operator (--) must be preceded by variable" )
+
+	self:ExcludeToken( "rpa", "Right parenthesis ( )) without matching left parenthesis" )
+	self:ExcludeToken( "lcb", "Left curly bracket ({) must be part of an table/if/while/for-statement block" )
+	self:ExcludeToken( "rcb", "Right curly bracket (}) without matching left curly bracket" )
+	self:ExcludeToken( "lsb", "Left square bracket ([) must be preceded by variable" )
+	self:ExcludeToken( "rsb", "Right square bracket (]) without matching left square bracket" )
+
+	self:ExcludeToken( "com", "Comma (,) not expected here, missing an argument?" )
+	self:ExcludeToken( "prd", "Method operator (.) must not be preceded by white space" )
+	self:ExcludeToken( "col", "Tenarry operator (:) must be part of conditional expression (A ? B : C)." )
+
+	self:ExcludeToken( "if", "If keyword (if) must not appear inside an equation" )
+	self:ExcludeToken( "eif", "Else-if keyword (elseif) must be part of an if-statement" )
+	self:ExcludeToken( "els", "Else keyword (else) must be part of an if-statement" )
+
+	self:ExcludeToken( "swh", "Switch keyword (switch) must not appear inside an equation" )
+	self:ExcludeToken( "cse", "Case keyword (case) must be part of an switch-statement" )
+	self:ExcludeToken( "dft", "Default keyword (default) must be part of an switch-statement" )
+
+	self:ExcludeToken( "try", "Try keyword (try) must be part of a try-statement" )
+	self:ExcludeToken( "cth", "Catch keyword (catch) must be part of an try-statement" )
+	self:ExcludeToken( "fnl", "Final keyword (final) must be part of an try-statement" )
+
+	--self:ExcludeToken( "pred", "predictive operator (@) must not appear inside an equation" )
+
 	self:TokenError( "Unexpected symbol found (%s)", self.PrepTokenName )
 end
 
-function Compiler:GetValue( Trace )
-
-	-- Prefixs:
-		if self:AcceptToken( "add" ) then
-			self:ExcludeWhiteSpace( "Identity operator (+) must not be succeeded by whitespace" )
-			return self:GetValue( Trace )
-
-		elseif self:AcceptToken( "sub" ) then
-			self:ExcludeWhiteSpace( "Negation operator (-) must not be succeeded by whitespace" )
-			return self:Compile_NEG( Trace, self:Expression( Trace ) )
-		
-		elseif self:AcceptToken( "not" ) then
-			self:ExcludeWhiteSpace( "Logical not operator (!) must not be succeeded by whitespace" )
-			return self:Compile_NOT( Trace, self:Expression( Trace ) )
-			
-		elseif self:AcceptToken( "len" ) then
-			self:ExcludeWhiteSpace( "length operator (#) must not be succeeded by whitespace" )
-			return self:Compile_LEN( Trace, self:Expression( Trace ) )
-		end
-
-	-- Raw Values:
-		if self:AcceptToken( "tre" ) then
-			return self:Compile_BOOL( self:GetTokenTrace( Trace ), true )
-		elseif self:AcceptToken( "fls" ) then
-			return self:Compile_BOOL( self:GetTokenTrace( Trace ), false )
-		elseif self:AcceptToken( "num" ) then
-			return self:Compile_NUM( self:GetTokenTrace( Trace ), self.TokenData )
-		end
-
-	-- Varibles:
-end
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Expressions
+   --- */
 
 function Compiler:Expression( Trace )
-	MsgN( "Compiling Expression" )
-
-	local _ExprnRoot = self.ExpressionRoot
+	local _ExprRoot = self.ExpressionRoot
 	self.ExpressionRoot = self:GetTokenTrace( Trace )
 	
-		local Expression
-	
-	-- Casting Operator:
-		local CastCheck = self:ManualPattern( "%(()[a-z][A-Z0-9]+()%)" )
+	local Expression = self:Expression_1( Trace )
 
-		if CastCheck then
-			self:TokenError( "Casting is not yet supported :(" )
-		end
+	if !Expression then
+		self:ExpressionError( Trace )
+	end
 
-	-- First Expression / Grouped Expression:
-		if self:AcceptToken( "lpa" ) then
-			Expresion = self:Expression( Trace )
-			
-			self:RequireToken( "rpa", "Right parenthesis ( )) missing, to close grouped equation." )
-		else
-			Expresion = self:GetValue( Trace )
-		end
-		
-	-- Error, if no expression.
-		if !Expresion then return self:ExpressionError( Trace ) end
-
-	-- Check against vararg:
-		if Expresion.Return == "..." then
-			self.ExpressionRoot = _ExprnRoot
-
-			return Expresion
-		end
-
-	-- Operators
-		if self:AcceptToken( "or" ) then
-			Expresion = self:Compile_OR( Trace, Expresion, self:Expression( Trace ) )
-		elseif self:AcceptToken( "and" ) then
-			Expresion = self:Compile_AND( Trace, Expresion, self:Expression( Trace ) )
-		elseif self:AcceptToken( "bor" ) then
-			Expresion = self:Compile_BOR( Trace, Expresion, self:Expression( Trace ) )
-		elseif self:AcceptToken( "band" ) then
-			Expresion = self:Compile_BAND( Trace, Expresion, self:Expression( Trace ) )
-		elseif self:AcceptToken( "bxor" ) then
-			Expresion = self:Compile_BXOR( Trace, Expresion, self:Expression( Trace ) )
-		elseif self:AcceptToken( "eq" ) then
-			Expresion = self:Compile_EQ( Trace, Expresion, self:Expression( Trace ) )
-		elseif self:AcceptToken( "neg" ) then
-			Expresion = self:Compile_NEG( Trace, Expresion, self:Expression( Trace ) )
-		elseif self:AcceptToken( "gth" ) then
-			Expresion = self:Compile_GTH( Trace, Expresion, self:Expression( Trace ) )
-		elseif self:AcceptToken( "lth" ) then
-			Expresion = self:Compile_LTH( Trace, Expresion, self:Expression( Trace ) )
-		elseif self:AcceptToken( "geq" ) then
-			Expresion = self:Compile_GEQ( Trace, Expresion, self:Expression( Trace ) )
-		elseif self:AcceptToken( "leq" ) then
-			Expresion = self:Compile_LEQ( Trace, Expresion, self:Expression( Trace ) )
-		elseif self:AcceptToken( "bshr" ) then
-			Expresion = self:Compile_BSHR( Trace, Expresion, self:Expression( Trace ) )
-		elseif self:AcceptToken( "bshl" ) then
-			Expresion = self:Compile_BSHL( Trace, Expresion, self:Expression( Trace ) )
-		elseif self:AcceptToken( "add" ) then
-			Expresion = self:Compile_ADD( Trace, Expresion, self:Expression( Trace ) )
-		elseif self:AcceptToken( "sub" ) then
-			Expresion = self:Compile_SUB( Trace, Expresion, self:Expression( Trace ) )
-		elseif self:AcceptToken( "mul" ) then
-			Expresion = self:Compile_MUL( Trace, Expresion, self:Expression( Trace ) )
-		elseif self:AcceptToken( "div" ) then
-			Expresion = self:Compile_DIV( Trace, Expresion, self:Expression( Trace ) )
-		elseif self:AcceptToken( "mod" ) then
-			Expresion = self:Compile_MOD( Trace, Expresion, self:Expression( Trace ) )
-		elseif self:AcceptToken( "exp" ) then
-			Expresion = self:Compile_EXP( Trace, Expresion, self:Expression( Trace ) )
-		elseif self:AcceptToken( "qsm" ) then
-			local Expresion2 = self:Expression( Trace ) -- Ha Ha, Expression 2 :D
-
-			self:RequireToken( "col", "colon (:) expected for tinary operator." ) -- TODO: This error message is shit.
-
-			Expresion = self:Compile_TIN( Trace, Expresion, Expresion2, self:Expression( Trace ) )
-		end
-
-	-- Error, if no expression.
-		if !Expresion then return self:ExpressionError( Trace ) end
-
-	-- TODO: Generate calls and indexing.
-
-
-	-- With that we have a complete expression.
-		self.ExpressionRoot = _ExprnRoot
-
-		return Expresion
+	self.ExpressionRoot = _ExprRoot
+	return Expression
 end
+
+-- Stage 1: Grouped Equation, In/Dec
+function Compiler:Expression_1( Trace )
+	if self:AcceptToken( "lpa" ) then
+		local Expression = self:Expression_1( Trace )
+
+		self:RequireToken( "rpa", "Right parenthesis ( )) missing, to close grouped equation." )
+
+		return Expression
+	end
+
+	return self:Expression_2( Trace )
+end
+
+-- Stage 2: Unary operations, sizeof, casting
+function Compiler:Expression_2( Trace )
+
+	if self:AcceptToken( "add" ) then
+		self:ExcludeWhiteSpace( "Identity operator (+) must not be succeeded by whitespace" )
+		return self:Expression_1( Trace )
+
+	elseif self:AcceptToken( "sub" ) then
+		self:ExcludeWhiteSpace( "Negation operator (-) must not be succeeded by whitespace" )
+		return self:Compile_NEG( Trace, self:Expression_1( Trace ) )
+	
+	elseif self:AcceptToken( "not" ) then
+		self:ExcludeWhiteSpace( "Logical not operator (!) must not be succeeded by whitespace" )
+		return self:Compile_NOT( Trace, self:Expression_1( Trace ) )
+		
+	elseif self:AcceptToken( "len" ) then
+		self:ExcludeWhiteSpace( "length operator (#) must not be succeeded by whitespace" )
+		return self:Compile_LEN( Trace, self:Expression_1( Trace ) )
+	end
+
+	-- TODO: Casting:
+	-- local CastCheck = self:ManualPattern( "%(()[a-z][A-Z0-9]+()%)" )
+
+	-- In C-style order of operatorions, Inrement and Decrement should be here.
+	
+	return self:Expression_3( Trace )
+end
+
+-- Stage 3: Multiplication, division, modulo
+function Compiler:Expression_3( Trace )
+	local Expression = self:Expression_4( Trace )
+
+	while self:CheckToken( "mul", "div", "mod", "exp" ) do
+		if self:AcceptToken( "mul" ) then
+			Expression = self:Compile_MUL( Trace, Expression, self:Expression_4( Trace ) )
+		elseif self:AcceptToken( "div" ) then
+			Expression = self:Compile_DIV( Trace, Expression, self:Expression_4( Trace ) )
+		elseif self:AcceptToken( "mod" ) then
+			Expression = self:Compile_MOD( Trace, Expression, self:Expression_4( Trace ) )
+		elseif self:AcceptToken( "exp" ) then
+			Expression = self:Compile_EXP( Trace, Expression, self:Expression_4( Trace ) )
+		end
+	end
+
+	return Expression
+end
+
+
+-- Stage 4: Addition and subtraction
+function Compiler:Expression_4( Trace )
+	local Expression = self:Expression_5( Trace )
+
+	while self:CheckToken( "add", "sub" ) do
+		if self:AcceptToken( "add" ) then
+			Expression = self:Compile_ADD( Trace, Expression, self:Expression_5( Trace ) )
+		elseif self:AcceptToken( "sub" ) then
+			Expression = self:Compile_SUB( Trace, Expression, self:Expression_5( Trace ) )
+		end
+	end
+
+	return Expression
+end
+
+-- Stage 5: Bitwise shift left and right
+function Compiler:Expression_5( Trace )
+	local Expression = self:Expression_6( Trace )
+
+	while self:CheckToken( "bshl", "bshr" ) do
+		if self:AcceptToken( "bshl" ) then
+			Expression = self:Compile_BSHL( Trace, Expression, self:Expression_6( Trace ) )
+		elseif self:AcceptToken( "bshr" ) then
+			Expression = self:Compile_BSHR( Trace, Expression, self:Expression_6( Trace ) )
+		end
+	end
+
+	return Expression
+end
+
+-- Stage 6: Comparisons Greater and Less
+function Compiler:Expression_6( Trace )
+	local Expression = self:Expression_7( Trace )
+
+	while self:CheckToken( "lth", "leq", "gth", "geq" ) do
+		if self:AcceptToken( "lth" ) then
+			Expression = self:Compile_LTH( Trace, Expression, self:Expression_7( Trace ) )
+		elseif self:AcceptToken( "leq" ) then
+			Expression = self:Compile_LEQ( Trace, Expression, self:Expression_7( Trace ) )
+		elseif self:AcceptToken( "gth" ) then
+			Expression = self:Compile_GTH( Trace, Expression, self:Expression_7( Trace ) )
+		elseif self:AcceptToken( "geq" ) then
+			Expression = self:Compile_GEQ( Trace, Expression, self:Expression_7( Trace ) )
+		end
+	end
+
+	return Expression
+end
+
+-- Stage 7: Comparisons equal and not equal.
+function Compiler:Expression_7( Trace )
+	local Expression = self:Expression_8( Trace )
+
+	while self:CheckToken( "eq", "neg" ) do
+		if self:AcceptToken( "eq" ) then
+			Expression = self:Compile_EQ( Trace, Expression, self:Expression_8( Trace ) )
+		elseif self:AcceptToken( "neg" ) then
+			Expression = self:Compile_NEG( Trace, Expression, self:Expression_8( Trace ) )
+		end
+	end
+
+	return Expression
+end
+
+-- Stage 8: bitwise and
+function Compiler:Expression_8( Trace )
+	local Expression = self:Expression_9( Trace )
+
+	while self:AcceptToken( "band" ) do
+		Expression = self:Compile_BAND( Trace, Expression, self:Expression_9( Trace ) )
+	end
+
+	return Expression
+end
+
+-- Stage 9: bitwise exclusive or
+function Compiler:Expression_9( Trace )
+	local Expression = self:Expression_10( Trace )
+
+	while self:AcceptToken( "bor" ) do
+		Expression = self:Compile_BOR( Trace, Expression, self:Expression_10( Trace ) )
+	end
+
+	return Expression
+end
+
+-- Stage 10: bitwise or
+function Compiler:Expression_10( Trace )
+	local Expression = self:Expression_11( Trace )
+
+	while self:AcceptToken( "bxor" ) do
+		Expression = self:Compile_BXOR( Trace, Expression, self:Expression_11( Trace ) )
+	end
+
+	return Expression
+end
+
+
+-- Stage 11: logical and
+function Compiler:Expression_11( Trace )
+	local Expression = self:Expression_12( Trace )
+
+	while self:AcceptToken( "and" ) do
+		Expression = self:Compile_AND( Trace, Expression, self:Expression_12( Trace ) )
+	end
+
+	return Expression
+end
+
+-- Stage 12: logical or
+function Compiler:Expression_12( Trace )
+	local Expression = self:Expression_13( Trace )
+
+	while self:AcceptToken( "or" ) do
+		Expression = self:Compile_OR( Trace, Expression, self:Expression_13( Trace ) )
+	end
+
+	return Expression
+end
+
+
+-- Stage 13: Ternary
+function Compiler:Expression_12( Trace )
+	local Expression = self:Expression_Value( )
+
+	while self:AcceptToken( "qsm" ) do
+		local Expression2 = self:Expression_1( Trace ) -- Ha Ha, Expression 2 :D
+
+		self:RequireToken( "col", "colon (:) expected for tinary operator." ) -- TODO: This error message is shit.
+
+		Expression = self:Compile_TEN( Trace, Expression, Expression2, self:Expression_1( Trace ) )
+	end
+
+	return Expression
+end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Values
+   --- */
+
+-- Stage 13: Raw Values:
+function Compiler:Expression_Value( Trace )
+
+	if self:AcceptToken( "tre" ) then
+		return self:Compile_BOOL( self:GetTokenTrace( Trace ), true )
+	elseif self:AcceptToken( "fls" ) then
+		return self:Compile_BOOL( self:GetTokenTrace( Trace ), false )
+	elseif self:AcceptToken( "num" ) then
+		return self:Compile_NUM( self:GetTokenTrace( Trace ), self.TokenData )
+	elseif self:AcceptToken( "str" ) then
+		return self:Compile_STR( self:GetTokenTrace( Trace ), self.TokenData )
+	end
+
+	return self:Expression_Variable( Trace )
+end
+
+-- Stage 14: Increment, Decrement and Variables.
+function Compiler:Expression_Variable( Trace )
+	if self:AcceptToken( "inc" ) then
+		self:RequireToken( "var", "Assigment operator (increment), must be preceeded by variable" )
+		return self:Compile_INC( Trace, false, self.TokenData )
+	
+	elseif self:AcceptToken( "dec" ) then
+		self:RequireToken( "var", "Assigment operator (decrement), must be preceeded by variable" )
+		return self:Compile_DEC( Trace, false, self.TokenData )
+	
+	elseif self:AcceptToken( "var" ) then
+
+		local Variable = self.TokenData
+
+		if self:AcceptToken( "inc" ) then
+			return self:Compile_INC( Trace, true, Variable )
+		elseif self:AcceptToken( "dec" ) then
+			return self:Compile_DEC( Trace, true, Variable )
+		end
+
+		return self:Compile_VAR( Trace, Variable )
+	end
+end
+
+-- Stage 15: Indexing, Calling
+function Compiler:Expression_Postfix( Trace, Expression )
+
+end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Statments
+   --- */
+
+-- Stage 1: If Statments
+

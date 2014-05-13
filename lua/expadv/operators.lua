@@ -457,7 +457,7 @@ function EXPADV.BuildLuaOperator( Operator )
 			end
 
 			-- Lets see if we need to localize the inline
-			if Uses >= 2 and !string.StartWith( InputInline, "Context.Dinfinitions" ) then
+			if Uses >= 2 and !Input.IsRaw and !string.StartWith( InputInline, "Context.Dinfinitions" ) then
 				local Local = Compiler:NextLocal( )
 				InputPrepare = string.format( "%s\nContext.Dinfinitions[%s] = %s", InputPrepare, Local, InputInline )
 				InputInline = string.format( "Context.Dinfinitions[%s]", Local )

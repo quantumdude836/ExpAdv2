@@ -5,11 +5,15 @@ local Compiler = EXPADV.Compiler
    --- */
 
 function Compiler:Compile_BOOL( Trace, Bool )
-	return { Trace = Trace, Inline = Bool and "true" or "false", Return = "b", FLAG = EXPADV_INLINE }
+	return { Trace = Trace, Inline = Bool and "true" or "false", Return = "b", FLAG = EXPADV_INLINE, IsRaw = true }
 end
 
 function Compiler:Compile_NUM( Trace, Int )
-	return { Trace = Trace, Inline = tostring( Int ), Return = "n", FLAG = EXPADV_INLINE }
+	return { Trace = Trace, Inline = tostring( Int ), Return = "n", FLAG = EXPADV_INLINE, IsRaw = true }
+end
+
+function Compiler:Compile_STR( Trace, String )
+	return -- TODO:
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -168,4 +172,56 @@ function Compiler:Compile_EXP( Trace, Expresion1, Expression2 )
 	if !Operator then self:TraceError( Trace, "Arithmatic operator (exponent) does not support '%s ^ %s'", self:NiceClass( Expresion1.Return, Expression2.Return ) ) end
 
 	return Operator.Compile( self, Trace, Expresion1, Expression2 )
+end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Expression Variables
+   --- */
+
+-- Varible operators, state their first peramater is there type, The first paramater will actually always be an int (memory refrence).
+function Compiler:Compile_INC( Trace, bVarFirst, Variable )
+
+	local MemRef, MemScope = self:FindCell( Trace, Variable, true )
+
+	local Class = self.Cells[ MemRef ].Return
+
+	local Operator = self:LookUpOperator( bVarFirst and "i++" or "++i" , Class )
+
+	if !Operator then
+		if bVarFirst then
+			self:TraceError( Trace, "Assigment operator (increment) does not support '%s++'", self:NiceClass( Class ) )
+		else
+			self:TraceError( Trace, "Assigment operator (increment) does not support '++%s'", self:NiceClass( Class ) )
+		end
+	end
+
+	return Operator.Compile( self, Trace, MemRef )
+end
+
+function Compiler:Compile_DEC( Trace, bVarFirst, Variable )
+
+	local MemRef, MemScope = self:FindCell( Trace, Variable, true )
+
+	local Class = self.Cells[ MemRef ].Return
+
+	local Operator = self:LookUpOperator( bVarFirst and "i--" or "--i" , Class )
+
+	if !Operator then
+		if bVarFirst then
+			self:TraceError( Trace, "Assigment operator (decrement) does not support '%s--'", self:NiceClass( Class ) )
+		else
+			self:TraceError( Trace, "Assigment operator (decrement) does not support '--%s'", self:NiceClass( Class ) )
+		end
+	end
+
+	return Operator.Compile( self, Trace, MemRef )
+end
+
+function Compiler:Compile_VAR( Trace, Variable )
+
+	local MemRef, MemScope = self:FindCell( Trace, Variable, true )
+
+	local Class = self.Cells[ MemRef ].Return
+
+	return { Trace = Trace, Inline = string.format( "Context.Memory[%i]", MemRef ), Return = Class, FLAG = EXPADV_INLINE, IsRaw = true, Variable = Variable }
 end

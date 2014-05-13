@@ -284,12 +284,16 @@ function Compiler:TestCell( Trace, MemRef, Class, Variable )
 	end
 end
 
-function Compiler:FindCell( Trace, Variable )
+function Compiler:FindCell( Trace, Variable, bError )
 	for Scope = self.ScopeID, 0, -1 do
 		local MemRef = self.Scopes[ Scope ][ Variable ]
 
 		if MemRef then return MemRef, Scope end
 	end
+
+	if !bError then return end
+
+	self:TraceError( Trace, "Variable %s does not exist.", Variable )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -310,7 +314,7 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier )
 
 		self.Scope[Variable] = MemRef
 
-		self.Cells[ MemRef ] = { Memory = MemRef, Scope = self.ScopeID, ClassName = Class, ClassObj = ClassObj, Modifier = nil }
+		self.Cells[ MemRef ] = { Memory = MemRef, Scope = self.ScopeID, Return = ClassObj.Short, ClassObj = ClassObj, Modifier = nil }
 
 		if self.MemoryDeph > 0 then
 			self.FreshMemory[self.MemoryDeph][MemRef] = MemRef
@@ -330,7 +334,7 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier )
 
 		self.Scope[Variable] = MemRef
 
-		self.Cells[ MemRef ] = { Memory = MemRef, Scope = self.ScopeID, ClassName = Class, ClassObj = ClassObj, Modifier = "static" }
+		self.Cells[ MemRef ] = { Memory = MemRef, Scope = self.ScopeID, Return = ClassObj.Short, ClassObj = ClassObj, Modifier = "static" }
 
 		return self.Cells[ MemRef ]
 	end
@@ -343,7 +347,7 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier )
 		else
 			MemRef = self:NextMemoryRef( )
 
-			self.Global[ MemRef ] = { Memory = MemRef, Scope = 0, ClassName = Class, ClassObj = ClassObj, Modifier = "global" }
+			self.Global[ MemRef ] = { Memory = MemRef, Scope = 0, Return = ClassObj.Short, ClassObj = ClassObj, Modifier = "global" }
 		end
 
 		if self.Scope[ Variable ] then
@@ -374,7 +378,7 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier )
 			else
 				MemRef = self:NextMemoryRef( )
 
-				self.InPorts[ MemRef ] = { Memory = MemRef, Scope = 0, ClassName = Class, ClassObj = ClassObj, Modifier = "input" }
+				self.InPorts[ MemRef ] = { Memory = MemRef, Scope = 0, Return = ClassObj.Short, ClassObj = ClassObj, Modifier = "input" }
 			end
 
 			if self.Scope[ Variable ] then
@@ -398,7 +402,7 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier )
 			else
 				MemRef = self:NextMemoryRef( )
 
-				self.OutPorts[ MemRef ] = { Memory = MemRef, Scope = 0, ClassName = Class, ClassObj = ClassObj, Modifier = "output" }
+				self.OutPorts[ MemRef ] = { Memory = MemRef, Scope = 0, Return = ClassObj.Short, ClassObj = ClassObj, Modifier = "output" }
 			end
 
 			if self.Scope[ Variable ] then
@@ -532,7 +536,7 @@ end
    --- */
 
 function EXPADV.Example( Player )
-	local Expression = "2 % 2"
+	local Expression = "5*5*5*5"
 	local _, Instance = EXPADV.Compile( Expression, { }, CLIENT,
 		
 		function( Error ) -- OnError
@@ -545,7 +549,7 @@ function EXPADV.Example( Player )
 			
 			local CompiledLua = CompileString( [[return function( Context )
 				]] .. (Instruction.Prepare or "") .. [[
-				print( "Daddy, the answer is", ]] .. (Instruction.Inline or "nil") .. [[)
+				print( "Daddy, the answer is ", ]] .. (Instruction.Inline or "nil") .. [[)
 			end]], "EXPADV2", false )
 
 			if isstring( CompiledLua ) then
@@ -557,6 +561,9 @@ function EXPADV.Example( Player )
 			local Context = EXPADV.BuildNewContext( Player, Player )
 			
 			Execute( Context )
+
+			MsgN( "Instruction: " )
+			PrintTable( Instruction )
 		end )
 
 	print( "Compiling: ", Instance )
