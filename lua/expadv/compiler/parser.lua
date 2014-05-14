@@ -385,7 +385,8 @@ function Compiler:Expression_Value( Trace )
 end
 
 -- Stage 14: Increment, Decrement and Variables.
-function Compiler:Expression_Variable( Trace )
+-- This function, also can be used for expression bassed statments.
+function Compiler:Expression_Variable( Trace, bIsStatement )
 	if self:AcceptToken( "inc" ) then
 		self:RequireToken( "var", "Assigment operator (increment), must be preceeded by variable" )
 		
@@ -396,12 +397,12 @@ function Compiler:Expression_Variable( Trace )
 		
 		return self:Compile_DEC( Trace, false, self.TokenData )
 	
-	elseif self:AcceptToken( "cng" ) then
+	elseif self:AcceptToken( "cng" ) and !bIsStatement then
 		self:RequireToken( "var", "Memory operator (changed), must be preceeded by variable" )
 		
 		return self:Compile_CHANGED( Trace, self.TokenData )
 
-	elseif self:AcceptToken( "dlt" ) then
+	elseif self:AcceptToken( "dlt" ) and !bIsStatement then
 		self:RequireToken( "var", "Memory operator (delta), must be preceeded by variable" )
 		
 		return self:Compile_DELTA( Trace, self.TokenData )
@@ -414,13 +415,74 @@ function Compiler:Expression_Variable( Trace )
 			return self:Compile_INC( Trace, true, Variable )
 		elseif self:AcceptToken( "dec" ) then
 			return self:Compile_DEC( Trace, true, Variable )
+		elseif !self:CheckToken( "lpa" ) and !bIsStatement  then
+			return self:Compile_VAR( Trace, Variable )
 		end
 
-		return self:Compile_VAR( Trace, Variable )
+		self:PrevToken( )
+	end
+
+	if bIsStatement then return end -- This is a statment.
+
+	return self:Expression_Function( Trace )
+end
+
+-- Stage 16: Functions
+function Compiler:Expression_Function( Trace  )
+	local Trace = self:GetTokenTrace( Trace )
+
+	if self:AcceptToken( "var" ) then
+
+		local Variable = self.TokenData
+
+		-- This error should never happen, We only call this form one place.
+		self:RequireToken( "lpa", "Unexpected error, can not compile expression." )
+
+		local Inputs = { }
+
+		if !self:CheckToken( "rpa" ) then
+			
+			Inputs[1] = self:Expression( Trace )
+
+			while self:AcceptToken( "com" ) do
+
+				Inputs[#Inputs + 1] = self:Expression( Trace )
+
+			end
+		end
+
+		self:RequireToken( "rpa", "Right parenthesis ( )), expected to close function perameters" )
+
+		return self:Compile_FUNC( Trace, Variable, Inputs )
+	end
+
+	if self:AcceptToken( "func" ) then
+
+		self:RequireToken( "lpa", "Left parenthesis (( ), expected to after 'function'" )
+
+		self:PushScope( )
+
+		local Perams, UseVarg = self:Util_Perams( Trace )
+
+		self:RequireToken( "rpa", "Right parenthesis ( )), expected to close function perameters" )
+
+		self:RequireToken( "lcb", "Left curly bracket ({) missing, to begin function body" )
+
+		self:PushLambdaDeph( )
+
+		local Sequence = self:Sequence( Trace, "rcb" )
+
+		self:PopLambdaDeph( )
+
+		self:PopScope( )
+
+		self:RequireToken( "rcb", "Right curly bracket (}) missing, to close function body" )
+
+		return self:Compile_LAMBDA( Trace, Perams, UseVarg, Sequence )
 	end
 end
 
--- Stage 15: Indexing, Calling
+-- Stage 16: Indexing, Calling
 function Compiler:Expression_Postfix( Trace, Expression )
 
 	while self:CheckToken( "prd", "lsb", "lpa" ) do
@@ -551,6 +613,7 @@ function Compiler:Statement_1( Trace )
 		self:RequireToken( "rpa", "Right parenthesis ( )) missing, to close condition" )
 
 		if self:AcceptToken( "lcb" ) then
+
 			self:PushScope( )
 
 			local Sequence = self:Sequence( Trace, "rcb" )
@@ -624,6 +687,205 @@ function Compiler:Statement_2( Trace )
 		self:PopScope( )
 
 		return self:Compile_ELSE( Trace, Expression, Statement )
-
 	end
+
+	return self:Statement_99( Trace )
+end
+
+
+-- Stage 99: Variable Assigments, This should not be stage 99!
+function Compiler:Statement_99( Trace )
+
+	if self:CheckToken( "var", "stc", "glo", "in", "out" ) then
+		local TokenPos = self.TokenPos
+
+		local Modifier
+
+		if self:AcceptToken( "stc" ) then Modifier == "static"
+		elseif self:AcceptToken( "glo" ) then Modifier == "global"
+		elseif self:AcceptToken( "in" ) then Modifier == "input"
+		elseif self:AcceptToken( "out" ) then Modifier == "output"
+		end
+
+		if Modifier then
+			self:RequireToken( "var", "Variable decleration expected after modifier %q", Modifier )
+			self:PrevToken( ) -- Its just easier!
+		end
+
+		local DefineClass
+
+		if self:CheckToken( "var" ) then
+			DefineClass = self:GetClass( Trace, self.TokenData )
+			self:NextToken( )
+		else
+
+		if Modifier and !DefineClass then
+			self:TokenError( "Variable expected after class name" )
+		end
+
+		local Variables = { self.TokenData }
+
+		while self:AcceptToken( "com" ) do
+			self:RequireToken( "var", "Variable expected comma (,)" )
+			Variables[#Variables + 1] = self.TokenData
+		end
+
+		local Assigment
+		local Expressions = { }
+
+		if self:AcceptToken( "ass" ) then
+			self:ExcludeWhiteSpace( "Assigment operator (=), must not be preceeded by whitespace." )
+			Assigment = "ass"
+
+		elseif !DefineClass then
+
+			if self:AcceptToken( "add" ) then
+				self:ExcludeWhiteSpace( "Assigment operator (+=), must not be preceeded by whitespace." )
+				Assigment = "add"
+			elseif self:AcceptToken( "asub" ) then
+				self:ExcludeWhiteSpace( "Assigment operator (-=), must not be preceeded by whitespace." )
+				Assigment = "sub"
+			elseif self:AcceptToken( "adiv" ) then
+				self:ExcludeWhiteSpace( "Assigment operator (/=), must not be preceeded by whitespace." )
+				Assigment = "div"
+			elseif self:AcceptToken( "amul" ) then
+				self:ExcludeWhiteSpace( "Assigment operator (*=), must not be preceeded by whitespace." )
+				Assigment = "mul"
+			else
+				self:TokenError( "Variable can not be preceeded by whitespace.")
+			end
+
+		end
+
+		if Assigment then
+			for I = 1, #Variables do
+				Expressions[#Expressions + 1] = self:Expression( Trace )
+
+				if !self:AcceptToken( "com" ) then break end
+			end
+		end
+
+
+		local Sequence = { }
+
+		if !Assigment then -- Default values!
+			local Expression = self:Compile_DEFAULT( Trace, DefineClass.Short )
+			-- This instruction, need to be edited to it doesn't duplicate.
+
+			for I = 1, #Variables do
+				Sequence[I] = self:Compile_ASS( Trace, Variables[I], Expression )
+			end
+
+			return self:Compile_SEQ( Trace, Sequence )
+		
+		elseif Assigment == "ass" then -- Assigment
+			local End = 1
+
+			for I = 1, #Expressions do
+				End = I
+				Sequence[I] = self:Compile_ASS( Trace, Variables[I], Expressions[I] )
+			end
+
+			if End < #Variables then
+				local Expression = self:Compile_DEFAULT( Trace, DefineClass.Short )
+				-- This instruction, need to be edited to it doesn't duplicate.
+				
+				for I = End, #Variables do
+					Sequence[I] = self:Compile_ASS( Trace, Variables[I], Expression )
+				end
+			end
+
+			return self:Compile_SEQ( Trace, Sequence )
+
+		elseif Assigment == "add" then -- Addition Assigment
+			for I = 1, #Variables do
+				local Instruction = Expressions[I]
+				if !Instruction then self:TraceError( "Variable %q is not assigned" ) end
+
+				Sequence[I] = self:Compile_ASS( Trace, Variables[I], self:Compile_ADD( Trace, self:Compile_VAR( Trace, Variables[I] ), Instruction ) )
+			end
+
+			return self:Compile_SEQ( Trace, Sequence )
+		
+		elseif Assigment == "sub" then -- Subtract Assigment
+			for I = 1, #Variables do
+				local Instruction = Expressions[I]
+				if !Instruction then self:TraceError( "Variable %q is not assigned" ) end
+
+				Sequence[I] = self:Compile_ASS( Trace, Variables[I], self:Compile_SUB( Trace, self:Compile_VAR( Trace, Variables[I] ), Instruction ) )
+			end
+
+			return self:Compile_SEQ( Trace, Sequence )
+		
+		elseif Assigment == "div" then -- Divishion Assigment
+			for I = 1, #Variables do
+				local Instruction = Expressions[I]
+				if !Instruction then self:TraceError( "Variable %q is not assigned" ) end
+
+				Sequence[I] = self:Compile_ASS( Trace, Variables[I], self:Compile_DIV( Trace, self:Compile_VAR( Trace, Variables[I] ), Instruction ) )
+			end
+
+			return self:Compile_SEQ( Trace, Sequence )
+		
+		elseif Assigment == "mul" then -- Multiplication Assigment
+			for I = 1, #Variables do
+				local Instruction = Expressions[I]
+				if !Instruction then self:TraceError( "Variable %q is not assigned" ) end
+
+				Sequence[I] = self:Compile_ASS( Trace, Variables[I], self:Compile_MUL( Trace, self:Compile_VAR( Trace, Variables[I] ), Instruction ) )
+			end
+
+			return self:Compile_SEQ( Trace, Sequence )
+		
+		end
+
+		-- Ok, so we didn't manage to do anything.
+		self.TokenPos = TokenPos - 1
+		self:NextToken( ) -- Go back to where we where.
+	end
+
+	return self:Expression_Variable( Trace, true )
+end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Utility
+   --- */
+
+function Compiler:Util_Perams( Trace )
+	local Params, Used, UseVarg = { }, { }, false
+	
+	if self:CheckToken( "var", "func" ) then
+
+		while true do
+
+			self:ExcludeToken( "com", "Parameter separator (,) must not appear here" )
+			
+			self:RequireToken2( "var", "func", "Variable type expected for function parameter." )
+			
+			local Class = self:GetClass( Trace, self.TokenData )
+			
+			self:RequireToken( "var", "Variable expected for parameter." )
+			
+			if Used[ self.TokenData ] then
+				self:TokenError( "Parameter %s may not appear twice", self.TokenData )
+			end
+
+			local MemRef, Scope = CreateVariable( Trace, self.TokenData, Class.Short )
+
+			Params[#Params + 1] = { self.TokenData, Class.Short, MemRef }
+				
+			Used[ self.TokenData ] = true
+			
+			if !self:AcceptToken( "com" ) then break end
+
+			self:ExcludeVarArg( )
+		end
+	end
+	
+	if self:AcceptToken( "varg" ) then
+		self:ExcludeToken( ",", "vararg (...) must be last parameter." )	
+		UseVarg = true
+	end
+	
+	return Params, UseVarg
 end
