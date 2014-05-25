@@ -225,3 +225,69 @@ function Compiler:Compile_VAR( Trace, Variable )
 
 	return { Trace = Trace, Inline = string.format( "Context.Memory[%i]", MemRef ), Return = Class, FLAG = EXPADV_INLINE, IsRaw = true, Variable = Variable }
 end
+
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Expression Variables
+   --- */
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Sequences
+   --- */
+
+local Prep_Words = {
+	["return"] = true,
+	["continue"] = true,
+	["break"] = true,
+	["local"] = true,
+	["while"] = true,
+	["for"] = true,
+	["end"] = true,
+	["if"] = true,
+	["do"] = true
+}
+
+local function ValidatePreperation( Preperation )
+	-- For now this will only be used to check if inline can be validated.
+
+	Line = string.Trim( Preperation )
+
+	local _, _, Word = string.find( Line, "^([a-zA-Z_][a-zA-Z0-9_]*)" )
+
+	return Valid_Words[ Word ] or ( Word and string.find( Line, "[=%(]" ) )
+end
+
+function Compiler:Compile_SEQ( Trace, Instructions )
+	local Sequence = { }
+
+	for I = 1, #Instructions do
+		local Instruction = Instructions[I]
+
+		local LastLine = Sequence[#Sequence]
+		if LastLine == "break" or LastLine == "continue" or LastLine == "return" then
+			continue -- It wont validate otherwise.
+		end
+
+		if !istable( Instruction ) and ValidatePreperation( tostring( Instruction ) ) then
+			Sequence[#Sequence + 1] = Instruction
+			continue
+		end
+
+		if Instruction.FLAG ~= EXPADV_FUNCTION then
+			Sequence[#Sequence + 1] = self:VMToLua( Instruction )
+			continue
+		end
+
+		if Instruction.FLAG == EXPADV_PREPARE or Instruction.FLAG == EXPADV_INLINEPREPARE then
+			Sequence[#Sequence + 1] = Instruction.Prepare
+		end
+
+		if Instruction.FLAG == EXPADV_INLINE or Instruction.FLAG == EXPADV_INLINEPREPARE then
+			if ValidatePreperation( Instruction.Inline ) then
+				Sequence[#Sequence + 1] = Instruction.Inline
+			end -- Somtimes the Inline will actually be required preparable code.
+		end
+	end
+
+	return { Trace = Trace, Return = "", Prepare = table.concat( Sequence, "\n" ),FLAG = EXPADV_PREPARE, IsRaw = true }
+end

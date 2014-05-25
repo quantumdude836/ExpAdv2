@@ -112,8 +112,6 @@ end
 
 hook.Add( "Initialize", "lemon.babysteps", function( )
 	EXPADV.LoadCore( )
-
-	EXPADV.Example( player.GetByID( 1 ) )
 end )
 
 

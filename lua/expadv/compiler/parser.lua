@@ -458,7 +458,7 @@ function Compiler:Expression_Function( Trace  )
 
 	if self:AcceptToken( "func" ) then
 
-		self:RequireToken( "lpa", "Left parenthesis (( ), expected to after 'function'" )
+		self:RequireToken( "lpa", "Left parenthesis (( ), expected after 'function'" )
 
 		self:PushScope( )
 
@@ -634,7 +634,7 @@ function Compiler:Statement_1( Trace )
 		return self:Compile_IF( Trace, Expression, Statement, self:Statement_2( Trace ) )
 	end
 
-	return self:Statement_3( Trace )
+	return self:Statement_99( Trace )
 end
 
 -- Stage 2: elseif, else statments
@@ -692,42 +692,52 @@ function Compiler:Statement_2( Trace )
 	return self:Statement_99( Trace )
 end
 
+-- Stage 3: 
+
 
 -- Stage 99: Variable Assigments, This should not be stage 99!
 function Compiler:Statement_99( Trace )
+	local Trace = self:GetTokenTrace( Trace )
 
-	if self:CheckToken( "var", "stc", "glo", "in", "out" ) then
-		local TokenPos = self.TokenPos
+	local Modifier
 
-		local Modifier
+	if self:AcceptToken( "stc" ) then Modifier = "static"
+	elseif self:AcceptToken( "glo" ) then Modifier = "global"
+	elseif self:AcceptToken( "in" ) then Modifier = "input"
+	elseif self:AcceptToken( "out" ) then Modifier = "output"
+	end
 
-		if self:AcceptToken( "stc" ) then Modifier == "static"
-		elseif self:AcceptToken( "glo" ) then Modifier == "global"
-		elseif self:AcceptToken( "in" ) then Modifier == "input"
-		elseif self:AcceptToken( "out" ) then Modifier == "output"
+	if Modifier and !self:CheckToken( "var", "func" ) then
+		self:PrevToken( )
+		return self:Expression_Variable( Trace, true )
+	end -- If modifier is used incorectly, we move on.
+
+	-----------------------------------------------------------------------
+		-- Variable assigments / Arithmatic assigments
+
+	if self:AcceptToken( "var" ) then
+
+		if !self:CheckToken( "var", "ass", "aadd", "asub", "advi", "amul" ) then
+			self:PrevToken( )
+			return self:Expression_Variable( Trace, true )
 		end
 
-		if Modifier then
-			self:RequireToken( "var", "Variable decleration expected after modifier %q", Modifier )
-			self:PrevToken( ) -- Its just easier!
+		local Variable, Class = self.TokenData
+
+		if self:AcceptToken( "var" ) then
+			Class = self:GetClass( Trace, Variable )
+			Variable = self.TokenData
 		end
 
-		local DefineClass
-
-		if self:CheckToken( "var" ) then
-			DefineClass = self:GetClass( Trace, self.TokenData )
-			self:NextToken( )
-		else
-
-		if Modifier and !DefineClass then
-			self:TokenError( "Variable expected after class name" )
-		end
-
-		local Variables = { self.TokenData }
+		local Variables = { Variable }
 
 		while self:AcceptToken( "com" ) do
-			self:RequireToken( "var", "Variable expected comma (,)" )
+			self:RequireToken( "var", "Variable expected after comma (,)" )
 			Variables[#Variables + 1] = self.TokenData
+		end
+
+		if !Class and !self:CheckToken( "ass", "aadd", "asub", "advi", "amul" ) then
+			self:TraceError( Trace, "Incomplete assigment statment")
 		end
 
 		local Assigment
@@ -737,7 +747,7 @@ function Compiler:Statement_99( Trace )
 			self:ExcludeWhiteSpace( "Assigment operator (=), must not be preceeded by whitespace." )
 			Assigment = "ass"
 
-		elseif !DefineClass then
+		elseif !Class then
 
 			if self:AcceptToken( "add" ) then
 				self:ExcludeWhiteSpace( "Assigment operator (+=), must not be preceeded by whitespace." )
@@ -757,91 +767,117 @@ function Compiler:Statement_99( Trace )
 
 		end
 
-		if Assigment then
-			for I = 1, #Variables do
-				Expressions[#Expressions + 1] = self:Expression( Trace )
-
-				if !self:AcceptToken( "com" ) then break end
-			end
-		end
-
-
 		local Sequence = { }
+		local GetExpression = true
 
-		if !Assigment then -- Default values!
-			local Expression = self:Compile_DEFAULT( Trace, DefineClass.Short )
-			-- This instruction, need to be edited to it doesn't duplicate.
+		for I, Variable in pairs( Variables ) do
 
-			for I = 1, #Variables do
-				Sequence[I] = self:Compile_ASS( Trace, Variables[I], Expression )
+			if !Assigment then -- Default assigment!
+				Sequence[I] = self:Compile_ASS( Trace, Variable, self:Compile_DEFAULT( Trace, Class.Short ) )
+				GetExpression = self:AcceptToken( "com" )
+				continue
 			end
 
-			return self:Compile_SEQ( Trace, Sequence )
-		
-		elseif Assigment == "ass" then -- Assigment
-			local End = 1
-
-			for I = 1, #Expressions do
-				End = I
-				Sequence[I] = self:Compile_ASS( Trace, Variables[I], Expressions[I] )
+			local Expression = GetExpression and self:Expression( Trace ) or nil
+			
+			if Assigment == "ass" then
+				Expression = Expression or self:Compile_DEFAULT( Trace, Class.Short )
+			elseif !GetExpression then
+				self:TraceError( Trace, "Invalid arithmatic assigment operation, #%i value or equation expected for %s", I, Variable )
+			elseif Assigment == "add" then
+				Expression = self:Compile_ADD( Trace, self:Compile_VAR( Trace, Variable ), Expression )
+			elseif Assigment == "sub" then
+				Expression = self:Compile_SUB( Trace, self:Compile_VAR( Trace, Variable ), Expression )
+			elseif Assigment == "mul" then
+				Expression = self:Compile_MUL( Trace, self:Compile_VAR( Trace, Variable ), Expression )
+			elseif Assigment == "div" then
+				Expression = self:Compile_DIV( Trace, self:Compile_VAR( Trace, Variable ), Expression )
 			end
 
-			if End < #Variables then
-				local Expression = self:Compile_DEFAULT( Trace, DefineClass.Short )
-				-- This instruction, need to be edited to it doesn't duplicate.
-				
-				for I = End, #Variables do
-					Sequence[I] = self:Compile_ASS( Trace, Variables[I], Expression )
-				end
-			end
+			Sequence[I] = self:Compile_ASS( Trace, Variable, Expression, Class.Short )
 
-			return self:Compile_SEQ( Trace, Sequence )
-
-		elseif Assigment == "add" then -- Addition Assigment
-			for I = 1, #Variables do
-				local Instruction = Expressions[I]
-				if !Instruction then self:TraceError( "Variable %q is not assigned" ) end
-
-				Sequence[I] = self:Compile_ASS( Trace, Variables[I], self:Compile_ADD( Trace, self:Compile_VAR( Trace, Variables[I] ), Instruction ) )
-			end
-
-			return self:Compile_SEQ( Trace, Sequence )
-		
-		elseif Assigment == "sub" then -- Subtract Assigment
-			for I = 1, #Variables do
-				local Instruction = Expressions[I]
-				if !Instruction then self:TraceError( "Variable %q is not assigned" ) end
-
-				Sequence[I] = self:Compile_ASS( Trace, Variables[I], self:Compile_SUB( Trace, self:Compile_VAR( Trace, Variables[I] ), Instruction ) )
-			end
-
-			return self:Compile_SEQ( Trace, Sequence )
-		
-		elseif Assigment == "div" then -- Divishion Assigment
-			for I = 1, #Variables do
-				local Instruction = Expressions[I]
-				if !Instruction then self:TraceError( "Variable %q is not assigned" ) end
-
-				Sequence[I] = self:Compile_ASS( Trace, Variables[I], self:Compile_DIV( Trace, self:Compile_VAR( Trace, Variables[I] ), Instruction ) )
-			end
-
-			return self:Compile_SEQ( Trace, Sequence )
-		
-		elseif Assigment == "mul" then -- Multiplication Assigment
-			for I = 1, #Variables do
-				local Instruction = Expressions[I]
-				if !Instruction then self:TraceError( "Variable %q is not assigned" ) end
-
-				Sequence[I] = self:Compile_ASS( Trace, Variables[I], self:Compile_MUL( Trace, self:Compile_VAR( Trace, Variables[I] ), Instruction ) )
-			end
-
-			return self:Compile_SEQ( Trace, Sequence )
-		
+			GetExpression = self:AcceptToken( "com" )
 		end
 
-		-- Ok, so we didn't manage to do anything.
-		self.TokenPos = TokenPos - 1
-		self:NextToken( ) -- Go back to where we where.
+		if GetExpression then
+			self:TraceError( Trace, "Unexpected comma (,)")
+		end
+
+		return self:Compile_SEQ( Trace, Sequence )
+
+	end
+
+	-----------------------------------------------------------------------
+		-- Function assigments
+
+	if self:AcceptToken( "func" ) then
+		
+		if !self:AcceptToken( "var" ) then
+			self:PrevToken( )
+			return self:Expression_Variable( Trace, true )
+		end
+
+		if self:CheckToken( "ass", "com" ) then
+			local Variables = { self.TokenData }
+
+			while self:AcceptToken( "com" ) do
+				self:RequireToken( "var", "Variable expected after comma (,)" )
+				Variables[#Variables + 1] = self.TokenData
+			end
+
+			local Sequence = { }
+			local GetExpression = self:AcceptToken( "ass" )
+			
+			for I, Variable in pairs( Variables ) do
+				local Expression = GetExpression and self:GetExpression( Trace ) or self:Compile_DEFAULT( Trace, "l" ) -- Lambda
+
+				Sequence[I] = self:Compile_ASS( Trace, Variable, Expression, "l" )
+
+				GetExpression = self:AcceptToken( "com" )
+			end
+
+			if GetExpression then
+				self:TraceError( Trace, "Unexpected comma (,)")
+			end
+
+			return self:Compile_SEQ( Trace, Sequence )
+		end
+
+		if self:CheckToken( "var", "lpa" ) then
+			local Variable, Prediction = self.TokenData
+
+			if self:AcceptToken( "var" ) then
+				Prediction = self:GetClass( Trace, Variable )
+				Variable = self.TokenData
+			end
+
+			self:RequireToken( "lpa", "Left parenthesis (( ), expected after 'function'" )
+
+			self:PushScope( )
+
+			local LastPrediction = self.Current_ReturnClass
+			local Perams, UseVarg = self:Util_Perams( Trace )
+
+			self:RequireToken( "rpa", "Right parenthesis ( )), expected to close function perameters" )
+
+			self:RequireToken( "lcb", "Left curly bracket ({) missing, to begin function body" )
+
+			self:PushLambdaDeph( )
+			self.Current_ReturnClass = Prediction
+
+			local Sequence = self:Sequence( Trace, "rcb" )
+
+			self.Current_ReturnClass = LastPrediction
+			self:PopLambdaDeph( )
+
+			self:PopScope( )
+
+			self:RequireToken( "rcb", "Right curly bracket (}) missing, to close function body" )
+
+			return self:Compile_ASS( Trace, Variable, self:Compile_LAMBDA( Trace, Perams, UseVarg, Sequence ), "l" )
+		end
+
+		self:PrevToken( )
 	end
 
 	return self:Expression_Variable( Trace, true )
@@ -889,3 +925,4 @@ function Compiler:Util_Perams( Trace )
 	
 	return Params, UseVarg
 end
+

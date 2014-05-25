@@ -100,7 +100,7 @@ include( "instructions.lua" )
 
 function Compiler:GetTokenTrace( Trace )
 	if !Trace then return { self.ReadLine, self.ReadChar } end
-	return 
+	return { self.ReadLine, self.ReadChar } -- TODO: this!
 end
 
 function Compiler:CompileTrace( Trace )
@@ -197,7 +197,7 @@ function Compiler:GetClass( Trace, ClassName, bNoError )
 
 	if !Class or Class.Name ~= ClassName then
 		if bNoError then return end
-		self:TraceError( "No such class %q", ClassName )
+		self:TraceError( Trace, "No such class %q", ClassName or "WTF" )
 	end
 
 	return Class
@@ -488,7 +488,7 @@ local function SoftCompile( self, Script, Files, bIsClientSide, OnError, OnSuces
 		-- coroutine.yield( )
 
 	-- Ok, Run the compiler.
-		local Compiled, Instruction = pcall( self.Expression, self, { 0, 0 } )
+		local Compiled, Instruction = pcall( self.Sequence, self, { 0, 0 } )
 
 	-- Finish!
 		Coroutines[self] = nil -- Because we compile inside a coroutine now =D
@@ -534,37 +534,29 @@ end
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Example Compiler Usage
    --- */
+if SERVER then
+	concommand.Add( "ask", function( Player, _, Args )
+		local Code = table.concat( Args, " " )
 
-function EXPADV.Example( Player )
-	local Expression = "5*5*5*5"
-	local _, Instance = EXPADV.Compile( Expression, { }, CLIENT,
-		
-		function( Error ) -- OnError
+		local function OnError( Error )
 			MsgN( "Compiler, Failed -> " .. Error )
-		end,
+		end
 
-		function( self, Instruction ) -- OnSucess
-
-			MsgN( "Do you know what ", Expression, "  is?" )
-			
-			local CompiledLua = CompileString( [[return function( Context )
-				]] .. (Instruction.Prepare or "") .. [[
-				print( "Daddy, the answer is ", ]] .. (Instruction.Inline or "nil") .. [[)
-			end]], "EXPADV2", false )
-
-			if isstring( CompiledLua ) then
-				return MsgN( "Compiler, Failed -> ", CompiledLua )
-			end
-
-			local Execute = CompiledLua( )
+		local function OnSucess( Instance, Instruction )
+			MsgN( "Executed: " .. Code )
 
 			local Context = EXPADV.BuildNewContext( Player, Player )
-			
+
+			local Execute = CompileString(
+					[[return function( Context )
+						]] .. ( Instruction.Prepare or "" ) .. [[
+						]] .. ( Instruction.Inline or "" ) .. [[
+					end]],
+			"EXPADV2", false )
+
 			Execute( Context )
+		end
 
-			MsgN( "Instruction: " )
-			PrintTable( Instruction )
-		end )
-
-	print( "Compiling: ", Instance )
+		EXPADV.Compile( Code, { }, false, OnError, OnSucess )
+	end )
 end
