@@ -272,13 +272,13 @@ function Compiler:NextMemoryRef( )
 	return self.MemoryRef
 end
 
-function Compiler:TestCell( Trace, MemRef, Class, Variable )
+function Compiler:TestCell( Trace, MemRef, ClassShort, Variable )
 	local Cell = self.Cells[ MemRef ]
 
 	if !Cell and Variable then
-		self:TraceError( Trace, "%s of type %s does not exist", Variable, Class ) -- Todo: Pretty Name
-	elseif Cell.Class ~= Class and Variable then
-		self:TraceError( Trace, "%s of type %s can not be assigned as %s", Variable, Cell.Class, Class )
+		self:TraceError( Trace, "%s of type %s does not exist", Variable, self:NiceClass( ClassShort ) )
+	elseif Cell.Return ~= ClassShort and Variable then
+		self:TraceError( Trace, "%s of type %s can not be assigned as %s", Variable, self:NiceClass( Cell.Return, ClassShort ) )
 	else
 		return true
 	end
@@ -301,7 +301,7 @@ end
    --- */
 
 function Compiler:CreateVariable( Trace, Variable, Class, Modifier )
-	local ClassObj = self:GetClass( Trace, Class, false )
+	local ClassObj = istable( Class ) and Class or self:GetClass( Trace, Class, false )
 
 	if !Modifier then
 		local MemRef = self.Scope[ Variable ]
@@ -432,9 +432,18 @@ end
 	@: Operator Look Up
    --- */
 
-function Compiler:LookUpOperator( Name, ... )
-	MsgN( "LookUp Operator: " .. string.format( "%s(%s)", Name, table.concat( { ... }, "" ) ) )
-	return EXPADV.Operators[ string.format( "%s(%s)", Name, table.concat( { ... }, "" ) ) ]
+function Compiler:LookUpOperator( Name, First, ... )
+	if !First then
+		return EXPADV.Operators[Name .. "()"]
+	end
+
+	local Op = EXPADV.Operators[ string.format( "%s(%s)", Name, table.concat( { First, ... }, "" ) ) ]
+	if Op then return Op end
+
+	local Class = EXPADV.GetClass( First )
+	if !Class or !Class.DerivedClass then return end
+
+	return self:LookUpOperator( Name, DerivedClass.Short, ... )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------

@@ -231,6 +231,15 @@ end
 	@: Expression Variables
    --- */
 
+function Compiler:Compile_DEFAULT( Trace, Class )
+	local Operator = self:LookUpOperator( "default", Class )
+
+	if !Operator then self:TraceError( Trace, "No defined default value for %s", self:NiceClass( Class ) ) end
+
+	return Operator.Compile( self, Trace )
+end
+
+
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Sequences
    --- */
@@ -290,4 +299,25 @@ function Compiler:Compile_SEQ( Trace, Instructions )
 	end
 
 	return { Trace = Trace, Return = "", Prepare = table.concat( Sequence, "\n" ),FLAG = EXPADV_PREPARE, IsRaw = true }
+end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Assigment
+   --- */
+
+function Compiler:Compile_ASS( Trace, Variable, Expression, DefinedClass, Modifier )
+	
+	if DefinedClass then
+		self:CreateVariable( Trace, Variable, DefinedClass, Modifier )
+	end
+
+	local MemRef, Scope = self:FindCell( Trace, Variable, true )
+
+	self:TestCell( Trace, MemRef, Expression.Return, Variable )
+	
+	local Operator = self:LookUpOperator( "=", Expression.Return )
+
+	if !Operator then self:TraceError( Trace, "Assigment operator (=) does not support 'var = %s'", self:NiceClass( Expression.Return ) ) end
+
+	return Operator.Compile( self, Trace, MemRef )
 end

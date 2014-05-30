@@ -722,11 +722,16 @@ function Compiler:Statement_99( Trace )
 			return self:Expression_Variable( Trace, true )
 		end
 
+		local Defined = false
 		local Variable, Class = self.TokenData
 
 		if self:AcceptToken( "var" ) then
 			Class = self:GetClass( Trace, Variable )
 			Variable = self.TokenData
+			Defined = true
+		else
+			local MemRef = self:FindCell( Trace, Variable, true )
+			Class = self.Cells[MemRef].ClassObj
 		end
 
 		local Variables = { Variable }
@@ -736,7 +741,7 @@ function Compiler:Statement_99( Trace )
 			Variables[#Variables + 1] = self.TokenData
 		end
 
-		if !Class and !self:CheckToken( "ass", "aadd", "asub", "advi", "amul" ) then
+		if !Defined and !self:CheckToken( "ass", "aadd", "asub", "advi", "amul" ) then
 			self:TraceError( Trace, "Incomplete assigment statment")
 		end
 
@@ -747,7 +752,7 @@ function Compiler:Statement_99( Trace )
 			self:ExcludeWhiteSpace( "Assigment operator (=), must not be preceeded by whitespace." )
 			Assigment = "ass"
 
-		elseif !Class then
+		elseif !Defined then
 
 			if self:AcceptToken( "add" ) then
 				self:ExcludeWhiteSpace( "Assigment operator (+=), must not be preceeded by whitespace." )
@@ -771,9 +776,10 @@ function Compiler:Statement_99( Trace )
 		local GetExpression = true
 
 		for I, Variable in pairs( Variables ) do
+			local Short = Class.Short
 
 			if !Assigment then -- Default assigment!
-				Sequence[I] = self:Compile_ASS( Trace, Variable, self:Compile_DEFAULT( Trace, Class.Short ) )
+				Sequence[I] = self:Compile_ASS( Trace, Variable, self:Compile_DEFAULT( Trace, Short ) )
 				GetExpression = self:AcceptToken( "com" )
 				continue
 			end
@@ -781,7 +787,7 @@ function Compiler:Statement_99( Trace )
 			local Expression = GetExpression and self:Expression( Trace ) or nil
 			
 			if Assigment == "ass" then
-				Expression = Expression or self:Compile_DEFAULT( Trace, Class.Short )
+				Expression = Expression or self:Compile_DEFAULT( Trace, Short )
 			elseif !GetExpression then
 				self:TraceError( Trace, "Invalid arithmatic assigment operation, #%i value or equation expected for %s", I, Variable )
 			elseif Assigment == "add" then
@@ -794,7 +800,7 @@ function Compiler:Statement_99( Trace )
 				Expression = self:Compile_DIV( Trace, self:Compile_VAR( Trace, Variable ), Expression )
 			end
 
-			Sequence[I] = self:Compile_ASS( Trace, Variable, Expression, Class.Short )
+			Sequence[I] = self:Compile_ASS( Trace, Variable, Expression, Class, Modifier )
 
 			GetExpression = self:AcceptToken( "com" )
 		end
