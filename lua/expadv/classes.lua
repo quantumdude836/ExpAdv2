@@ -34,6 +34,10 @@ function BaseClassObj:AddAlias( Alias )
 	Temp_Aliases[ Alias ] = self
 end
 
+function BaseClassObj:WireInput( Function ) -- function( Context, Obj ) end
+		self.PrintClass = Function
+	end
+
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Wire Support
    --- */
@@ -157,6 +161,16 @@ function EXPADV.GetClass( Name )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Print Lookup!
+   --- */
+
+local PrintLookUps = { }
+
+function EXPADV.PrintClass( Context, Short, Obj )
+	return PrintLookUps[Short]( Context, Obj )
+end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Load classes!
    --- */
 
@@ -210,7 +224,18 @@ function EXPADV.LoadClasses( )
  		if !Class.CreateNew then
  			Class.CreateNew = DeriveClass.CreateNew
  		end
- 			
+
+ 		if !Class.PrintClass then
+ 			Class.PrintClass = DeriveClass.PrintClass
+ 		end
+
+ 		Class.PrintClass = Class.PrintClass or function( Context, Obj )
+ 			return string.format("<%s: >", Class.Name, tostring( Obj ) )
+ 		end
+
+ 		PrintLookUps[Class.Short] = Class.PrintClass
+ 		EXPADV.AddVMFunction( Class.Component, "print", Class.Short , "s", Class.PrintClass )
+
  		if WireLib then
 
  			if !Class.Wire_Out_Type then

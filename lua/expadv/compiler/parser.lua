@@ -445,9 +445,7 @@ function Compiler:Expression_Function( Trace  )
 			Inputs[1] = self:Expression( Trace )
 
 			while self:AcceptToken( "com" ) do
-
 				Inputs[#Inputs + 1] = self:Expression( Trace )
-
 			end
 		end
 

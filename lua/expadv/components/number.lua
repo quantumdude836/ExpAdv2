@@ -65,6 +65,12 @@ MathComponent:AddInlineOperator("$", "n", "n", "((%memory[@value 1] or 0) - (%de
 	@:Section -> Assignment Operators
 ---	/*
 
+-- For saving to memory.
+MathComponent:AddPreparedOperator("=n", "n,n", "n", "Context.Memory[@value 1] = @value 2" )
+
+-- Example of custom realtime memory allication method
+MathComponent:AddPreparedOperator("=n", "s,n", "n", "Context.Memory[ Context.Cells[@value 1].MemRef ] = @value 2" )
+
 /*	---
 	@Assign Before:
 ---	*/
