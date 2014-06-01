@@ -153,6 +153,8 @@ end
    --- */
 
 function Compiler:Expression( Trace )
+	MsgN( "Compiler -> Expression" )
+
 	local _ExprRoot = self.ExpressionRoot
 	self.ExpressionRoot = self:GetTokenTrace( Trace )
 	
@@ -164,11 +166,13 @@ function Compiler:Expression( Trace )
 
 	self.ExpressionRoot = _ExprRoot
 
-	return self:Expression_Postfix( Expression )
+	return self:Expression_Postfix( Trace, Expression )
 end
 
 -- Stage 1: Grouped Equation, In/Dec
 function Compiler:Expression_1( Trace )
+	MsgN( "Compiler -> Expression 1" )
+	
 	if self:AcceptToken( "lpa" ) then
 		local Expression = self:Expression_1( Trace )
 
@@ -182,6 +186,7 @@ end
 
 -- Stage 2: Unary operations, sizeof, casting
 function Compiler:Expression_2( Trace )
+	MsgN( "Compiler -> Expression 2" )
 
 	if self:AcceptToken( "add" ) then
 		self:ExcludeWhiteSpace( "Identity operator (+) must not be succeeded by whitespace" )
@@ -210,6 +215,8 @@ end
 
 -- Stage 3: Multiplication, division, modulo
 function Compiler:Expression_3( Trace )
+	MsgN( "Compiler -> Expression 3" )
+
 	local Expression = self:Expression_4( Trace )
 
 	while self:CheckToken( "mul", "div", "mod", "exp" ) do
@@ -230,6 +237,8 @@ end
 
 -- Stage 4: Addition and subtraction
 function Compiler:Expression_4( Trace )
+	MsgN( "Compiler -> Expression 4" )
+
 	local Expression = self:Expression_5( Trace )
 
 	while self:CheckToken( "add", "sub" ) do
@@ -245,6 +254,8 @@ end
 
 -- Stage 5: Bitwise shift left and right
 function Compiler:Expression_5( Trace )
+	MsgN( "Compiler -> Expression 5" )
+
 	local Expression = self:Expression_6( Trace )
 
 	while self:CheckToken( "bshl", "bshr" ) do
@@ -260,6 +271,8 @@ end
 
 -- Stage 6: Comparisons Greater and Less
 function Compiler:Expression_6( Trace )
+	MsgN( "Compiler -> Expression 6" )
+
 	local Expression = self:Expression_7( Trace )
 
 	while self:CheckToken( "lth", "leq", "gth", "geq" ) do
@@ -279,6 +292,8 @@ end
 
 -- Stage 7: Comparisons equal and not equal.
 function Compiler:Expression_7( Trace )
+	MsgN( "Compiler -> Expression 7" )
+
 	local Expression = self:Expression_8( Trace )
 
 	while self:CheckToken( "eq", "neg" ) do
@@ -294,6 +309,8 @@ end
 
 -- Stage 8: bitwise and
 function Compiler:Expression_8( Trace )
+	MsgN( "Compiler -> Expression 8" )
+
 	local Expression = self:Expression_9( Trace )
 
 	while self:AcceptToken( "band" ) do
@@ -305,6 +322,8 @@ end
 
 -- Stage 9: bitwise exclusive or
 function Compiler:Expression_9( Trace )
+	MsgN( "Compiler -> Expression 9" )
+
 	local Expression = self:Expression_10( Trace )
 
 	while self:AcceptToken( "bor" ) do
@@ -316,6 +335,8 @@ end
 
 -- Stage 10: bitwise or
 function Compiler:Expression_10( Trace )
+	MsgN( "Compiler -> Expression 10" )
+
 	local Expression = self:Expression_11( Trace )
 
 	while self:AcceptToken( "bxor" ) do
@@ -328,6 +349,8 @@ end
 
 -- Stage 11: logical and
 function Compiler:Expression_11( Trace )
+	MsgN( "Compiler -> Expression 11" )
+
 	local Expression = self:Expression_12( Trace )
 
 	while self:AcceptToken( "and" ) do
@@ -339,6 +362,8 @@ end
 
 -- Stage 12: logical or
 function Compiler:Expression_12( Trace )
+	MsgN( "Compiler -> Expression 12" )
+
 	local Expression = self:Expression_13( Trace )
 
 	while self:AcceptToken( "or" ) do
@@ -350,7 +375,9 @@ end
 
 
 -- Stage 13: Ternary
-function Compiler:Expression_12( Trace )
+function Compiler:Expression_13( Trace )
+	MsgN( "Compiler -> Expression 13" )
+
 	local Expression = self:Expression_Value( )
 
 	while self:AcceptToken( "qsm" ) do
@@ -370,6 +397,7 @@ end
 
 -- Stage 13: Raw Values:
 function Compiler:Expression_Value( Trace )
+	MsgN( "Compiler -> Expression Value" )
 
 	if self:AcceptToken( "tre" ) then
 		return self:Compile_BOOL( self:GetTokenTrace( Trace ), true )
@@ -387,6 +415,8 @@ end
 -- Stage 14: Increment, Decrement and Variables.
 -- This function, also can be used for expression bassed statments.
 function Compiler:Expression_Variable( Trace, bIsStatement )
+	MsgN( "Compiler -> Expression Variable" )
+
 	if self:AcceptToken( "inc" ) then
 		self:RequireToken( "var", "Assigment operator (increment), must be preceeded by variable" )
 		
@@ -415,44 +445,46 @@ function Compiler:Expression_Variable( Trace, bIsStatement )
 			return self:Compile_INC( Trace, true, Variable )
 		elseif self:AcceptToken( "dec" ) then
 			return self:Compile_DEC( Trace, true, Variable )
-		elseif !self:CheckToken( "lpa" ) and !bIsStatement  then
+		elseif self:CheckToken( "lpa" ) and !bIsStatement  then
 			return self:Compile_VAR( Trace, Variable )
 		end
 
 		self:PrevToken( )
 	end
 
-	if bIsStatement then return end -- This is a statment.
-
-	return self:Expression_Function( Trace )
+	return self:Expression_Function( Trace, bIsStatement )
 end
 
 -- Stage 16: Functions
-function Compiler:Expression_Function( Trace  )
+function Compiler:Expression_Function( Trace, bIsStatement )
+	MsgN( "Compiler -> Expression Function" )
+
 	local Trace = self:GetTokenTrace( Trace )
 
 	if self:AcceptToken( "var" ) then
-
 		local Variable = self.TokenData
 
 		-- This error should never happen, We only call this form one place.
 		self:RequireToken( "lpa", "Unexpected error, can not compile expression." )
 
-		local Inputs = { }
+		local Expressions = { }
 
 		if !self:CheckToken( "rpa" ) then
 			
-			Inputs[1] = self:Expression( Trace )
+			Expressions[1] = self:Expression( Trace )
 
 			while self:AcceptToken( "com" ) do
-				Inputs[#Inputs + 1] = self:Expression( Trace )
+				Expressions[#Expressions + 1] = self:Expression( Trace )
 			end
+
 		end
 
 		self:RequireToken( "rpa", "Right parenthesis ( )), expected to close function perameters" )
 
-		return self:Compile_FUNC( Trace, Variable, Inputs )
+		return self:Compile_FUNC( Trace, Variable, Expressions )
 	end
+
+	if bIsStatement then return end -- This is a statment.
 
 	if self:AcceptToken( "func" ) then
 
@@ -482,9 +514,9 @@ end
 
 -- Stage 16: Indexing, Calling
 function Compiler:Expression_Postfix( Trace, Expression )
+	MsgN( "Compiler -> Expression Postfix" )
 
 	while self:CheckToken( "prd", "lsb", "lpa" ) do
-
 		-- Methods
 			if self:AcceptToken( "prd" ) then
 				local Trace = self:GetTokenTrace( Trace )
@@ -495,22 +527,22 @@ function Compiler:Expression_Postfix( Trace, Expression )
 
 				self:RequireToken( "lpa", "Left parenthesis (( ) missing, after method name" )
 
-				local Inputs = { }
+				local Expressions = { }
 
 				if !self:CheckToken( "rpa" ) then
 					
-					Inputs[1] = self:Expression( Trace )
+					Expressions[1] = self:Expression( Trace )
 
 					while self:AcceptToken( "com" ) do
 
-						Inputs[#Inputs + 1] = self:Expression( Trace )
+						Expressions[#Expressions + 1] = self:Expression( Trace )
 
 					end
 				end
 
 				self:RequireToken( "rpa", "Right parenthesis ( )) missing, to close method parameters" )
 
-				Expression = self:Compile_METHOD( Trace, Expression, Method, Inputs )
+				Expression = self:Compile_METHOD( Trace, Expression, Method, Expressions )
 			end
 
 		-- Members
@@ -567,11 +599,21 @@ end
 	@: Statments
    --- */
 
+function Compiler:StatementError( )
+	self:TokenError( "Invalid Statment!" )
+end -- TODO: ^ This
+
 function Compiler:Statement( Trace )
+	MsgN( "Compiler -> Statement" )
+
 	local _StmtRoot = self.StatmentRoot
 	self.StatmentRoot = self:GetTokenTrace( Trace )
 	
 	local Statement = self:Statement_1( Trace )
+
+	if !Statement then
+		self:StatementError( )
+	end
 
 	self.StatmentRoot = _StmtRoot
 
@@ -579,13 +621,12 @@ function Compiler:Statement( Trace )
 end
 
 function Compiler:Sequence( Trace, ExitToken )
+	
 	local Sequence = { }
 
-	while true do
+	while self:HasTokens( ) do
 
-		if !self:HasTokens( ) then
-			break
-		elseif ExitToken and self:CheckToken( ExitToken ) then
+		if ExitToken and self:CheckToken( ExitToken ) then
 			break
 		end
 
@@ -603,6 +644,8 @@ end
 
 -- Stage 1: If statments
 function Compiler:Statement_1( Trace )
+	MsgN( "Compiler -> Statement 1" )
+
 	if self:AcceptToken( "if" ) then
 		self:RequireToken( "lpa", "Left parenthesis (( ) missing, to open condition" )
 
@@ -637,6 +680,8 @@ end
 
 -- Stage 2: elseif, else statments
 function Compiler:Statement_2( Trace )
+	MsgN( "Compiler -> Statement 2" )
+
 	if self:AcceptToken( "eif" ) then
 		self:RequireToken( "lpa", "Left parenthesis (( ) missing, to open condition" )
 
@@ -695,6 +740,8 @@ end
 
 -- Stage 99: Variable Assigments, This should not be stage 99!
 function Compiler:Statement_99( Trace )
+	MsgN( "Compiler -> Statement 99" )
+
 	local Trace = self:GetTokenTrace( Trace )
 
 	local Modifier

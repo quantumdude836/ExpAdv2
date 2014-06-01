@@ -98,42 +98,26 @@ end
 function Compiler:NextToken( )
 	local Pos = self.TokenPos + 1
 	
-	if Pos <= 0 then
-		self.TokenPos = 0
-		
-		self.Token = nil
-		self.TokenData = nil
-		self.TokenType = nil
-		self.TokenName = nil
-		
-		self.TokenLine = 0
-		self.TokenChar = 0
-		
-		self.PrepToken = self.Tokens[ 1 ]
+	self.TokenPos = Pos
 	
-	else
+	self.Token = self.Tokens[ Pos ]
 	
-		self.TokenPos = Pos
-		
-		self.Token = self.Tokens[ Pos ]
-		
-		if !self.Token then
-			self.Token = self:GetNextToken( )
-			self.Tokens[ Pos ] = self.Token
-		end
-		
-		self.TokenData = self.Token[1]
-		self.TokenType = self.Token[2]
-		self.TokenName = self.Token[3]
-		self.TokenLine = self.Token[4]
-		self.TokenChar = self.Token[5]
-		
-		self.PrepToken = self.Tokens[ Pos + 1 ]
-		
-		if !self.PrepToken then
-			self.PrepToken = self:GetNextToken( )
-			self.Tokens[ Pos + 1 ] = self.PrepToken
-		end	
+	if !self.Token then
+		self.Token = self:GetNextToken( )
+		self.Tokens[ Pos ] = self.Token
+	end
+	
+	self.TokenData = self.Token[1]
+	self.TokenType = self.Token[2]
+	self.TokenName = self.Token[3]
+	self.TokenLine = self.Token[4]
+	self.TokenChar = self.Token[5]
+	
+	self.PrepToken = self.Tokens[ Pos + 1 ]
+	
+	if !self.PrepToken then
+		self.PrepToken = self:GetNextToken( )
+		self.Tokens[ Pos + 1 ] = self.PrepToken
 	end
 	
 	if self.PrepToken then

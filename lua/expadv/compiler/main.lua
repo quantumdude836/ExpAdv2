@@ -135,6 +135,8 @@ end
    --- */
 
 function Compiler:NiceClass( Name, Name2, ... )
+	--if !Name then return "" end
+
 	local Class = EXPADV.GetClass( Name )
 	
 	Name = Class and Class.Name or "void"
@@ -468,7 +470,10 @@ local function SoftCompile( self, Script, Files, bIsClientSide, OnError, OnSuces
 		EXPADV.COMPILER_ENV = self.Enviroment
 		
 	-- Tokenizer:
-		self.TokenPos = -1
+		self.TokenPos = 0
+		self.TokenLine = 0
+		self.TokenChar = 0
+
 		self.Char = ""
 		self.ReadData = ""
 		self.ReadChar = 1
@@ -488,10 +493,16 @@ local function SoftCompile( self, Script, Files, bIsClientSide, OnError, OnSuces
 
 	-- Operators:
 		
-	-- Run:
+	-- Start the Tokenizer:
 		self:NextChar( )
 		self.Tokens = { self:GetNextToken( ), self:GetNextToken( ) }
-		self:NextToken( )
+		self.PrepToken = self.Tokens[ 1 ]
+
+		if self.PrepToken then
+			self.PrepTokenType = self.PrepToken[2]
+			self.PrepTokenName = self.PrepToken[3]
+			self.PrepTokenLine = self.PrepToken[4]
+		end
 
 	-- Wait for next tick to begin:
 		-- coroutine.yield( )

@@ -218,11 +218,16 @@ function Compiler:Compile_DEC( Trace, bVarFirst, Variable )
 end
 
 function Compiler:Compile_VAR( Trace, Variable )
-
 	local MemRef, MemScope = self:FindCell( Trace, Variable, true )
 
 	local Class = self.Cells[ MemRef ].Return
 
+	local Operator = self:LookUpOperator( Class.Short .. "=", "n" )
+	if Operator then return Operator.Compile( self, Trace, MemRef ) end
+	
+	local Operator = self:LookUpOperator( Class.Short .. "=", "s" )
+	if Operator then return Operator.Compile( self, Trace, Variable ) end
+	
 	return { Trace = Trace, Inline = string.format( "Context.Memory[%i]", MemRef ), Return = Class, FLAG = EXPADV_INLINE, IsRaw = true, Variable = Variable }
 end
 
@@ -333,32 +338,37 @@ end
 function Compiler:Compile_FUNC( Trace, Variable, Expressions )
 	
 	-- Check for memory ref and call the call operator.
+
 	local MemRef, Scope = self:FindCell( Trace, Variable, false )
 	
 	if MemRef then
 		return self:Compile_CALL( Trace, self:Compile_VAR( Trace, Variable ), Expressions )
 	end
 
-	-- Not a varible, Lets look for the function.
-	if #Inputs == 0 then
+	if #Expressions == 0 then
 		local Operator = EXPADV.Functions[Variable .. "()"] or EXPADV.Functions[Variable .. "(...)"]
-		if Operator then return Operator.Compile( self, Trace, Variable, unpack( Inputs ) ) end
+		
+		if !Operator then self:TraceError( Trace, "No such function %s()", Variable ) end
+
+		return Operator.Compile( self, Trace, Variable, unpack( Expressions ) )
 	end
 
 	local Signature, BestMatch = ""
 
 	for I = 1, #Expressions do
-		local Match = string.format( "%s(%s...)", Variable, Signature ) -- Vargs
+		local Match = string.format( "%s(%s...)", Variable, Signature )
+		
 		if EXPADV.Functions[ Match ] then BestMatch = EXPADV.Functions[ Match ] end
 
-		Signature = Signature .. Perams[I].Return -- Static Args
+		Signature = Signature .. Expressions[I].Return
 	end
 
-	local Operator = Functions[ Format( "%s(%s)", Variable, Signature ) ] or BestMatch
+	local Operator = EXPADV.Functions[ string.format( "%s(%s)", Variable, Signature ) ] or BestMatch
+	
 	if !Operator then
 		local Temp = { }
 		for K, V in pairs( Expressions ) do Temp[K] = V.Return end
-		self:TraceError( Trace, "No such function %s(%s)", Function, self:NiceClass( unpack( Temp ) ) )
+		self:TraceError( Trace, "No such function %s(%s)", Variable, self:NiceClass( unpack( Temp ) ) )
 	end
 
 	return Operator.Compile( self, Trace, unpack( Expressions ) )
