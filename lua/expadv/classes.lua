@@ -34,7 +34,7 @@ function BaseClassObj:AddAlias( Alias )
 	Temp_Aliases[ Alias ] = self
 end
 
-function BaseClassObj:WireInput( Function ) -- function( Context, Obj ) end
+function BaseClassObj:StringBuilder( Function ) -- function( Context, Obj ) end
 		self.ToString = Function
 	end
 
@@ -130,7 +130,7 @@ local Class_Generic = EXPADV.AddClass( nil, "generic", "g" )
 	@: Define boolean class
    --- */
 
-local Class_Boolean = EXPADV.AddClass( nil, "boolean", "g" )
+local Class_Boolean = EXPADV.AddClass( nil, "boolean", "b" )
 	  
 	  Class_Boolean:AddAlias( "bool" )
 
@@ -213,7 +213,8 @@ function EXPADV.LoadClasses( )
 
  		EXPADV.ClassAliases[ Class.Name ] = Class
 
- 		MsgN( "Registered Class: " .. Class.Name )
+ 		MsgN( "Registered Class: " .. Class.Name .. " - " .. Class.Short )
+ 		MsgN( "-- Extends: " .. DeriveClass.Name .. " - " .. DeriveClass.Short )
  	end -- ^ Derive classes!
 
  	----------------------------------------------------------

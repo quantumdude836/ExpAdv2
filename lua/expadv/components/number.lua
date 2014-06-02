@@ -1,10 +1,11 @@
 /*	---	--------------------------------------------------------------------------------
-	@: Server -> Math Component
+	@: Math Component
 ---	*/
 
 local MathComponent = EXPADV.AddComponent( "math" , true )
 local Number = MathComponent:AddClass( "number" , "n" )
 
+Number:StringBuilder( function( Context, Trace, Obj ) return tostring( Obj ) end )
 Number:DefaultAsLua( 0 )
 Number:AddAlias( "int" )
 
