@@ -22,8 +22,6 @@ function BaseClassObj:DefaultAsLua( Default ) -- Object / function( Trace, Conte
 	self.CreateNew = Default
 end
 
-EXPADV.BaseClassObj.DeriveFrom = "generic"
-
 function BaseClassObj:ExtendClass( ExtendClass )
 	self.DeriveFrom = ExtendClass
 end
@@ -105,9 +103,9 @@ end
 local Temp_Classes = { }
 
 function EXPADV.AddClass( Component, Name, Short )
-	if #Short > 1 then Short = "x" .. Short end
+	if #Short > 1 then Short = "_" .. Short end
 
-	local Class = setmetatable( { Component = Component, Name = Name, Short = Short }, EXPADV.BaseClassObj )
+	local Class = setmetatable( { Component = Component, Name = Name, Short = Short, DeriveFrom = "generic" }, EXPADV.BaseClassObj )
 
 	Temp_Classes[ #Temp_Classes + 1 ] = Class
 
@@ -118,7 +116,8 @@ end
 	@: Define generic Class
    --- */
 
-local Class_Generic = EXPADV.AddClass( nil, "generic", "g" )
+local Class_Generic = setmetatable( { Name = "generic", Short = "g" }, EXPADV.BaseClassObj )
+	-- We do this manually, so it doesnt get treated like the rest!
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Define Null Class
@@ -155,7 +154,7 @@ function EXPADV.GetClass( Name )
 
 	if EXPADV.ClassAliases[ Name ] then return EXPADV.ClassAliases[ Name ] end
 
-	if #Name > 1 then Name = "x" .. Name end
+	if #Name > 1 and Name[1] ~= "_" then Name = "_" .. Name end
 
 	if EXPADV.ClassShorts[ Name ] then return EXPADV.ClassShorts[ Name ] end
 end
@@ -175,18 +174,21 @@ end
    --- */
 
 function EXPADV.LoadClasses( )
- 	EXPADV.Classes = { }
-
- 	EXPADV.ClassShorts = { }
-
  	EXPADV.ClassAliases = { }
+
+ 	EXPADV.Classes = { generic = Class_Generic }
+
+ 	EXPADV.ClassShorts = { g = Class_Generic }
 
  	-- EXPADV.RunHook( "LoadClasses" )
 
  	for I = 1, #Temp_Classes do
  		local Class = Temp_Classes[I]
 
- 		if Class.Component and !Class.Component.Enabled then continue end
+ 		if Class.Component and !Class.Component.Enabled then
+ 			MsgN( "Skipping class " .. Class.Name .. " (component disabled)." )
+ 			continue
+ 		end
 
  		EXPADV.Classes[ Class.Name ] = Class
 
@@ -196,6 +198,7 @@ function EXPADV.LoadClasses( )
  	----------------------------------------------------------
 
  	for _, Class in pairs( EXPADV.Classes ) do
+ 		if Class == Class_Generic then continue end
 
  		local DeriveClass = EXPADV.GetClass( Class.DeriveFrom )
 
@@ -204,6 +207,8 @@ function EXPADV.LoadClasses( )
 
  			EXPADV.ClassShorts[ Class.Short ] = nil
 
+ 			MsgN( "Skipping class " .. Class.Name .. " (extends invalid class '" .. (Class.DeriveFrom or "void") .. "')." )
+ 			
  			continue
  		end
 
@@ -214,7 +219,6 @@ function EXPADV.LoadClasses( )
  		EXPADV.ClassAliases[ Class.Name ] = Class
 
  		MsgN( "Registered Class: " .. Class.Name .. " - " .. Class.Short )
- 		MsgN( "-- Extends: " .. DeriveClass.Name .. " - " .. DeriveClass.Short )
  	end -- ^ Derive classes!
 
  	----------------------------------------------------------
@@ -245,7 +249,8 @@ function EXPADV.LoadClasses( )
  		EXPADV.AddVMFunction( Class.Component, "tostring", Class.Short , "s", Class.ToString )
 
  		if Class.DeriveGeneric then continue end
-
+ 		if Class == Class_Generic then continue end
+ 		
  		Class.LoadOnServer = DeriveClass.LoadOnServer
 
 		Class.LoadOnClient = DeriveClass.LoadOnClient

@@ -1,5 +1,9 @@
 local Compiler = EXPADV.Compiler
 
+local function Quick( Inline, Return )
+	return { Trace = {0,0}, Inline = tostring( Inline ), Return = Return, FLAG = EXPADV_INLINE, IsRaw = true }
+end -- ^ Used to quickly insert false instructions.
+
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Raw Values
    --- */
@@ -224,11 +228,11 @@ function Compiler:Compile_VAR( Trace, Variable )
 
 	local Class = self.Cells[ MemRef ].Return
 
-	local Operator = self:LookUpOperator( Class.Short .. "=", "n" )
-	if Operator then return Operator.Compile( self, Trace, MemRef ) end
+	local Operator = self:LookUpOperator( "=" ..  Class, "n" )
+	if Operator then return Operator.Compile( self, Trace, Quick( MemRef, "n" ) ) end
 	
-	local Operator = self:LookUpOperator( Class.Short .. "=", "s" )
-	if Operator then return Operator.Compile( self, Trace, Variable ) end
+	local Operator = self:LookUpOperator( "=" ..  Class, "s" )
+	if Operator then return Operator.Compile( self, Trace, Quick( Variable, "s" ) ) end
 	
 	return { Trace = Trace, Inline = string.format( "Context.Memory[%i]", MemRef ), Return = Class, FLAG = EXPADV_INLINE, IsRaw = true, Variable = Variable }
 end
@@ -321,15 +325,15 @@ function Compiler:Compile_ASS( Trace, Variable, Expression, DefinedClass, Modifi
 
 	self:TestCell( Trace, MemRef, Expression.Return, Variable )
 	
-	local Operator = self:LookUpOperator( "=(" .. Expression.Return .. ")", "n" )
+	local Operator = self:LookUpOperator( Expression.Return .. "=", "n", Expression.Return )
 	
-	if Operator then return Operator.Compile( self, Trace, MemRef ) end
+	if Operator then return Operator.Compile( self, Trace, Quick( MemRef, "n" ), Expression ) end
 
-	local Operator = self:LookUpOperator( "=(" .. Expression.Return .. ")", "s" )
+	local Operator = self:LookUpOperator( Expression.Return .. "=", "s", Expression.Return )
 	
 	if !Operator then self:TraceError( Trace, "Assigment operator (=) does not support 'var = %s'", self:NiceClass( Expression.Return ) ) end
 
-	return Operator.Compile( self, Trace, Variable )
+	return Operator.Compile( self, Trace, Quick( Variable, "s" ), Expression )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -362,6 +366,8 @@ function Compiler:Compile_FUNC( Trace, Variable, Expressions )
 
 			Signature = Signature .. Expressions[I].Return
 		end
+
+		MsgN( "Looking for: ", string.format( "%s(%s)", Variable, Signature ) )
 
 		local Operator = EXPADV.Functions[ string.format( "%s(%s)", Variable, Signature ) ] or BestMatch
 		

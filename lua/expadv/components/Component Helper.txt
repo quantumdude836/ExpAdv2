@@ -36,9 +36,9 @@ Number:AddPreparedOperator( Name, Input, Return, Prepare, Inline )
 
 These are collision values - to prevent collision with other variables.
 %define A,B,C = 1,2,3
-print(%A)
+print(@A)
 
-Number:AddVMOperator( Name, Input, Return, Function ) -- function( Trace, Context, ... )
+Number:AddVMOperator( Name, Input, Return, Function ) -- function( Context, Trace, ... )
 */
 
 
@@ -47,10 +47,11 @@ Number:AddVMOperator( Name, Input, Return, Function ) -- function( Trace, Contex
 =================================================================================*/
 Number:AddInlineFunction( Name, input, Return, Inline)
 Number:AddPreparedFunction( Name, Input, Return, Prepare, Inline)
-Number:AddVMFunction( Name, Input, Return, Function) -- function( Trace, Context, ... )
+Number:AddVMFunction( Name, Input, Return, Function) -- function( Context, Trace, ... )
 Number:AddFunctionHelper(Name, Input, Description )
 
-%context - Context
-%memory - Context.Memory
-%trigger - Context.Trigger
-%delta - Context.Delta
+Context
+Context.Memory
+Context.Delta
+Context.Trigger
+Context.Changed

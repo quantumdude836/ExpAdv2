@@ -92,7 +92,12 @@ function EXPADV.LoadComponents( )
 			EXPADV.Config.EnabledComponents[ Component.Name ] = Component.Default_Enabled
 		end
 
-		if !Component.Enabled then return end
+		if !Component.Enabled then
+			MsgN( "Skipping component: " .. Component.Name )
+			continue
+		end
+
+		MsgN( "Registered component: " .. Component.Name )
 
 		if Component.OnEnable then Component.OnEnable( ) end
 

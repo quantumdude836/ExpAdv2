@@ -432,7 +432,19 @@ function Compiler:LookUpOperator( Name, First, ... )
 	local Class = EXPADV.GetClass( First )
 	if !Class or !Class.DerivedClass then return end
 
-	return self:LookUpOperator( Name, DerivedClass.Short, ... )
+	return self:LookUpOperator( Name, Class.DerivedClass.Short, ... )
+end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Anti colishion variables (@define)
+   --- */
+
+function Compiler:DefineVariable( )
+	local ID = self.DefineID + 1
+
+	self.DefineID = ID
+
+	return "Context.Dinfinitions[" .. ID .. "]"
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -450,12 +462,16 @@ local function SoftCompile( self, Script, Files, bIsClientSide, OnError, OnSuces
 	-- Instance:
 		self.Pos = 0
 		self.Len = #Script
-		self.Strings = { }
-		self.VMInstructions = { }
 		self.Buffer = Script
 		self.Files = Files or { }
+
+	-- Holders
+		self.DefineID = 0
+		self.Strings = { }
+		self.VMInstructions = { }
+		
+	-- Enviroment
 		self.Enviroment = { }
-		EXPADV.COMPILER_ENV = self.Enviroment
 		
 	-- Memory:
 		self:BuildScopes( )
@@ -522,10 +538,9 @@ end
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Example Compiler Usage
    --- */
-if SERVER then
-	concommand.Add( "ask", function( Player, _, Args )
-		local Code = table.concat( Args, " " )
 
+function EXPADV.TestCompiler( Player, Code )
+		
 		local function OnError( Error )
 			MsgN( "Compiler, Failed -> " .. Error )
 		end
@@ -540,8 +555,15 @@ if SERVER then
 				"end"
 			}, "\n" )
 
-			--MsgN( Native )
+			MsgN( Native )
 			local Compiled = CompileString( Native, "EXPADV2", false )
+			
+			if isstring( Compiled ) then
+				MsgN( "Failed to compile native:")
+				MsgN( Compiled )
+				return
+			end
+
 			Compiled = Compiled( )
 
 			local Context = EXPADV.BuildNewContext( Instance, Player, Player )
@@ -549,5 +571,12 @@ if SERVER then
 		end
 
 		EXPADV.Compile( Code, { }, false, OnError, OnSucess )
+end
+
+if SERVER then
+	concommand.Add( "ask", function( Player, _, Args )
+		local Code = table.concat( Args, " " )
+		
+		EXPADV.TestCompiler( Player, Code )
 	end )
 end

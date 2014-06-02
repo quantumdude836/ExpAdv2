@@ -94,13 +94,26 @@ function EXPADV.LoadOperators( )
 
 		-- First of all, Check the return type!
 		if Operator.Return and Operator.Return == "" then
-			if Operator.FLAG == EXPADV_INLINE then continue end
-			Operator.Return = nil -- ^ Inlined operators must return somthing!
+			
+			if Operator.FLAG == EXPADV_INLINE then
+				MsgN( string.format( "Skipped operator: %s(%s), Inline operators can't return void.", Operator.Name, Operator.Input ) )
+				continue
+			end
+
+			Operator.Return = nil
+
 		elseif Operator.Return and Operator.Return == "..." then
+			
 			Operator.ReturnsVarg = true
+
 		else
 			local Class = EXPADV.GetClass( Operator.Return, false, true )
-			if !Class then continue end -- return Class does not exits!
+			
+			if !Class then 
+				MsgN( string.format( "Skipped operator: %s(%s), Invalid return class %s.", Operator.Name, Operator.Input, Operator.Return ) )
+				continue
+			end
+
 		end
 
 		-- Second we check the input types, and build our signatures!
@@ -116,7 +129,8 @@ function EXPADV.LoadOperators( )
 					
 					if I ~= #string.Explode( ",", Operator.Input ) then 
 						ShouldNotLoad = true
-						break -- Vararg is in the wrong place =(
+						MsgN( string.format( "Skipped operator: %s(%s), vararg (...) must appear as at end of parameters.", Operator.Name, Operator.Input ) )
+						break
 					end
 
 					Signature[ I ] = "..."
@@ -129,6 +143,7 @@ function EXPADV.LoadOperators( )
 				
 				if !Class then 
 					ShouldNotLoad = true
+					MsgN( string.format( "Skipped operator: %s(%s), Invalid class for parameter #%i %s.", Operator.Name, Operator.Input, I, Input ) )
 					break
 				end
 
@@ -283,7 +298,7 @@ function EXPADV.LoadFunctions( )
 						break -- Vararg is in the wrong place =(
 					end
 
-					Signature[ #Signature + I ] = "..."
+					Signature[ #Signature + 1 ] = "..."
 					Operator.UsesVarg = true
 					break
 				end
@@ -296,7 +311,7 @@ function EXPADV.LoadFunctions( )
 					break
 				end
 
-				Signature[ #Signature + I ] = Class.Short
+				Signature[ #Signature + 1 ] = Class.Short
 			end
 
 			Operator.Input = Signature
@@ -322,8 +337,6 @@ function EXPADV.LoadFunctions( )
 	end
 
 	if CLIENT then
-
-		EXPADV.Functions = { }
 
 		for I = 1, #Temp_HelperData do
 			local Helper = Temp_HelperData[I]
@@ -460,18 +473,18 @@ function EXPADV.BuildLuaOperator( Operator )
 			end
 
 			-- Place inputs into generated code
-			if Input.FLAG == EXPADV_PREPARE or Input.FLAG == EXPADV_INLINEPREPARE then
+			if Operator.FLAG == EXPADV_PREPARE or Operator.FLAG == EXPADV_INLINEPREPARE then
 				OpPrepare = string.gsub( OpPrepare, "@value " .. I, InputInline )
 				OpPrepare = string.gsub( OpPrepare, "@type " .. I, Format( "%q", Input.Return or Operator.Input[I] ) )
 			end
 
-			if Input.FLAG == EXPADV_INLINE or Input.FLAG == EXPADV_INLINEPREPARE then
+			if Operator.FLAG == EXPADV_INLINE or Operator.FLAG == EXPADV_INLINEPREPARE then
 				OpInline = string.gsub( OpInline, "@value " .. I, InputInline )
 				OpInline = string.gsub( OpInline, "@type " .. I, Format( "%q", Input.Return or Operator.Input[I] ) )
 			end
 
 			-- Now we handel preperation.
-			if Input.FLAG == EXPADV_PREPARE or Input.FLAG == EXPADV_INLINEPREPARE then
+			if Operator.FLAG == EXPADV_PREPARE or Operator.FLAG == EXPADV_INLINEPREPARE then
 
 				-- First check for manual prepare
 				if string.find( OpPrepare, "@prepare " .. I ) then
@@ -510,11 +523,11 @@ function EXPADV.BuildLuaOperator( Operator )
 					OpPrepare = (OpPrepare or "") .. "\n" .. table.concat( VAPrepare, "\n" )
 				end
 
-				if Input.FLAG == EXPADV_PREPARE or Input.FLAG == EXPADV_INLINEPREPARE then
+				if Operator.FLAG == EXPADV_PREPARE or Operator.FLAG == EXPADV_INLINEPREPARE then
 					OpPrepare = string.gsub( OpPrepare, "(@%.%.%.)" .. I, table.concat( VAInline, "," ) )
 				end
 
-				if Input.FLAG == EXPADV_INLINE or Input.FLAG == EXPADV_INLINEPREPARE then
+				if Operator.FLAG == EXPADV_INLINE or Operator.FLAG == EXPADV_INLINEPREPARE then
 					OpInline = string.gsub( OpInline, "(@%.%.%.)" .. I, table.concat( VAInline, "," ) )
 				end
 
@@ -572,14 +585,14 @@ function EXPADV.BuildLuaOperator( Operator )
 				local Line = string.sub( OpPrepare, Start + 8, End - 1  )
 
 				for Name in string.gmatch( Line, "([a-zA-Z0-9_]+)" ) do
-					local Lua = Compiler:NextLocal( )
+					local Lua = Compiler:DefineVariable( )
 
 					NewLine[ #NewLine + 1 ] = Lua
 
 					Definitions[ "@" .. Name ] = Lua
 				end
 
-				OpPrepare = string.sub( OpPrepare, 1, Start ) .. table.concat( NewLine, "," ) .. string.sub( OpPrepare, End - 1 )
+				OpPrepare = string.sub( OpPrepare, 1, Start - 1 ) .. table.concat( NewLine, "," ) .. string.sub( OpPrepare, End - 1 )
 			end
 
 			OpPrepare = string.gsub( OpPrepare, "(@[a-zA-Z0-9_]+)", Definitions )
