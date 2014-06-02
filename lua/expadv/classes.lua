@@ -209,6 +209,8 @@ function EXPADV.LoadClasses( )
 
  		Class.DerivedClass = DeriveClass
 
+ 		Class.DeriveGeneric = DeriveClass == Class_Generic
+
  		EXPADV.ClassAliases[ Class.Name ] = Class
 
  		MsgN( "Registered Class: " .. Class.Name )
@@ -228,7 +230,7 @@ function EXPADV.LoadClasses( )
  			EXPADV.AddVMOperator( Class.Component, "default", Class.Short , Class.Short, Class.CreateNew )
  		end
 
- 		if DeriveClass and !Class.ToString then
+ 		if DeriveClass and !Class.DeriveGeneric and !Class.ToString then
 	 		Class.ToString = DeriveClass.ToString
 	 	end
 
@@ -241,7 +243,7 @@ function EXPADV.LoadClasses( )
  		ToStringLookUp[Class.Short] = Class.ToString
  		EXPADV.AddVMFunction( Class.Component, "tostring", Class.Short , "s", Class.ToString )
 
- 		if DeriveClass == Class_Generic then continue end
+ 		if Class.DeriveGeneric then continue end
 
  		Class.LoadOnServer = DeriveClass.LoadOnServer
 

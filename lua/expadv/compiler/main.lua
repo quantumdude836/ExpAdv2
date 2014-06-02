@@ -540,18 +540,12 @@ if SERVER then
 				"end"
 			}, "\n" )
 
-			MsgN( Native )
+			--MsgN( Native )
+			local Compiled = CompileString( Native, "EXPADV2", false )
+			Compiled = Compiled( )
 
 			local Context = EXPADV.BuildNewContext( Instance, Player, Player )
-
-			local Execute = CompileString( Native, "EXPADV2", false )
-
-			if isstring( Execute ) then
-				MsgN( "Compiler failed on compile")
-				MsgN( Execute )
-			end
-
-			local O, E = pcall( Execute, Context )
+			Compiled( Context )
 		end
 
 		EXPADV.Compile( Code, { }, false, OnError, OnSucess )
