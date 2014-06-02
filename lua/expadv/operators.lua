@@ -139,8 +139,6 @@ function EXPADV.LoadOperators( )
 			Operator.InputCount = #Signature
 			Operator.Signature = string.format( "%s(%s)", Operator.Name, table.concat( Signature, "" ) )
 
-			MsgN( "Built Operator: " .. Operator.Signature )
-
 			if Operator.UsesVarg then Operator.InputCount = Operator.InputCount - 1 end
 		else
 			Operator.Input = { }
@@ -150,6 +148,8 @@ function EXPADV.LoadOperators( )
 
 		-- Do we still need to load this?
 		if ShouldNotLoad then continue end
+
+		MsgN( "Built Operator: " .. Operator.Signature )
 
 		-- Lets build this operator.
 		EXPADV.BuildLuaOperator( Operator )
@@ -245,7 +245,7 @@ function EXPADV.LoadFunctions( )
 			Operator.ReturnsVarg = true
 		else
 			local Class = EXPADV.GetClass( Operator.Return, false, true )
-			if !Class then continue end -- return Class does not exits!
+			if !Class then continue end
 		end
 
 		-- Second we check the input types, and build our signatures!
@@ -267,7 +267,7 @@ function EXPADV.LoadFunctions( )
 				
 				if !Class then 
 					ShouldNotLoad = true
-					break
+					continue
 				end
 
 				Signature[1] = Class.Short .. ":"
@@ -283,7 +283,7 @@ function EXPADV.LoadFunctions( )
 						break -- Vararg is in the wrong place =(
 					end
 
-					Signature[ I + 1 ] = "..."
+					Signature[ #Signature + I ] = "..."
 					Operator.UsesVarg = true
 					break
 				end
@@ -296,7 +296,7 @@ function EXPADV.LoadFunctions( )
 					break
 				end
 
-				Signature[ I + 1 ] = Class.Short
+				Signature[ #Signature + I ] = Class.Short
 			end
 
 			Operator.Input = Signature
@@ -312,6 +312,8 @@ function EXPADV.LoadFunctions( )
 
 		-- Do we still need to load this?
 		if ShouldNotLoad then continue end
+
+		MsgN( "Built Function: " .. Operator.Signature )
 
 		-- Lets build this operator.
 		EXPADV.BuildLuaOperator( Operator )
@@ -357,55 +359,49 @@ end
    --- */
 
 function EXPADV.BuildVMOperator( Operator )
-	if Operator.InputCount == 0 then
-		Operator.Compile = function( Compiler, Trace )
-			return Compiler:NewVMInstruction( Trace, Operator, Operator.Function )
-		end
-	end
-
-	Operator.Compile = function( Compiler, Trace, ... )
+	function Operator.Compile( Compiler, Trace, ... )
 		EXPADV.CanBuildOperator( Compiler, Trace, Operator )
 
-		local Inputs = { Compiler:CompileTrace( Trace ), "Context" }
+		local Instructions = { ... }
+		local Arguments, Prepare = { }, { }
 
-		for I = Operator.InputCount, 1, -1 do
-			local Input = Operator.Input[I]
+		for I = 1, Operator.InputCount do
+			local Instruction = Instructions[I]
 
-			if isnumber( Input ) then
-				Inputs[I + 2] = Input
-			elseif isstring( Input ) then
-				Inputs[I + 2] = "\"" .. Input .. "\""
-			elseif Input.FLAG == EXPADV_FUNCTION then
-				Inputs[I + 2] = Compiler:VMToLua( Input.Function )
-				continue
-			elseif Input.FLAG == EXPADV_INLINE then
+			if isstring( Instruction ) then
 
-				if string.StartWith( Input.Inline, "Context.Dinfinitions" ) then
-					Inputs[I + 2] = Input.Inline
-					continue
-				end -- Already a varible
+				Arguments[I] = "\"" .. Instruction .. "\""
 
-				local O, E = pcall( RunString, "setfenv(1, EXPADV.COMPILER_ENV ); EXPADV_NATIVE = function( Trace, Context ) " .. Input.Inline .. " end")
-				if !O then self:Error( "Failed to compile instruction: %s -> %s", Operator.Signature, E ) end
-				
-				Inputs[I + 2] = Compiler:VMToLua( EXPADV_NATIVE )
-				EXPADV_NATIVE = nil
-			elseif Input.FLAG == EXPADV_PREPARE then
-				local O, E = pcall( RunString, "setfenv(1, EXPADV.COMPILER_ENV ); EXPADV_NATIVE = function( Trace, Context )\n" .. Input.Prepare .. "\nend")
-				if !O then self:Error( "Failed to compile instruction: %s -> %s", Operator.Signature, E ) end
-				
-				Inputs[I + 2] = Compiler:VMToLua( EXPADV_NATIVE )
-				EXPADV_NATIVE = nil
+			elseif isnumber( Instruction ) then
+
+				Arguments[I] = Instruction
+
+			elseif Instruction.FLAG == EXPADV_FUNCTION then
+				-- TODO: Figure this one out later
+
+			elseif Instruction.FLAG == EXPADV_INLINE then
+
+				Arguments[I] = Instruction.Inline
+
+			elseif Instruction.FLAG == EXPADV_PREPARE then
+
+				Prepare[ #Prepare + 1 ] = Instruction.Prepare
+
 			else
-				local O, E = pcall( RunString, "setfenv(1, EXPADV.COMPILER_ENV ); EXPADV_NATIVE = function( Trace, Context )\n" .. Input.Prepare .. "\n" .. "return " .. Input.Inline .. "\nend")
-				if !O then self:Error( "Failed to compile instruction: %s -> %s", Operator.Signature, E ) end
+				Arguments[I] = Instruction.Inline
 
-				Inputs[I + 2] = Compiler:VMToLua( EXPADV_NATIVE )
-				EXPADV_NATIVE = nil
+				Prepare[ #Prepare + 1 ] = Instruction.Prepare
 			end
+
 		end
 
-		return Compiler:NewVMInstruction( Trace, Operator, Operator.Function, Inputs )
+		local ID = #Compiler.VMInstructions + 1
+		
+		Compiler.VMInstructions[ID] = Operator.Function
+		
+		local Inline = string.format( "Context.Instructions[%i]( Context, %s, %s )", ID, Compiler:CompileTrace( Trace ), table.concat( Arguments, "," ) )
+	
+		return Compiler:NewLuaInstruction( Trace, Operator, table.concat( Prepare, "\n" ), Inline )
 	end
 end
 
@@ -527,7 +523,7 @@ function EXPADV.BuildLuaOperator( Operator )
 
 		-- Now lets check cpu time, note we will let the trace system below, insert our traces.
 		if Operator.FLAG == EXPADV_PREPARE or Operator.FLAG == EXPADV_INLINEPREPARE then
-			OpPrepare = string.gsub( OpPrepare, "%%cpu", "Context:UpdateCPUQuota( %%trace )" )
+			OpPrepare = string.gsub( OpPrepare, "@cpu", "Context:UpdateCPUQuota( @trace )" )
 		end
 
 		--Now lets handel traces!

@@ -13,7 +13,9 @@ function Compiler:Compile_NUM( Trace, Int )
 end
 
 function Compiler:Compile_STR( Trace, String )
-	return -- TODO:
+	local ID = #self.Strings + 1
+	self.Strings[ ID ] = String
+	return { Trace = Trace, Inline = "Context.Strings[" .. ID .. "]", Return = "s", FLAG = EXPADV_INLINE, IsRaw = true }
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -268,7 +270,7 @@ local function ValidatePreperation( Preperation )
 
 	local _, _, Word = string.find( Line, "^([a-zA-Z_][a-zA-Z0-9_]*)" )
 
-	return Valid_Words[ Word ] or ( Word and string.find( Line, "[=%(]" ) )
+	return Prep_Words[ Word ] or ( Word and string.find( Line, "[=%(]" ) )
 end
 
 function Compiler:Compile_SEQ( Trace, Instructions )
@@ -287,10 +289,9 @@ function Compiler:Compile_SEQ( Trace, Instructions )
 			continue
 		end
 
-		if Instruction.FLAG ~= EXPADV_FUNCTION then
-			Sequence[#Sequence + 1] = self:VMToLua( Instruction )
-			continue
-		end
+		if Instruction.FLAG == EXPADV_FUNCTION then
+			self:Error( 0, "Compiler failed to build sequence, got vm instruction." )
+		end -- ^ This should never even be remotly possible.
 
 		if Instruction.FLAG == EXPADV_PREPARE or Instruction.FLAG == EXPADV_INLINEPREPARE then
 			Sequence[#Sequence + 1] = Instruction.Prepare
@@ -337,39 +338,39 @@ end
 
 function Compiler:Compile_FUNC( Trace, Variable, Expressions )
 	
+	
 	-- Check for memory ref and call the call operator.
-
 	local MemRef, Scope = self:FindCell( Trace, Variable, false )
 	
 	if MemRef then
 		return self:Compile_CALL( Trace, self:Compile_VAR( Trace, Variable ), Expressions )
-	end
-
-	if #Expressions == 0 then
+	
+	elseif #Expressions == 0 then
 		local Operator = EXPADV.Functions[Variable .. "()"] or EXPADV.Functions[Variable .. "(...)"]
 		
 		if !Operator then self:TraceError( Trace, "No such function %s()", Variable ) end
 
-		return Operator.Compile( self, Trace, Variable, unpack( Expressions ) )
-	end
+		return Operator.Compile( self, Trace, Variable )
+	else
 
-	local Signature, BestMatch = ""
+		local Signature, BestMatch = ""
 
-	for I = 1, #Expressions do
-		local Match = string.format( "%s(%s...)", Variable, Signature )
+		for I = 1, #Expressions do
+			local Match = string.format( "%s(%s...)", Variable, Signature )
+
+			if EXPADV.Functions[ Match ] then BestMatch = EXPADV.Functions[ Match ] end
+
+			Signature = Signature .. Expressions[I].Return
+		end
+
+		local Operator = EXPADV.Functions[ string.format( "%s(%s)", Variable, Signature ) ] or BestMatch
 		
-		if EXPADV.Functions[ Match ] then BestMatch = EXPADV.Functions[ Match ] end
-
-		Signature = Signature .. Expressions[I].Return
+		if Operator then
+			return Operator.Compile( self, Trace, unpack( Expressions ) )
+		end
 	end
 
-	local Operator = EXPADV.Functions[ string.format( "%s(%s)", Variable, Signature ) ] or BestMatch
+	local Signature = table.concat( { self:NiceClass( unpack( Expressions ) ) }, "," )
 	
-	if !Operator then
-		local Temp = { }
-		for K, V in pairs( Expressions ) do Temp[K] = V.Return end
-		self:TraceError( Trace, "No such function %s(%s)", Variable, self:NiceClass( unpack( Temp ) ) )
-	end
-
-	return Operator.Compile( self, Trace, unpack( Expressions ) )
+	self:TraceError( Trace, "No such function %s(%s)", Variable, Signature )
 end

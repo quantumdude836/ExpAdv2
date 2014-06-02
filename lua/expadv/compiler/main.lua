@@ -118,8 +118,10 @@ end
 
 function Compiler:TraceError( Trace, ... )
 	if type( Trace ) ~= "table" then
+		MsgN( "ExpAdv2 Untraced error:")
 		print( Trace, ... )
 		debug.Trace( )
+		return self:Error( 0, "Untraced Error, see console!" )
 	end
 	
 	self.ReadLine, self.ReadChar = Trace[1], Trace[2]
@@ -137,11 +139,17 @@ end
 function Compiler:NiceClass( Name, Name2, ... )
 	--if !Name then return "" end
 
+	if istable( Name ) and Name.Return then
+		Name = Name.Return
+	end
+
 	local Class = EXPADV.GetClass( Name )
 	
 	Name = Class and Class.Name or "void"
 
-	if Name2 then return Name, self:NiceClass( Name2, ... ) end
+	if Name2 then
+		return Name, self:NiceClass( Name2, ... )
+	end
 
 	return Name
 end
@@ -149,16 +157,6 @@ end
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Instruction based functions:
    --- */
-
-function Compiler:VMToLua( Instruction )
-	if Instruction.FLAG ~= EXPADV_FUNCTION then
-		self:TokenError( "COMPILER: VMToLua recieved a Lua instruction." )
-	end
-
-	local ID = #self.VMInstructions + 1
-	self.VMInstructions[ID] = Instruction.Function
-	return string.format( "Context.Instructions[%i]( %s )", ID, table.concat( Instruction.Inputs, "," ) )
-end
 
 function Compiler:NewLuaInstruction( Trace, Operator, Prepare, Inline )
 	local Flag = EXPADV_INLINEPREPARE
@@ -175,17 +173,6 @@ function Compiler:NewLuaInstruction( Trace, Operator, Prepare, Inline )
 		Prepare = Prepare,
 		Return = Operator.Return,
 		FLAG = Flag
-	}
-end
-
-function Compiler:NewVMInstruction( Trace, Operator, Function, Inputs )
-	return {
-		Trace = Trace,
-		Function = Function,
-		Return = Operator.Return,
-		Inputs = Inputs or { self:CompileTrace( Trace ), "Context" },
-		Evaluated = true,
-		FLAG = Operator.FLAG
 	}
 end
 
@@ -294,7 +281,7 @@ function Compiler:FindCell( Trace, Variable, bError )
 	end
 
 	if !bError then return end
-
+	
 	self:TraceError( Trace, "Variable %s does not exist.", Variable )
 end
 
@@ -464,21 +451,12 @@ local function SoftCompile( self, Script, Files, bIsClientSide, OnError, OnSuces
 		self.Pos = 0
 		self.Len = #Script
 		self.Strings = { }
+		self.VMInstructions = { }
 		self.Buffer = Script
 		self.Files = Files or { }
 		self.Enviroment = { }
 		EXPADV.COMPILER_ENV = self.Enviroment
 		
-	-- Tokenizer:
-		self.TokenPos = 0
-		self.TokenLine = 0
-		self.TokenChar = 0
-
-		self.Char = ""
-		self.ReadData = ""
-		self.ReadChar = 1
-		self.ReadLine = 1
-
 	-- Memory:
 		self:BuildScopes( )
 
@@ -491,18 +469,8 @@ local function SoftCompile( self, Script, Files, bIsClientSide, OnError, OnSuces
 		self.LambdaDeph = 0
 		self.LoopDeph = 0
 
-	-- Operators:
-		
 	-- Start the Tokenizer:
-		self:NextChar( )
-		self.Tokens = { self:GetNextToken( ), self:GetNextToken( ) }
-		self.PrepToken = self.Tokens[ 1 ]
-
-		if self.PrepToken then
-			self.PrepTokenType = self.PrepToken[2]
-			self.PrepTokenName = self.PrepToken[3]
-			self.PrepTokenLine = self.PrepToken[4]
-		end
+		self:StartTokenizer( )
 
 	-- Wait for next tick to begin:
 		-- coroutine.yield( )
@@ -564,17 +532,26 @@ if SERVER then
 
 		local function OnSucess( Instance, Instruction )
 			MsgN( "Executed: " .. Code )
+			
+			local Native = table.concat( {
+				"return function( Context )",
+				Instruction.Prepare or "",
+				Instruction.Inline or "",
+				"end"
+			}, "\n" )
 
-			local Context = EXPADV.BuildNewContext( Player, Player )
+			MsgN( Native )
 
-			local Execute = CompileString(
-					[[return function( Context )
-						]] .. ( Instruction.Prepare or "" ) .. [[
-						]] .. ( Instruction.Inline or "" ) .. [[
-					end]],
-			"EXPADV2", false )
+			local Context = EXPADV.BuildNewContext( Instance, Player, Player )
 
-			Execute( Context )
+			local Execute = CompileString( Native, "EXPADV2", false )
+
+			if isstring( Execute ) then
+				MsgN( "Compiler failed on compile")
+				MsgN( Execute )
+			end
+
+			local O, E = pcall( Execute, Context )
 		end
 
 		EXPADV.Compile( Code, { }, false, OnError, OnSucess )

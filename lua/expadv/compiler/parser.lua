@@ -378,7 +378,7 @@ end
 function Compiler:Expression_13( Trace )
 	MsgN( "Compiler -> Expression 13" )
 
-	local Expression = self:Expression_Value( )
+	local Expression = self:Expression_Value( Trace )
 
 	while self:AcceptToken( "qsm" ) do
 		local Expression2 = self:Expression_1( Trace ) -- Ha Ha, Expression 2 :D
@@ -445,7 +445,7 @@ function Compiler:Expression_Variable( Trace, bIsStatement )
 			return self:Compile_INC( Trace, true, Variable )
 		elseif self:AcceptToken( "dec" ) then
 			return self:Compile_DEC( Trace, true, Variable )
-		elseif self:CheckToken( "lpa" ) and !bIsStatement  then
+		elseif !self:CheckToken( "lpa" ) and !bIsStatement  then
 			return self:Compile_VAR( Trace, Variable )
 		end
 
@@ -464,15 +464,13 @@ function Compiler:Expression_Function( Trace, bIsStatement )
 	if self:AcceptToken( "var" ) then
 		local Variable = self.TokenData
 
-		-- This error should never happen, We only call this form one place.
 		self:RequireToken( "lpa", "Unexpected error, can not compile expression." )
-
+		
 		local Expressions = { }
 
 		if !self:CheckToken( "rpa" ) then
-			
 			Expressions[1] = self:Expression( Trace )
-
+			
 			while self:AcceptToken( "com" ) do
 				Expressions[#Expressions + 1] = self:Expression( Trace )
 			end
@@ -624,19 +622,23 @@ function Compiler:Sequence( Trace, ExitToken )
 	
 	local Sequence = { }
 
-	while self:HasTokens( ) do
+	while true do
 
-		if ExitToken and self:CheckToken( ExitToken ) then
+		if !self:HasTokens( ) then
+			break
+		elseif ExitToken and self:CheckToken( ExitToken ) then
 			break
 		end
 
 		Sequence[#Sequence + 1] = self:Statement( Trace ) 
 
-		if !self:AcceptSeperator( ) and self.PrepTokenLine == self.TokenLine then
+		-- TODO: Prevent code after, Break, Continue and Return
+
+		if !self:HasTokens( ) then
+			break
+		elseif !self:AcceptSeperator( ) and self.PrepTokenLine == self.TokenLine then
 			self:TokenError( "Statements must be separated by semicolon (;) or newline" )
 		end
-
-		-- TODO: Prevent code after, Break, Continue and Return
 	end
 
 	return self:Compile_SEQ( Trace, Sequence )

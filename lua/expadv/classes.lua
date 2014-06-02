@@ -35,7 +35,7 @@ function BaseClassObj:AddAlias( Alias )
 end
 
 function BaseClassObj:WireInput( Function ) -- function( Context, Obj ) end
-		self.PrintClass = Function
+		self.ToString = Function
 	end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -164,10 +164,10 @@ end
 	@: Print Lookup!
    --- */
 
-local PrintLookUps = { }
+local ToStringLookUp = { }
 
-function EXPADV.PrintClass( Context, Short, Obj )
-	return PrintLookUps[Short]( Context, Obj )
+function EXPADV.ToString( Context, Short, Obj )
+	return ToStringLookUp[Short]( Context, Obj )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -193,11 +193,11 @@ function EXPADV.LoadClasses( )
  		EXPADV.ClassShorts[ Class.Short ] = Class
  	end
 
+ 	----------------------------------------------------------
+
  	for _, Class in pairs( EXPADV.Classes ) do
 
  		local DeriveClass = EXPADV.GetClass( Class.DeriveFrom )
-
- 		Class.DerivedClass = DeriveClass
 
  		if !DeriveClass then
  			EXPADV.Classes[ Class.Name ] = nil
@@ -207,34 +207,45 @@ function EXPADV.LoadClasses( )
  			continue
  		end
 
+ 		Class.DerivedClass = DeriveClass
+
  		EXPADV.ClassAliases[ Class.Name ] = Class
 
- 		if Class.CreateNew then
- 			EXPADV.AddVMOperator( Class.Component, "default", Class.Short , Class.Short, Class.CreateNew )
- 		end -- ^ Add default operator, can now do this :D
-
  		MsgN( "Registered Class: " .. Class.Name )
+ 	end -- ^ Derive classes!
+
+ 	----------------------------------------------------------
+
+ 	for _, Class in pairs( EXPADV.Classes ) do
+
+ 		local DeriveClass = Class.DerivedClass
+
+ 		if DeriveClass and !Class.CreateNew then
+	 		Class.CreateNew = DeriveClass.CreateNew
+	 	end
+
+		if Class.CreateNew then
+ 			EXPADV.AddVMOperator( Class.Component, "default", Class.Short , Class.Short, Class.CreateNew )
+ 		end
+
+ 		if DeriveClass and !Class.ToString then
+	 		Class.ToString = DeriveClass.ToString
+	 	end
+
+	 	if !Class.ToString then
+	 		function Class.ToString( Context, Trace, Obj )
+ 				return string.format("<%s: %s>", Class.Name, tostring( Obj ) )
+ 			end
+ 		end
+
+ 		ToStringLookUp[Class.Short] = Class.ToString
+ 		EXPADV.AddVMFunction( Class.Component, "tostring", Class.Short , "s", Class.ToString )
 
  		if DeriveClass == Class_Generic then continue end
 
  		Class.LoadOnServer = DeriveClass.LoadOnServer
 
 		Class.LoadOnClient = DeriveClass.LoadOnClient
-
- 		if !Class.CreateNew then
- 			Class.CreateNew = DeriveClass.CreateNew
- 		end
-
- 		if !Class.PrintClass then
- 			Class.PrintClass = DeriveClass.PrintClass
- 		end
-
- 		Class.PrintClass = Class.PrintClass or function( Context, Obj )
- 			return string.format("<%s: >", Class.Name, tostring( Obj ) )
- 		end
-
- 		PrintLookUps[Class.Short] = Class.PrintClass
- 		EXPADV.AddVMFunction( Class.Component, "print", Class.Short , "s", Class.PrintClass )
 
  		if WireLib then
 

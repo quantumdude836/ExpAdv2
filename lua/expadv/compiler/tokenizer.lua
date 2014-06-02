@@ -79,6 +79,7 @@ end
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Token Jumping
    --- */
+
 function Compiler:GoToToken( I )
 	local RealPos = self.TokenPos
 	
@@ -95,37 +96,64 @@ function Compiler:PrevToken( )
 	self:NextToken( ) -- Cus i'm cool like that =D
 end
 
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Tokenizer Main
+   --- */
+
+function Compiler:StartTokenizer( )
+	self.Char = ""
+	self.ReadData = ""
+	self.ReadChar = 1
+	self.ReadLine = 1
+
+	self.Tokens = { }
+	self.TokenPos = 0
+	self.TokenLine = 0
+	self.TokenChar = 0
+
+	self:NextChar( )
+	self:NextToken( )
+end
+
 function Compiler:NextToken( )
-	local Pos = self.TokenPos + 1
-	
-	self.TokenPos = Pos
-	
-	self.Token = self.Tokens[ Pos ]
-	
-	if !self.Token then
-		self.Token = self:GetNextToken( )
-		self.Tokens[ Pos ] = self.Token
+
+	if self.TokenPos >= 1 then
+		if !self.Tokens[ self.TokenPos ] then
+			self.Tokens[ self.TokenPos ] = self:GetNextToken( )
+		end
+
+		self.Token = self.Tokens[ self.TokenPos ]
 	end
-	
-	self.TokenData = self.Token[1]
-	self.TokenType = self.Token[2]
-	self.TokenName = self.Token[3]
-	self.TokenLine = self.Token[4]
-	self.TokenChar = self.Token[5]
-	
-	self.PrepToken = self.Tokens[ Pos + 1 ]
-	
-	if !self.PrepToken then
-		self.PrepToken = self:GetNextToken( )
-		self.Tokens[ Pos + 1 ] = self.PrepToken
+
+	self.TokenPos = self.TokenPos + 1
+
+	if !self.Tokens[ self.TokenPos ] then
+		self.Tokens[ self.TokenPos ] = self:GetNextToken( )
 	end
-	
+
+	self.PrepToken = self.Tokens[ self.TokenPos ]
+
+	---------------------------------------------------------
+
+	-- MsgN( "TokenPos: ", self.TokenPos )
+
+	if self.Token then
+		self.TokenData = self.Token[1]
+		self.TokenType = self.Token[2]
+		self.TokenName = self.Token[3]
+		self.TokenLine = self.Token[4]
+		self.TokenChar = self.Token[5]
+
+		-- MsgN( "Current Token: ", self.TokenType )
+	end
+
 	if self.PrepToken then
 		self.PrepTokenType = self.PrepToken[2]
 		self.PrepTokenName = self.PrepToken[3]
 		self.PrepTokenLine = self.PrepToken[4]
+
+		-- MsgN( "Prep Token: ", self.PrepTokenType )
 	end
-	
 end
 
 function Compiler:PopToken( )
@@ -173,7 +201,7 @@ function Compiler:SkipComments( )
 
 			self:SkipChar( )
 
-			self:TimeCheck(  )
+			-- TODO: Yeild protection.
 		end
 
 		self.ReadData = ""
@@ -185,32 +213,6 @@ end
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Token Generator
    --- */
-
-function Compiler:DataToken( )
-
-	-- NUMBER:
-
-	if self:NextPattern( "^0x[%x]+" ) then
-		self.ReadData = tonumber( self.ReadData ) or self:Error( 0, "Invalid number format (%s)", 0, self.ReadData )
-		return self:NewToken( "num", "hex" )
-
-	elseif self:NextPattern( "^0b[01]+" ) then
-		self.ReadData = tonumber( self.ReadData:sub(3), 2 ) or self:Error( 0, "Invalid number format (%s)", 0, self.ReadData )
-		return self:NewToken( "num", "bin" )
-
-	elseif self:NextPattern( "^%d+%.?%d*" ) then
-		self.ReadData = tonumber( self.ReadData ) or self:Error( 0, "Invalid number format (%s)", 0, self.ReadData )
-		return self:NewToken( "num", "real" )
-
-	-- STRING:
-
-	elseif self.Char == '"' then
-		return self:StringToken( '"' )
-	elseif self.Char == "'" then
-		return self:StringToken( "'" )
-	end
-
-end
 
 function Compiler:StringToken( StrChar )
 	local Escape = false
@@ -274,8 +276,6 @@ function Compiler:StringToken( StrChar )
 		else
 			self:Error( 0, "Unfinished escape sequence (\\%s)", self.Char )
 		end
-
-		self:TimeCheck(  )
 	end
 
 	if self.Char and self.Char == StrChar then
@@ -296,8 +296,29 @@ end
 
 /* ---------------------------------------------------------------------------------------------------------------------------------------------- */
 
-function Compiler:WordToken( )
-	if self:NextPattern( "^[a-zA-Z][a-zA-Z0-9_]*" ) then
+function Compiler:BuildToken( )
+	-- NUMBER:
+
+	if self:NextPattern( "^0x[%x]+" ) then
+		self.ReadData = tonumber( self.ReadData ) or self:Error( 0, "Invalid number format (%s)", 0, self.ReadData )
+		return self:NewToken( "num", "hex" )
+
+	elseif self:NextPattern( "^0b[01]+" ) then
+		self.ReadData = tonumber( self.ReadData:sub(3), 2 ) or self:Error( 0, "Invalid number format (%s)", 0, self.ReadData )
+		return self:NewToken( "num", "bin" )
+
+	elseif self:NextPattern( "^%d+%.?%d*" ) then
+		self.ReadData = tonumber( self.ReadData ) or self:Error( 0, "Invalid number format (%s)", 0, self.ReadData )
+		return self:NewToken( "num", "real" )
+
+	-- STRING:
+
+	elseif self.Char == '"' then
+		return self:StringToken( '"' )
+	elseif self.Char == "'" then
+		return self:StringToken( "'" )
+	
+	elseif self:NextPattern( "^[a-zA-Z][a-zA-Z0-9_]*" ) then
 		local RawData = self.ReadData
 
 	-- KEYWORDS:
@@ -377,11 +398,6 @@ end
 function Compiler:GetNextToken( )
 	if self.Char then
 
-		/*if self.Yield and self.Yield < SysTime( ) then
-			MsgN( "Yeild: ", self.Pos )
-			coroutine.yield( )
-		end*/
-
 		self:SkipSpaces( )
 
 		self:SkipComments( )
@@ -391,11 +407,9 @@ function Compiler:GetNextToken( )
 			return self:GetNextToken( )
 		end
 		
-		local Token = self:WordToken( ) or self:DataToken( )
+		local Token = self:BuildToken( )
 		
-		if Token then
-			return Token
-		end
+		if Token then return Token end
 		
 		for I = 1, #self.RawTokens do
 			local Token = self.RawTokens[I]

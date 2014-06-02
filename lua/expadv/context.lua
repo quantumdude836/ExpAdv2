@@ -10,7 +10,7 @@ EXPADV.RootContext.__index = EXPADV.RootContext
 	@: Now we need a way to build this object
    --- */
 
-function EXPADV.BuildNewContext( Player, Entity )
+function EXPADV.BuildNewContext( Instance, Player, Entity )
 	local Context = setmetatable( { player = Player, entity = Entity }, EXPADV.RootContext )
 
 	Context.Memory = { }
@@ -18,9 +18,9 @@ function EXPADV.BuildNewContext( Player, Entity )
 	Context.Trigger = { }
 	Context.Changed = { }
 
-	Context.Strings = { }
 	Context.Dinfinitions = { }
-	Context.VMInstructions = { }
+	Context.Strings = Instance.Strings or { }
+	Context.Instructions = Instance.VMInstructions or { }
 
 	return Context
 end

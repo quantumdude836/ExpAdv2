@@ -59,17 +59,22 @@ MathComponent:AddInlineOperator("^", "n,n", "n", "(@value 1 ^ @value 2)" )
 MathComponent:AddInlineOperator("is", "n", "b", "(@value 1 >= 1)" )
 MathComponent:AddInlineOperator("not", "n", "b", "(@value 1 < 1)" )
 MathComponent:AddInlineOperator("-", "n", "b", "(-@value 1)" )
-MathComponent:AddInlineOperator("$", "n", "n", "((%memory[@value 1] or 0) - (%delta[@value 1] or 0))" )
+MathComponent:AddInlineOperator("$", "n", "n", "((Context.Memory[@value 1] or 0) - (Context.Delta[@value 1] or 0))" )
 
 /*	---	---------------------------------------------------------------------------------
 	@:Section -> Assignment Operators
 ---	/*
 
 -- For saving to memory.
-MathComponent:AddPreparedOperator("=n", "n,n", "n", "Context.Memory[@value 1] = @value 2" )
+MathComponent:AddPreparedOperator("=n", "n,n", "n", [[
+	@define value = Context.Memory[@value 1]
+	Context.Trigger = Context.Delta[@value 1] ~= @value
+	Context.Memory[@value 1] = @value 2
+	Context.Delta[@value 1] = value
+]] ) -- First value is memory address, second is value.
 
 -- Example of custom realtime memory allication method
-MathComponent:AddPreparedOperator("=n", "s,n", "n", "Context.Memory[ Context.Cells[@value 1].MemRef ] = @value 2" )
+-- MathComponent:AddPreparedOperator("=n", "s,n", "n", "Context.Memory[ Context.Cells[@value 1].MemRef ] = @value 2" )
 
 /*	---
 	@Assign Before:

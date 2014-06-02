@@ -66,7 +66,9 @@ function EXPADV.LoadCore( )
 
 	EXPADV.IncludeCore( )
 
+	include( "expadv/components/core.lua" )
 	include( "expadv/components/number.lua" )
+	include( "expadv/components/string.lua" )
 
 	EXPADV.LoadComponents( )
 
