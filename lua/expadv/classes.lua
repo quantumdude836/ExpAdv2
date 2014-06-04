@@ -72,16 +72,32 @@ end
 	@: Seralization Support
    --- */
 
--- Not yet supported, please do not use this method.
-function BaseClassObj:Serialize( Function ) -- function( obj Value )
-	self.SerializeAsString = Function
-end
+require( "von" )
 
--- Not yet supported, please do not use this method.
-function BaseClassObj:Deserialize( Function ) -- function( String seralized )
-	self.DeserializeFromString = Function
-end
+if von then
+	-- Not yet supported, please do not use this method.
+	function BaseClassObj:Serialize( Function ) -- function( table Context, obj Value )
+		self.SerializeAsString = Function
+	end
 
+	-- Not yet supported, please do not use this method.
+	function BaseClassObj:Deserialize( Function ) -- function( table Context, String seralized )
+		self.DeserializeFromString = Function
+	end
+
+	-- Not yet supported, please do not use this method.
+	function EXPADV.Serialize( Context, Short, Obj ) -- Table, String, Obj
+		-- Assigned: Vercas
+		-- Todo: return seralized
+	end
+
+	-- Not yet supported, please do not use this method.
+	function EXPADV.Deserialize( Context, Seralized ) -- Table, String
+		-- Assigned: Vercas
+		-- Todo: return Short, Obj
+	end
+
+end
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Server -> Client Support
    --- */
