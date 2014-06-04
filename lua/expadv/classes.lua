@@ -12,7 +12,8 @@ local BaseClassObj = EXPADV.BaseClassObj
 	@: Basic Support
    --- */
 
-function BaseClassObj:DefaultAsLua( Default ) -- Object / function( Trace, Context )
+-- Builds a VM operator, to return the default zzero value object of a class.
+function BaseClassObj:DefaultAsLua( Default ) -- Object / function( table Trace, table Context )
 	if istable( Default ) then
 		Default = function( ) return table.Copy( Default ) end
 	elseif !isfunction( Default ) then
@@ -22,19 +23,22 @@ function BaseClassObj:DefaultAsLua( Default ) -- Object / function( Trace, Conte
 	self.CreateNew = Default
 end
 
-function BaseClassObj:ExtendClass( ExtendClass )
+-- Derives this class and its operators of another class.
+function BaseClassObj:ExtendClass( ExtendClass ) -- String
 	self.DeriveFrom = ExtendClass
 end
 
 local Temp_Aliases = { }
 
-function BaseClassObj:AddAlias( Alias )
+-- Allows more convenient names to be used when defining class type in expadv2 script.
+function BaseClassObj:AddAlias( Alias ) -- String
 	Temp_Aliases[ Alias ] = self
 end
 
-function BaseClassObj:StringBuilder( Function ) -- function( Context, Obj ) end
-		self.ToString = Function
-	end
+-- Use this to define a tostring method for your class, this takes the natives context into account.
+function BaseClassObj:StringBuilder( Function ) -- function( table Context, obj Value )
+	self.ToString = Function
+end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Wire Support
@@ -44,7 +48,9 @@ if WireLib then
 
 	local function WireOut( Context, MemoryRef ) return Context.Memory[ MemoryRef ] end
 
-	function BaseClassObj:WireOutput( WireType, Function ) -- function( Context, MemoryRef ) return Converted end
+	-- Defines the wire outport type name of your class.
+	-- Optonally define a method to translate native type in memory to wire type.
+	function BaseClassObj:WireOutput( WireType, Function ) -- String, function( table Context, number MemoryRef )
 		self.Wire_Out_Type = string.upper( WireType )
 
 		self.Wire_Out_Util = Function or WireOut
@@ -52,7 +58,9 @@ if WireLib then
 
 	local function WireIn( Context, MemoryRef, InValue ) Context.Memory[ MemoryRef ] = InValue end
 
-	function BaseClassObj:WireInput( WireType, Function ) -- function( Context, MemoryRef,  InValue ) end
+	-- Defines the wire inport type name of your class.
+	-- Optonally define a method to translate wire type to native type and store in memory.
+	function BaseClassObj:WireInput( WireType, Function ) -- function( table Context, number MemoryRef, obj Value )
 		self.Wire_In_Type = string.upper( WireType )
 		
 		self.Wire_In_Util = Function or WireIn
@@ -64,11 +72,13 @@ end
 	@: Seralization Support
    --- */
 
-function BaseClassObj:Serialize( Function ) -- function( Value ) return String end
+-- Not yet supported, please do not use this method.
+function BaseClassObj:Serialize( Function ) -- function( obj Value )
 	self.SerializeAsString = Function
 end
 
-function BaseClassObj:Deserialize( Function ) -- function( String ) return Value end
+-- Not yet supported, please do not use this method.
+function BaseClassObj:Deserialize( Function ) -- function( String seralized )
 	self.DeserializeFromString = Function
 end
 
@@ -80,19 +90,23 @@ EXPADV.BaseClassObj.LoadOnServer = true
 
 EXPADV.BaseClassObj.LoadOnClient = true
 
+-- Defines the class as server side only.
 function BaseClassObj:MakeServerOnly( )
 	self.LoadOnClient = false
 end
 
+-- Defines the class as cleint side only.
 function BaseClassObj:MakeClientOnly( )
 	self.LoadOnServer = false
 end
 
-function BaseClassObj:NetSend( Function ) -- function( Value ) return String end
+-- Not yet supported, please do not use this method.
+function BaseClassObj:NetSend( Function ) -- function( obj Value )
 	self.SendToClient = Function
 end
 
-function BaseClassObj:NetReceive( Function ) -- function( Value ) return String end
+-- Not yet supported, please do not use this method.
+function BaseClassObj:NetReceive( Function ) -- function( obj Value )
 	self.ReceiveFromServer = Function
 end
 
@@ -102,7 +116,9 @@ end
 
 local Temp_Classes = { }
 
-function EXPADV.AddClass( Component, Name, Short )
+-- Define and create a new class, this returns the classes module.
+-- This function is for internal use only, use BaseComponent:AddClass( ... )
+function EXPADV.AddClass( Component, Name, Short ) -- table, string, string
 	if #Short > 1 then Short = "_" .. Short end
 
 	local Class = setmetatable( { Component = Component, Name = Name, Short = Short, DeriveFrom = "generic" }, EXPADV.BaseClassObj )
@@ -147,7 +163,8 @@ local Class_Variant = EXPADV.AddClass( nil, "variant", "vr" )
 	@: GetClass
    --- */
 
-function EXPADV.GetClass( Name )
+-- Returns a classes module, using either name or id as look up.
+function EXPADV.GetClass( Name ) -- String
 	if !Name then return end
 
 	if EXPADV.Classes[ Name ] then return EXPADV.Classes[ Name ] end
@@ -165,7 +182,8 @@ end
 
 local ToStringLookUp = { }
 
-function EXPADV.ToString( Context, Short, Obj )
+-- Used during execution to translate class objects to strings.
+function EXPADV.ToString( Context, Short, Obj ) -- Table, String, Obj
 	return ToStringLookUp[Short]( Context, Obj )
 end
 
@@ -173,6 +191,7 @@ end
 	@: Load classes!
    --- */
 
+-- Internal function, not for public use.
 function EXPADV.LoadClasses( )
  	EXPADV.ClassAliases = { }
 
