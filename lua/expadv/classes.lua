@@ -12,7 +12,7 @@ local BaseClassObj = EXPADV.BaseClassObj
 	@: Basic Support
    --- */
 
--- Builds a VM operator, to return the default zzero value object of a class.
+-- Builds a VM operator, to return the default zero value object of a class.
 function BaseClassObj:DefaultAsLua( Default ) -- Object / function( table Trace, table Context )
 	if istable( Default ) then
 		Default = function( ) return table.Copy( Default ) end
@@ -23,7 +23,7 @@ function BaseClassObj:DefaultAsLua( Default ) -- Object / function( table Trace,
 	self.CreateNew = Default
 end
 
--- Derives this class and its operators of another class.
+-- Derives this class as well as its operators and methods from another class.
 function BaseClassObj:ExtendClass( ExtendClass ) -- String
 	self.DeriveFrom = ExtendClass
 end

@@ -80,7 +80,7 @@ function EXPADV.AddVMOperator( Component, Name, Input, Return, Function )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
-	@: Load out operators
+	@: Load our operators
    --- */
 
 function EXPADV.LoadOperators( )
@@ -94,13 +94,12 @@ function EXPADV.LoadOperators( )
 
 		-- First of all, Check the return type!
 		if Operator.Return and Operator.Return == "" then
-			
+			Operator.Return = nil
+
 			if Operator.FLAG == EXPADV_INLINE then
 				MsgN( string.format( "Skipped operator: %s(%s), Inline operators can't return void.", Operator.Name, Operator.Input ) )
 				continue
 			end
-
-			Operator.Return = nil
 
 		elseif Operator.Return and Operator.Return == "..." then
 			
@@ -111,6 +110,14 @@ function EXPADV.LoadOperators( )
 			
 			if !Class then 
 				MsgN( string.format( "Skipped operator: %s(%s), Invalid return class %s.", Operator.Name, Operator.Input, Operator.Return ) )
+				continue
+			end
+
+			if !Class.LoadOnServer and Operator.LoadOnServer then
+				MsgN( string.format( "Skipped operator: %s(%s), return class %s is not avalible on server.", Operator.Name, Operator.Input, Operator.Return ) )
+				continue
+			elseif !Class.LoadOnClient and Operator.LoadOnClient then
+				MsgN( string.format( "Skipped operator: %s(%s), return class %s is not avalible on clients.", Operator.Name, Operator.Input, Operator.Return ) )
 				continue
 			end
 
@@ -142,8 +149,18 @@ function EXPADV.LoadOperators( )
 				local Class = EXPADV.GetClass( Input, false, true )
 				
 				if !Class then 
-					ShouldNotLoad = true
 					MsgN( string.format( "Skipped operator: %s(%s), Invalid class for parameter #%i %s.", Operator.Name, Operator.Input, I, Input ) )
+					ShouldNotLoad = true
+					break
+				end
+
+				if !Class.LoadOnServer and Operator.LoadOnServer then
+					MsgN( string.format( "Skipped operator: %s(%s), parameter #%i %s is not avalible on server.", Operator.Name, Operator.Input, I, Class.Name ) )
+					ShouldNotLoad = true
+					break
+				elseif !Class.LoadOnClient and Operator.LoadOnClient then
+					MsgN( string.format( "Skipped operator: %s(%s), parameter #%i %s is not avalible on clients.", Operator.Name, Operator.Input, I, Class.Name ) )
+					ShouldNotLoad = true
 					break
 				end
 
@@ -240,7 +257,7 @@ function EXPADV.AddFunctionHelper( Component, Name, Input, Description )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
-	@: Load out functions
+	@: Load our functions
    --- */
 
 function EXPADV.LoadFunctions( )
@@ -254,13 +271,31 @@ function EXPADV.LoadFunctions( )
 
 		-- First of all, Check the return type!
 		if Operator.Return and Operator.Return == "" then
-			if Operator.FLAG == EXPADV_INLINE then continue end
-			Operator.Return = nil -- ^ Inlined operators must return somthing!
+			Operator.Return = nil
+
+			if Operator.FLAG == EXPADV_INLINE then
+				MsgN( string.format( "Skipped operator: %s(%s), Inline operators can't return void.", Operator.Name, Operator.Input ) )
+				continue
+			end
+
 		elseif Operator.Return and Operator.Return == "..." then
 			Operator.ReturnsVarg = true
 		else
 			local Class = EXPADV.GetClass( Operator.Return, false, true )
-			if !Class then continue end
+			
+			if !Class then 
+				MsgN( string.format( "Skipped function: %s(%s), Invalid return class %s.", Operator.Name, Operator.Input, Operator.Return ) )
+				continue
+			end
+
+			if !Class.LoadOnServer and Operator.LoadOnServer then
+				MsgN( string.format( "Skipped function: %s(%s), return class %s is not avalible on server.", Operator.Name, Operator.Input, Operator.Return ) )
+				continue
+			elseif !Class.LoadOnClient and Operator.LoadOnClient then
+				MsgN( string.format( "Skipped function: %s(%s), return class %s is not avalible on clients.", Operator.Name, Operator.Input, Operator.Return ) )
+				continue
+			end
+
 		end
 
 		-- Second we check the input types, and build our signatures!
@@ -281,7 +316,15 @@ function EXPADV.LoadFunctions( )
 				local Class = EXPADV.GetClass( Meta, false, true )
 				
 				if !Class then 
-					ShouldNotLoad = true
+					MsgN( string.format( "Skipped function: %s(%s), Invalid class for method %s.", Operator.Name, Operator.Input, Input ) )
+					continue
+				end
+
+				if !Class.LoadOnServer and Operator.LoadOnServer then
+					MsgN( string.format( "Skipped function: %s(%s), method class %s is not avalible on server.", Operator.Name, Operator.Input, Class.Name ) )
+					continue
+				elseif !Class.LoadOnClient and Operator.LoadOnClient then
+					MsgN( string.format( "Skipped function: %s(%s), method class %s is not avalible on clients.", Operator.Name, Operator.Input, Class.Name ) )
 					continue
 				end
 
@@ -307,6 +350,17 @@ function EXPADV.LoadFunctions( )
 				local Class = EXPADV.GetClass( Input, false, true )
 				
 				if !Class then 
+					MsgN( string.format( "Skipped function: %s(%s), Invalid class for parameter #%i %s.", Operator.Name, Operator.Input, I, Input ) )
+					ShouldNotLoad = true
+					break
+				end
+
+				if !Class.LoadOnServer and Operator.LoadOnServer then
+					MsgN( string.format( "Skipped function: %s(%s), parameter #%i %s is not avalible on server.", Operator.Name, Operator.Input, I, Class.Name ) )
+					ShouldNotLoad = true
+					break
+				elseif !Class.LoadOnClient and Operator.LoadOnClient then
+					MsgN( string.format( "Skipped function: %s(%s), parameter #%i %s is not avalible on clients.", Operator.Name, Operator.Input, I, Class.Name ) )
 					ShouldNotLoad = true
 					break
 				end

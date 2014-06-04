@@ -12,7 +12,8 @@ local BaseComponent = EXPADV.EXPADV_BaseComponent
 	@: Class Support
    --- */
 
-function BaseComponent:AddClass( Name, Short )
+-- Define and create a new class (on the component), this returns the classes module.
+function BaseComponent:AddClass( Name, Short ) -- String, String
 	return EXPADV.AddClass( self, Name, Short )
 end
 
@@ -20,15 +21,18 @@ end
 	@: Operator Support
    --- */
 
-function BaseComponent:AddInlineOperator( Name, Input, Return, Inline )
+-- Creates a new inline operator (on the component).
+function BaseComponent:AddInlineOperator( Name, Input, Return, Inline ) -- String, String, String, String
 	return EXPADV.AddInlineOperator( self, Name, Input, Return, Inline )
 end
 
-function BaseComponent:AddPreparedOperator( Name, Input, Return, Prepare, Inline )
+-- Creates a new prepared operator (on the component), with optional inline.
+function BaseComponent:AddPreparedOperator( Name, Input, Return, Prepare, Inline ) -- String, String, String, String, String
 	return EXPADV.AddPreparedOperator( self, Name, Input, Return, Prepare, Inline )
 end
 
-function BaseComponent:AddVMOperator( Name, Input, Return, Function ) -- function( Trace, Context, ... )
+-- Creates a new virtual operator (on the component).
+function BaseComponent:AddVMOperator( Name, Input, Return, Function ) -- String, String, String, function( Context, Trace, ... )
 	return EXPADV.AddVMOperator( self, Name, Input, Return, Function )
 end
 
@@ -36,15 +40,18 @@ end
 	@: Function Support
    --- */
 
-function BaseComponent:AddInlineFunction( Name, Input, Return, Inline )
+-- Creates a new inline function (on the component).
+function BaseComponent:AddInlineFunction( Name, Input, Return, Inline ) -- String, String, String, String
 	return EXPADV.AddInlineFunction( self, Name, Input, Return, Inline )
 end
 
-function BaseComponent:AddPreparedFunction( Name, Input, Return, Prepare, Inline )
+-- Creates a new prepared function (on the component), with optional inline.
+function BaseComponent:AddPreparedFunction( Name, Input, Return, Prepare, Inline ) -- String, String, String, String, String
 	return EXPADV.AddPreparedFunction( self, Name, Input, Return, Prepare, Inline )
 end
 
-function BaseComponent:AddVMFunction( Name, Input, Return, Function ) -- function( Trace, Context, ... )
+-- Creates a new virtual function (on the component).
+function BaseComponent:AddVMFunction( Name, Input, Return, Function ) -- String, String, String, function( Context, Trace, ... )
 	return EXPADV.AddVMFunction( self, Name, Input, Return, Function )
 end
 
@@ -52,7 +59,8 @@ end
 	@: Function Helper Data
    --- */
 
-function BaseComponent:AddFunctionHelper( Name, Input, Description )
+-- Creates a helper entry for a function on the component.
+function BaseComponent:AddFunctionHelper( Name, Input, Description ) -- String, String, String
 	return EXPADV.AddFunctionHelper( self, Name, Input, Description )
 end
 
@@ -68,7 +76,8 @@ end
 
 local Temp_Components = { }
 
-function EXPADV.AddComponent( Name, Enabled )
+-- Registers and retruns a new component object.
+function EXPADV.AddComponent( Name, Enabled ) -- String, Boolean
 	local Component = setmetatable( { Name = Name, Default_Enabled = Enabled }, BaseComponent )
 
 	Temp_Components[Name] = Component
@@ -80,6 +89,7 @@ end
 	@: Load Components
    --- */
 
+-- Internal function, not for public use.
 function EXPADV.LoadComponents( )
 	EXPADV.Components = { }
 
