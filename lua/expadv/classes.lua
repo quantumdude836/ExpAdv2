@@ -89,12 +89,19 @@ if von then
 	function EXPADV.Serialize( Context, Short, Obj ) -- Table, String, Obj
 		-- Assigned: Vercas
 		-- Todo: return seralized
+
+		--	This is an initial attempt to check behaviour.
+		return von.serialize({Short, Obj})
 	end
 
 	-- Not yet supported, please do not use this method.
 	function EXPADV.Deserialize( Context, Seralized ) -- Table, String
 		-- Assigned: Vercas
 		-- Todo: return Short, Obj
+
+		local res = von.deserialize(serialized)
+
+		return res[2], res[1]
 	end
 
 end
