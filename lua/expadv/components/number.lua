@@ -40,7 +40,7 @@ MathComponent:AddPreparedOperator( "n=", "n,n", "", [[
 	@define value = Context.Memory[@value 1]
 	Context.Trigger = Context.Delta[@value 1] ~= @value
 	Context.Memory[@value 1] = @value 2
-	Context.Delta[@value 1] = value
+	Context.Delta[@value 1] = @value
 ]] ) -- First value is memory address, second is value.
 
 -- Example of custom realtime memory allication method

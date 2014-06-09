@@ -239,13 +239,27 @@ end
 
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
-	@: Expression Variables
+	@: Type Operators
    --- */
 
 function Compiler:Compile_DEFAULT( Trace, Class )
 	local Operator = self:LookUpOperator( "default", Class )
 
 	if !Operator then self:TraceError( Trace, "No defined default value for %s", self:NiceClass( Class ) ) end
+
+	return Operator.Compile( self, Trace )
+end
+
+function Compiler:Compile_CAST( Trace, Class, Expression )
+	if Class.Short == Expression.Return then
+		self:TraceError( Trace, "%s can not be cast to itself.", Class.Name )
+	end
+
+	local Operator = self:LookUpOperator( Class.Name, Expression.Return )
+
+	if !Operator then
+		self:TraceError( Trace, "%s can not be cast to %s", self:NiceClass( Expression.Return ), Class.Name )
+	end
 
 	return Operator.Compile( self, Trace )
 end

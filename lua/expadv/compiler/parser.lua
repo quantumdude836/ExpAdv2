@@ -169,16 +169,28 @@ function Compiler:Expression( Trace )
 	return self:Expression_Postfix( Trace, Expression )
 end
 
--- Stage 1: Grouped Equation, In/Dec
+-- Stage 1: Grouped Equation, casting
 function Compiler:Expression_1( Trace )
 	MsgN( "Compiler -> Expression 1" )
 	
 	if self:AcceptToken( "lpa" ) then
+		
+		if self:AcceptToken( "var" ) or self:AcceptToken( "func" ) then
+			local Type = self.TokenData
+			local Class = self:GetClass( Trace, Type, true )
+
+			if !Class or !self:AcceptToken( "rpa" ) then
+				self:PrevToken( ) -- Not a casting operation.
+			else 
+				return self:Compile_CAST( Trace, Class, self:Expression_1( Trace ) )
+			end
+		end
+
 		local Expression = self:Expression_1( Trace )
 
 		self:RequireToken( "rpa", "Right parenthesis ( )) missing, to close grouped equation." )
 
-		return Expression
+		return Expression -- Grouped equation
 	end
 
 	return self:Expression_2( Trace )
@@ -204,9 +216,6 @@ function Compiler:Expression_2( Trace )
 		self:ExcludeWhiteSpace( "length operator (#) must not be succeeded by whitespace" )
 		return self:Compile_LEN( Trace, self:Expression_1( Trace ) )
 	end
-
-	-- TODO: Casting:
-	-- local CastCheck = self:ManualPattern( "%(()[a-z][A-Z0-9]+()%)" )
 
 	-- In C-style order of operatorions, Inrement and Decrement should be here.
 	
