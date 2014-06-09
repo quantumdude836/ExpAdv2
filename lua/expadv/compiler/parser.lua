@@ -731,7 +731,7 @@ function Compiler:Statement_2( Trace )
 
 			self:RequireToken( "rcb", "Right curly bracket (}) missing, to close elseif statement" )
 
-			return self:Compile_ELSE( Trace, Expression, Sequence )
+			return self:Compile_ELSE( Trace, Sequence )
 		end
 
 		self:PushScope( )
@@ -740,7 +740,7 @@ function Compiler:Statement_2( Trace )
 
 		self:PopScope( )
 
-		return self:Compile_ELSE( Trace, Expression, Statement )
+		return self:Compile_ELSE( Trace, Statement )
 	end
 
 	return self:Statement_99( Trace )

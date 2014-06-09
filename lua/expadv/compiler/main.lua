@@ -215,7 +215,6 @@ function Compiler:PopScope( )
 
 	self.ScopeID = self.ScopeID - 1
 	self.Scope = self.Scopes[ self.ScopeID ]
-	self.Prediction = self.Predictions[ self.ScopeID ]
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
