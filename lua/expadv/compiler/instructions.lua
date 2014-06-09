@@ -338,7 +338,7 @@ function Compiler:Compile_IF( Trace, Condition, Sequence, Else )
 	if Condition.Prepare then Native[#Native + 1] = Condition.Prepare end
 	if Else and Else.Prepare then Native[#Native + 1] = Else.Prepare end
 
-	Native[#Native + 1] = "if( " .. Condition.Inline .. " ) then"
+	Native[#Native + 1] = "if ( " .. Condition.Inline .. " ) then"
 
 	if Sequence.Prepare then Native[#Native + 1] = Sequence.Prepare end
 	if Sequence.Inline then Native[#Native + 1] = Sequence.Inline end
@@ -357,7 +357,7 @@ function Compiler:Compile_ELSEIF( Trace, Condition, Sequence, Else )
 	local Native = { }
 	if Else and Else.Prepare then Native[#Native + 1] = Else.Prepare end
 
-	Native[#Native + 1] = "elseif( " .. Condition.Inline .. " ) then"
+	Native[#Native + 1] = "elseif ( " .. Condition.Inline .. " ) then"
 
 	if Sequence.Prepare then Native[#Native + 1] = Sequence.Prepare end
 	if Sequence.Inline then Native[#Native + 1] = Sequence.Inline end

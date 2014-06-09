@@ -194,9 +194,12 @@ end
 	@: Register our functions
    --- */
 
+local Func_Alias
 local Temp_Functions = { }
 
 function EXPADV.AddInlineFunction( Component, Name, Input, Return, Inline )
+	Func_Alias = { }
+
 	Temp_Functions[ #Temp_Functions + 1 ] = {  
 		LoadOnClient = LoadOnClient,
 		LoadOnServer = LoadOnServer,
@@ -206,11 +209,14 @@ function EXPADV.AddInlineFunction( Component, Name, Input, Return, Inline )
 		Input = Input,
 		Return = Return,
 		Inline = Inline,
+		Aliases = Func_Alias,
 		FLAG = EXPADV_INLINE
 	}
 end
 
 function EXPADV.AddPreparedFunction( Component, Name, Input, Return, Prepare, Inline )
+	Func_Alias = { }
+
 	Temp_Functions[ #Temp_Functions + 1 ] = {  
 		LoadOnClient = LoadOnClient,
 		LoadOnServer = LoadOnServer,
@@ -221,11 +227,14 @@ function EXPADV.AddPreparedFunction( Component, Name, Input, Return, Prepare, In
 		Return = Return,
 		Prepare = Prepare,
 		Inline = Inline,
+		Aliases = Func_Alias,
 		FLAG = Inline and EXPADV_INLINEPREPARE or EXPADV_PREPARE
 	}
 end
 
 function EXPADV.AddVMFunction( Component, Name, Input, Return, Function )
+	Func_Alias = { }
+
 	Temp_Functions[ #Temp_Functions + 1 ] = {  
 		LoadOnClient = LoadOnClient,
 		LoadOnServer = LoadOnServer,
@@ -235,8 +244,13 @@ function EXPADV.AddVMFunction( Component, Name, Input, Return, Function )
 		Input = Input,
 		Return = Return,
 		Function = Function,
+		Aliases = Func_Alias,
 		FLAG = EXPADV_FUNCTION
 	}
+end
+
+function EXPADV.AddFunctionAlias( Name, Input )
+	Func_Alias[ #Func_Alias + 1 ] = { Name = Name, Input = Input }
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -388,6 +402,8 @@ function EXPADV.LoadFunctions( )
 		EXPADV.BuildLuaOperator( Operator )
 
 		EXPADV.Functions[ Operator.Signature ] = Operator
+
+		EXPADV.LoadFunctionAliases( Operator )
 	end
 
 	if CLIENT then
@@ -406,6 +422,63 @@ function EXPADV.LoadFunctions( )
 			Operator.Description = Helper.Description
 		end
 
+	end
+end
+
+function EXPADV.LoadFunctionAliases( Operator )
+	for _, Alias in pairs( Operator.Aliases ) do
+		local ShouldNotLoad = false
+
+		if Alias.Input and Alias.Input ~= "" then
+			
+			local Signature = { }
+
+			local Start, End = string.find( Alias.Input, "^()[a-z0-9]+():" )
+
+			if Start then
+				local Meta = string.sub( Alias.Input, Start, End - 1 )
+
+				Alias.Input = string.sub( Alias.Input, End + 1 )
+
+				local Class = EXPADV.GetClass( Meta, false, true )
+				if !Class then
+					continue
+				elseif !Class.LoadOnServer and Operator.LoadOnServer then
+					continue
+				elseif !Class.LoadOnClient and Operator.LoadOnClient then
+					continue
+				end
+
+				Signature[1] = Class.Short .. ":"
+			end
+
+			for I, Input in pairs( string.Explode( ",", Alias.Input ) ) do
+
+				if Input == "..." then
+					ShouldNotLoad = true
+					break
+				end
+
+				local Class = EXPADV.GetClass( Input, false, true )
+				
+				if !Class then 
+					ShouldNotLoad = true
+					break
+				end
+
+				if !Class.LoadOnServer and Operator.LoadOnServer then
+					ShouldNotLoad = true
+					break
+				elseif !Class.LoadOnClient and Operator.LoadOnClient then
+					ShouldNotLoad = true
+					break
+				end
+
+				Signature[ #Signature + 1 ] = Class.Short
+			end
+		end
+
+		EXPADV.Functions[ string.format( "%s(%s)", Alias.Name, table.concat( Signature, "" ) ) ] = Operator
 	end
 end
 

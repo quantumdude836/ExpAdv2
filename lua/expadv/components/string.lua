@@ -101,7 +101,7 @@ StringComponent:AddInlineFunction( "matchFirst", "s:s", "s", "string.match(@valu
 
 StringComponent:AddInlineFunction( "matchFirst", "s:s,n", "s", "string.match(@value 1, @value 2, @value 3)" )
 
---[[ StringComponent:AddPreparedFunction( "gmatch", "s:s", "s*", [[
+/* StringComponent:AddPreparedFunction( "gmatch", "s:s", "s*", [[
 	@define array, iter, values = {}, string.gmatch( @value 1, @value 2 )
 
 	for i = 1, 50 do
@@ -109,9 +109,9 @@ StringComponent:AddInlineFunction( "matchFirst", "s:s,n", "s", "string.match(@va
 		if table.getn(@values) == 0 then break end
 		@array[i] = @values
 	end
-]], "@array" )]]
+]], "@array" )*/
 
---[[ StringComponent:AddPreparedFunction( "gmatch", "s:s,n", "s*", [[
+/* StringComponent:AddPreparedFunction( "gmatch", "s:s,n", "s*", [[
 	@define array, iter, values = {}, string.gmatch( @value 1, @value 2 )
 
 	for i = 1, math.Clamp( @value 3 or 50, 0, 50) do
@@ -119,7 +119,7 @@ StringComponent:AddInlineFunction( "matchFirst", "s:s,n", "s", "string.match(@va
 		if table.getn(@values) == 0 then break end
 		@array[i] = @values
 	end
-]], "@array" ) ]]
+]], "@array" ) */
 
 /*==============================================================================================
 	Section: Format
@@ -136,3 +136,14 @@ StringComponent:AddPreparedFunction( "format", "s:...", "s", [[
 	
 	@result = string.format( @value 1, unpack(@values) )
 ]], "@result" )
+
+/*==============================================================================================
+	Section: Insert / Remove
+==============================================================================================*/
+StringComponent:AddInlineFunction( "remove", "s:n,n", "s", "(string.sub( @Value 1, 1, @value - 1 ) .. string.sub( @Value 1, @value 3 or (@value 2 + 1) ))" )
+StringComponent:AddFunctionHelper( "remove", "s:n,n", "Removes nth Char from string." )
+		  EXPADV.AddFunctionAlias( "remove", "s:n" )
+
+StringComponent:AddInlineFunction( "Insert", "s:s,n,n", "s", "(string.sub( @value 1, 1, @value 3 ) .. @value 2 .. string.sub( @value 1, @value 4 or (@value 3 + 1) ))" )
+StringComponent:AddFunctionHelper( "Insert", "s:s,n,n", "Inserts into string after nth char." )
+		  EXPADV.AddFunctionAlias( "Insert", "s:s,n" )
