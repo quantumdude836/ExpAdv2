@@ -65,6 +65,15 @@ function BaseComponent:AddFunctionHelper( Name, Input, Description ) -- String, 
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Exceptions
+   --- */
+
+-- Registers a new exception type on this component.
+function BaseComponent:AddException( Exception ) -- String
+	EXPADV.AddException( self, Exception )
+end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Component Settings
    --- */
 

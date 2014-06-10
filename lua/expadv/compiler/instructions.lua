@@ -381,7 +381,7 @@ function Compiler:Compile_IF( Trace, Condition, Sequence, Else )
 
 	Native[#Native + 1] = "end"
 
-	return { Trace = Trace, Return = "", Prepare = table.concat( Native, "\n" ),FLAG = EXPADV_PREPARE, IsRaw = true }
+	return { Trace = Trace, Return = "", Prepare = table.concat( Native, "\n" ),FLAG = EXPADV_PREPARE }
 end
 
 function Compiler:Compile_ELSEIF( Trace, Condition, Sequence, Else )
@@ -401,13 +401,63 @@ function Compiler:Compile_ELSEIF( Trace, Condition, Sequence, Else )
 	if Sequence.Inline then Native[#Native + 1] = Sequence.Inline end
 	if Else and Else.Inline then Native[#Native + 1] = Else.Inline end
 
-	return { Trace = Trace, Return = "", Inline = table.concat( Native, "\n" ), Prepare = Condition.Prepare, FLAG = EXPADV_PREPARE, IsRaw = true }
+	return { Trace = Trace, Return = "", Inline = table.concat( Native, "\n" ), Prepare = Condition.Prepare, FLAG = EXPADV_PREPARE }
 end
 
 function Compiler:Compile_ELSE( Trace, Sequence )
 	local Native = { "else", Sequence.Prepare or "", Sequence.Inline or "" }
-	return { Trace = Trace, Return = "", Inline = table.concat( Native, "\n" ), FLAG = EXPADV_PREPARE, IsRaw = true }
+	return { Trace = Trace, Return = "", Inline = table.concat( Native, "\n" ), FLAG = EXPADV_PREPARE}
 end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Try Catch
+   --- */
+function Compiler:Compile_TRY( Trace, Sequence, Catch, Final )
+	local _, VM_ID = self:MakeVirtual( Sequence )
+
+	local Native = {
+		"local Ok, Result = pcall( .Instructions[" .. VM_ID .. "], Context )",
+		"if !Ok and istable( Result) and Result.Exception then",
+		Catch.Prepare,
+		[[elseif !Ok then
+			error( Result, 0 )
+		end]],
+		Final and Final.Prepare or "",
+		[[if Ok and Result ~= nil then
+			return Result
+		end]]
+	}
+
+	return { Trace = Trace, Return = "", Prepare = table.concat( Native, "\n" ), FLAG = EXPADV_PREPARE }
+end
+
+function Compiler:Compile_CATCH( Trace, MemRef, Accepted, Sequence, Catch )
+	local Operator = self:LookUpOperator( "_ex=", "n", "_ex" )
+	local Ass = Operator.Compile( self, Trace, { Trace = Trace, Inline = "Result", Return = "_ex", FLAG = EXPADV_INLINE, IsRaw = true } )
+
+	local Condition = "true"
+
+	if Listed then
+		Condition = table.concat( Accepted, " == Result.Exception or " ) .. " == Result.Exception "
+	end -- ^ Creates a conditon for each accepted exception type.
+
+	local Native = {
+		"if (" .. Condition .. ") then",
+		Ass.Prepare,
+		Sequence.Prepare or "",
+		Sequence.Inline or "",
+	}
+
+	if Catch then
+		Native[ #Native + 1 ] = "else" .. Catch.Prepare
+	else
+		Native[ #Native + 1 ] = [[else error( Result, 0 )end
+		end]]
+	end
+
+	return { Trace = Trace, Return = "", Prepare = table.concat( Native, "\n" ), FLAG = EXPADV_PREPARE }
+end
+
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Assigment

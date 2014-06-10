@@ -429,9 +429,9 @@ function EXPADV.LoadFunctionAliases( Operator )
 	for _, Alias in pairs( Operator.Aliases ) do
 		local ShouldNotLoad = false
 
+		local Signature = { }
+		
 		if Alias.Input and Alias.Input ~= "" then
-			
-			local Signature = { }
 
 			local Start, End = string.find( Alias.Input, "^()[a-z0-9]+():" )
 
@@ -541,7 +541,11 @@ function EXPADV.BuildVMOperator( Operator )
 		
 		local Inline = string.format( "Context.Instructions[%i]( Context, %s, %s )", ID, Compiler:CompileTrace( Trace ), table.concat( Arguments, "," ) )
 	
-		return Compiler:NewLuaInstruction( Trace, Operator, table.concat( Prepare, "\n" ), Inline )
+		local Instruction = Compiler:NewLuaInstruction( Trace, Operator, table.concat( Prepare, "\n" ), Inline )
+		
+		Instruction.IsRaw = true
+		
+		return Instruction
 	end
 end
 

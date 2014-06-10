@@ -98,9 +98,18 @@ include( "instructions.lua" )
 	@: Error Functions.
    --- */
 
-function Compiler:GetTokenTrace( Trace )
-	if !Trace then return { self.ReadLine, self.ReadChar } end
-	return { self.ReadLine, self.ReadChar } -- TODO: this!
+function Compiler:GetTokenTrace( RootTrace )
+	local Trace = { self.ReadLine, self.ReadChar }
+	if !RootTrace then return Trace end
+
+	Trace.Stack = { {RootTrace[1], RootTrace[2] } } 
+	if !RootTrace.Stack then return Trace end
+
+	for I = 1, 5 do
+		Trace.Stack[I + 1] = RootTrace.Stack[I]
+	end
+
+	return Trace
 end
 
 function Compiler:CompileTrace( Trace )
@@ -174,6 +183,35 @@ function Compiler:NewLuaInstruction( Trace, Operator, Prepare, Inline )
 		Return = Operator.Return,
 		FLAG = Flag
 	}
+end
+
+function Compiler:MakeVirtual( Instruction )
+	if Instruction.IsRaw then return Instruction end
+
+	local ID = #self.VMInstructions + 1
+	
+	local Native = table.concat( { -- Todo, Add Env
+		"return function( Context )",
+			Instruction.Prepare or "",
+			Instruction.Inline or "",
+		"end"
+	}, "\n" )
+
+	local Compiled = CompileString( Native, "EXPADV2", false )	
+	
+	if isstring( Compiled ) then
+		self:TokenError( "Failed to compile native to virtual instruction." )
+		MsgN( "Error -> " .. Compiled )
+		debug.Trace( )
+	end
+
+	self.VMInstructions[ID] = Compiled( )
+	
+	local Instr = self:NewLuaInstruction( Trace, Operator, nil, string.format( "Context.Instructions[%i]( Context )", ID ) )
+
+	Instr.IsRaw = true
+
+	return Instr, ID
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------

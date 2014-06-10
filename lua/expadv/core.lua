@@ -28,20 +28,34 @@ function EXPADV.LoadConfig( )
 	EXPADV.Config = Config
 end
 
+-- Saves the config file.
 function EXPADV.SaveConfig( )
 	-- EXPADV.RunHook( "PreSaveConfig", EXPADV.Config )
 
 	file.Write( "expadv.txt", util.TableToKeyValues( EXPADV.Config ) )
 end
 
-function EXPADV.CreateSetting( Name, Default )
+-- Creates a new setting on the config.
+function EXPADV.CreateSetting( Name, Default ) -- String, Obj
 	Name = string.lower( Name )
 
 	EXPADV.Config.Settings[ Name ] = Config.Settings[ Name ] or Default
 end
 
-function EXPADV.ReadSetting( Name, Default )
+-- Reads a setting from the config.
+function EXPADV.ReadSetting( Name, Default ) -- String, Obj
 	return EXPADV.Config.Settings[ string.lower( Name ) ] or Default
+end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Exceptions
+   --- */
+
+local Temp_Exceptions = { }
+
+-- Registers a new exception type.
+function EXPADV.AddException( Component, Exception ) -- Table, String
+	Temp_Exceptions[ #Temp_Exceptions + 1 ] = { Component = Component, Exception = Exception }
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -78,6 +92,18 @@ function EXPADV.LoadCore( )
 
 	EXPADV.LoadFunctions( )
 
+	EXPADV.Exceptions = { stack = "stack" }
+
+	for I = 1, #Temp_Exceptions do
+		local Exception = Temp_Exceptions[I]
+
+		if Exception.Component and !Exception.Component.Enabled then
+			continue
+		end
+
+		EXPADV.Exceptions[ Exception.Exception ] = Exception.Exception
+	end
+
 	include( "expadv/compiler/main.lua" )
 
 	EXPADV.SaveConfig( )
@@ -103,10 +129,6 @@ if CLIET then
 		EXPADV.LoadCore( )
 	end )
 end
-
-/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
-	@: Entity Registery.
-   --- */
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Test Build.

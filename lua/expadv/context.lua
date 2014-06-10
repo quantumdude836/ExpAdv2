@@ -7,10 +7,18 @@ EXPADV.RootContext = { }
 EXPADV.RootContext.__index = EXPADV.RootContext
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: A few things that we need local.
+   --- */
+
+pcall = pcall
+setmetatable = setmetatable
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Now we need a way to build this object
    --- */
 
-function EXPADV.BuildNewContext( Instance, Player, Entity )
+-- Builds a new context from a compilers instance.
+function EXPADV.BuildNewContext( Instance, Player, Entity ) -- Table, Player, Entity
 	local Context = setmetatable( { player = Player, entity = Entity }, EXPADV.RootContext )
 
 	Context.Memory = { }
@@ -25,8 +33,9 @@ function EXPADV.BuildNewContext( Instance, Player, Entity )
 	return Context
 end
 
-function EXPADV.RootContext:Push( Cells )
-	-- if self.__deph > 50 then self:Throw( ) end -- TODO!
+-- Pushes the contexts memory upwards.
+function EXPADV.RootContext:Push( Trace, Cells ) -- Table, Table
+	if self.__deph > 50 then self:Throw( Trace, "stack", "stack overflow" ) end
 
 	local Memory = {
 		__index = function( Table, Key ) return Cells[Key] and rawget( Table, Key ) or self.Memory[Key] end,
@@ -60,38 +69,72 @@ function EXPADV.RootContext:Push( Cells )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
-	@: We call these before and after execution.
+	@: Executeion
    --- */
+   
+EXPADV.Updates = { }
 
+-- Should be called before executing.
 function EXPADV.RootContext:PreExecute( )
 	EXPADV.EXECUTOR = self
 
 	-- TODO: Lua debug hook
-
-	collectgarbage( "stop" )
 end
 
+-- Should be called after executing.
 function EXPADV.RootContext:PostExecute( )
 	EXPADV.EXECUTOR = nil
 
 	self.Dinfinitions = { }
 
 	-- TODO: Remove Lua debug hook
-
-	collectgarbage( "restart" )
 end
 
-/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
-	@: This is how we safly call executions.
-   --- */
-
-function EXPADV.RootContext:Execute( Location, Operation, ... )
+-- Safely execute a function on this context.
+function EXPADV.RootContext:Execute( Location, Operation, ... ) -- String, Function, ...
 	
 	self:PreExecute( )
 
-	--TODO:
+	local Ok, Result = pcall( Operation, ... )
 
 	self:PostExecute( )
+
+	
+	if !Ok and isString( Result ) then
+		-- Lua Error
+	elseif Ok or Result.Exit then
+
+		--TODO: Tick Quota Check
+
+		EXPADV.Updates[self] = true
+
+		return true, Result
+
+	elseif Result.Script then
+		-- Script Error
+	elseif Result.Exception then
+		-- Exception
+	end
+
+	return false
+end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Breakouts
+   --- */
+
+-- Exits the currently executing code.
+function EXPADV.RootContext:Exit( )
+	error( { Exit = true, Context = self }, 0 )
+end
+
+-- Throws an exception
+function EXPADV.RootContext:Throw( Trace, Name, Message ) -- Table, String, String
+	error( { Trace = Trace, Exception = Name, Msg = Message, Context = self }, 0 )
+end
+
+function EXPADV.RootContext:ScriptError( Trace, Message )
+	error( { Trace = Trace, Script = true, Msg = Message, Context = self }, 0 )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
