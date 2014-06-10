@@ -26,6 +26,34 @@ end
 	@: Operators
    --- */
 
+function Compiler:Compile_NOT( Trace, Expresion1 )
+	local Operator = self:LookUpOperator( "!", Expresion1.Return )
+
+	if !Operator then self:TraceError( Trace, "Operator does not support '!%s'", self:NiceClass( Expresion1.Return ) ) end
+
+	return Operator.Compile( self, Trace, Expresion1 )
+end
+
+function Compiler:Compile_LEN( Trace, Expresion1 )
+	local Operator = self:LookUpOperator( "#", Expresion1.Return )
+
+	if !Operator then self:TraceError( Trace, "Length operator does not support '#%s'", self:NiceClass( Expresion1.Return ) ) end
+
+	return Operator.Compile( self, Trace, Expresion1 )
+end
+
+function Compiler:Compile_NEG( Trace, Expresion1 )
+	local Operator = self:LookUpOperator( "#", Expresion1.Return )
+
+	if !Operator then self:TraceError( Trace, "Negation operator does not support '-%s'", self:NiceClass( Expresion1.Return ) ) end
+
+	return Operator.Compile( self, Trace, Expresion1 )
+end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Logical Operators
+   --- */
+
 function Compiler:Compile_OR( Trace, Expresion1, Expression2 )
 	local Operator = self:LookUpOperator( "||", Expresion1.Return, Expression2.Return )
 
@@ -129,6 +157,10 @@ function Compiler:Compile_BSHL( Trace, Expresion1, Expression2 )
 
 	return Operator.Compile( self, Trace, Expresion1, Expression2 )
 end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Arithmatic Operators
+   --- */
 
 function Compiler:Compile_ADD( Trace, Expresion1, Expression2 )
 	print( "Add Operator ", Expresion1.Return, Expression2.Return )
@@ -330,6 +362,9 @@ end
    --- */
 
 function Compiler:Compile_IF( Trace, Condition, Sequence, Else )
+	local Operator = self:LookUpOperator( "is", Condition.Return )
+	if Operator then Condition = Operator.Compile( self, Trace, Condition ) end
+		
 	if Condition.Return ~= "b" then
 		self:TraceError( Trace, "boolean expected for condition, got %s", self:NiceClass( Condition.Return ) )
 	end
@@ -350,6 +385,9 @@ function Compiler:Compile_IF( Trace, Condition, Sequence, Else )
 end
 
 function Compiler:Compile_ELSEIF( Trace, Condition, Sequence, Else )
+	local Operator = self:LookUpOperator( "is", Condition.Return )
+	if Operator then Condition = Operator.Compile( self, Trace, Condition ) end
+	
 	if Condition.Return ~= "b" then
 		self:TraceError( Trace, "boolean expected for condition, got %s", self:NiceClass( Condition.Return ) )
 	end
