@@ -34,7 +34,7 @@ function EXPADV.BuildNewContext( Instance, Player, Entity ) -- Table, Player, En
 end
 
 -- Pushes the contexts memory upwards.
-function EXPADV.RootContext:Push( Trace, Cells ) -- Table, Table
+/*function EXPADV.RootContext:Push( Trace, Cells ) -- Table, Table
 	if self.__deph > 50 then self:Throw( Trace, "stack", "stack overflow" ) end
 
 	local Memory = {
@@ -65,6 +65,67 @@ function EXPADV.RootContext:Push( Trace, Cells ) -- Table, Table
 		__newindex = function( Table, Key, Value ) Table.__parent[Key] = Value end,
 	}
 
+	return setmetatable( Context, Context )
+end*/
+
+function EXPADV.RootContext:Push( Trace, Cells ) -- Table, Table
+	if self.__deph > 50 then self:Throw( Trace, "stack", "stack overflow" ) end
+	
+	local Memory = {
+		__index = self.Memory,
+		__newindex = function( Memory, Key, Value )
+			if Cells[Key] then return rawset( Memory, Key, Value ) end
+			
+			Prev = Memory.__index
+			
+			while Prev do
+				if rawget( Prev, Key ) ~= nil then return rawset( Prev, Key, Value ) end
+				Prev = Prev.__index
+			end
+		end
+	}
+	
+	local Delta = {
+		__index = self.Delta,
+		__newindex = function( Delta, Key, Value )
+			if Cells[Key] then return rawset( Delta, Key, Value ) end
+			
+			Prev = Delta.__index
+			
+			while Prev do
+				if rawget( Prev, Key ) ~= nil then return rawset( Prev, Key, Value ) end
+				Prev = Prev.__index
+			end
+		end
+	}
+	
+	local Changed = {
+		__index = self.Changed,
+		__newindex = function( Changed, Key, Value )
+			if Cells[Key] then return rawset( Changed, Key, Value ) end
+			
+			Prev = Changed.__index
+			
+			while Prev do
+				if rawget( Prev, Key ) ~= nil then return rawset( Prev, Key, Value ) end
+				Prev = Prev.__index
+			end
+		end
+	}
+	
+	local Context = {
+		__deph = self.__deph + 1, -- Memory stack deph
+		__index = self.__index or self, -- Root context
+		__parent = self.__parent or self, -- Previous context on stack.
+		__newindex = function( Context, Key, Value ),
+			rawset( Context.__parent, Key, Value ),
+		end,
+		
+		Memory = setmetatable( Memory, Memory ),
+		Delta = setmetatable( Delta, Delta ),
+		Changed = setmetatable( Changed, Changed ),
+	}
+	
 	return setmetatable( Context, Context )
 end
 
