@@ -687,7 +687,7 @@ function EXPADV.BuildLuaOperator( Operator )
 			local Trace = Compiler:CompileTrace( Trace )
 
 			if Uses >= 2 then
-				OpPrepare = string.forma( "local Trace = %s\n%s", Trace, OpPrepare or "" )
+				OpPrepare = string.format( "local Trace = %s\n%s", Trace, OpPrepare or "" )
 				Trace = "Trace"
 			end
 
