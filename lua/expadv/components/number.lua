@@ -45,3 +45,21 @@ MathComponent:AddPreparedOperator( "n=", "n,n", "", [[
 
 -- Example of custom realtime memory allication method
 -- MathComponent:AddPreparedOperator("=n", "s,n", "n", "Context.Memory[ Context.Cells[@value 1].MemRef ] = @value 2" )
+
+-- MAX VALUE
+MathComponent:AddInlineOperator( "max", "n,n,n,n,n", "n", "math.max(@value 1, @value 2, @value 3, @value 4, @value 5)" )
+MathComponent:AddFunctionHelper( "max", "n,n,n,n,n", "returns the higest value out of 3 numbers." )
+EXPADV.AddFunctionAlias( "max", "n,n,n,n" )
+EXPADV.AddFunctionAlias( "max", "n,n,n" )
+EXPADV.AddFunctionAlias( "max", "n,n" )
+
+-- MIN VALUE
+MathComponent:AddInlineOperator( "min", "n,n,n,n,n", "n", "math.min(@value 1, @value 2, @value 3, @value 4, @value 5)" )
+MathComponent:AddFunctionHelper( "min", "n,n,n,n,n", "returns the lowest value out of 3 numbers." )
+EXPADV.AddFunctionAlias( "min", "n,n,n,n" )
+EXPADV.AddFunctionAlias( "min", "n,n,n" )
+EXPADV.AddFunctionAlias( "min", "n,n" )
+
+-- Casting:
+
+MathComponent:AddInlineOperator( "string", "n", "s", "tostring(@value 1)" )

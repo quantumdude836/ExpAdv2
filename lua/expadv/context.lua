@@ -34,25 +34,25 @@ function EXPADV.BuildNewContext( Instance, Player, Entity ) -- Table, Player, En
 end
 
 -- Pushes the contexts memory upwards.
-/*function EXPADV.RootContext:Push( Trace, Cells ) -- Table, Table
+function EXPADV.RootContext:Push( Trace, Cells ) -- Table, Table
 	if self.__deph > 50 then self:Throw( Trace, "stack", "stack overflow" ) end
 
 	local Memory = {
-		__index = function( Table, Key ) return Cells[Key] and rawget( Table, Key ) or self.Memory[Key] end,
+		__index = self.Memory, -- function( Table, Key ) return Cells[Key] and rawget( Table, Key ) or self.Memory[Key] end,
 		__newindex = function( Table, Key, Value ) if Cells[Key] then rawset( Table, Key, Value ) else self.Memory[Key] = Value end end,
 	}
 
 	setmetatable( Memory, Memory )
 
 	local Delta = {
-		__index = function( Table, Key ) return Cells[Key] and rawget( Table, Key ) or self.Memory[Key] end,
+		__index = self.Delta, -- function( Table, Key ) return Cells[Key] and rawget( Table, Key ) or self.Memory[Key] end,
 		__newindex = function( Table, Key, Value ) if Cells[Key] then rawset( Table, Key, Value ) else self.Memory[Key] = Value end end,
 	}
 
 	setmetatable( Delta, Delta )
 
 	local Changed = {
-		__index = function( Table, Key ) return Cells[Key] and rawget( Table, Key ) or self.Memory[Key] end,
+		__index = self.Changed, -- function( Table, Key ) return Cells[Key] and rawget( Table, Key ) or self.Memory[Key] end,
 		__newindex = function( Table, Key, Value ) if Cells[Key] then rawset( Table, Key, Value ) else self.Memory[Key] = Value end end,
 	}
 
@@ -61,14 +61,14 @@ end
 	local Context = {
 		__deph = self.__deph + 1,
 		__parent = self.__parent or self,
-		__index = function( Table, Key ) return rawget( Table, Key ) or self[Key] end,
+		__index = self.__parent, --function( Table, Key ) return rawget( Table, Key ) or self[Key] end,
 		__newindex = function( Table, Key, Value ) Table.__parent[Key] = Value end,
 	}
 
 	return setmetatable( Context, Context )
-end*/
+end
 
-function EXPADV.RootContext:Push( Trace, Cells ) -- Table, Table
+/*function EXPADV.RootContext:Push( Trace, Cells ) -- Table, Table
 	if self.__deph > 50 then self:Throw( Trace, "stack", "stack overflow" ) end
 	
 	local Memory = {
@@ -76,7 +76,7 @@ function EXPADV.RootContext:Push( Trace, Cells ) -- Table, Table
 		__newindex = function( Memory, Key, Value )
 			if Cells[Key] then return rawset( Memory, Key, Value ) end
 			
-			Prev = Memory.__index
+			local Prev = Memory.__index
 			
 			while Prev do
 				if rawget( Prev, Key ) ~= nil then return rawset( Prev, Key, Value ) end
@@ -90,7 +90,7 @@ function EXPADV.RootContext:Push( Trace, Cells ) -- Table, Table
 		__newindex = function( Delta, Key, Value )
 			if Cells[Key] then return rawset( Delta, Key, Value ) end
 			
-			Prev = Delta.__index
+			local Prev = Delta.__index
 			
 			while Prev do
 				if rawget( Prev, Key ) ~= nil then return rawset( Prev, Key, Value ) end
@@ -104,7 +104,7 @@ function EXPADV.RootContext:Push( Trace, Cells ) -- Table, Table
 		__newindex = function( Changed, Key, Value )
 			if Cells[Key] then return rawset( Changed, Key, Value ) end
 			
-			Prev = Changed.__index
+			local Prev = Changed.__index
 			
 			while Prev do
 				if rawget( Prev, Key ) ~= nil then return rawset( Prev, Key, Value ) end
@@ -117,7 +117,7 @@ function EXPADV.RootContext:Push( Trace, Cells ) -- Table, Table
 		__deph = self.__deph + 1, -- Memory stack deph
 		__index = self.__index or self, -- Root context
 		__parent = self.__parent or self, -- Previous context on stack.
-		__newindex = function( Context, Key, Value ),
+		__newindex = function( Context, Key, Value )
 			rawset( Context.__parent, Key, Value ),
 		end,
 		
@@ -127,7 +127,7 @@ function EXPADV.RootContext:Push( Trace, Cells ) -- Table, Table
 	}
 	
 	return setmetatable( Context, Context )
-end
+end*/
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Executeion

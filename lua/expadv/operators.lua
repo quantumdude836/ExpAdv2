@@ -30,6 +30,7 @@ function EXPADV.SharedOperators( )
 end
 
 EXPADV.BaseClassObj.LoadOnClient = true
+
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Register our operators!
    --- */
@@ -319,10 +320,10 @@ function EXPADV.LoadFunctions( )
 			
 			local Signature = { }
 
-			local Start, End = string.find( Operator.Input, "^()[a-z0-9]+():" )
+			local Start, End = string.find( Operator.Input, "^()[a-z0-9]+()%." )
 
 			if Start then
-				local Meta = string.sub( Operator.Input, Start, End - 1 )
+				local Meta = string.sub( Operator.Input, 1, End - 1 )
 
 				Operator.Input = string.sub( Operator.Input, End + 1 )
 
@@ -342,10 +343,10 @@ function EXPADV.LoadFunctions( )
 					continue
 				end
 
-				Signature[1] = Class.Short .. ":"
+				Signature[1] = Class.Short .. "."
 			end
 
-			for I, Input in pairs( string.Explode( ",", Operator.Input ) ) do //string.gmatch( Operator.Input, "()([%w%?!%*]+)%s*([%[%]]?)()" ) do
+			for I, Input in pairs( string.Explode( ",", Operator.Input ) ) do
 
 				-- First lets check for varargs.
 				if Input == "..." then

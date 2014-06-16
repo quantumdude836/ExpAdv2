@@ -282,7 +282,9 @@ function Compiler:Compile_DEFAULT( Trace, Class )
 	return Operator.Compile( self, Trace )
 end
 
-function Compiler:Compile_CAST( Trace, Class, Expression )
+function Compiler:Compile_CAST( Trace, Name, Expression )
+	local Class = self:GetClass( Trace, Name, false )
+
 	if Class.Short == Expression.Return then
 		self:TraceError( Trace, "%s can not be cast to itself.", Class.Name )
 	end
@@ -293,7 +295,7 @@ function Compiler:Compile_CAST( Trace, Class, Expression )
 		self:TraceError( Trace, "%s can not be cast to %s", self:NiceClass( Expression.Return ), Class.Name )
 	end
 
-	return Operator.Compile( self, Trace )
+	return Operator.Compile( self, Trace, Expression )
 end
 
 
@@ -502,7 +504,7 @@ function Compiler:Compile_FUNC( Trace, Variable, Expressions )
 		
 		if !Operator then self:TraceError( Trace, "No such function %s()", Variable ) end
 
-		return Operator.Compile( self, Trace, Variable )
+		return Operator.Compile( self, Trace )
 	else
 
 		local Signature, BestMatch = ""
@@ -527,4 +529,39 @@ function Compiler:Compile_FUNC( Trace, Variable, Expressions )
 	local Signature = table.concat( { self:NiceClass( unpack( Expressions ) ) }, "," )
 	
 	self:TraceError( Trace, "No such function %s(%s)", Variable, Signature )
+end
+
+function Compiler:Compile_METHOD( Trace, Expression, Method, Expressions )
+	local Meta = Expression.Return
+	
+	if #Expressions == 0 then
+		local Operator = EXPADV.Functions[Method .. "(" .. Meta .. ")"] or EXPADV.Functions[Variable .. "(" .. Meta .. "....)"] -- Yes this does look dumb.
+		
+		if !Operator then self:TraceError( Trace, "No such method %s.%s()", self:NiceClass(Meta), Method ) end
+
+		return Operator.Compile( self, Trace, Expression )
+	else
+
+		local Signature, BestMatch = Meta .. "."
+
+		for I = 1, #Expressions do
+			local Match = string.format( "%s(%s...)", Method, Signature )
+
+			if EXPADV.Functions[ Match ] then BestMatch = EXPADV.Functions[ Match ] end
+
+			Signature = Signature .. Expressions[I].Return
+		end
+
+		MsgN( "Looking for: ", string.format( "%s(%s)", Method, Signature ) )
+
+		local Operator = EXPADV.Functions[ string.format( "%s(%s)", Method, Signature ) ] or BestMatch
+		
+		if Operator then
+			return Operator.Compile( self, Trace, Expression, unpack( Expressions ) )
+		end
+	end
+
+	local Signature = table.concat( { self:NiceClass( unpack( Expressions ) ) }, "," )
+	
+	self:TraceError( Trace, "No such method %s.%s(%s)", self:NiceClass(Meta), Variable, Signature )
 end

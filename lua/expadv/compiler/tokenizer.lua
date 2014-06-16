@@ -411,6 +411,13 @@ function Compiler:GetNextToken( )
 		
 		if Token then return Token end
 		
+		for ClassName, _ in pairs( EXPADV.Classes ) do
+			if self:NextPattern( "%( *" .. ClassName .. " *%)" ) then
+				self.ReadData = ClassName
+				return self:NewToken( "cst", "cast" )
+			end
+		end
+
 		for I = 1, #self.RawTokens do
 			local Token = self.RawTokens[I]
 

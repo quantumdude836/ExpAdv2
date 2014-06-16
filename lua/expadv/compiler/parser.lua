@@ -166,34 +166,25 @@ function Compiler:Expression( Trace )
 
 	self.ExpressionRoot = _ExprRoot
 
-	return self:Expression_Postfix( Trace, Expression )
+	return Expression
 end
 
--- Stage 1: Grouped Equation, casting
+-- Stage 1: Grouped Equation
 function Compiler:Expression_1( Trace )
 	MsgN( "Compiler -> Expression 1" )
 	
 	if self:AcceptToken( "lpa" ) then
-		local Trace = self:GetTokenTrace( Trace )
-
-		if self:AcceptToken( "var" ) or self:AcceptToken( "func" ) then
-			local Type = self.TokenData
-			local Class = self:GetClass( Trace, Type, true )
-
-			if !Class or !self:AcceptToken( "rpa" ) then
-				self:PrevToken( ) -- Not a casting operation.
-			else 
-				return self:Compile_CAST( Trace, Class, self:Expression_1( Trace ) )
-			end
-		end
-
 		local Expression = self:Expression_1( Trace )
+
+		if Expression.FLAG == EXPADV_INLINE or Expression.FLAG == EXPADV_INLINEPREPARE then
+			Expression.Inline = string.format( "(%s)", Expression.Inline )
+		end
 
 		self:RequireToken( "rpa", "Right parenthesis ( )) missing, to close grouped equation." )
 
-		return Expression -- Grouped equation
+		return Expression
 	end
-
+	
 	return self:Expression_2( Trace )
 end
 
@@ -220,6 +211,14 @@ function Compiler:Expression_2( Trace )
 		local Trace = self:GetTokenTrace( Trace )
 		self:ExcludeWhiteSpace( "length operator (#) must not be succeeded by whitespace" )
 		return self:Compile_LEN( Trace, self:Expression_1( Trace ) )
+
+	elseif self:AcceptToken( "cst" ) then
+		local Trace = self:GetTokenTrace( Trace )
+
+		local Class = self.TokenData
+		self:ExcludeWhiteSpace( "casting operator ( (" .. Class .. ") ) must not be succeeded by whitespace" )
+		
+		return self:Compile_CAST( Trace, Class, self:Expression_1( Trace ) )
 	end
 
 	-- In C-style order of operatorions, Inrement and Decrement should be here.
@@ -393,6 +392,8 @@ function Compiler:Expression_13( Trace )
 	MsgN( "Compiler -> Expression 13" )
 
 	local Expression = self:Expression_Value( Trace )
+	
+	Expression = self:Expression_17( Trace, Expression )
 
 	while self:AcceptToken( "qsm" ) do
 		local Trace = self:GetTokenTrace( Trace )
@@ -411,7 +412,7 @@ end
 	@: Values
    --- */
 
--- Stage 13: Raw Values:
+-- Stage 14: Raw Values:
 function Compiler:Expression_Value( Trace )
 	MsgN( "Compiler -> Expression Value" )
 
@@ -428,7 +429,7 @@ function Compiler:Expression_Value( Trace )
 	return self:Expression_Variable( Trace )
 end
 
--- Stage 14: Increment, Decrement and Variables.
+-- Stage 15: Increment, Decrement and Variables.
 -- This function, also can be used for expression bassed statments.
 function Compiler:Expression_Variable( Trace, bIsStatement )
 	MsgN( "Compiler -> Expression Variable" )
@@ -502,6 +503,7 @@ function Compiler:Expression_Function( Trace, bIsStatement )
 
 		end
 
+		print( self.PrepTokenType )
 		self:RequireToken( "rpa", "Right parenthesis ( )), expected to close function perameters" )
 
 		return self:Compile_FUNC( Trace, Variable, Expressions )
@@ -536,9 +538,9 @@ function Compiler:Expression_Function( Trace, bIsStatement )
 	end
 end
 
--- Stage 16: Indexing, Calling
-function Compiler:Expression_Postfix( Trace, Expression )
-	MsgN( "Compiler -> Expression Postfix" )
+-- Stage 17: Indexing, Calling
+function Compiler:Expression_17( Trace, Expression )
+	MsgN( "Compiler -> Expression 17" )
 
 	while self:CheckToken( "prd", "lsb", "lpa" ) do
 		-- Methods
