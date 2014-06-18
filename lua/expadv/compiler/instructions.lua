@@ -490,8 +490,24 @@ end
 	@: Functions
    --- */
 
-function Compiler:Compile_FUNC( Trace, Variable, Expressions )
+function Compiler:Compile_CALL( Trace, Expression, Expressions )
+	local Operator = self:LookUpOperator( "call", Expression.Return, "..." )
+
+	if !Operator then
+		self:TraceError( Trace, "No such call operation, %s( ... )", self:NiceClass( Expression.Return ) )
+	end
+
+	local Instruction = Operator.Compile( self, Trace, Expression, unpack( Expressions ) )
 	
+	if Expression.Variable and Instruction.Return and Instruction.Return == "_vr" then
+		local Pred = self.ReturnTypes[ self.ScopeID ][ Variable ]
+		if Pred then Instruction = self:Compile_CAST( Trace, Pred, Instruction ) end
+	end
+
+	return Instruction
+end
+
+function Compiler:Compile_FUNC( Trace, Variable, Expressions )
 	
 	-- Check for memory ref and call the call operator.
 	local MemRef, Scope = self:FindCell( Trace, Variable, false )
@@ -572,37 +588,38 @@ function Compiler:Compile_LAMBDA( Trace, Params, UseVarg, Sequence )
 	-- { self.TokenData, Class.Short, MemRef }
 
 	for I, Param in pairs( Params ) do
+		local Type = Param[2]
 
 		Inputs[I] = "IN_" .. I
 
 		PreSequence[ #PreSequence + 1 ] = string.format( "if !IN_%i or IN_%i[1] == nil then", I, I )
-		PreSequence[ #PreSequence + 1 ] = string.format( "Context:Throw(%s, \"invoke\", \"Invalid argument #%i, %s expected got void.\" )", self:CompileTrace( Trace ), I, self:NiceClass( Param[2] ) )
+		PreSequence[ #PreSequence + 1 ] = string.format( "Context:Throw(%s, \"invoke\", \"Invalid argument #%i, %s expected got void.\" )", self:CompileTrace( Trace ), I, self:NiceClass( Type ) )
 
-		if Param[2] ~= "vr" then
-			PreSequence[ #PreSequence + 1 ] = string.format( "elseif IN_%i[2] ~= %q then", I, Param[2] )
-			PreSequence[ #PreSequence + 1 ] = string.format( "Context:Throw(%s, \"invoke\", \"Invalid argument #%i, %s expected got \" .. IN_%i[2] )", self:CompileTrace( Trace ), I, self:NiceClass( Param[2] ) )
+		if Param[2] ~= "_vr" then
+			PreSequence[ #PreSequence + 1 ] = string.format( "elseif IN_%i[2] ~= %q then", I, Type )
+			PreSequence[ #PreSequence + 1 ] = string.format( "Context:Throw(%s, \"invoke\", \"Invalid argument #%i, %s expected got \" .. IN_%i[2] )", self:CompileTrace( Trace ), I, self:NiceClass( Type ), I )
 		end
 
 		PreSequence[ #PreSequence + 1 ] = "else"
 
-			local Operator = self:LookUpOperator( Param[1] .. "=", "n", Param[1] )
+			local Operator = self:LookUpOperator( Type .. "=", "n", Type )
 			
 			if Operator then
-				Instruction = Operator.Compile( self, Trace, Quick( Param[3], "n" ), Quick( Inputs[I] .. "[1]", Param[2] ) )
+				Instruction = Operator.Compile( self, Trace, Quick( Param[3], "n" ), Quick( Inputs[I] .. "[1]", Type ) )
 
 				PreSequence[ #PreSequence + 1 ] = Instruction.Prepare
 				PreSequence[ #PreSequence + 1 ] = Instruction.Inline
 			else
 
-				local Operator = self:LookUpOperator( Param[1] .. "=", "n", Param[1] )
+				local Operator = self:LookUpOperator( Type .. "=", "n", Type )
 
 				if Operator then
-					Instruction = Operator.Compile( self, Trace, Quick( Param[1], "s" ), Quick( Inputs[I] .. "[1]", Param[2] ) )
+					Instruction = Operator.Compile( self, Trace, Quick( Param[1], "s" ), Quick( Inputs[I] .. "[1]", Type ) )
 
 					PreSequence[ #PreSequence + 1 ] = Instruction.Prepare
 					PreSequence[ #PreSequence + 1 ] = Instruction.Inline
 				else
-					self:TraceError( Trace, "Invalid argument #%i, %s can not be used as function argument", I, self:NiceClass(Param[2]) )
+					self:TraceError( Trace, "Invalid argument #%i, %s can not be used as function argument", I, self:NiceClass( Type ) )
 				end
 			end
 
@@ -613,10 +630,32 @@ function Compiler:Compile_LAMBDA( Trace, Params, UseVarg, Sequence )
 
 	local Lua = table.concat( {
 		"function(" .. table.concat( Inputs, "," ) .. ")",
+		self:FlushMemory( Trace ),
 		table.concat( PreSequence, "\n" ),
 		Sequence.Prepare or "",
 		Sequence.Inline or "" 
 	}, "\n" )
 
 	return { Trace = Trace, Inline = Lua, Return = "f", FLAG = EXPADV_INLINE }
+end
+
+function Compiler:Compile_RETURN( Trace, Expression )
+	
+	if self.Current_ReturnClass then
+		if !Expression then
+			self:TraceError( Trace, "function returns void, %s expected", self.Current_ReturnClass )
+		
+		elseif self.Current_ReturnClass == "_vr" and Expression.Return ~= "_vr" then
+			Expression = self:Compile_CAST( Trace, "variant", Expression )
+		
+		elseif self.Current_ReturnClass ~= Expression.Return then
+			self:TraceError( Trace, "function returns %s, %s expected", self.Current_ReturnClass )
+		end
+
+		Expression.Inline = string.format( "return %s, %q", Expression.Inline, Expression.Return )
+
+		return Expression
+	end
+
+	return Quick( "return" )
 end

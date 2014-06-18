@@ -240,7 +240,7 @@ function Compiler:BuildScopes( )
 	self.ScopeID = 1
 	self.Global, self.Scope = { }, { }
 	self.Scopes = { [0] = self.Global, self.Scope }
-
+	self.ReturnTypes = { [0] = { }, { } }
 	self.MemoryRef = 0
 end
 
@@ -248,10 +248,12 @@ function Compiler:PushScope( )
 	self.Scope = { }
 	self.ScopeID = self.ScopeID + 1
 	self.Scopes[ self.ScopeID ] = self.Scope
+	self.ReturnTypes[ self.ScopeID ] = { }
 end
 
 function Compiler:PopScope( )
 	self.Scopes[ self.ScopeID ] = nil
+	self.ReturnTypes[ self.ScopeID ] = nil
 
 	self.ScopeID = self.ScopeID - 1
 	self.Scope = self.Scopes[ self.ScopeID ]
@@ -289,6 +291,10 @@ end
    function Compiler:PopLambdaDeph( )
    		self:PopMemory( )
    		self.LambdaDeph = self.LambdaDeph - 1
+   end
+
+   function Compiler:FlushMemory( Trace )
+		return string.format( "local Context = Context:Push( %s, %s )", EXPADV.ToLua( Trace ), EXPADV.ToLua( self.FreshMemory[self.MemoryDeph] ) )
    end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -549,7 +555,6 @@ local TimeMark, SysTime = 0, SysTime
 
 local function LineHook( )
 	if SysTime( ) > TimeMark then
-		MsgN( "THIS RAN!" )
 		coroutine.yield( )
 	end
 end

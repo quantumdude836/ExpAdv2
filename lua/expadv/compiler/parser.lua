@@ -656,11 +656,11 @@ function Compiler:Sequence( Trace, ExitToken )
 			break
 		elseif ExitToken and self:CheckToken( ExitToken ) then
 			break
+		elseif self.BreakOut then
+			self:TokenError( "Unreachable code after %s", self.BreakOut )
 		end
 
 		Sequence[#Sequence + 1] = self:Statement( Trace ) 
-
-		-- TODO: Prevent code after, Break, Continue and Return
 
 		if !self:HasTokens( ) then
 			break
@@ -669,6 +669,7 @@ function Compiler:Sequence( Trace, ExitToken )
 		end
 	end
 
+	self.BreakOut = nil
 	return self:Compile_SEQ( Trace, Sequence )
 end
 
@@ -883,8 +884,25 @@ function Compiler:Statement_4( Trace )
 	return self:Statement_5( Trace )
 end
 
--- Stage 5: Events
+-- Stage 5: Return, Break, Coninue
 function Compiler:Statement_5( Trace )
+	
+	if self:AcceptToken( "ret" ) then
+		local Trace = self:GetTokenTrace( Trace )
+		
+		if self.LambdaDeph <= 0 then
+			self:TraceError( Trace, "Return must no appear outside of a function or event" )
+		end
+
+		self.BreakOut = "return"
+
+		if self:CheckToken( "rsb" ) then
+			return self:Compile_RETURN( Trace )
+		end
+
+		return self:Compile_RETURN( Trace, self:Expression( Trace ) )
+	end
+
 	return self:Statement_6( Trace )
 end
 
@@ -1038,7 +1056,7 @@ function Compiler:Statement_6( Trace )
 			end
 
 			if GetExpression then
-				self:TraceError( Trace, "Unexpected comma (,)")
+				self:TraceError( Trace, "Unexpected comma (,)" )
 			end
 
 			return self:Compile_SEQ( Trace, Sequence )
@@ -1075,6 +1093,8 @@ function Compiler:Statement_6( Trace )
 
 			self:RequireToken( "rcb", "Right curly bracket (}) missing, to close function body" )
 
+			self.ReturnTypes[ self.ScopeID ][Variable] = Prediction
+
 			return self:Compile_ASS( Trace, Variable, self:Compile_LAMBDA( Trace, Perams, UseVarg, Sequence ), "function" )
 		end
 
@@ -1097,8 +1117,10 @@ function Compiler:Util_Perams( Trace )
 
 			self:ExcludeToken( "com", "Parameter separator (,) must not appear here" )
 			
-			self:RequireToken2( "var", "func", "Variable type expected for function parameter." )
-			
+			if !self:AcceptToken( "var" ) then
+				self:RequireToken( "func", "Variable type expected for function parameter." )
+			end
+
 			local Class = self:GetClass( Trace, self.TokenData )
 			
 			self:RequireToken( "var", "Variable expected for parameter." )
@@ -1107,7 +1129,7 @@ function Compiler:Util_Perams( Trace )
 				self:TokenError( "Parameter %s may not appear twice", self.TokenData )
 			end
 
-			local MemRef, Scope = self:CreateVariable( Trace, self.TokenData, Class.Short )
+			local MemRef, Scope = self:CreateVariable( Trace, self.TokenData, Class.Name )
 
 			Params[#Params + 1] = { self.TokenData, Class.Short, MemRef }
 				
