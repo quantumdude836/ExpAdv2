@@ -392,7 +392,7 @@ function Compiler:Expression_13( Trace )
 	MsgN( "Compiler -> Expression 13" )
 
 	local Expression = self:Expression_Value( Trace )
-	
+
 	Expression = self:Expression_17( Trace, Expression )
 
 	while self:AcceptToken( "qsm" ) do
@@ -787,14 +787,13 @@ function Compiler:Statement_3( Trace )
 
 		local Catch, Final
 
-		local Caught, wild = { }
+		local Caught, Wild = { }
 
 		if !self:CheckToken( "cth" ) then
 			self:TraceError( Trace, "catch statment expected after try statment." )
 		end
 
 		while self:AcceptToken( "cth" ) do
-
 			local Trace = self:GetTokenTrace( Trace )
 
 			if Wild then self:TraceError( Trace, "No exception can reach this catch statment." ) end
@@ -843,7 +842,7 @@ function Compiler:Statement_3( Trace )
 
 			self:PushScope( )
 
-			local MemRef = self:CreateVariable( Trace, self.TokenData, "_ex" )
+			local MemRef = self:CreateVariable( Trace, self.TokenData, "exception" )
 
 			self:RequireToken( "rpa", "Right parenthesis ( )) missing, to catch" )
 
@@ -1031,9 +1030,9 @@ function Compiler:Statement_6( Trace )
 			local GetExpression = self:AcceptToken( "ass" )
 			
 			for I, Variable in pairs( Variables ) do
-				local Expression = GetExpression and self:GetExpression( Trace ) or self:Compile_DEFAULT( Trace, "l" ) -- Lambda
+				local Expression = GetExpression and self:GetExpression( Trace ) or self:Compile_DEFAULT( Trace, "f" ) -- Lambda
 
-				Sequence[I] = self:Compile_ASS( Trace, Variable, Expression, "l" )
+				Sequence[I] = self:Compile_ASS( Trace, Variable, Expression, "function" )
 
 				GetExpression = self:AcceptToken( "com" )
 			end
@@ -1076,7 +1075,7 @@ function Compiler:Statement_6( Trace )
 
 			self:RequireToken( "rcb", "Right curly bracket (}) missing, to close function body" )
 
-			return self:Compile_ASS( Trace, Variable, self:Compile_LAMBDA( Trace, Perams, UseVarg, Sequence ), "l" )
+			return self:Compile_ASS( Trace, Variable, self:Compile_LAMBDA( Trace, Perams, UseVarg, Sequence ), "function" )
 		end
 
 		self:PrevToken( )
@@ -1108,7 +1107,7 @@ function Compiler:Util_Perams( Trace )
 				self:TokenError( "Parameter %s may not appear twice", self.TokenData )
 			end
 
-			local MemRef, Scope = CreateVariable( Trace, self.TokenData, Class.Short )
+			local MemRef, Scope = self:CreateVariable( Trace, self.TokenData, Class.Short )
 
 			Params[#Params + 1] = { self.TokenData, Class.Short, MemRef }
 				

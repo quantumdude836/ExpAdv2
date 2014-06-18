@@ -5,6 +5,63 @@
 EXPADV = { }
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Sometimes We might need to convert objects into native.
+   --- */
+
+local Cache, ToLua, ToLuaTable = { }
+
+EXPADV.__Cache = Cache
+
+function ToLua( Value, bNoTables )
+	if !Value then return "nil" end
+	
+	local Type = type(Value)
+	
+	if Type == "number" then
+		return Value
+	elseif Type == "string" then
+		return string.format( "%q", Value )
+	elseif Type == "boolean" then
+		return Value and "true" or "false"
+	elseif Type == "table" and !bNoTables then
+		return ToLuaTable( Value )
+	elseif Type == "function" and !NoTables then
+		local Index = #Cache + 1
+		Cache[Index] = Value
+		return "EXPADV.__Cache[" .. Index .. "]"
+	end
+end
+
+EXPADV.ToLua = ToLua
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: We need config files.
+   --- */
+
+function ToLuaTable( Table )
+	local Lua = "{"
+	
+	for Key, Value in pairs(Table) do
+		local kLua = ToLua( Key, true )
+		local vLua = ToLua( Value )
+		
+		if !kLua then
+			error("TableToLua invalid Key of type " .. type(Key))
+		elseif !vLua then
+			error("TableToLua invalid Value of type " .. type(Value))
+		end
+		
+		Lua = string.format( "%s[%s] = %s, ", Lua, kLua, vLua )
+		
+		--Lua .. "[" .. kLua .. "] = " .. vLua .. ", ")
+	end
+	
+	return Lua .. "}"
+end
+
+EXPADV.ToLuaTable = ToLuaTable
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: We need config files.
    --- */
 

@@ -59,7 +59,7 @@ function Compiler:Compile_OR( Trace, Expresion1, Expression2 )
 
 	if !Operator then self:TraceError( Trace, "Logic operator (or) does not support '%s || %s'", self:NiceClass( Expresion1.Return, Expression2.Return ) ) end
 
-	return Operator.Compile( self, Trace, Expresion1, Expression2 )
+	return Operator.Compile( self, Trace, Expresion1, self:MakeVirtual( Expression2 ) )
 end
 
 function Compiler:Compile_AND( Trace, Expresion1, Expression2 )
@@ -67,7 +67,7 @@ function Compiler:Compile_AND( Trace, Expresion1, Expression2 )
 
 	if !Operator then self:TraceError( Trace, "Logic operator (and) does not support '%s && %s'", self:NiceClass( Expresion1.Return, Expression2.Return ) ) end
 
-	return Operator.Compile( self, Trace, Expresion1, Expression2 )
+	return Operator.Compile( self, Trace, Expresion1, self:MakeVirtual( Expression2 ) )
 end
 
 function Compiler:Compile_BOR( Trace, Expresion1, Expression2 )
@@ -434,7 +434,7 @@ function Compiler:Compile_TRY( Trace, Sequence, Catch, Final )
 end
 
 function Compiler:Compile_CATCH( Trace, MemRef, Accepted, Sequence, Catch )
-	local Operator = self:LookUpOperator( "_ex=", "n", "_ex" )
+	local Operator = self:LookUpOperator( "ex=", "n", "ex" )
 	local Ass = Operator.Compile( self, Trace, { Trace = Trace, Inline = "Result", Return = "_ex", FLAG = EXPADV_INLINE, IsRaw = true } )
 
 	local Condition = "true"
@@ -564,4 +564,59 @@ function Compiler:Compile_METHOD( Trace, Expression, Method, Expressions )
 	local Signature = table.concat( { self:NiceClass( unpack( Expressions ) ) }, "," )
 	
 	self:TraceError( Trace, "No such method %s.%s(%s)", self:NiceClass(Meta), Variable, Signature )
+end
+
+function Compiler:Compile_LAMBDA( Trace, Params, UseVarg, Sequence )
+	local Inputs, PreSequence = { }, { }
+
+	-- { self.TokenData, Class.Short, MemRef }
+
+	for I, Param in pairs( Params ) do
+
+		Inputs[I] = "IN_" .. I
+
+		PreSequence[ #PreSequence + 1 ] = string.format( "if !IN_%i or IN_%i[1] == nil then", I, I )
+		PreSequence[ #PreSequence + 1 ] = string.format( "Context:Throw(%s, \"invoke\", \"Invalid argument #%i, %s expected got void.\" )", self:CompileTrace( Trace ), I, self:NiceClass( Param[2] ) )
+
+		if Param[2] ~= "vr" then
+			PreSequence[ #PreSequence + 1 ] = string.format( "elseif IN_%i[2] ~= %q then", I, Param[2] )
+			PreSequence[ #PreSequence + 1 ] = string.format( "Context:Throw(%s, \"invoke\", \"Invalid argument #%i, %s expected got \" .. IN_%i[2] )", self:CompileTrace( Trace ), I, self:NiceClass( Param[2] ) )
+		end
+
+		PreSequence[ #PreSequence + 1 ] = "else"
+
+			local Operator = self:LookUpOperator( Param[1] .. "=", "n", Param[1] )
+			
+			if Operator then
+				Instruction = Operator.Compile( self, Trace, Quick( Param[3], "n" ), Quick( Inputs[I] .. "[1]", Param[2] ) )
+
+				PreSequence[ #PreSequence + 1 ] = Instruction.Prepare
+				PreSequence[ #PreSequence + 1 ] = Instruction.Inline
+			else
+
+				local Operator = self:LookUpOperator( Param[1] .. "=", "n", Param[1] )
+
+				if Operator then
+					Instruction = Operator.Compile( self, Trace, Quick( Param[1], "s" ), Quick( Inputs[I] .. "[1]", Param[2] ) )
+
+					PreSequence[ #PreSequence + 1 ] = Instruction.Prepare
+					PreSequence[ #PreSequence + 1 ] = Instruction.Inline
+				else
+					self:TraceError( Trace, "Invalid argument #%i, %s can not be used as function argument", I, self:NiceClass(Param[2]) )
+				end
+			end
+
+		PreSequence[ #PreSequence + 1 ] = "end"
+	end
+	
+	if UseVarg then Inputs[#Inputs + 1] = "..." end
+
+	local Lua = table.concat( {
+		"function(" .. table.concat( Inputs, "," ) .. ")",
+		table.concat( PreSequence, "\n" ),
+		Sequence.Prepare or "",
+		Sequence.Inline or "" 
+	}, "\n" )
+
+	return { Trace = Trace, Inline = Lua, Return = "f", FLAG = EXPADV_INLINE }
 end

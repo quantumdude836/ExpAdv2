@@ -113,7 +113,7 @@ function Compiler:GetTokenTrace( RootTrace )
 end
 
 function Compiler:CompileTrace( Trace )
-	return -- TODO: this!
+	return EXPADV.ToLua( Trace )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -188,12 +188,14 @@ end
 function Compiler:MakeVirtual( Instruction )
 	if Instruction.IsRaw then return Instruction end
 
+	if Instruction.FLAG == EXPADV_INLINE then return Instruction end
+
 	local ID = #self.VMInstructions + 1
 	
 	local Native = table.concat( { -- Todo, Add Env
 		"return function( Context )",
 			Instruction.Prepare or "",
-			Instruction.Inline or "",
+			"return " .. Instruction.Inline or "",
 		"end"
 	}, "\n" )
 
@@ -526,7 +528,7 @@ local function SoftCompile( self, Script, Files, bIsClientSide, OnError, OnSuces
 		self:StartTokenizer( )
 
 	-- Wait for next tick to begin:
-		-- coroutine.yield( )
+		coroutine.yield( )
 
 	-- Ok, Run the compiler.
 		local Compiled, Instruction = pcall( self.Sequence, self, { 0, 0 } )
@@ -543,24 +545,43 @@ end
 	@: Compiler Handeler, From now on we will compile over time!
    --- */
 
-/*hook.Add( "Tick", "ExpAdv.Compile", function( )
-	for Instance, Coroutine in pairs( Coroutines ) do
-		Instance.Yield = SysTime( ) + 1--0.001
+local TimeMark, SysTime = 0, SysTime
 
-		EXPADV.COMPILER_ENV = Instance.Enviroment
-
-		coroutine.resume( Coroutine )
-
-		EXPADV.COMPILER_ENV = nil
+local function LineHook( )
+	if SysTime( ) > TimeMark then
+		MsgN( "THIS RAN!" )
+		coroutine.yield( )
 	end
-end )*/
+end
+
+hook.Add( "Tick", "ExpAdv.Compile", function( )
+	for Instance, Coroutine in pairs( Coroutines ) do
+
+		TimeMark = SysTime( ) + 0.01
+
+		debug.sethook( Coroutine, LineHook, "l", 25 )
+
+			EXPADV.COMPILER_ENV = Instance.Enviroment
+
+				coroutine.resume( Coroutine )
+
+			EXPADV.COMPILER_ENV = nil
+
+		debug.sethook( Coroutine )
+
+	end
+end )
 
 function EXPADV.Compile( Script, Files, bIsClientSide, OnError, OnSucess )
 	local self = setmetatable( { }, Compiler )
 	
-	SoftCompile( self, Script, Files, bIsClientSide, OnError, OnSucess )
+	local Coroutine = coroutine.create( SoftCompile )
 
-	return self
+	coroutine.resume( Coroutine ,self, Script, Files, bIsClientSide, OnError, OnSucess )
+
+	Coroutines[self] = Coroutine
+
+	return self, Coroutine
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
