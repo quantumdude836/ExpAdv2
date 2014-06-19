@@ -562,7 +562,7 @@ end
 hook.Add( "Tick", "ExpAdv.Compile", function( )
 	for Instance, Coroutine in pairs( Coroutines ) do
 
-		TimeMark = SysTime( ) + 0.01
+		TimeMark = SysTime( ) + 0.001
 
 		debug.sethook( Coroutine, LineHook, "l", 25 )
 

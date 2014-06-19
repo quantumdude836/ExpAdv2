@@ -74,6 +74,15 @@ function BaseComponent:AddException( Exception ) -- String
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Events
+   --- */
+
+-- Registers a new event type on this component.
+function BaseComponent:AddEvent( Name, Input, Return ) -- String, String, String
+	EXPADV.AddEvent( self, Name, Input, Return )
+end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Component Settings
    --- */
 

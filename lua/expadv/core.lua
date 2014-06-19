@@ -80,7 +80,7 @@ function EXPADV.LoadConfig( )
 
 	Config.Settings = Config.Settings or { }
 
-	MsgN( "ExpAdv: Loaded config file, sucessfully.")
+	MsgN( "ExpAdv: Loaded config file, sucessfully." )
 
 	EXPADV.Config = Config
 end
@@ -123,6 +123,7 @@ function EXPADV.IncludeCore( )
 	include( "expadv/components.lua" )
 	include( "expadv/classes.lua" )
 	include( "expadv/operators.lua" )
+	include( "expadv/events.lua" )
 	include( "expadv/context.lua" )
 end
 
@@ -148,6 +149,8 @@ function EXPADV.LoadCore( )
 	EXPADV.LoadOperators( )
 
 	EXPADV.LoadFunctions( )
+
+	EXPADV.LoadEvents( )
 
 	EXPADV.Exceptions = { stack = "stack" }
 
