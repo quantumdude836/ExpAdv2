@@ -19,7 +19,7 @@ setmetatable = setmetatable
 
 -- Builds a new context from a compilers instance.
 function EXPADV.BuildNewContext( Instance, Player, Entity ) -- Table, Player, Entity
-	local Context = setmetatable( { player = Player, entity = Entity }, EXPADV.RootContext )
+	local Context = setmetatable( { player = Player, entity = Entity, Online = false }, EXPADV.RootContext )
 
 	Context.Memory = { }
 	Context.Delta = { }
@@ -194,14 +194,33 @@ function EXPADV.RootContext:Throw( Trace, Name, Message ) -- Table, String, Stri
 	error( { Trace = Trace, Exception = Name, Msg = Message, Context = self }, 0 )
 end
 
-function EXPADV.RootContext:ScriptError( Trace, Message )
+-- Throws a script error, and shuts down the context.
+function EXPADV.RootContext:ScriptError( Trace, Message ) -- Table, String
 	error( { Trace = Trace, Script = true, Msg = Message, Context = self }, 0 )
+end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Context registery.
+   --- */
+
+-- Runs the root execution of the code.
+function EXPADV.RootContext:StartUp( Execution ) -- Function
+	self:Handel( "StartUp" )
+	self.Online = true
+	self:Execute( Execution, self )
+end
+
+-- Shuts down the context and execution.
+function EXPADV.RootContext:ShutDown( )
+	self.Online = false
+	self:Handel( "ShutDown" )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Context Events.
    --- */
 
+-- Calls A context based hook, with passthrough to main hook system.
 function EXPADV.RootContext:Handel( Name, ... )
 	local Hook = self["On" .. Name]
 		
@@ -215,8 +234,8 @@ end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Context registery.
-   --- */
-
+--- */
+   
 local Registery = { }
 
 EXPADV.CONTEXT_REGISTERY = Registery

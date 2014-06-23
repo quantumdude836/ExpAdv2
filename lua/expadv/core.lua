@@ -216,6 +216,8 @@ end
    -- LuaError( Context, Error )*		| Void | Called when an executing context throws a lua error.
    -- ScriptError( Context, Error )*	| Void | Called when an executing context throws a script error.
    -- Exception( Context, Exception )*	| Void | Called when an executing context receives an uncatched exception.
+   -- StartUp( Context )*				| Void | Called before the inital root execution.
+   -- ShutDown( Context )*				| Void | Called after the context has shutdown.
 
    --  function Component:PostLoadAliases( ) end
    --  hook.Add( "Expadv.PostLoadAliases", ... )
