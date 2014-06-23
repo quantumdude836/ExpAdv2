@@ -87,6 +87,8 @@ end
 function EXPADV.LoadOperators( )
 	EXPADV.Operators = { }
 
+	EXPADV.CallHook( "PreLoadOperators" )
+
 	for I = 1, #Temp_Operators do
 		local Operator = Temp_Operators[I]
 
@@ -189,6 +191,8 @@ function EXPADV.LoadOperators( )
 
 		EXPADV.Operators[ Operator.Signature ] = Operator
 	end
+
+	EXPADV.CallHook( "PostLoadOperators" )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -277,6 +281,8 @@ end
 
 function EXPADV.LoadFunctions( )
 	EXPADV.Functions = { }
+
+	EXPADV.CallHook( "PreLoadFunctions" )
 
 	for I = 1, #Temp_Functions do
 		local Operator = Temp_Functions[I]
@@ -424,9 +430,14 @@ function EXPADV.LoadFunctions( )
 		end
 
 	end
+
+	EXPADV.CallHook( "PostLoadFunctions" )
 end
 
 function EXPADV.LoadFunctionAliases( Operator )
+	
+	EXPADV.CallHook( "PreLoadAliases" )
+
 	for _, Alias in pairs( Operator.Aliases ) do
 		local ShouldNotLoad = false
 
@@ -481,6 +492,8 @@ function EXPADV.LoadFunctionAliases( Operator )
 
 		EXPADV.Functions[ string.format( "%s(%s)", Alias.Name, table.concat( Signature, "" ) ) ] = Operator
 	end
+
+	EXPADV.CallHook( "PostLoadAliases" )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------

@@ -26,8 +26,18 @@ end
 	@: Operators
    --- */
 
+function Compiler:Compile_IS( Trace, Expresion1 )
+	if Expresion1.Return == "b" then return Expresion1 end
+
+	local Operator = self:LookUpOperator( "is", Expresion1.Return )
+
+	if !Operator thenself:TraceError( Trace, "%s can not be used as condition", self:NiceClass( Expresion1.Return ) ) end
+
+	return Operator.Compile( self, Trace, Expresion1 )
+end
+
 function Compiler:Compile_NOT( Trace, Expresion1 )
-	local Operator = self:LookUpOperator( "!", Expresion1.Return )
+	local Operator = self:LookUpOperator( "not", Expresion1.Return )
 
 	if !Operator then self:TraceError( Trace, "Operator does not support '!%s'", self:NiceClass( Expresion1.Return ) ) end
 
@@ -35,7 +45,7 @@ function Compiler:Compile_NOT( Trace, Expresion1 )
 end
 
 function Compiler:Compile_LEN( Trace, Expresion1 )
-	local Operator = self:LookUpOperator( "#", Expresion1.Return )
+	local Operator = self:LookUpOperator( "len", Expresion1.Return )
 
 	if !Operator then self:TraceError( Trace, "Length operator does not support '#%s'", self:NiceClass( Expresion1.Return ) ) end
 
@@ -43,7 +53,7 @@ function Compiler:Compile_LEN( Trace, Expresion1 )
 end
 
 function Compiler:Compile_NEG( Trace, Expresion1 )
-	local Operator = self:LookUpOperator( "#", Expresion1.Return )
+	local Operator = self:LookUpOperator( "neg", Expresion1.Return )
 
 	if !Operator then self:TraceError( Trace, "Negation operator does not support '-%s'", self:NiceClass( Expresion1.Return ) ) end
 
@@ -282,16 +292,18 @@ function Compiler:Compile_DEFAULT( Trace, Class )
 	return Operator.Compile( self, Trace )
 end
 
-function Compiler:Compile_CAST( Trace, Name, Expression )
+function Compiler:Compile_CAST( Trace, Name, Expression, bNoError )
 	local Class = self:GetClass( Trace, Name, false )
 
 	if Class.Short == Expression.Return then
+		if bNoError then return end
 		self:TraceError( Trace, "%s can not be cast to itself.", Class.Name )
 	end
 
 	local Operator = self:LookUpOperator( Class.Name, Expression.Return )
 
 	if !Operator then
+		if bNoError then return end
 		self:TraceError( Trace, "%s can not be cast to %s", self:NiceClass( Expression.Return ), Class.Name )
 	end
 
@@ -364,12 +376,7 @@ end
    --- */
 
 function Compiler:Compile_IF( Trace, Condition, Sequence, Else )
-	local Operator = self:LookUpOperator( "is", Condition.Return )
-	if Operator then Condition = Operator.Compile( self, Trace, Condition ) end
-		
-	if Condition.Return ~= "b" then
-		self:TraceError( Trace, "boolean expected for condition, got %s", self:NiceClass( Condition.Return ) )
-	end
+	Condition = self:Compile_IS( Trace, Condition )
 
 	local Native = { }
 	if Condition.Prepare then Native[#Native + 1] = Condition.Prepare end
@@ -387,12 +394,7 @@ function Compiler:Compile_IF( Trace, Condition, Sequence, Else )
 end
 
 function Compiler:Compile_ELSEIF( Trace, Condition, Sequence, Else )
-	local Operator = self:LookUpOperator( "is", Condition.Return )
-	if Operator then Condition = Operator.Compile( self, Trace, Condition ) end
-	
-	if Condition.Return ~= "b" then
-		self:TraceError( Trace, "boolean expected for condition, got %s", self:NiceClass( Condition.Return ) )
-	end
+	Condition = self:Compile_IS( Trace, Condition )
 
 	local Native = { }
 	if Else and Else.Prepare then Native[#Native + 1] = Else.Prepare end
@@ -582,7 +584,7 @@ function Compiler:Compile_METHOD( Trace, Expression, Method, Expressions )
 	self:TraceError( Trace, "No such method %s.%s(%s)", self:NiceClass(Meta), Variable, Signature )
 end
 
-function Compiler:Compile_LAMBDA( Trace, Params, UseVarg, Sequence )
+function Compiler:Compile_LAMBDA( Trace, Params, UseVarg, Sequence, Memory )
 	local Inputs, PreSequence = { }, { }
 
 	-- { self.TokenData, Class.Short, MemRef }
@@ -630,10 +632,11 @@ function Compiler:Compile_LAMBDA( Trace, Params, UseVarg, Sequence )
 
 	local Lua = table.concat( {
 		"function(" .. table.concat( Inputs, "," ) .. ")",
-		self:FlushMemory( Trace ),
+		self:FlushMemory( Trace, Memory ),
 		table.concat( PreSequence, "\n" ),
 		Sequence.Prepare or "",
-		Sequence.Inline or "" 
+		Sequence.Inline or "",
+		"end"
 	}, "\n" )
 
 	return { Trace = Trace, Inline = Lua, Return = "f", FLAG = EXPADV_INLINE }
@@ -659,3 +662,55 @@ function Compiler:Compile_RETURN( Trace, Expression )
 
 	return Quick( "return" )
 end
+
+function Compiler:Comile_EVENT_DEL( Trace, Name )
+	return { Trace = Trace, Prepare = string.format( "Context.event_%s = nil", Name ), FLAG = EXPADV_PREPARE }
+end
+
+function Compiler:Compile_EVENT( Trace, Name, Perams, UseVarg, Sequence, Memory )
+
+	local Inputs, PreSequence = { }, { }
+
+	-- { self.TokenData, Class.Short, MemRef }
+
+	for I, Param in pairs( Params ) do
+		local Type = Param[2]
+
+		Inputs[I] = "IN_" .. I
+
+		local Operator = self:LookUpOperator( Type .. "=", "n", Type )
+		
+		if Operator then
+			Instruction = Operator.Compile( self, Trace, Quick( Param[3], "n" ), Quick( Inputs[I] .. "[1]", Type ) )
+
+			PreSequence[ #PreSequence + 1 ] = Instruction.Prepare
+			PreSequence[ #PreSequence + 1 ] = Instruction.Inline
+		else
+
+			local Operator = self:LookUpOperator( Type .. "=", "n", Type )
+
+			if Operator then
+				Instruction = Operator.Compile( self, Trace, Quick( Param[1], "s" ), Quick( Inputs[I] .. "[1]", Type ) )
+
+				PreSequence[ #PreSequence + 1 ] = Instruction.Prepare
+				PreSequence[ #PreSequence + 1 ] = Instruction.Inline
+			else
+				self:TraceError( Trace, "Invalid argument #%i, %s can not be used as event argument", I, self:NiceClass( Type ) )
+			end
+		end
+	end
+	
+	if UseVarg then Inputs[#Inputs + 1] = "..." end
+
+	local Lua = table.concat( {
+		string.format( "Context.event_%s = function( %s )", Name, table.concat( Inputs, "," ) )
+		self:FlushMemory( Trace, Memory ),
+		table.concat( PreSequence, "\n" ),
+		Sequence.Prepare or "",
+		Sequence.Inline or "",
+		"end"
+	}, "\n" )
+
+	return { Trace = Trace, Prepare = Lua, FLAG = EXPADV_PREPARE }
+end
+

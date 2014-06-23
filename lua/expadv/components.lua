@@ -130,6 +130,9 @@ function EXPADV.LoadComponents( )
 		if Component.OnEnable then Component.OnEnable( ) end
 
 		EXPADV.Components[ Component.Name ] = Component
+
+		EXPADV.CallHook( "EnableComponent", Component )
 	end
 
+	EXPADV.CallHook( "PostLoadComponents" )
 end

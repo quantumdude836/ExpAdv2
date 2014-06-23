@@ -228,7 +228,7 @@ function EXPADV.LoadClasses( )
 
  	EXPADV.ClassShorts = { g = Class_Generic }
 
- 	-- EXPADV.RunHook( "LoadClasses" )
+ 	EXPADV.CallHook( "PreLoadClasses" )
 
  	for I = 1, #Temp_Classes do
  		local Class = Temp_Classes[I]
@@ -331,9 +331,11 @@ function EXPADV.LoadClasses( )
 
  	end
 
- 	for _, Class in pairs( EXPADV.Classes ) do
- 		-- EXPADV.RunHook( "RegisterClass", Class )
+ 	for Name, Class in pairs( EXPADV.Classes ) do
+ 		EXPADV.CallHook( "RegisterClass", Name, Class )
  	end
+
+ 	EXPADV.CallHook( "PostLoadClasses" )
 
  	for Alias, Class in pairs( EXPADV.ClassAliases ) do
  		
@@ -343,4 +345,5 @@ function EXPADV.LoadClasses( )
 
  	end
 
- end
+ 	EXPADV.CallHook( "PostLoadClassAliases" )
+end

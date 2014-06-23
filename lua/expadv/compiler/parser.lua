@@ -528,13 +528,13 @@ function Compiler:Expression_Function( Trace, bIsStatement )
 
 		local Sequence = self:Sequence( Trace, "rcb" )
 
-		self:PopLambdaDeph( )
+		local Memory = self:PopLambdaDeph( )
 
 		self:PopScope( )
 
 		self:RequireToken( "rcb", "Right curly bracket (}) missing, to close function body" )
 
-		return self:Compile_LAMBDA( Trace, Perams, UseVarg, Sequence )
+		return self:Compile_LAMBDA( Trace, Perams, UseVarg, Sequence, Memory )
 	end
 end
 
@@ -879,8 +879,57 @@ function Compiler:Statement_3( Trace )
 	return self:Statement_4( Trace )
 end
 
--- Stage 4:
+-- Stage 4: Events
 function Compiler:Statement_4( Trace )
+	if self:AcceptToken( "evt" ) then
+		local Trace = self:GetTokenTrace( Trace )
+
+		self:RequireToken( "var", "Event name expected after keyword evet." )
+
+		local Name = self.TokenData
+		local Event = EXPADV.Events[Name]
+
+		self:RequireToken( "lpa", "Left parenthesis ( () missing, after event name" )
+
+		local Perams, UseVarg = self:Util_Perams( Trace )
+
+		self:RequireToken( "rpa", "Right parenthesis () ) missing, to close event parameters" )
+
+		if !Event then self:TraceError( Trace, "No such event %s", Name )
+
+		for I = 1, #Perams do
+			local Peram = Perams[I]
+			local Test = Event.Input[I]
+			
+			if !Test then
+				self:TraceError( Trace, "Invalid perameter #%i to event %s, no perameter expected", I, Name, )
+			elseif Test ~= Peram[2] then
+				self:TraceError( Trace, "Invalid perameter #%i to event %s, %s expected", I, Name, self:NiceClass( Peram[2] ) )
+			end
+		end
+
+		if !self:AcceptToken( "lcb") then
+			return self:Comile_EVENT_DEL( Trace, Name )
+		end
+
+		local LastPrediction = self.Current_ReturnClass
+		self.Current_ReturnClass = Event.Return
+
+		self:PushScope( )
+		self:PushLambdaDeph( )
+
+		local Sequence = self:Sequence( Trace, "rcb" )
+
+		local Memory = self:PopLambdaDeph( )
+		self:PopScope( )
+
+		self.Current_ReturnClass = LastPrediction
+
+		self:RequireToken( "rcb", "Right curly bracket (}) missing, to close event" )
+
+		return self:Compile_EVENT( Trace, Name, Perams, UseVarg, Sequence, Memory )
+	end
+
 	return self:Statement_5( Trace )
 end
 
@@ -1087,7 +1136,7 @@ function Compiler:Statement_6( Trace )
 			local Sequence = self:Sequence( Trace, "rcb" )
 
 			self.Current_ReturnClass = LastPrediction
-			self:PopLambdaDeph( )
+			local Memory = self:PopLambdaDeph( )
 
 			self:PopScope( )
 
@@ -1095,7 +1144,7 @@ function Compiler:Statement_6( Trace )
 
 			self.ReturnTypes[ self.ScopeID ][Variable] = Prediction
 
-			return self:Compile_ASS( Trace, Variable, self:Compile_LAMBDA( Trace, Perams, UseVarg, Sequence ), "function" )
+			return self:Compile_ASS( Trace, Variable, self:Compile_LAMBDA( Trace, Perams, UseVarg, Sequence, Memory ), "function" )
 		end
 
 		self:PrevToken( )

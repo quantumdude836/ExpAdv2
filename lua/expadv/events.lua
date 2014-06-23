@@ -2,6 +2,10 @@
 	@: Events
    --- */
 
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Events
+   --- */
+
 local Temp_Events = { }
 
 function EXPADV.AddEvent( Component, Name, Input, Return )
@@ -107,4 +111,14 @@ end
 	@: Event Interface
    --- */
 
+function EXPADV.CallEvent( Name, ... )
 
+end
+
+function EXPADV.CallPlayerEvent( Player, Name, ... )
+	
+end
+
+function EXPADV.CallPlayerReturnableEvent( Player, Name, ... )
+
+end

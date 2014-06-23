@@ -191,6 +191,48 @@ if CLIET then
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Hooks.
+   --- */
+
+   -- PostLoadComponents( ) 			| Void | Called once all components have been loaded.
+   -- EnableComponent( Component ) 		| Void | Called after a component enables.
+   -- PreLoadOperators( )				| Void | Called before operators are loaded.
+   -- PostLoadOperators( )				| Void | Called after operators are loaded.
+   -- PreLoadFunctions( )				| Void | Called before functions are loaded.
+   -- PostLoadFunctions( )				| Void | Called after functions are loaded.
+   -- PreLoadAliases( )					| Void | Called before function aliases are loaded.
+   -- PostLoadAliases( )				| Void | Called after function aliases are loaded.
+   -- PreLoadClasses( )					| Void | Called before classes are loaded.
+   -- PostLoadClasses( )				| Void | Called after classes are loaded.
+   -- PostLoadClassAliases( )			| Void | Called after classes and class aliases are loaded.
+   -- RegisterClass( Name, Class )		| Void | Called after each class has been registered and loaded.
+   -- RegisterContext( Context )*		| Void | Called when a context is registered to the core.
+   -- UnregisterContext( Context )*		| Void | Called when a context is unregistered from the core.
+   -- LuaError( Context, Error )*		| Void | Called when an executing context throws a lua error.
+   -- ScriptError( Context, Error )*	| Void | Called when an executing context throws a script error.
+   -- Exception( Context, Exception )*	| Void | Called when an executing context receives an uncatched exception.
+
+   --  function Component:PostLoadAliases( ) end
+   --  hook.Add( "Expadv.PostLoadAliases", ... )
+   -- *Also avaible on Context -> function Context:ScriptError( Result ) end
+
+function EXPADV.CallHook( Name, ... )
+
+	for _, Component in pairs( EXPADV.Components ) do
+		if !Component.Enabled then continue end -- Shouldn't be possible!
+
+		local Hook = Component["On" .. Name]
+		
+		if !Hook then continue end
+
+		local Results = { Hook( Component, ... ) }
+		if Results[1] ~= nil then return unpack( ... ) end
+	end
+
+	return hook.Run( "Expadv." .. Name, ... )
+end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Test Build.
    --- */
 

@@ -159,10 +159,10 @@ function EXPADV.RootContext:Execute( Location, Operation, ... ) -- String, Funct
 	local Ok, Result = pcall( Operation, ... )
 
 	self:PostExecute( )
-
 	
 	if !Ok and isString( Result ) then
-		-- Lua Error
+		return self:Handel( "LuaError", Result )
+
 	elseif Ok or Result.Exit then
 
 		--TODO: Tick Quota Check
@@ -172,9 +172,9 @@ function EXPADV.RootContext:Execute( Location, Operation, ... ) -- String, Funct
 		return true, Result
 
 	elseif Result.Script then
-		-- Script Error
+		return self:Handel( "ScriptError", Result )
 	elseif Result.Exception then
-		-- Exception
+		return self:Handel( "Exception", Result )
 	end
 
 	return false
@@ -199,6 +199,34 @@ function EXPADV.RootContext:ScriptError( Trace, Message )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Context Events.
+   --- */
+
+function EXPADV.RootContext:Handel( Name, ... )
+	local Hook = self["On" .. Name]
+		
+	if Hook then
+		local Results = { Hook( Context, ... ) }
+		if Results[1] ~= nil then return unpack( ... ) end
+	end
+
+	return EXPADV.CallHook( Name, Context, ... )
+end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Context registery.
    --- */
 
+local Registery = { }
+
+EXPADV.CONTEXT_REGISTERY = Registery
+
+function EXPADV.RegisterContext( Context )
+	Registery[Context] = Context
+	Context:Handel( "RegisterContext" )
+end
+
+function EXPADV.UnregisterContext( Context )
+	Registery[Context] = nil
+	Context:Handel( "UnregisterContext" )
+end

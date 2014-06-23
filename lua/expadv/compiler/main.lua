@@ -269,8 +269,10 @@ end
    end
 
    function Compiler:PopMemory( )
+   		local Memory = self.FreshMemory[ self.MemoryDeph ]
    		self.FreshMemory[ self.MemoryDeph ] = nil
    		self.MemoryDeph = self.MemoryDeph - 1
+   		return Memory
    end
 
    function Compiler:PushLoopDeph( )
@@ -289,12 +291,13 @@ end
    end
 
    function Compiler:PopLambdaDeph( )
-   		self:PopMemory( )
+   		local Memory = self:PopMemory( )
    		self.LambdaDeph = self.LambdaDeph - 1
+   		return Memory
    end
 
-   function Compiler:FlushMemory( Trace )
-		return string.format( "local Context = Context:Push( %s, %s )", EXPADV.ToLua( Trace ), EXPADV.ToLua( self.FreshMemory[self.MemoryDeph] ) )
+   function Compiler:FlushMemory( Trace, Memory )
+		return string.format( "local Context = Context:Push( %s, %s )", EXPADV.ToLua( Trace ), EXPADV.ToLua( Memory ) )
    end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
