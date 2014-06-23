@@ -230,8 +230,12 @@ function EXPADV.LoadClasses( )
 
  	EXPADV.CallHook( "PreLoadClasses" )
 
- 	for I = 1, #Temp_Classes do
+ 	local Index = 1
+
+ 	while Index <= #Temp_Classes do
  		local Class = Temp_Classes[I]
+
+ 		Index = Index + 1
 
  		if Class.Component and !Class.Component.Enabled then
  			MsgN( "Skipping class " .. Class.Name .. " (component disabled)." )
@@ -241,6 +245,8 @@ function EXPADV.LoadClasses( )
  		EXPADV.Classes[ Class.Name ] = Class
 
  		EXPADV.ClassShorts[ Class.Short ] = Class
+
+ 		EXPADV.CallHook( "PreRegisterClass", Class.Short, Class )
  	end
 
  	----------------------------------------------------------
@@ -332,7 +338,7 @@ function EXPADV.LoadClasses( )
  	end
 
  	for Name, Class in pairs( EXPADV.Classes ) do
- 		EXPADV.CallHook( "RegisterClass", Name, Class )
+ 		EXPADV.CallHook( "PostRegisterClass", Name, Class )
  	end
 
  	EXPADV.CallHook( "PostLoadClasses" )

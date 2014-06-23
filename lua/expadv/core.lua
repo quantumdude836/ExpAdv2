@@ -83,11 +83,13 @@ function EXPADV.LoadConfig( )
 	MsgN( "ExpAdv: Loaded config file, sucessfully." )
 
 	EXPADV.Config = Config
+
+	EXPADV.CallHook( "PostLoadConfig", Config )
 end
 
 -- Saves the config file.
 function EXPADV.SaveConfig( )
-	-- EXPADV.RunHook( "PreSaveConfig", EXPADV.Config )
+	EXPADV.CallHook( "PreSaveConfig", EXPADV.Config )
 
 	file.Write( "expadv.txt", util.TableToKeyValues( EXPADV.Config ) )
 end
@@ -194,6 +196,8 @@ end
 	@: Hooks.
    --- */
 
+   -- PostLoadConfig( Config )			| Void | Called after the main config has loaded.
+   -- PreSaveConfig( Config )			| Void | Called before saving the main config file.
    -- PostLoadComponents( ) 			| Void | Called once all components have been loaded.
    -- EnableComponent( Component ) 		| Void | Called after a component enables.
    -- PreLoadOperators( )				| Void | Called before operators are loaded.
@@ -205,7 +209,8 @@ end
    -- PreLoadClasses( )					| Void | Called before classes are loaded.
    -- PostLoadClasses( )				| Void | Called after classes are loaded.
    -- PostLoadClassAliases( )			| Void | Called after classes and class aliases are loaded.
-   -- RegisterClass( Name, Class )		| Void | Called after each class has been registered and loaded.
+   -- PreRegisterClass( Short, Class )	| Void | Called once per class, before class loading begins (classes can be created here).
+   -- PostRegisterClass( Name, Class )	| Void | Called after each class has been registered and loaded.
    -- RegisterContext( Context )*		| Void | Called when a context is registered to the core.
    -- UnregisterContext( Context )*		| Void | Called when a context is unregistered from the core.
    -- LuaError( Context, Error )*		| Void | Called when an executing context throws a lua error.
