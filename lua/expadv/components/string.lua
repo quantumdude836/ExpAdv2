@@ -101,20 +101,23 @@ StringComponent:AddInlineFunction( "matchFirst", "s.s", "s", "string.match(@valu
 
 StringComponent:AddInlineFunction( "matchFirst", "s.s,n", "s", "string.match(@value 1, @value 2, @value 3)" )
 
-/* StringComponent:AddPreparedFunction( "gmatch", "s.s", "s*", [[
+/*
+StringComponent:CreateSetting( "gmatch_limit", 50 )
+
+StringComponent:AddPreparedFunction( "gmatch", "s.s", "s*", [[
 	@define array, iter, values = {}, string.gmatch( @value 1, @value 2 )
 
-	for i = 1, 50 do
+	for i = 1, @setting gmatch_limit do
 		@values = {@iter( )}
 		if table.getn(@values) == 0 then break end
 		@array[i] = @values
 	end
-]], "@array" )*/
+]], "@array" )
 
-/* StringComponent:AddPreparedFunction( "gmatch", "s.s,n", "s*", [[
+StringComponent:AddPreparedFunction( "gmatch", "s.s,n", "s*", [[
 	@define array, iter, values = {}, string.gmatch( @value 1, @value 2 )
 
-	for i = 1, math.Clamp( @value 3 or 50, 0, 50) do
+	for i = 1, math.Clamp( @value 3 or @setting gmatch_limit, 0, @setting gmatch_limit) do
 		@values = {@iter( )}
 		if table.getn(@values) == 0 then break end
 		@array[i] = @values

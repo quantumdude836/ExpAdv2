@@ -29,7 +29,8 @@ function EXPADV.BuildNewContext( Instance, Player, Entity ) -- Table, Player, En
 	Context.Dinfinitions = { }
 	Context.Strings = Instance.Strings or { }
 	Context.Instructions = Instance.VMInstructions or { }
-
+	Context.Enviroment = Instance.Enviroment or error( "No safe guard.", 0 )
+	
 	return Context
 end
 

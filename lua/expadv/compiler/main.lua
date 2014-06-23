@@ -194,6 +194,7 @@ function Compiler:MakeVirtual( Instruction )
 	
 	local Native = table.concat( { -- Todo, Add Env
 		"return function( Context )",
+			"setfenv( Context.Enviroment )",
 			Instruction.Prepare or "",
 			"return " .. Instruction.Inline or "",
 		"end"
@@ -496,6 +497,27 @@ function Compiler:DefineVariable( )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Base Env
+   --- */
+
+EXPADV.BaseEnv = {
+		EXPADV = EXPADV,
+		
+		Vector = Vector, Angle = Angle,
+		pairs = pairs, ipairs = ipairs,
+		pcall = pcall, error = error, unpack = unpack,
+		print = print, MsgN = MsgN, tostring = tostring, tonumber = tonumber,
+	
+	-----------------------------------------------------------
+		__index = function( _, Value )
+			debug.Trace( )
+			error("Attempt to reach Lua environment " .. Value, 1 )
+		end, __newindex = function( _, Value )
+			error("Attempt to write to lua environment " .. Value, 1 )
+		end 
+}
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Compile Code
    --- */
 
@@ -519,7 +541,8 @@ local function SoftCompile( self, Script, Files, bIsClientSide, OnError, OnSuces
 		self.VMInstructions = { }
 		
 	-- Enviroment
-		self.Enviroment = { }
+		self.Enviroment = { __index = EXPADV.BaseEnv }
+		setmetatable( self.Enviroment, self.BaseEnv )
 		
 	-- Memory:
 		self:BuildScopes( )
@@ -616,6 +639,7 @@ function EXPADV.TestCompiler( Player, Code )
 			
 			local Native = table.concat( {
 				"return function( Context )",
+				"setfenv( Context.Enviroment )",
 				Instruction.Prepare or "",
 				Instruction.Inline or "",
 				"end"

@@ -85,8 +85,27 @@ end
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Component Settings
    --- */
+function BaseComponent:CreateSetting( Name, Default ) -- String, Obj
+	local Config = EXPADV.Config.Components[self.Name] or { }
+	
+	EXPADV.Config.Components[self.Name] = Config
+	
+	Name = string.lower( Name )
 
-   -- TODO
+	Config[ Name ] = Config[ Name ] or Default
+end
+
+-- Reads a setting from the config.
+function BaseComponent:ReadSetting( Name, Default ) -- String, Obj
+	local Config = EXPADV.Config.Components[self.Name] or { }
+	
+	EXPADV.Config.Components[self.Name] = Config
+	
+	Name = string.lower( Name )
+
+	return Config[ Name ] or Default
+end
+
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: New Component

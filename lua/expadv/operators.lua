@@ -509,8 +509,38 @@ function EXPADV.CanBuildOperator( Compiler, Trace, Operator )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
-	@: Operator to Lua
+	@: 
    --- */
+
+function EXPADV.Interprit( Operator, Compiler, Line )
+	if Operator.Component then
+		local Settings = { }
+
+		for StartPos, EndPos in string.gmatch( OpPrepare, "()@setting [a-zA-Z_0-9]+()" ) do
+			Settings[ #Settings + 1 ] = { StartPos, EndPos }
+		end
+
+		for I = #Settings, 1, -1 do
+			local Start, End = unpack( DefinedLines[I] )
+			local Setting = Operator.Component:ReadSetting( string.sub( Line, Start + 9, End - 1 ), nil )
+			Line = string.sub( Line, 1, Start - 1 ) .. EXPADV.ToLua(Setting) .. string.sub( Line, End - 1 )
+		end
+	end
+	
+	for Import in string.gmatch( Line, "(%$[a-zA-Z0-9_]+)" ) do
+		local What = string.sub( Import, 2 )
+		
+		Line = string.gsub( Line, Import, What )
+		
+		Compiler.Enviroment[What] = _G[What]
+	end
+	
+	return Line
+end
+   
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Operator to Lua
+--- */
 
 function EXPADV.BuildVMOperator( Operator )
 	function Operator.Compile( Compiler, Trace, ... )
@@ -741,10 +771,8 @@ function EXPADV.BuildLuaOperator( Operator )
 			end
 
 			OpPrepare = string.gsub( OpPrepare, "(@[a-zA-Z0-9_]+)", Definitions )
-
-			--TODO: Externals!
-
-			--TODO: Imports!
+	
+			OpPrepare = EXPADV.Interprit( Operator, Compiler, OpPrepare )
 		end
 
 		-- Now lets format the inline
@@ -752,9 +780,7 @@ function EXPADV.BuildLuaOperator( Operator )
 			-- Replace the locals in our prepare!
 			OpInline = string.gsub( OpInline, "(@[a-zA-Z0-9_]+)", Definitions )
 
-			--TODO: Externals!
-
-			--TODO: Imports!
+			OpInline = EXPADV.Interprit( Operator, Compiler, OpInline )
 		end
 
 		return Compiler:NewLuaInstruction( Trace, Operator, OpPrepare, OpInline )
