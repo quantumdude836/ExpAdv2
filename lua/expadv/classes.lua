@@ -49,7 +49,7 @@ if WireLib then
 	local function WireOut( Context, MemoryRef ) return Context.Memory[ MemoryRef ] end
 
 	-- Defines the wire outport type name of your class.
-	-- Optonally define a method to translate native type in memory to wire type.
+	-- Optionally define a method to translate native type in memory to wire type.
 	function BaseClassObj:WireOutput( WireType, Function ) -- String, function( table Context, number MemoryRef )
 		self.Wire_Out_Type = string.upper( WireType )
 
@@ -59,7 +59,7 @@ if WireLib then
 	local function WireIn( Context, MemoryRef, InValue ) Context.Memory[ MemoryRef ] = InValue end
 
 	-- Defines the wire inport type name of your class.
-	-- Optonally define a method to translate wire type to native type and store in memory.
+	-- Optionally define a method to translate wire type to native type and store in memory.
 	function BaseClassObj:WireInput( WireType, Function ) -- function( table Context, number MemoryRef, obj Value )
 		self.Wire_In_Type = string.upper( WireType )
 		
@@ -88,7 +88,7 @@ if von then
 	-- Not yet supported, please do not use this method.
 	function EXPADV.Serialize( Context, Short, Obj ) -- Table, String, Obj
 		-- Assigned: Vercas
-		-- Todo: return seralized
+		-- Todo: return serialized
 
 		--	This is an initial attempt to check behaviour.
 		return von.serialize({Short, Obj})

@@ -251,7 +251,7 @@ function EXPADV.UnregisterContext( Context )
 	Context:Handel( "UnregisterContext" )
 end
 
-local LastUpdated -- Means we dont need a zilion pcalls
+local LastUpdated -- Means we dont need a zillion pcalls
 
 local function CheckUpdates( )
 	for Context in pairs( Updates ) do
