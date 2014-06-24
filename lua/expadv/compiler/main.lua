@@ -663,10 +663,9 @@ function EXPADV.TestCompiler( Player, Code )
 				return
 			end
 
-			Compiled = Compiled( )
-
 			local Context = EXPADV.BuildNewContext( Instance, Player, Player )
-			Compiled( Context )
+			
+			Context:StartUp( Compiled( ) )
 		end
 
 		EXPADV.Compile( Code, { }, false, OnError, OnSucess )

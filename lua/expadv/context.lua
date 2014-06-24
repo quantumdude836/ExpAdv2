@@ -250,3 +250,24 @@ function EXPADV.UnregisterContext( Context )
 	Registery[Context] = nil
 	Context:Handel( "UnregisterContext" )
 end
+
+local LastUpdated -- Means we dont need a zilion pcalls
+
+local function CheckUpdates( )
+	for Context in pairs( Updates ) do
+		LastUpdated = Context
+		Context:Handel( "Update" )
+	end
+	
+	Updates = { }
+end
+
+hook.Add( "Tick", "ExpAdv2.Update", function( )
+	local Ok, Msg = pcall( CheckUpdates )
+	
+	if !Ok and LastUpdated then
+		LastUpdated:Handel( "LuaError", Msg )
+	end
+	
+	LastUpdated = nil
+end )

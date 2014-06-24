@@ -197,6 +197,7 @@ end
 	@: Hooks.
    --- */
 
+   -- Think( )							| Void | Called once per think, this is for convinence.
    -- PostLoadCore( )					| Void | Called after the core has finished loading.
    -- PostLoadConfig( Config )			| Void | Called after the main config has loaded.
    -- PreSaveConfig( Config )			| Void | Called before saving the main config file.
@@ -245,6 +246,15 @@ function EXPADV.CallHook( Name, ... )
 	
 	return hook.Run( "Expadv." .. Name, ... )
 end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Conveinence hooks.
+   --- */
+   
+hook.Add( "Think", "ExpAdv2.Hook", function( )
+	local Ok, Msg = pcall( EXPADV.CallHook, "Think" )
+	if !Ok then MsgN( "ExpAdv2 - Error in main Think hook: ", Msg ) end
+end )
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Test Build.
