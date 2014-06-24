@@ -197,7 +197,7 @@ end
 	@: Hooks.
    --- */
 
-   -- Think( )							| Void | Called once per think, this is for convinence.
+   -- Think( )							| Void | Called once per think, this is for convenience.
    -- PostLoadCore( )					| Void | Called after the core has finished loading.
    -- PostLoadConfig( Config )			| Void | Called after the main config has loaded.
    -- PreSaveConfig( Config )			| Void | Called before saving the main config file.
@@ -222,7 +222,7 @@ end
    -- LuaError( Context, Error )*		| Void | Called when an executing context throws a lua error.
    -- ScriptError( Context, Error )*	| Void | Called when an executing context throws a script error.
    -- Exception( Context, Exception )*	| Void | Called when an executing context receives an uncatched exception.
-   -- StartUp( Context )*				| Void | Called before the inital root execution.
+   -- StartUp( Context )*				| Void | Called before the initial root execution.
    -- ShutDown( Context )*				| Void | Called after the context has shutdown.
 
    --  function Component:OnPostLoadAliases( ) end
@@ -248,7 +248,7 @@ function EXPADV.CallHook( Name, ... )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
-	@: Conveinence hooks.
+	@: Convenience hooks.
    --- */
    
 hook.Add( "Think", "ExpAdv2.Hook", function( )
