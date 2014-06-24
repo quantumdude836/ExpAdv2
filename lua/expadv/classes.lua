@@ -233,7 +233,7 @@ function EXPADV.LoadClasses( )
  	local Index = 1
 
  	while Index <= #Temp_Classes do
- 		local Class = Temp_Classes[I]
+ 		local Class = Temp_Classes[Index]
 
  		Index = Index + 1
 

@@ -219,23 +219,25 @@ end
    -- StartUp( Context )*				| Void | Called before the inital root execution.
    -- ShutDown( Context )*				| Void | Called after the context has shutdown.
 
-   --  function Component:PostLoadAliases( ) end
+   --  function Component:OnPostLoadAliases( ) end
    --  hook.Add( "Expadv.PostLoadAliases", ... )
-   -- *Also avaible on Context -> function Context:ScriptError( Result ) end
+   -- *Also avaible on Context -> function Context:OnScriptError( Result ) end
 
 function EXPADV.CallHook( Name, ... )
+	
+	if EXPADV.Components then
+		for _, Component in pairs( EXPADV.Components ) do
+			if !Component.Enabled then continue end -- Shouldn't be possible!
 
-	for _, Component in pairs( EXPADV.Components ) do
-		if !Component.Enabled then continue end -- Shouldn't be possible!
+			local Hook = Component["On" .. Name]
+			
+			if !Hook then continue end
 
-		local Hook = Component["On" .. Name]
-		
-		if !Hook then continue end
-
-		local Results = { Hook( Component, ... ) }
-		if Results[1] ~= nil then return unpack( ... ) end
+			local Results = { Hook( Component, ... ) }
+			if Results[1] ~= nil then return unpack( ... ) end
+		end
 	end
-
+	
 	return hook.Run( "Expadv." .. Name, ... )
 end
 

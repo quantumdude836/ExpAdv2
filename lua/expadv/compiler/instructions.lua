@@ -31,7 +31,7 @@ function Compiler:Compile_IS( Trace, Expresion1 )
 
 	local Operator = self:LookUpOperator( "is", Expresion1.Return )
 
-	if !Operator thenself:TraceError( Trace, "%s can not be used as condition", self:NiceClass( Expresion1.Return ) ) end
+	if !Operator then self:TraceError( Trace, "%s can not be used as condition", self:NiceClass( Expresion1.Return ) ) end
 
 	return Operator.Compile( self, Trace, Expresion1 )
 end
@@ -703,7 +703,7 @@ function Compiler:Compile_EVENT( Trace, Name, Perams, UseVarg, Sequence, Memory 
 	if UseVarg then Inputs[#Inputs + 1] = "..." end
 
 	local Lua = table.concat( {
-		string.format( "Context.event_%s = function( %s )", Name, table.concat( Inputs, "," ) )
+		string.format( "Context.event_%s = function( %s )", Name, table.concat( Inputs, "," ) ),
 		self:FlushMemory( Trace, Memory ),
 		table.concat( PreSequence, "\n" ),
 		Sequence.Prepare or "",

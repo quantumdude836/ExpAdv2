@@ -112,13 +112,59 @@ end
    --- */
 
 function EXPADV.CallEvent( Name, ... )
-
+	local Result
+	
+	for _, Context in pairs( EXPADV.CONTEXT_REGISTERY ) do
+		if !Context.Online then continue end
+		
+		local Event = Context["event_" .. Name]
+		
+		if !Event then continue end
+		
+		local Ok, Value = Context:Execute( "Event " .. Name, Event, ... )
+		
+		if !Result and Ok and Value ~= nil then Result = Value end
+	end
+	
+	return Result
 end
 
 function EXPADV.CallPlayerEvent( Player, Name, ... )
+	local Result
 	
+	for _, Context in pairs( EXPADV.CONTEXT_REGISTERY ) do
+		if !Context.Online then continue end
+		
+		if Context.player ~= Player then continue end
+		
+		local Event = Context["event_" .. Name]
+		
+		if !Event then continue end
+		
+		local Ok, Value = Context:Execute( "Event " .. Name, Event, ... )
+		
+		if !Result and Ok and Value ~= nil then Result = Value end
+	end
+	
+	return Result
 end
 
 function EXPADV.CallPlayerReturnableEvent( Player, Name, ... )
-
+	local Result
+	
+	for _, Context in pairs( EXPADV.CONTEXT_REGISTERY ) do
+		if !Context.Online then continue end
+		
+		local Event = Context["event_" .. Name]
+		
+		if !Event then continue end
+		
+		local Ok, Value = Context:Execute( "Event " .. Name, Event, ... )
+		
+		if Context.player ~= Player then continue end
+		
+		if !Result and Ok and Value ~= nil then Result = Value end
+	end
+	
+	return Result
 end
