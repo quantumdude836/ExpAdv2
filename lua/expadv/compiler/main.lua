@@ -8,6 +8,8 @@ EXPADV.Compiler.__index = EXPADV.Compiler
 
 local Compiler = EXPADV.Compiler
 
+EXPADV.CallHook( "PreLoadCompiler", Compiler )
+
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: First teach the compiler, our tokens.
    --- */
@@ -80,7 +82,7 @@ Compiler.RawTokens = {
 		{ "...", "varg", "varargs" },
 }
 
---EXPADV.RunHook( "RegisterClass", Compiler.RawTokens )
+EXPADV.CallHook( "BuildCompilerTokens", Compiler.RawTokens )
 
 table.sort( Compiler.RawTokens, function( Token, Token2 )
 	return #Token[1] > #Token2[1]
@@ -623,6 +625,13 @@ function Compiler:PercentCompiled( )
 	if self.Pos <= 0 or self.Len <= 0 then return 0 end
 	return self.Pos / self.Len * 100
 end
+
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: END OF COMPILER!
+   --- */
+   
+EXPADV.CallHook( "PostLoadCompiler", Compiler.RawTokens )
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Example Compiler Usage

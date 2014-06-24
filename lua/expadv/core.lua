@@ -165,7 +165,7 @@ function EXPADV.LoadCore( )
 
 		EXPADV.Exceptions[ Exception.Exception ] = Exception.Exception
 	end
-
+	
 	include( "expadv/compiler/main.lua" )
 
 	EXPADV.SaveConfig( )
@@ -181,7 +181,8 @@ function EXPADV.LoadCore( )
 			net.Send( Player )
 		end )
 	end
-		
+	
+	EXPADV.CallHook( "PostLoadCore" )
 end
 
 if CLIET then
@@ -196,6 +197,7 @@ end
 	@: Hooks.
    --- */
 
+   -- PostLoadCore( )					| Void | Called after the core has finished loading.
    -- PostLoadConfig( Config )			| Void | Called after the main config has loaded.
    -- PreSaveConfig( Config )			| Void | Called before saving the main config file.
    -- PostLoadComponents( ) 			| Void | Called once all components have been loaded.
@@ -211,6 +213,9 @@ end
    -- PostLoadClassAliases( )			| Void | Called after classes and class aliases are loaded.
    -- PreRegisterClass( Short, Class )	| Void | Called once per class, before class loading begins (classes can be created here).
    -- PostRegisterClass( Name, Class )	| Void | Called after each class has been registered and loaded.
+   -- PreLoadCompiler( BaseCompiler )	| Void | Called before the compiler is loaded.
+   -- PostLoadCompiler( BaseCompiler )	| Void | Called after the compiler is loaded.
+   -- BuildCompilerTokens( TokenArray )	| Void | Called before the compiler builds it token list.
    -- RegisterContext( Context )*		| Void | Called when a context is registered to the core.
    -- UnregisterContext( Context )*		| Void | Called when a context is unregistered from the core.
    -- LuaError( Context, Error )*		| Void | Called when an executing context throws a lua error.
