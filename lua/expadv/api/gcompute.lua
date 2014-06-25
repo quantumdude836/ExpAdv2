@@ -203,7 +203,6 @@ function PANEL:Build( Context, Root, stdOut, stdErr )
 	EXPADV.RegisterContext( Context )
 
 	Context.OnStartUp = function( self )
-		--MsgN( "Executed code root." )
 		stdOut:WriteLine( "Executed code root." )
 	end
 
@@ -252,6 +251,10 @@ function EditorHelperTable:Run( codeEditor, compilerStdOut, compilerStdErr, stdO
 
 	local OnSucess = function ( Instance, Instruction )
 		compilerStdOut:WriteLine( "Compiler Finished." )
+
+		Instance.Enviroment.print = function( ... )
+			stdOut:WriteLine( ... )
+		end
 
 		local Native = table.concat( {
 			"return function( Context )",

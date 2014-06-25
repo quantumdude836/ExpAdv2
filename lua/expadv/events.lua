@@ -120,7 +120,7 @@ function EXPADV.CallEvent( Name, ... )
 		local Event = Context["event_" .. Name]
 		
 		if !Event then continue end
-		MsgN( "Executed event ", Name, " on ", Context )
+		
 		local Ok, Value = Context:Execute( "Event " .. Name, Event, ... )
 		
 		if !Result and Ok and Value ~= nil then Result = Value end
