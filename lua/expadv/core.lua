@@ -182,6 +182,8 @@ function EXPADV.LoadCore( )
 		end )
 	end
 	
+	EXPADV.IsLoaded = true
+
 	EXPADV.CallHook( "PostLoadCore" )
 end
 
@@ -255,6 +257,16 @@ hook.Add( "Think", "ExpAdv2.Hook", function( )
 	local Ok, Msg = pcall( EXPADV.CallHook, "Think" )
 	if !Ok then MsgN( "ExpAdv2 - Error in main Think hook: ", Msg ) end
 end )
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: API.
+   --- */
+
+if CLIENT then
+	hook.Add( "GComputeLoaded", "ExpAdv.GCompute", function( )
+		include( "expadv/api/gcompute.lua")
+	end )
+end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Test Build.

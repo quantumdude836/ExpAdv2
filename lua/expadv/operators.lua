@@ -331,6 +331,8 @@ function EXPADV.LoadFunctions( )
 			if Start then
 				local Meta = string.sub( Operator.Input, 1, End - 1 )
 
+				Operator.Method = true
+				
 				Operator.Input = string.sub( Operator.Input, End + 1 )
 
 				-- Next, check for valid input classes.

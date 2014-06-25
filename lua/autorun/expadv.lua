@@ -7,3 +7,5 @@ AddCSLuaFile( "expadv/components.lua" )
 AddCSLuaFile( "expadv/classes.lua" )
 AddCSLuaFile( "expadv/operators.lua" )
 AddCSLuaFile( "expadv/context.lua" )
+AddCSLuaFile( "expadv/context.lua" )
+
