@@ -651,7 +651,7 @@ function EXPADV.TestCompiler( Player, Code )
 			
 			local Native = table.concat( {
 				"return function( Context )",
-				"setfenv( Context.Enviroment )",
+				--"setfenv( Context.Enviroment )",
 				Instruction.Prepare or "",
 				Instruction.Inline or "",
 				"end"

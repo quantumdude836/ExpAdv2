@@ -171,8 +171,12 @@ function PANEL:Update( )
 	end
 end
 
-function PANEL:SetUp( Context, Root, stdOut, stdErr )
+function PANEL:Build( Context, Root, stdOut, stdErr )
+
+	EXPADV.RegisterContext( Context )
+
 	Context.OnStartUp = function( self )
+		MsgN( "Executed code root." )
 		stdOut:WriteLine( "Executed code root." )
 	end
 
@@ -181,15 +185,18 @@ function PANEL:SetUp( Context, Root, stdOut, stdErr )
 	end
 
 	Context.OnLuaError = function( self, Msg )
+		MsgN( "Lua Error: " .. Msg )
 		stdErr:WriteLine( "Lua Error: " .. Msg )
 	end
 
 	Context.OnScriptError = function( self, Msg )
+		MsgN( "Script Error: " .. Msg )
 		stdErr:WriteLine( "Script Error: " .. Msg )
 	end
 
 	Context.OnException = function( self, Exception )
-		stdErr:WriteLine( "Uncatched exception: " .. unpack( Exception ) )
+		MsgN( "Uncatched exception: " .. table.concat( Exception, " " ) )
+		stdErr:WriteLine( "Uncatched exception: " .. table.concat( Exception, " " ) )
 	end
 
 	Context.OnUpdate = function( pnl )
@@ -201,8 +208,6 @@ function PANEL:SetUp( Context, Root, stdOut, stdErr )
 	end
 
 	self.Context = Context
-
-	--self:Update( )
 
 	Context:StartUp( Root )
 end
@@ -226,7 +231,8 @@ function EditorHelperTable:Run( codeEditor, compilerStdOut, compilerStdErr, stdO
 
 		local Native = table.concat( {
 			"return function( Context )",
-			"setfenv( Context.Enviroment )",
+			[[MsgN("Executing Root: ", Context)]],
+			--"setfenv( Context.Enviroment )",
 			Instruction.Prepare or "",
 			Instruction.Inline or "",
 			"end"
@@ -241,9 +247,6 @@ function EditorHelperTable:Run( codeEditor, compilerStdOut, compilerStdErr, stdO
 		end
 
 		local Context = EXPADV.BuildNewContext( Instance, LocalPlayer( ), LocalPlayer( ) )
-
-		EXPADV.RegisterContext( Context )
-
 		compilerStdOut:WriteLine( "Context built." )
 
 		local Frame = vgui.Create( "DFrame" )
@@ -252,7 +255,9 @@ function EditorHelperTable:Run( codeEditor, compilerStdOut, compilerStdErr, stdO
 
 		local Pnl = vgui.Create( "EA_GC_Context", Frame )
 		Pnl:Dock( FILL )
-		Pnl:SetUp( Context, Compiled( ), stdOut, stdErr )
+
+		local Ok, Msg = pcall( Pnl.Build, Pnl, Context, Compiled( ), stdOut, stdErr )
+		if !Ok then stdErr:WriteLine( Msg ) end
 
 		Frame:Center( )
 		Frame:MakePopup( )

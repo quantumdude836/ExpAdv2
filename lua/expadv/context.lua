@@ -26,7 +26,7 @@ function EXPADV.BuildNewContext( Instance, Player, Entity ) -- Table, Player, En
 	Context.Trigger = { }
 	Context.Changed = { }
 
-	Context.Dinfinitions = { }
+	Context.Definitions = { }
 	
 	Context.Cells = Instance.Cells or { }
 	Context.Strings = Instance.Strings or { }
@@ -149,20 +149,23 @@ end
 function EXPADV.RootContext:PostExecute( )
 	EXPADV.EXECUTOR = nil
 
-	self.Dinfinitions = { }
+	self.Definitions = { }
 
 	-- TODO: Remove Lua debug hook
 end
 
 -- Safely execute a function on this context.
 function EXPADV.RootContext:Execute( Location, Operation, ... ) -- String, Function, ...
-	
+	print( "EXPADV2 - Executed:", self )
+
 	self:PreExecute( )
 
 	local Ok, Result = pcall( Operation, ... )
 
 	self:PostExecute( )
 	
+	print( "EXPADV2 - Result:", self, Ok, Result )
+
 	if !Ok and isString( Result ) then
 		return self:Handel( "LuaError", Result )
 
@@ -210,7 +213,7 @@ end
 function EXPADV.RootContext:StartUp( Execution ) -- Function
 	self:Handel( "StartUp" )
 	self.Online = true
-	self:Execute( Execution, self )
+	return self:Execute( "root", Execution, self )
 end
 
 -- Shuts down the context and execution.
@@ -246,25 +249,30 @@ EXPADV.CONTEXT_REGISTERY = Registery
 function EXPADV.RegisterContext( Context )
 	Registery[Context] = Context
 	Context:Handel( "RegisterContext" )
+	MsgN( "EXPADV2 - Registered: ", Context )
 end
 
 function EXPADV.UnregisterContext( Context )
 	Registery[Context] = nil
 	Context:Handel( "UnregisterContext" )
+	MsgN( "EXPADV2 - Unregistered: ", Context )
 end
 
 local LastUpdated -- Means we dont need a zillion pcalls
 
 local function CheckUpdates( )
-	for Context in pairs( EXPADV.Updates ) do
+	for Context, _ in pairs( EXPADV.Updates ) do
 		LastUpdated = Context
 		Context:Handel( "Update" )
+		MsgN( "EXPADV2 - Updated: ", Context )
 	end
 	
 	EXPADV.Updates = { }
 end
 
 hook.Add( "Tick", "ExpAdv2.Update", function( )
+	--MsgN( "EXPADV2 - Update Tick" )
+
 	local Ok, Msg = pcall( CheckUpdates )
 	
 	if !Ok and LastUpdated then
