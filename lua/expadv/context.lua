@@ -27,6 +27,8 @@ function EXPADV.BuildNewContext( Instance, Player, Entity ) -- Table, Player, En
 	Context.Changed = { }
 
 	Context.Dinfinitions = { }
+	
+	Context.Cells = Instance.Cells or { }
 	Context.Strings = Instance.Strings or { }
 	Context.Instructions = Instance.VMInstructions or { }
 	Context.Enviroment = Instance.Enviroment or error( "No safe guard.", 0 )
@@ -254,12 +256,12 @@ end
 local LastUpdated -- Means we dont need a zillion pcalls
 
 local function CheckUpdates( )
-	for Context in pairs( Updates ) do
+	for Context in pairs( EXPADV.Updates ) do
 		LastUpdated = Context
 		Context:Handel( "Update" )
 	end
 	
-	Updates = { }
+	EXPADV.Updates = { }
 end
 
 hook.Add( "Tick", "ExpAdv2.Update", function( )

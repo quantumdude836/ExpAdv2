@@ -332,7 +332,7 @@ function EXPADV.LoadFunctions( )
 				local Meta = string.sub( Operator.Input, 1, End - 1 )
 
 				Operator.Method = true
-				
+
 				Operator.Input = string.sub( Operator.Input, End + 1 )
 
 				-- Next, check for valid input classes.
@@ -518,7 +518,7 @@ function EXPADV.Interprit( Operator, Compiler, Line )
 	if Operator.Component then
 		local Settings = { }
 
-		for StartPos, EndPos in string.gmatch( OpPrepare, "()@setting [a-zA-Z_0-9]+()" ) do
+		for StartPos, EndPos in string.gmatch( Line, "()@setting [a-zA-Z_0-9]+()" ) do
 			Settings[ #Settings + 1 ] = { StartPos, EndPos }
 		end
 

@@ -354,7 +354,7 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier )
 
 		self.Scope[Variable] = MemRef
 
-		self.Cells[ MemRef ] = { Memory = MemRef, Scope = self.ScopeID, Return = ClassObj.Short, ClassObj = ClassObj, Modifier = nil }
+		self.Cells[ MemRef ] = { Variable = Variable, Memory = MemRef, Scope = self.ScopeID, Return = ClassObj.Short, ClassObj = ClassObj, Modifier = nil }
 
 		if self.MemoryDeph > 0 then
 			self.FreshMemory[self.MemoryDeph][MemRef] = MemRef
@@ -374,7 +374,7 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier )
 
 		self.Scope[Variable] = MemRef
 
-		self.Cells[ MemRef ] = { Memory = MemRef, Scope = self.ScopeID, Return = ClassObj.Short, ClassObj = ClassObj, Modifier = "static" }
+		self.Cells[ MemRef ] = { Variable = Variable, Memory = MemRef, Scope = self.ScopeID, Return = ClassObj.Short, ClassObj = ClassObj, Modifier = "static" }
 
 		return self.Cells[ MemRef ]
 	end
@@ -387,7 +387,8 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier )
 		else
 			MemRef = self:NextMemoryRef( )
 
-			self.Global[ MemRef ] = { Memory = MemRef, Scope = 0, Return = ClassObj.Short, ClassObj = ClassObj, Modifier = "global" }
+			self.Global[ MemRef ] = { Variable = Variable, Memory = MemRef, Scope = 0, Return = ClassObj.Short, ClassObj = ClassObj, Modifier = "global" }
+			self.Cells[ MemRef ] = self.Global[ MemRef ]
 		end
 
 		if self.Scope[ Variable ] then
@@ -418,7 +419,8 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier )
 			else
 				MemRef = self:NextMemoryRef( )
 
-				self.InPorts[ MemRef ] = { Memory = MemRef, Scope = 0, Return = ClassObj.Short, ClassObj = ClassObj, Modifier = "input" }
+				self.InPorts[ MemRef ] = { Variable = Variable, Memory = MemRef, Scope = 0, Return = ClassObj.Short, ClassObj = ClassObj, Modifier = "input" }
+				self.Cells[ MemRef ] = self.InPorts[ MemRef ]
 			end
 
 			if self.Scope[ Variable ] then
@@ -442,7 +444,8 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier )
 			else
 				MemRef = self:NextMemoryRef( )
 
-				self.OutPorts[ MemRef ] = { Memory = MemRef, Scope = 0, Return = ClassObj.Short, ClassObj = ClassObj, Modifier = "output" }
+				self.OutPorts[ MemRef ] = { Variable = Variable, Memory = MemRef, Scope = 0, Return = ClassObj.Short, ClassObj = ClassObj, Modifier = "output" }
+				self.Cells[ MemRef ] = self.OutPorts[ MemRef ]
 			end
 
 			if self.Scope[ Variable ] then

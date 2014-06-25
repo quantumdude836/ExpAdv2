@@ -226,6 +226,7 @@ end
    -- Exception( Context, Exception )*	| Void | Called when an executing context receives an uncatched exception.
    -- StartUp( Context )*				| Void | Called before the initial root execution.
    -- ShutDown( Context )*				| Void | Called after the context has shutdown.
+   -- Update( Context )*				| Void | Called every tick, when a context has ran that tick.
 
    --  function Component:OnPostLoadAliases( ) end
    --  hook.Add( "Expadv.PostLoadAliases", ... )

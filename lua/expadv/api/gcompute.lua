@@ -99,7 +99,6 @@ function LANGUAGE.BuildData( )
 
 	for Name, Class in pairs( EXPADV.Classes ) do
 		Classes[Class.Short] = Namespace:AddClass( Name )
-		PrintTable( Classes[Class.Short] )
 	end
 
 	for Name, Class in pairs( EXPADV.Classes ) do
@@ -146,9 +145,66 @@ if EXPADV and EXPADV.IsLoaded then LANGUAGE.BuildData( ) end
 
 local PANEL = { }
 
+function PANEL:Init( )
+	self.CellList = vgui.Create( "DListView", self )
+
+	self.CellList:AddColumn( "Cell" )
+	self.CellList:AddColumn( "Scope" )
+	self.CellList:AddColumn( "Class" )
+	self.CellList:AddColumn( "Modifier" )
+	self.CellList:AddColumn( "Name" )
+	self.CellList:AddColumn( "Value" )
+
+	self.CellList:Dock( FILL )
+
+
+end
+
+function PANEL:Update( )
+	self.CellList:Clear( )
+
+	for MemRef, Cell in pairs( self.Context.Cells ) do
+		local Value = self.Context.Memory[MemRef]
+		local StrValue = tostring( Value or "#Void" )
+
+		self.CellList:AddLine( MemRef, Cell.Scope, Cell.Return, Cell.Modifier or "N/A", Cell.Variable, StrValue )
+	end
+end
+
 function PANEL:SetUp( Context, Root, stdOut, stdErr )
+	Context.OnStartUp = function( self )
+		stdOut:WriteLine( "Executed code root." )
+	end
+
+	Context.OnShutDown = function( self )
+		stdOut:WriteLine( "Context shut down." )
+	end
+
+	Context.OnLuaError = function( self, Msg )
+		stdErr:WriteLine( "Lua Error: " .. Msg )
+	end
+
+	Context.OnScriptError = function( self, Msg )
+		stdErr:WriteLine( "Script Error: " .. Msg )
+	end
+
+	Context.OnException = function( self, Exception )
+		stdErr:WriteLine( "Uncatched exception: " .. unpack( Exception ) )
+	end
+
+	Context.OnUpdate = function( pnl )
+		self:Update( )
+	end
+
+	Context.Print = function( Trace, Msg )
+		stdOut:WriteLine( string.format( "[%i,%i] - %s", Trace[1], Trace[2], Msg ) )
+	end
+
 	self.Context = Context
-	--Context:StartUp( Compiled( ) )
+
+	--self:Update( )
+
+	Context:StartUp( Root )
 end
 
 function PANEL:ShutDown( )
@@ -195,8 +251,8 @@ function EditorHelperTable:Run( codeEditor, compilerStdOut, compilerStdErr, stdO
 		Frame:SetSize( 300, 322 )
 
 		local Pnl = vgui.Create( "EA_GC_Context", Frame )
-		Pnl:SetUp( Context, Compiled( ), stdOut, stdErr )
 		Pnl:Dock( FILL )
+		Pnl:SetUp( Context, Compiled( ), stdOut, stdErr )
 
 		Frame:Center( )
 		Frame:MakePopup( )
@@ -209,5 +265,5 @@ function EditorHelperTable:Run( codeEditor, compilerStdOut, compilerStdErr, stdO
 
 	compilerStdOut:WriteLine( "Compiler Started." )
 
-	EXPADV.Compile( codeEditor:GetText( ), { }, false, OnError, OnSucess )
+	EXPADV.Compile( codeEditor:GetText( ), { }, true, OnError, OnSucess )
 end
