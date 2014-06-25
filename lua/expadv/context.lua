@@ -2,7 +2,7 @@
 	@: Create A Context object
    --- */
 
-EXPADV.RootContext = { }
+EXPADV.RootContext = { __deph = 0 }
 
 EXPADV.RootContext.__index = EXPADV.RootContext
 
@@ -19,13 +19,14 @@ setmetatable = setmetatable
 
 -- Builds a new context from a compilers instance.
 function EXPADV.BuildNewContext( Instance, Player, Entity ) -- Table, Player, Entity
-	local Context = setmetatable( { player = Player, entity = Entity, Online = false }, EXPADV.RootContext )
+	local Context = setmetatable( { player = Player, entity = Entity, Deph = 0, Online = false }, EXPADV.RootContext )
 
 	Context.Memory = { }
 	Context.Delta = { }
 	Context.Trigger = { }
 	Context.Changed = { }
 
+	Context.Data = { }
 	Context.Definitions = { }
 	
 	Context.Cells = Instance.Cells or { }
@@ -38,99 +39,38 @@ end
 
 -- Pushes the contexts memory upwards.
 function EXPADV.RootContext:Push( Trace, Cells ) -- Table, Table
-	if self.__deph > 50 then self:Throw( Trace, "stack", "stack overflow" ) end
+	if self.Deph > 50 then self:Throw( Trace, "stack", "stack overflow" ) end
 
 	local Memory = {
 		__index = self.Memory, -- function( Table, Key ) return Cells[Key] and rawget( Table, Key ) or self.Memory[Key] end,
-		__newindex = function( Table, Key, Value ) if Cells[Key] then rawset( Table, Key, Value ) else self.Memory[Key] = Value end end,
+		__newindex = function( Table, Key, Value ) if Cells[Key] then rawset( Table, Key, Value ) else rawset(self.Memory, Key, Value )  end end,
 	}
-
-	setmetatable( Memory, Memory )
 
 	local Delta = {
 		__index = self.Delta, -- function( Table, Key ) return Cells[Key] and rawget( Table, Key ) or self.Memory[Key] end,
-		__newindex = function( Table, Key, Value ) if Cells[Key] then rawset( Table, Key, Value ) else self.Memory[Key] = Value end end,
+		__newindex = function( Table, Key, Value ) if Cells[Key] then rawset( Table, Key, Value ) else rawset(self.Delta, Key, Value )  end end,
 	}
-
-	setmetatable( Delta, Delta )
 
 	local Changed = {
 		__index = self.Changed, -- function( Table, Key ) return Cells[Key] and rawget( Table, Key ) or self.Memory[Key] end,
-		__newindex = function( Table, Key, Value ) if Cells[Key] then rawset( Table, Key, Value ) else self.Memory[Key] = Value end end,
+		__newindex = function( Table, Key, Value ) if Cells[Key] then rawset( Table, Key, Value ) else rawset(self.Changed, Key, Value ) end end,
 	}
 
-	setmetatable( Changed, Changed )
+	return {
+		Data = self.Data,
+		Deph = self.Deph + 1,
 
-	local Context = {
-		__deph = self.__deph + 1,
-		__parent = self.__parent or self,
-		__index = self.__parent, --function( Table, Key ) return rawget( Table, Key ) or self[Key] end,
-		__newindex = function( Table, Key, Value ) Table.__parent[Key] = Value end,
-	}
-
-	return setmetatable( Context, Context )
-end
-
-/*function EXPADV.RootContext:Push( Trace, Cells ) -- Table, Table
-	if self.__deph > 50 then self:Throw( Trace, "stack", "stack overflow" ) end
-	
-	local Memory = {
-		__index = self.Memory,
-		__newindex = function( Memory, Key, Value )
-			if Cells[Key] then return rawset( Memory, Key, Value ) end
-			
-			local Prev = Memory.__index
-			
-			while Prev do
-				if rawget( Prev, Key ) ~= nil then return rawset( Prev, Key, Value ) end
-				Prev = Prev.__index
-			end
-		end
-	}
-	
-	local Delta = {
-		__index = self.Delta,
-		__newindex = function( Delta, Key, Value )
-			if Cells[Key] then return rawset( Delta, Key, Value ) end
-			
-			local Prev = Delta.__index
-			
-			while Prev do
-				if rawget( Prev, Key ) ~= nil then return rawset( Prev, Key, Value ) end
-				Prev = Prev.__index
-			end
-		end
-	}
-	
-	local Changed = {
-		__index = self.Changed,
-		__newindex = function( Changed, Key, Value )
-			if Cells[Key] then return rawset( Changed, Key, Value ) end
-			
-			local Prev = Changed.__index
-			
-			while Prev do
-				if rawget( Prev, Key ) ~= nil then return rawset( Prev, Key, Value ) end
-				Prev = Prev.__index
-			end
-		end
-	}
-	
-	local Context = {
-		__deph = self.__deph + 1, -- Memory stack deph
-		__index = self.__index or self, -- Root context
-		__parent = self.__parent or self, -- Previous context on stack.
-		__newindex = function( Context, Key, Value )
-			rawset( Context.__parent, Key, Value ),
-		end,
+		Definitions = self.Definitions,
+		Cells = self.Cells,
+		Strings = self.Strings,
+		Instructions = self.Instructions,
+		Enviroment = self.Enviroment,
 		
 		Memory = setmetatable( Memory, Memory ),
 		Delta = setmetatable( Delta, Delta ),
 		Changed = setmetatable( Changed, Changed ),
 	}
-	
-	return setmetatable( Context, Context )
-end*/
+end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Executeion
@@ -156,17 +96,13 @@ end
 
 -- Safely execute a function on this context.
 function EXPADV.RootContext:Execute( Location, Operation, ... ) -- String, Function, ...
-	print( "EXPADV2 - Executed:", self )
-
 	self:PreExecute( )
 
 	local Ok, Result = pcall( Operation, ... )
 
 	self:PostExecute( )
 	
-	print( "EXPADV2 - Result:", self, Ok, Result )
-
-	if !Ok and isString( Result ) then
+	if !Ok and isstring( Result ) then
 		return self:Handel( "LuaError", Result )
 
 	elseif Ok or Result.Exit then
@@ -249,13 +185,11 @@ EXPADV.CONTEXT_REGISTERY = Registery
 function EXPADV.RegisterContext( Context )
 	Registery[Context] = Context
 	Context:Handel( "RegisterContext" )
-	MsgN( "EXPADV2 - Registered: ", Context )
 end
 
 function EXPADV.UnregisterContext( Context )
 	Registery[Context] = nil
 	Context:Handel( "UnregisterContext" )
-	MsgN( "EXPADV2 - Unregistered: ", Context )
 end
 
 local LastUpdated -- Means we dont need a zillion pcalls
@@ -264,15 +198,12 @@ local function CheckUpdates( )
 	for Context, _ in pairs( EXPADV.Updates ) do
 		LastUpdated = Context
 		Context:Handel( "Update" )
-		MsgN( "EXPADV2 - Updated: ", Context )
 	end
 	
 	EXPADV.Updates = { }
 end
 
 hook.Add( "Tick", "ExpAdv2.Update", function( )
-	--MsgN( "EXPADV2 - Update Tick" )
-
 	local Ok, Msg = pcall( CheckUpdates )
 	
 	if !Ok and LastUpdated then

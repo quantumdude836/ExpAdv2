@@ -196,7 +196,7 @@ function Compiler:MakeVirtual( Instruction )
 	
 	local Native = table.concat( { -- Todo, Add Env
 		"return function( Context )",
-			"setfenv( Context.Enviroment )",
+			"setfenv( 1, Context.Enviroment )",
 			Instruction.Prepare or "",
 			"return " .. Instruction.Inline or "",
 		"end"
@@ -205,13 +205,12 @@ function Compiler:MakeVirtual( Instruction )
 	local Compiled = CompileString( Native, "EXPADV2", false )	
 	
 	if isstring( Compiled ) then
-		self:TokenError( "Failed to compile native to virtual instruction." )
-		MsgN( "Error -> " .. Compiled )
-		debug.Trace( )
+		error( Compiled )
 	end
 
 	self.VMInstructions[ID] = Compiled( )
-	
+	self.NativeLog[ "Instructions " .. ID ] = Natvie
+
 	local Instr = self:NewLuaInstruction( Trace, Operator, nil, string.format( "Context.Instructions[%i]( Context )", ID ) )
 
 	Instr.IsRaw = true
@@ -346,8 +345,8 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier )
 	if !Modifier then
 		local MemRef = self.Scope[ Variable ]
 
-		if MemRef then
-			return self:TestCell( Trace, MemRef, Class, Variable )
+		if MemRef and self:TestCell( Trace, MemRef, Class, Variable ) then
+			return self.Cells[ MemRef ]
 		end
 
 		MemRef = self:NextMemoryRef( )
@@ -366,8 +365,8 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier )
 	if Modifier == "static" then
 		local MemRef = self.Scope[ Variable ]
 
-		if MemRef then
-			return self:TestCell( Trace, MemRef, Class, Variable )
+		if MemRef and self:TestCell( Trace, MemRef, Class, Variable ) then
+			return self.Cells[ MemRef ]
 		end
 
 		MemRef = self:NextMemoryRef( )
@@ -382,8 +381,8 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier )
 	if Modifier == "global" then
 		local MemRef = self.Global[ Variable ]
 
-		if MemRef then
-			self:TestCell( Trace, MemRef, Class, Variable )
+		if MemRef and self:TestCell( Trace, MemRef, Class, Variable ) then
+			return self.Cells[ MemRef ]
 		else
 			MemRef = self:NextMemoryRef( )
 
@@ -414,8 +413,8 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier )
 
 			local MemRef = self.InPorts[ Variable ]
 
-			if MemRef then
-				self:TestCell( Trace, MemRef, Class, Variable )
+			if MemRef and self:TestCell( Trace, MemRef, Class, Variable ) then
+				return self.Cells[ MemRef ]
 			else
 				MemRef = self:NextMemoryRef( )
 
@@ -439,8 +438,8 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier )
 
 			local MemRef = self.OutPorts[ Variable ]
 
-			if MemRef then
-				self:TestCell( Trace, MemRef, Class, Variable )
+			if MemRef and self:TestCell( Trace, MemRef, Class, Variable ) then
+				return self.Cells[ MemRef ]
 			else
 				MemRef = self:NextMemoryRef( )
 
@@ -498,7 +497,7 @@ function Compiler:DefineVariable( )
 
 	self.DefineID = ID
 
-	return "Context.Dinfinitions[" .. ID .. "]"
+	return "Context.Definitions[" .. ID .. "]"
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -506,21 +505,23 @@ end
    --- */
 
 EXPADV.BaseEnv = {
+	__index = function( _, Value )
+			debug.Trace( )
+			error("Attempt to reach Lua environment " .. Value, 1 )
+	end, __newindex = function( _, Value )
+			error("Attempt to write to lua environment " .. Value, 1 )
+	end 
+}
+
+local function CreateEnviroment( )
+	return setmetatable( {
 		EXPADV = EXPADV,
-		
 		Vector = Vector, Angle = Angle,
 		pairs = pairs, ipairs = ipairs,
 		pcall = pcall, error = error, unpack = unpack,
 		print = print, MsgN = MsgN, tostring = tostring, tonumber = tonumber,
-	
-	-----------------------------------------------------------
-		__index = function( _, Value )
-			debug.Trace( )
-			error("Attempt to reach Lua environment " .. Value, 1 )
-		end, __newindex = function( _, Value )
-			error("Attempt to write to lua environment " .. Value, 1 )
-		end 
-}
+	}, EXPADV.BaseEnv )
+end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Compile Code
@@ -544,10 +545,10 @@ local function SoftCompile( self, Script, Files, bIsClientSide, OnError, OnSuces
 		self.DefineID = 0
 		self.Strings = { }
 		self.VMInstructions = { }
+		self.NativeLog = { }
 		
 	-- Enviroment
-		self.Enviroment = { __index = EXPADV.BaseEnv }
-		setmetatable( self.Enviroment, self.BaseEnv )
+		self.Enviroment = CreateEnviroment( )
 		
 	-- Memory:
 		self:BuildScopes( )

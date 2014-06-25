@@ -560,7 +560,7 @@ function Compiler:Compile_METHOD( Trace, Expression, Method, Expressions )
 		return Operator.Compile( self, Trace, Expression )
 	else
 
-		local Signature, BestMatch = Meta .. "."
+		local Signature, BestMatch = Meta .. ":"
 
 		for I = 1, #Expressions do
 			local Match = string.format( "%s(%s...)", Method, Signature )
@@ -667,7 +667,7 @@ function Compiler:Comile_EVENT_DEL( Trace, Name )
 	return { Trace = Trace, Prepare = string.format( "Context.event_%s = nil", Name ), FLAG = EXPADV_PREPARE }
 end
 
-function Compiler:Compile_EVENT( Trace, Name, Perams, UseVarg, Sequence, Memory )
+function Compiler:Compile_EVENT( Trace, Name, Params, UseVarg, Sequence, Memory )
 
 	local Inputs, PreSequence = { }, { }
 

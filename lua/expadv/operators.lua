@@ -326,7 +326,7 @@ function EXPADV.LoadFunctions( )
 			
 			local Signature = { }
 
-			local Start, End = string.find( Operator.Input, "^()[a-z0-9]+()%." )
+			local Start, End = string.find( Operator.Input, "^()[a-z0-9]+():" )
 
 			if Start then
 				local Meta = string.sub( Operator.Input, 1, End - 1 )
@@ -351,7 +351,8 @@ function EXPADV.LoadFunctions( )
 					continue
 				end
 
-				Signature[1] = Class.Short .. "."
+				Signature[1] = Class.Short
+				Signature[2] = ":"
 			end
 
 			for I, Input in pairs( string.Explode( ",", Operator.Input ) ) do
@@ -391,9 +392,11 @@ function EXPADV.LoadFunctions( )
 				Signature[ #Signature + 1 ] = Class.Short
 			end
 
+			Operator.Signature = string.format( "%s(%s)", Operator.Name, table.concat( Signature, "" ) )
+			if Operator.Method then table.remove( Signature, 2 ) end
+
 			Operator.Input = Signature
 			Operator.InputCount = #Signature
-			Operator.Signature = string.format( "%s(%s)", Operator.Name, table.concat( Signature, "" ) )
 
 			if Operator.UsesVarg then Operator.InputCount = Operator.InputCount - 1 end
 		else

@@ -97,14 +97,14 @@ StringComponent:AddInlineFunction( "replace", "s.s,s", "s", "(string.Replace(@va
 
 -- StringComponent:AddInlineFunction( "matchPattern", "s:s,n", "s*", "{string.match(@value 1, @value 2, @value 3)}" )
 
-StringComponent:AddInlineFunction( "matchFirst", "s.s", "s", "string.match(@value 1, @value 2)" )
+StringComponent:AddInlineFunction( "matchFirst", "s:s", "s", "string.match(@value 1, @value 2)" )
 
-StringComponent:AddInlineFunction( "matchFirst", "s.s,n", "s", "string.match(@value 1, @value 2, @value 3)" )
+StringComponent:AddInlineFunction( "matchFirst", "s:s,n", "s", "string.match(@value 1, @value 2, @value 3)" )
 
 /*
 StringComponent:CreateSetting( "gmatch_limit", 50 )
 
-StringComponent:AddPreparedFunction( "gmatch", "s.s", "s*", [[
+StringComponent:AddPreparedFunction( "gmatch", "s:s", "s*", [[
 	@define array, iter, values = {}, string.gmatch( @value 1, @value 2 )
 
 	for i = 1, @setting gmatch_limit do
@@ -114,7 +114,7 @@ StringComponent:AddPreparedFunction( "gmatch", "s.s", "s*", [[
 	end
 ]], "@array" )
 
-StringComponent:AddPreparedFunction( "gmatch", "s.s,n", "s*", [[
+StringComponent:AddPreparedFunction( "gmatch", "s:s,n", "s*", [[
 	@define array, iter, values = {}, string.gmatch( @value 1, @value 2 )
 
 	for i = 1, math.Clamp( @value 3 or @setting gmatch_limit, 0, @setting gmatch_limit) do
@@ -130,7 +130,7 @@ StringComponent:AddPreparedFunction( "gmatch", "s.s,n", "s*", [[
 
 --TODO: Add error handling
 
-StringComponent:AddPreparedFunction( "format", "s....", "s", [[
+StringComponent:AddPreparedFunction( "format", "s:...", "s", [[
 	@define values, result = {}
 	
 	for i, variant in pairs( { @... } ) do
@@ -143,10 +143,10 @@ StringComponent:AddPreparedFunction( "format", "s....", "s", [[
 /*==============================================================================================
 	Section: Insert / Remove
 ==============================================================================================*/
-StringComponent:AddInlineFunction( "remove", "s.n,n", "s", "(string.sub( @Value 1, 1, @value - 1 ) .. string.sub( @Value 1, @value 3 or (@value 2 + 1) ))" )
-StringComponent:AddFunctionHelper( "remove", "s.n,n", "Removes nth Char from string." )
-		  EXPADV.AddFunctionAlias( "remove", "s.n" )
+StringComponent:AddInlineFunction( "remove", "s:n,n", "s", "(string.sub( @Value 1, 1, @value - 1 ) .. string.sub( @Value 1, @value 3 or (@value 2 + 1) ))" )
+StringComponent:AddFunctionHelper( "remove", "s:n,n", "Removes nth Char from string." )
+		  EXPADV.AddFunctionAlias( "remove", "s:n" )
 
-StringComponent:AddInlineFunction( "Insert", "s.s,n,n", "s", "(string.sub( @value 1, 1, @value 3 ) .. @value 2 .. string.sub( @value 1, @value 4 or (@value 3 + 1) ))" )
-StringComponent:AddFunctionHelper( "Insert", "s.s,n,n", "Inserts into string after nth char." )
-		  EXPADV.AddFunctionAlias( "Insert", "s.s,n" )
+StringComponent:AddInlineFunction( "Insert", "s:s,n,n", "s", "(string.sub( @value 1, 1, @value 3 ) .. @value 2 .. string.sub( @value 1, @value 4 or (@value 3 + 1) ))" )
+StringComponent:AddFunctionHelper( "Insert", "s:s,n,n", "Inserts into string after nth char." )
+		  EXPADV.AddFunctionAlias( "Insert", "s:s,n" )

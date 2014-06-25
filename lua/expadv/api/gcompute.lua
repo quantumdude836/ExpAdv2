@@ -94,7 +94,7 @@ function LANGUAGE.BuildData( )
 
 	-------------------------------------------------------------------------------------
 
-	local Classes = { }
+	local Classes = { ["..."] = Namespace:AddClass( "..." ) }
 	local Void = GCompute.GlobalNamespace:GetMember("void"):ToType( )
 
 	for Name, Class in pairs( EXPADV.Classes ) do
@@ -107,30 +107,30 @@ function LANGUAGE.BuildData( )
 	end
 
 	-- TODO: !Cake fix this please!
-	--for _, Operator in pairs( EXPADV.Functions ) do
-		--local ParameterList = GCompute.ParameterList( )
-		--local ReturnType = Operator.Return and Classes[Operator.Return]:GetClassType( ) or Void
+	for _, Operator in pairs( EXPADV.Functions ) do
+		local ParameterList = GCompute.ParameterList( )
+		local ReturnType = Operator.Return and Classes[Operator.Return]:GetClassType( ) or Void
  
-		--if !Operator.Method then
-			--local Member = Namespace:GetMember( Operator.Name )
-			--if !Member then continue end
+		if !Operator.Method then
+			local Member = Namespace:GetMember( Operator.Name )
+			if !Member then continue end
 
-			--for I = 1, #Operator.Input do
-			--	ParameterList:AddParameter( Classes[Operator.Input[I]]:GetClassType( ) )
-			--end
+			for I = 1, #Operator.Input do
+				ParameterList:AddParameter( Classes[Operator.Input[I]]:GetClassType( ) )
+			end
 
-			--Member:GetClass( 1 ):AddConstructor( ParameterList )
-		--else
-			--local MethodClass = Classes[Operator.Input[I]]
+			Member:GetClass( 1 ):AddConstructor( ParameterList )
+		else
+			local MethodClass = Classes[Operator.Input[1]]--:GetClassType( )
 
-			--for I = 2, #Operator.Input do
-			--	ParameterList:AddParameter( Classes[Operator.Input[I]]:GetClassType( ) )
-			--end
+			for I = 2, #Operator.Input do
+				ParameterList:AddParameter( Classes[Operator.Input[I]]:GetClassType( ) )
+			end
 
-			--MethodClass:GetNamespace( ):AddMethod( Operator.Name, ParameterList ):SetReturnType( ReturnType )
+			MethodClass:GetNamespace( ):AddMethod( Operator.Name, ParameterList ):SetReturnType( ReturnType )
 			
-		--end
-	--end
+		end
+	end
 
 	LANGUAGE:DispatchEvent( "NamespaceChanged" )
 end
@@ -146,8 +146,10 @@ if EXPADV and EXPADV.IsLoaded then LANGUAGE.BuildData( ) end
 local PANEL = { }
 
 function PANEL:Init( )
-	self.CellList = vgui.Create( "DListView", self )
+	self.Tabs = vgui.Create( "DPropertySheet", self )
+	self.Tabs:Dock( FILL )
 
+	self.CellList = vgui.Create( "DListView" )
 	self.CellList:AddColumn( "Cell" )
 	self.CellList:AddColumn( "Scope" )
 	self.CellList:AddColumn( "Class" )
@@ -155,9 +157,8 @@ function PANEL:Init( )
 	self.CellList:AddColumn( "Name" )
 	self.CellList:AddColumn( "Value" )
 
+	self.Tabs:AddSheet( "Memory", self.CellList, "gui/codeicons/field",  false, false, "Debug memory" )
 	self.CellList:Dock( FILL )
-
-
 end
 
 function PANEL:Update( )
@@ -167,8 +168,34 @@ function PANEL:Update( )
 		local Value = self.Context.Memory[MemRef]
 		local StrValue = tostring( Value or "#Void" )
 
-		self.CellList:AddLine( MemRef, Cell.Scope, Cell.Return, Cell.Modifier or "N/A", Cell.Variable, StrValue )
+		self.CellList:AddLine( MemRef, Cell.Scope, EXPADV.TypeName( Cell.Return ), Cell.Modifier or "N/A", Cell.Variable, StrValue )
 	end
+end
+
+function PANEL:ShowLog( Log )
+	self.Log = { }
+
+	self.Pnl_log = vgui.Create( "DListView" )
+	self.Pnl_log:AddColumn( "Instruction" )
+	self.Pnl_log:AddColumn( "Length" )
+	self.Pnl_log:AddColumn( "Lines" )
+
+	for Name, Native in pairs( Log ) do
+		local Line = self.Pnl_log:AddLine( Name, #Native, #string.Explode( "\n", Native ) )
+		self.Log[Line] = {Name, Native}
+	end
+
+	function self.Pnl_log.OnClickLine( _, Pnl, Selected )
+		if !Selected then return end
+
+		local DragonDildos = GCompute.IDE.Instance:CreateView( "Code" )
+		DragonDildos:SetTitle( self.Log[Pnl][1] )
+		DragonDildos:SetCode( self.Log[Pnl][2] )
+		DragonDildos:Select( )
+	end
+
+	self.Tabs:AddSheet( "Interpritation", self.Pnl_log, "gui/codeicons/field",  false, false, "View native interpriations" )
+	self.Pnl_log:Dock( FILL )
 end
 
 function PANEL:Build( Context, Root, stdOut, stdErr )
@@ -176,7 +203,7 @@ function PANEL:Build( Context, Root, stdOut, stdErr )
 	EXPADV.RegisterContext( Context )
 
 	Context.OnStartUp = function( self )
-		MsgN( "Executed code root." )
+		--MsgN( "Executed code root." )
 		stdOut:WriteLine( "Executed code root." )
 	end
 
@@ -185,22 +212,19 @@ function PANEL:Build( Context, Root, stdOut, stdErr )
 	end
 
 	Context.OnLuaError = function( self, Msg )
-		MsgN( "Lua Error: " .. Msg )
 		stdErr:WriteLine( "Lua Error: " .. Msg )
 	end
 
 	Context.OnScriptError = function( self, Msg )
-		MsgN( "Script Error: " .. Msg )
 		stdErr:WriteLine( "Script Error: " .. Msg )
 	end
 
 	Context.OnException = function( self, Exception )
-		MsgN( "Uncatched exception: " .. table.concat( Exception, " " ) )
 		stdErr:WriteLine( "Uncatched exception: " .. table.concat( Exception, " " ) )
 	end
 
-	Context.OnUpdate = function( pnl )
-		self:Update( )
+	Context.OnUpdate = function( )
+		if IsValid( self ) then self:Update( ) end
 	end
 
 	Context.Print = function( Trace, Msg )
@@ -231,15 +255,15 @@ function EditorHelperTable:Run( codeEditor, compilerStdOut, compilerStdErr, stdO
 
 		local Native = table.concat( {
 			"return function( Context )",
-			[[MsgN("Executing Root: ", Context)]],
-			--"setfenv( Context.Enviroment )",
+			"setfenv( 1, Context.Enviroment )",
 			Instruction.Prepare or "",
 			Instruction.Inline or "",
 			"end"
 		}, "\n" )
 
 		local Compiled = CompileString( Native, "EXPADV2", false )
-			
+		Instance.NativeLog["Root"] = Native
+
 		if isstring( Compiled ) then
 			compilerStdErr:WriteLine( "Failed to compile native.")
 			compilerStdErr:WriteLine( Compiled )
@@ -247,17 +271,18 @@ function EditorHelperTable:Run( codeEditor, compilerStdOut, compilerStdErr, stdO
 		end
 
 		local Context = EXPADV.BuildNewContext( Instance, LocalPlayer( ), LocalPlayer( ) )
+		
 		compilerStdOut:WriteLine( "Context built." )
 
 		local Frame = vgui.Create( "DFrame" )
-		Frame:SetTitle( "Expression Advanced Two" )
-		Frame:SetSize( 300, 322 )
+		Frame:SetTitle( "Expression Advanced - Debugger" )
+		Frame:SetSize( 600, 322 )
 
 		local Pnl = vgui.Create( "EA_GC_Context", Frame )
 		Pnl:Dock( FILL )
 
-		local Ok, Msg = pcall( Pnl.Build, Pnl, Context, Compiled( ), stdOut, stdErr )
-		if !Ok then stdErr:WriteLine( Msg ) end
+		Pnl:Build( Context, Compiled( ), stdOut, stdErr )
+		Pnl:ShowLog( Instance.NativeLog )
 
 		Frame:Center( )
 		Frame:MakePopup( )

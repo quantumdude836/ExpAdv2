@@ -153,7 +153,7 @@ end
    --- */
 
 function Compiler:Expression( Trace )
-	MsgN( "Compiler -> Expression" )
+	--MsgN( "Compiler -> Expression" )
 
 	local _ExprRoot = self.ExpressionRoot
 	self.ExpressionRoot = self:GetTokenTrace( Trace )
@@ -171,7 +171,7 @@ end
 
 -- Stage 1: Grouped Equation
 function Compiler:Expression_1( Trace )
-	MsgN( "Compiler -> Expression 1" )
+	--MsgN( "Compiler -> Expression 1" )
 	
 	if self:AcceptToken( "lpa" ) then
 		local Expression = self:Expression_1( Trace )
@@ -190,7 +190,7 @@ end
 
 -- Stage 2: Unary operations, sizeof, casting
 function Compiler:Expression_2( Trace )
-	MsgN( "Compiler -> Expression 2" )
+	--MsgN( "Compiler -> Expression 2" )
 
 	if self:AcceptToken( "add" ) then
 		local Trace = self:GetTokenTrace( Trace )
@@ -228,7 +228,7 @@ end
 
 -- Stage 3: Multiplication, division, modulo
 function Compiler:Expression_3( Trace )
-	MsgN( "Compiler -> Expression 3" )
+	--MsgN( "Compiler -> Expression 3" )
 
 	local Expression = self:Expression_4( Trace )
 
@@ -250,7 +250,7 @@ end
 
 -- Stage 4: Addition and subtraction
 function Compiler:Expression_4( Trace )
-	MsgN( "Compiler -> Expression 4" )
+	--MsgN( "Compiler -> Expression 4" )
 
 	local Expression = self:Expression_5( Trace )
 
@@ -267,7 +267,7 @@ end
 
 -- Stage 5: Bitwise shift left and right
 function Compiler:Expression_5( Trace )
-	MsgN( "Compiler -> Expression 5" )
+	--MsgN( "Compiler -> Expression 5" )
 
 	local Expression = self:Expression_6( Trace )
 
@@ -284,7 +284,7 @@ end
 
 -- Stage 6: Comparisons Greater and Less
 function Compiler:Expression_6( Trace )
-	MsgN( "Compiler -> Expression 6" )
+	--MsgN( "Compiler -> Expression 6" )
 
 	local Expression = self:Expression_7( Trace )
 
@@ -305,7 +305,7 @@ end
 
 -- Stage 7: Comparisons equal and not equal.
 function Compiler:Expression_7( Trace )
-	MsgN( "Compiler -> Expression 7" )
+	--MsgN( "Compiler -> Expression 7" )
 
 	local Expression = self:Expression_8( Trace )
 
@@ -322,7 +322,7 @@ end
 
 -- Stage 8: bitwise and
 function Compiler:Expression_8( Trace )
-	MsgN( "Compiler -> Expression 8" )
+	--MsgN( "Compiler -> Expression 8" )
 
 	local Expression = self:Expression_9( Trace )
 
@@ -335,7 +335,7 @@ end
 
 -- Stage 9: bitwise exclusive or
 function Compiler:Expression_9( Trace )
-	MsgN( "Compiler -> Expression 9" )
+	--MsgN( "Compiler -> Expression 9" )
 
 	local Expression = self:Expression_10( Trace )
 
@@ -348,7 +348,7 @@ end
 
 -- Stage 10: bitwise or
 function Compiler:Expression_10( Trace )
-	MsgN( "Compiler -> Expression 10" )
+	--MsgN( "Compiler -> Expression 10" )
 
 	local Expression = self:Expression_11( Trace )
 
@@ -362,7 +362,7 @@ end
 
 -- Stage 11: logical and
 function Compiler:Expression_11( Trace )
-	MsgN( "Compiler -> Expression 11" )
+	--MsgN( "Compiler -> Expression 11" )
 
 	local Expression = self:Expression_12( Trace )
 
@@ -375,7 +375,7 @@ end
 
 -- Stage 12: logical or
 function Compiler:Expression_12( Trace )
-	MsgN( "Compiler -> Expression 12" )
+	--MsgN( "Compiler -> Expression 12" )
 
 	local Expression = self:Expression_13( Trace )
 
@@ -389,7 +389,7 @@ end
 
 -- Stage 13: Ternary
 function Compiler:Expression_13( Trace )
-	MsgN( "Compiler -> Expression 13" )
+	--MsgN( "Compiler -> Expression 13" )
 
 	local Expression = self:Expression_Value( Trace )
 
@@ -414,7 +414,7 @@ end
 
 -- Stage 14: Raw Values:
 function Compiler:Expression_Value( Trace )
-	MsgN( "Compiler -> Expression Value" )
+	--MsgN( "Compiler -> Expression Value" )
 
 	if self:AcceptToken( "tre" ) then
 		return self:Compile_BOOL( self:GetTokenTrace( Trace ), true )
@@ -432,7 +432,7 @@ end
 -- Stage 15: Increment, Decrement and Variables.
 -- This function, also can be used for expression bassed statments.
 function Compiler:Expression_Variable( Trace, bIsStatement )
-	MsgN( "Compiler -> Expression Variable" )
+	--MsgN( "Compiler -> Expression Variable" )
 
 	if self:AcceptToken( "inc" ) then
 		local Trace = self:GetTokenTrace( Trace )
@@ -481,7 +481,7 @@ end
 
 -- Stage 16: Functions
 function Compiler:Expression_Function( Trace, bIsStatement )
-	MsgN( "Compiler -> Expression Function" )
+	--MsgN( "Compiler -> Expression Function" )
 
 	local Trace = self:GetTokenTrace( Trace )
 
@@ -540,7 +540,7 @@ end
 
 -- Stage 17: Indexing, Calling
 function Compiler:Expression_17( Trace, Expression )
-	MsgN( "Compiler -> Expression 17" )
+	--MsgN( "Compiler -> Expression 17" )
 
 	while self:CheckToken( "prd", "lsb", "lpa" ) do
 		-- Methods
@@ -630,7 +630,7 @@ function Compiler:StatementError( )
 end -- TODO: ^ This
 
 function Compiler:Statement( Trace )
-	MsgN( "Compiler -> Statement" )
+	--MsgN( "Compiler -> Statement" )
 
 	local _StmtRoot = self.StatmentRoot
 	self.StatmentRoot = self:GetTokenTrace( Trace )
@@ -675,7 +675,7 @@ end
 
 -- Stage 1: If statments
 function Compiler:Statement_1( Trace )
-	MsgN( "Compiler -> Statement 1" )
+	--MsgN( "Compiler -> Statement 1" )
 
 	if self:AcceptToken( "if" ) then
 		local Trace = self:GetTokenTrace( Trace )
@@ -713,7 +713,7 @@ end
 
 -- Stage 2: elseif, else statments
 function Compiler:Statement_2( Trace )
-	MsgN( "Compiler -> Statement 2" )
+	--MsgN( "Compiler -> Statement 2" )
 
 	if self:AcceptToken( "eif" ) then
 		local Trace = self:GetTokenTrace( Trace )
@@ -957,7 +957,7 @@ end
 
 -- Stage 6: Variable Assigments.
 function Compiler:Statement_6( Trace )
-	MsgN( "Compiler -> Statement 6" )
+	--MsgN( "Compiler -> Statement 6" )
 
 	local Modifier
 
@@ -1061,7 +1061,7 @@ function Compiler:Statement_6( Trace )
 				Expression = self:Compile_DIV( Trace, self:Compile_VAR( Trace, Variable ), Expression )
 			end
 
-			Sequence[I] = self:Compile_ASS( Trace, Variable, Expression, Class, Modifier )
+			Sequence[I] = self:Compile_ASS( Trace, Variable, Expression, Defined and Class or nil, Modifier )
 
 			GetExpression = self:AcceptToken( "com" )
 		end

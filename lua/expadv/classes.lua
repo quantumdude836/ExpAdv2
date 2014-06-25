@@ -165,30 +165,6 @@ local Class_Generic = setmetatable( { Name = "generic", Short = "g" }, EXPADV.Ba
    -- TODO
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
-	@: Define boolean class
-   --- */
-
-local Class_Boolean = EXPADV.AddClass( nil, "boolean", "b" )
-	  
-	  Class_Boolean:AddAlias( "bool" )
-
-	  Class_Boolean:DefaultAsLua( false )
-
-/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
-	@: Register variant class!
-   --- */
-
-local Class_Variant = EXPADV.AddClass( nil, "variant", "vr" )
-		
-	  Class_Variant:DefaultAsLua( { false, "b" } )
-
-/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
-	@: Register exception class!
-   --- */
-
-local Class_Exception = EXPADV.AddClass( nil, "exception", "ex" )
-
-/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: GetClass
    --- */
 
@@ -203,6 +179,20 @@ function EXPADV.GetClass( Name ) -- String
 	if #Name > 1 and Name[1] ~= "_" then Name = "_" .. Name end
 
 	if EXPADV.ClassShorts[ Name ] then return EXPADV.ClassShorts[ Name ] end
+end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Type Name!
+   --- */
+
+function EXPADV.TypeName( Name )
+	if EXPADV.Classes[ Name ] then return EXPADV.Classes[ Name ].Name end
+
+	if EXPADV.ClassAliases[ Name ] then return EXPADV.ClassAliases[ Name ].Name end
+
+	if #Name > 1 and Name[1] ~= "_" then Name = "_" .. Name end
+
+	if EXPADV.ClassShorts[ Name ] then return EXPADV.ClassShorts[ Name ].Name end
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
