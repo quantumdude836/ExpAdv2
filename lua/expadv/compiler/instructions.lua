@@ -682,7 +682,7 @@ function Compiler:Compile_EVENT( Trace, Name, Params, UseVarg, Sequence, Memory 
 		
 		if Operator then
 			Instruction = Operator.Compile( self, Trace, Quick( Param[3], "n" ), Quick( Inputs[I] .. "[1]", Type ) )
-
+			
 			PreSequence[ #PreSequence + 1 ] = Instruction.Prepare
 			PreSequence[ #PreSequence + 1 ] = Instruction.Inline
 		else
@@ -691,7 +691,7 @@ function Compiler:Compile_EVENT( Trace, Name, Params, UseVarg, Sequence, Memory 
 
 			if Operator then
 				Instruction = Operator.Compile( self, Trace, Quick( Param[1], "s" ), Quick( Inputs[I] .. "[1]", Type ) )
-
+--
 				PreSequence[ #PreSequence + 1 ] = Instruction.Prepare
 				PreSequence[ #PreSequence + 1 ] = Instruction.Inline
 			else
@@ -705,7 +705,7 @@ function Compiler:Compile_EVENT( Trace, Name, Params, UseVarg, Sequence, Memory 
 	local Lua = table.concat( {
 		string.format( "Context.event_%s = function( %s )", Name, table.concat( Inputs, "," ) ),
 		self:FlushMemory( Trace, Memory ),
-		table.concat( PreSequence, "\n" ),
+		--table.concat( PreSequence, "\n" ),
 		Sequence.Prepare or "",
 		Sequence.Inline or "",
 		"end"

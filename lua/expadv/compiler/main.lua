@@ -514,13 +514,13 @@ EXPADV.BaseEnv = {
 }
 
 local function CreateEnviroment( )
-	return setmetatable( {
+	return {
 		EXPADV = EXPADV,
 		Vector = Vector, Angle = Angle,
 		pairs = pairs, ipairs = ipairs,
 		pcall = pcall, error = error, unpack = unpack,
 		print = print, MsgN = MsgN, tostring = tostring, tonumber = tonumber,
-	}, EXPADV.BaseEnv )
+	} 
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -546,7 +546,7 @@ local function SoftCompile( self, Script, Files, bIsClientSide, OnError, OnSuces
 		self.Strings = { }
 		self.VMInstructions = { }
 		self.NativeLog = { }
-		
+
 	-- Enviroment
 		self.Enviroment = CreateEnviroment( )
 		
@@ -572,6 +572,8 @@ local function SoftCompile( self, Script, Files, bIsClientSide, OnError, OnSuces
 		local Compiled, Instruction = pcall( self.Sequence, self, { 0, 0 } )
 
 	-- Finish!
+		setmetatable( self.Enviroment, EXPADV.BaseEnv )
+
 		Coroutines[self] = nil -- Because we compile inside a coroutine now =D
 
 		if !Compiled then return OnError( Instruction ) end

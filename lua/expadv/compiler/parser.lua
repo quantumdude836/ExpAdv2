@@ -892,15 +892,21 @@ function Compiler:Statement_4( Trace )
 		self:RequireToken( "lpa", "Left parenthesis ( () missing, after event name" )
 
 		local Perams, UseVarg = self:Util_Perams( Trace )
-
+		
 		self:RequireToken( "rpa", "Right parenthesis () ) missing, to close event parameters" )
 
-		if !Event then self:TraceError( Trace, "No such event %s", Name ) end
+		if !Event then
+			self:TraceError( Trace, "No such event %s", Name )
+		elseif !Event.LoadOnClient and Event.LoadOnServer and !self.IsServerScript then
+			self:TraceError( Trace, "Event %s can only appear in serverside code", Name )
+		elseif !Event.LoadOnServer and Event.LoadOnClient and !self.IsClientScript then
+			self:TraceError( Trace, "Event %s can only appear in clientside code", Name )
+		end
 
 		for I = 1, #Perams do
 			local Peram = Perams[I]
 			local Test = Event.Input[I]
-			
+			 
 			if !Test then
 				self:TraceError( Trace, "Invalid perameter #%i to event %s, no perameter expected", I, Name )
 			elseif Test ~= Peram[2] then
@@ -1178,9 +1184,9 @@ function Compiler:Util_Perams( Trace )
 				self:TokenError( "Parameter %s may not appear twice", self.TokenData )
 			end
 
-			local MemRef, Scope = self:CreateVariable( Trace, self.TokenData, Class.Name )
+			local Cell, Scope = self:CreateVariable( Trace, self.TokenData, Class.Name )
 
-			Params[#Params + 1] = { self.TokenData, Class.Short, MemRef }
+			Params[#Params + 1] = { self.TokenData, Class.Short, Cell.Memory }
 				
 			Used[ self.TokenData ] = true
 			

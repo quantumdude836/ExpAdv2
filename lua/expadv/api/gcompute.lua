@@ -159,6 +159,21 @@ function PANEL:Init( )
 
 	self.Tabs:AddSheet( "Memory", self.CellList, "gui/codeicons/field",  false, false, "Debug memory" )
 	self.CellList:Dock( FILL )
+
+	self.DrawPnl = vgui.Create( "DPanel" )
+	self.Tabs:AddSheet( "Render", self.DrawPnl, "gui/codeicons/field",  false, false, "Veiw render hook" )
+	self.DrawPnl:Dock( FILL )
+
+	function self.DrawPnl.Paint( Pnl )
+		local Context = self.Context
+
+		if !Context or !Context.Online then return end
+
+		local Event = Context.event_render
+		if !Event then return end
+
+		Context:Execute( "Event render", Event, Pnl:GetSize( ) )
+	end
 end
 
 function PANEL:Update( )
@@ -270,7 +285,11 @@ function EditorHelperTable:Run( codeEditor, compilerStdOut, compilerStdErr, stdO
 		if isstring( Compiled ) then
 			compilerStdErr:WriteLine( "Failed to compile native.")
 			compilerStdErr:WriteLine( Compiled )
-			return
+			
+			local DragonDildos = GCompute.IDE.Instance:CreateView( "Code" )
+			DragonDildos:SetTitle( "Root" )
+			DragonDildos:SetCode( Native )
+			DragonDildos:Select( )
 		end
 
 		local Context = EXPADV.BuildNewContext( Instance, LocalPlayer( ), LocalPlayer( ) )

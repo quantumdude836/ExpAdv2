@@ -1,7 +1,28 @@
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
-	@: Events
+	@: Server -> Client control.
    --- */
 
+local LoadOnServer = true
+
+local LoadOnClient = true
+
+function EXPADV.ServerEvents( )
+	LoadOnServer = true
+
+	LoadOnClient = false
+end
+
+function EXPADV.ClientEvents( )
+	LoadOnClient = true
+
+	LoadOnServer = false
+end
+
+function EXPADV.SharedEvents( )
+	LoadOnClient = true
+
+	LoadOnServer = true
+end
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Events
    --- */

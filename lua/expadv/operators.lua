@@ -532,14 +532,20 @@ function EXPADV.Interprit( Operator, Compiler, Line )
 		end
 	end
 	
-	for Import in string.gmatch( Line, "(%$[a-zA-Z0-9_]+)" ) do
-		local What = string.sub( Import, 2 )
-		
-		Line = string.gsub( Line, Import, What )
-		
-		Compiler.Enviroment[What] = _G[What]
+	local Imports = { }
+
+	for StartPos, EndPos in string.gmatch( Line, "()%$[a-zA-Z0-9_]+()" ) do
+		Imports[ #Imports + 1 ] = { StartPos, EndPos }
 	end
-	
+
+	for I = #Imports, 1, -1 do
+		local Start, End = unpack( Imports[I] )
+		local Variable = string.sub( Line, Start + 1, End - 1 )
+
+		Line = string.sub( Line, 1, Start - 1 ) .. Variable .. string.sub( Line, End )
+		Compiler.Enviroment[Variable] = _G[Variable]
+	end
+
 	return Line
 end
    
@@ -612,8 +618,13 @@ function EXPADV.BuildLuaOperator( Operator )
 		local OpPrepare, OpInline = Operator.Prepare, Operator.Inline
 
 		for I = Operator.InputCount, 1, -1 do
+
 			local Input = Inputs[I]
 			local InputInline, InputPrepare = "nil", ""
+			
+			if !istable( Input ) then
+				print( "NOT TABLE: ", Input )
+			end
 			
 			-- How meany times do we need this Var?
 			local Uses = 0
@@ -630,7 +641,7 @@ function EXPADV.BuildLuaOperator( Operator )
 
 			-- Generate the inline and preperation.
 			if Uses == 0 then
-				InputInline = nil -- This should never happen!
+				InputInline = "nil" -- This should never happen!
 			elseif Input.FLAG == EXPADV_FUNCTION then
 				InputInline = Compiler:VMToLua( Input )
 
@@ -638,7 +649,7 @@ function EXPADV.BuildLuaOperator( Operator )
 				InputInline = Input.Inline
 
 			elseif Input.FLAG == EXPADV_PREPARE then
-				InputInline = nil
+				InputInline = "nil"
 				InputPrepare = Input.Prepare
 			else
 				InputInline = Input.Inline

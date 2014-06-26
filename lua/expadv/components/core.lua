@@ -64,6 +64,8 @@ EXPADV.AddException( nil, "cast" )
 @: Events
 --- */
 
+EXPADV.SharedEvents( )
+
 EXPADV.AddEvent( nil, "tick", "", "" )
 
 hook.Add( "Tick", "Expav.Event", function( ) EXPADV.CallEvent( "tick" ) end )
@@ -71,4 +73,25 @@ hook.Add( "Tick", "Expav.Event", function( ) EXPADV.CallEvent( "tick" ) end )
 EXPADV.AddEvent( nil, "think", "", "" )
 
 hook.Add( "Think", "Expav.Event", function( ) EXPADV.CallEvent( "think" ) end )
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+@: I WHANT TO TRY RENDERING! -- Remove All this!
+--- */
+
+EXPADV.ClientEvents( )
+
+EXPADV.AddEvent( nil, "render", "n,n", "" )
+
+EXPADV.ClientOperators( )
+
+EXPADV.AddPreparedFunction( nil, "drawColor", "n,n,n,n", "", "$surface.SetDrawColor( $Color( @value 1, @value 2, @value 3, @value 4 ) )" )
+
+EXPADV.AddPreparedFunction( nil, "drawBox", "n,n,n,n", "", "$surface.DrawRect( @value 1, @value 2, @value 3, @value 4 )" )
+
+EXPADV.AddPreparedFunction( nil, "drawText", "s,n,n", "", "$surface.SetTextPos( @value 2, @value 3 ); $surface.DrawText( @value 1 )" )
+
+EXPADV.AddPreparedFunction( nil, "textColor", "n,n,n,n", "", "$surface.SetTextColor( @value 1, @value 2, @value 3, @value 4 )" )
+
+EXPADV.AddPreparedFunction( nil, "textFont", "s", "", "$surface.SetFont( @value 1 )" )
+
 
