@@ -3,37 +3,29 @@
    ---	*/
 
 local StringComponent = EXPADV.AddComponent( "string" , true )
+
+/* --- --------------------------------------------------------------------------------
+@: String Object
+   --- */
+
 local String = StringComponent:AddClass( "string" , "s" )
 
 String:StringBuilder( function( Context, Trace, Obj) return Obj end )
 String:DefaultAsLua( "" )
 String:AddAlias( "str" )
 
+/* --- --------------------------------------------------------------------------------
+@: Wire Support
+   --- */
+
 if WireLib then
 	String:WireInput( "STRING" ) 
 	String:WireOutput( "STRING" ) 
 end
 
-/*==============================================================================================
-	Section: Operators
-==============================================================================================*/
-
--- Assign:
-
-StringComponent:AddPreparedOperator( "s=", "n,s", "", [[
-    Context.Trigger = Context.Trigger or Context.Memory[@value 1] ~= @value 2
-    Context.Memory[@value 1] = @value 2
-]] )
-
--- Changed:
-
-StringComponent:AddPreparedOperator( "~", "n", "b", [[
-	@define value = Context.Memory[@value 1]
-	@define changed = Context.Changed[@value 1] ~= @value
-	Context.Changed[@value 1] = @value
-]], "@changed" )
-
--- Compare:
+/* --- --------------------------------------------------------------------------------
+@: Logical and Comparason
+   --- */
 
 StringComponent:AddInlineOperator("==", "s,s", "b", "(@value 1 == @value 2)" )
 
@@ -47,7 +39,27 @@ StringComponent:AddInlineOperator(">=","s,s", "b", "(@value 1 >= @value 2)" )
 
 StringComponent:AddInlineOperator("<=","s,s", "b", "(@value 1 <= @value 2)" )
 
--- Arithmetic:
+/* --- --------------------------------------------------------------------------------
+@: Assigment
+   --- */
+
+StringComponent:AddPreparedOperator( "s=", "n,s", "", [[
+    Context.Trigger = Context.Trigger or Context.Memory[@value 1] ~= @value 2
+    Context.Memory[@value 1] = @value 2
+]] )
+
+StringComponent:AddInlineOperator("=s","n","s", "(Context.Memory[@value 1] or \"\")" )
+
+StringComponent:AddPreparedOperator( "~", "n", "b", [[
+	@define value = Context.Memory[@value 1]
+	@define changed = Context.Changed[@value 1] ~= @value
+	Context.Changed[@value 1] = @value
+]], "@changed" )
+
+
+/* --- --------------------------------------------------------------------------------
+@: Arithmatic
+   --- */
 
 StringComponent:AddInlineOperator("+","s,s", "s", "(@value 1 .. @value 2)" )
 
@@ -57,37 +69,41 @@ StringComponent:AddInlineOperator("+","n,s", "s", "(@value 1 .. @value 2)" )
 
 StringComponent:AddInlineOperator( "#","s","n", "(string.len(@value 1))" )
 
--- General:
-
-StringComponent:AddInlineOperator("=s","n","s", "(Context.Memory[@value 1] or \"\")" )
+/* --- --------------------------------------------------------------------------------
+@: Operators
+   --- */
 
 StringComponent:AddInlineOperator( "is", "s", "b", "(@value 1 ~= \"\")" )
 
 StringComponent:AddInlineOperator( "not", "s", "b", "(@value 1 == \"\")" )
 
--- Index:
+/* --- --------------------------------------------------------------------------------
+@: Indexing
+   --- */
 
 StringComponent:AddInlineOperator( "[]", "s,n", "s", "string.sub(@value 1, @value 2, @value 2)" )
 
--- Casting:
+/* --- --------------------------------------------------------------------------------
+@: Casting
+   --- */
 
 StringComponent:AddInlineOperator( "number", "s", "n", "tonumber(@value 1)" )
 
-/*==============================================================================================
-	Section: Finding and Replacing
-==============================================================================================*/
+/* --- --------------------------------------------------------------------------------
+@: Find and replace
+   --- */
 
-StringComponent:AddInlineFunction( "find", "s.s", "n", "(string.find(@value 1, @value 2) or 0)" )
+StringComponent:AddInlineFunction( "find", "s:s", "n", "(string.find(@value 1, @value 2) or 0)" )
 
-StringComponent:AddInlineFunction( "find", "s.s,n", "n", "(string.find(@value 1, @value 2, @value 3) or 0)" )
+StringComponent:AddInlineFunction( "find", "s:s,n", "n", "(string.find(@value 1, @value 2, @value 3) or 0)" )
 
-StringComponent:AddInlineFunction( "find", "s.s,n,b", "n", "(string.find(@value 1, @value 2, @value 3, @value 4) or 0)" )
+StringComponent:AddInlineFunction( "find", "s:s,n,b", "n", "(string.find(@value 1, @value 2, @value 3, @value 4) or 0)" )
 
 StringComponent:AddInlineFunction( "replace", "s.s,s", "s", "(string.Replace(@value 1, @value 2, @value 3) or \"\")" )
 
-/*==============================================================================================
-	Section: Explode / Matches
-==============================================================================================*/
+/* --- --------------------------------------------------------------------------------
+@: Explodes and matches
+   --- */
 
 -- StringComponent:AddInlineFunction( "explode", "s:s", "s*", "string.Explode(@value 2, @value 1)" )
 
@@ -124,17 +140,15 @@ StringComponent:AddPreparedFunction( "gmatch", "s:s,n", "s*", [[
 	end
 ]], "@array" ) */
 
-/*==============================================================================================
-	Section: Format
-==============================================================================================*/
-
---TODO: Add error handling
+/* --- --------------------------------------------------------------------------------
+@: Format
+   --- */
 
 StringComponent:AddPreparedFunction( "format", "s:...", "s", [[
 	@define values, result = {}
 	
 	for i, variant in pairs( { @... } ) do
-		@values[I] = istable(@variant[1]) and tostring( @variant[1] ) or variant[1]
+		@values[I] = tostring( @variant[1] )
 	end
 	
 	@result = string.format( @value 1, unpack(@values) )
