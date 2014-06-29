@@ -5,7 +5,7 @@
 local StringComponent = EXPADV.AddComponent( "string" , true )
 
 /* --- --------------------------------------------------------------------------------
-@: String Object
+	@: String Object
    --- */
 
 local String = StringComponent:AddClass( "string" , "s" )
@@ -15,7 +15,7 @@ String:DefaultAsLua( "" )
 String:AddAlias( "str" )
 
 /* --- --------------------------------------------------------------------------------
-@: Wire Support
+	@: Wire Support
    --- */
 
 if WireLib then
@@ -24,7 +24,7 @@ if WireLib then
 end
 
 /* --- --------------------------------------------------------------------------------
-@: Logical and Comparason
+	@: Logical and Comparason
    --- */
 
 StringComponent:AddInlineOperator("==", "s,s", "b", "(@value 1 == @value 2)" )
@@ -40,7 +40,7 @@ StringComponent:AddInlineOperator(">=","s,s", "b", "(@value 1 >= @value 2)" )
 StringComponent:AddInlineOperator("<=","s,s", "b", "(@value 1 <= @value 2)" )
 
 /* --- --------------------------------------------------------------------------------
-@: Assigment
+	@: Assigment
    --- */
 
 StringComponent:AddPreparedOperator( "s=", "n,s", "", [[
@@ -58,7 +58,7 @@ StringComponent:AddPreparedOperator( "~", "n", "b", [[
 
 
 /* --- --------------------------------------------------------------------------------
-@: Arithmatic
+	@: Arithmatic
    --- */
 
 StringComponent:AddInlineOperator("+","s,s", "s", "(@value 1 .. @value 2)" )
@@ -70,7 +70,7 @@ StringComponent:AddInlineOperator("+","n,s", "s", "(@value 1 .. @value 2)" )
 StringComponent:AddInlineOperator( "#","s","n", "(string.len(@value 1))" )
 
 /* --- --------------------------------------------------------------------------------
-@: Operators
+	@: Operators
    --- */
 
 StringComponent:AddInlineOperator( "is", "s", "b", "(@value 1 ~= \"\")" )
@@ -78,19 +78,19 @@ StringComponent:AddInlineOperator( "is", "s", "b", "(@value 1 ~= \"\")" )
 StringComponent:AddInlineOperator( "not", "s", "b", "(@value 1 == \"\")" )
 
 /* --- --------------------------------------------------------------------------------
-@: Indexing
+	@: Indexing
    --- */
 
 StringComponent:AddInlineOperator( "[]", "s,n", "s", "string.sub(@value 1, @value 2, @value 2)" )
 
 /* --- --------------------------------------------------------------------------------
-@: Casting
+	@: Casting
    --- */
 
 StringComponent:AddInlineOperator( "number", "s", "n", "tonumber(@value 1)" )
 
 /* --- --------------------------------------------------------------------------------
-@: Find and replace
+	@: Find and replace
    --- */
 
 StringComponent:AddInlineFunction( "find", "s:s", "n", "(string.find(@value 1, @value 2) or 0)" )
@@ -102,7 +102,7 @@ StringComponent:AddInlineFunction( "find", "s:s,n,b", "n", "(string.find(@value 
 StringComponent:AddInlineFunction( "replace", "s.s,s", "s", "(string.Replace(@value 1, @value 2, @value 3) or \"\")" )
 
 /* --- --------------------------------------------------------------------------------
-@: Explodes and matches
+	@: Explodes and matches
    --- */
 
 -- StringComponent:AddInlineFunction( "explode", "s:s", "s*", "string.Explode(@value 2, @value 1)" )
@@ -141,7 +141,7 @@ StringComponent:AddPreparedFunction( "gmatch", "s:s,n", "s*", [[
 ]], "@array" ) */
 
 /* --- --------------------------------------------------------------------------------
-@: Format
+	@: Format
    --- */
 
 StringComponent:AddPreparedFunction( "format", "s:...", "s", [[
@@ -154,9 +154,10 @@ StringComponent:AddPreparedFunction( "format", "s:...", "s", [[
 	@result = string.format( @value 1, unpack(@values) )
 ]], "@result" )
 
-/*==============================================================================================
-	Section: Insert / Remove
-==============================================================================================*/
+/* --- --------------------------------------------------------------------------------
+	@: Insert / Remove
+   --- */
+   
 StringComponent:AddInlineFunction( "remove", "s:n,n", "s", "(string.sub( @Value 1, 1, @value - 1 ) .. string.sub( @Value 1, @value 3 or (@value 2 + 1) ))" )
 StringComponent:AddFunctionHelper( "remove", "s:n,n", "Removes nth Char from string." )
 		  EXPADV.AddFunctionAlias( "remove", "s:n" )
