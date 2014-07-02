@@ -15,7 +15,7 @@ local BaseClassObj = EXPADV.BaseClassObj
 -- Builds a VM operator, to return the default zero value object of a class.
 function BaseClassObj:DefaultAsLua( Default ) -- Object / function( table Trace, table Context )
 	if istable( Default ) then
-		Default = function( ) return table.Copy( Default ) end
+		Default = function( ) return setmetatable( table.Copy( Default ), getmetatable( Default ) ) end
 	elseif !isfunction( Default ) then
 		Default = function( ) return Default end
 	end

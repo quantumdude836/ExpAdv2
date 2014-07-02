@@ -60,7 +60,7 @@ ColorComponent:AddPreparedOperator( "c=", "n,c", "", [[
 	Context.Memory[@value 1] = @value 2
 ]] )
 
-ColorComponent:AddInlineOperator("=c","n","c", "(Context.Memory[@value 1] or Color( 255, 255, 255, 255 ))" )
+ColorComponent:AddInlineOperator( "=c","n","c", "(Context.Memory[@value 1] or Color( 255, 255, 255, 255 ))" )
 
 /* --- --------------------------------------------------------------------------------
 	@: Constructor

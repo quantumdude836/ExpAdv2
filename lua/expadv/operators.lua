@@ -526,7 +526,7 @@ function EXPADV.Interprit( Operator, Compiler, Line )
 		end
 
 		for I = #Settings, 1, -1 do
-			local Start, End = unpack( DefinedLines[I] )
+			local Start, End = unpack( Settings[I] )
 			local Setting = Operator.Component:ReadSetting( string.sub( Line, Start + 9, End - 1 ), nil )
 			Line = string.sub( Line, 1, Start - 1 ) .. EXPADV.ToLua(Setting) .. string.sub( Line, End - 1 )
 		end
@@ -767,12 +767,13 @@ function EXPADV.BuildLuaOperator( Operator )
 			local DefinedLines = { }
 
 			for StartPos, EndPos in string.gmatch( OpPrepare, "()@define [a-zA-Z_0-9%%, \t]+()" ) do
-				DefinedLines[ #DefinedLines + 1 ] = { StartPos, EndPos }
+				local Assigned = string.find( OpPrepare, "^[ \t]+=", EndPos )
+				DefinedLines[ #DefinedLines + 1 ] = { StartPos, EndPos, Assigned }
 			end
 
 			for I = #DefinedLines, 1, -1 do -- Work backwards, so we dont break our preparation.
 				local NewLine = { }
-				local Start, End = unpack( DefinedLines[I] ) -- Oh God unpack, meh.
+				local Start, End, Assigned = unpack( DefinedLines[I] ) -- Oh God unpack, meh.
 				local Line = string.sub( OpPrepare, Start + 8, End - 1  )
 
 				for Name in string.gmatch( Line, "([a-zA-Z0-9_]+)" ) do
@@ -783,7 +784,9 @@ function EXPADV.BuildLuaOperator( Operator )
 					Definitions[ "@" .. Name ] = Lua
 				end
 
-				OpPrepare = string.sub( OpPrepare, 1, Start - 1 ) .. table.concat( NewLine, "," ) .. string.sub( OpPrepare, End - 1 )
+				local Insert = Assigned and table.concat( NewLine, "," ) or " "
+				
+				OpPrepare = string.sub( OpPrepare, 1, Start - 1 ) .. Insert .. string.sub( OpPrepare, End - 1 )
 			end
 
 			OpPrepare = string.gsub( OpPrepare, "(@[a-zA-Z0-9_]+)", Definitions )

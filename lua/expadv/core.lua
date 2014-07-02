@@ -135,15 +135,21 @@ end
 
 if SERVER then util.AddNetworkString( "expadv.config" ) end
 
+function EXPADV.AddComponentFile( FileName )
+	EXPADV.SharedOperators( )
+	MsgN( "Loading Component: " .. FileName )
+	include( "expadv/components/" .. FileName .. ".lua" )
+end
+
 function EXPADV.LoadCore( )
 	EXPADV.LoadConfig( )
 
 	EXPADV.IncludeCore( )
 
-	include( "expadv/components/core.lua" )
-	include( "expadv/components/number.lua" )
-	include( "expadv/components/string.lua" )
-	include( "expadv/components/color.lua" )
+	EXPADV.AddComponentFile( "core" )
+	EXPADV.AddComponentFile( "number" )
+	EXPADV.AddComponentFile( "string" )
+	EXPADV.AddComponentFile( "color" )
 
 	EXPADV.LoadComponents( )
 
