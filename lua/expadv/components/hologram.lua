@@ -472,198 +472,196 @@ end]], "(@val or Color(0, 0, 0))" )
 /*==============================================================================================
 	Section: Material / Skin / Bodygroup
 ==============================================================================================*/
-HoloComponent:AddPreparedFunction "setMaterial", "h:s", "", [[
+HoloComponent:AddPreparedFunction( "setMaterial", "h:s", "", [[
 if $IsValid( @value 1 ) and @value 1.Player == Context.player then
 	@value 1:SetMaterial(@value 2)
 end]] )
 
-error( "CBA to finish moving over the hologram component", 0 )
-
-Component:AddFunction( "getMaterial", "h:", "s", [[
-local %Val = ""
+HoloComponent:AddPreparedFunction( "getMaterial", "h:", "s", [[
+@define val = ""
 if $IsValid( @value 1 ) then
-	%Val = @value 1:GetMaterial( ) or ""
-end]], "%Val" )
+	@val = @value 1:GetMaterial( ) or ""
+end]], "@val" )
 
-Component:AddFunction( "getSkin", "h:", "n", [[
-local %Val = ""
+HoloComponent:AddPreparedFunction( "getSkin", "h:", "n", [[
+@define val = ""
 if $IsValid( @value 1 ) then
-	%Val = @value 1:GetSkin( ) or 0
-end]], "%Val" )
+	@val = @value 1:GetSkin( ) or 0
+end]], "@val" )
 
-Component:AddFunction( "getSkinCount", "h:", "n", [[
-local %Val = ""
+HoloComponent:AddPreparedFunction( "getSkinCount", "h:", "n", [[
+@define val = ""
 if $IsValid( @value 1 ) then
-	%Val = @value 1:SkinCount( ) or 0
-end]], "%Val" )
+	@val = @value 1:SkinCount( ) or 0
+end]], "@val" )
 
-Component:AddFunction( "setSkin", "h:n", "", [[
+HoloComponent:AddPreparedFunction( "setSkin", "h:n", "", [[
 if $IsValid( @value 1 ) and @value 1.Player == Context.player then
 	@value 1:SetSkin(@value 2)
-end]], "" )
+end]] )
 
-Component:AddFunction( "setBodygroup", "h:n,n", "", [[
+HoloComponent:AddPreparedFunction( "setBodygroup", "h:n,n", "", [[
 if $IsValid( @value 1 ) and @value 1.Player == Context.player then
 	@value 1:SetBodygroup(@value 2, @value 3)
-end]], "" )
+end]] )
 
 /*==============================================================================================
     Section: Parent
 ==============================================================================================*/
 Component:SetPerf( LEMON_PERF_CHEAP )
 
-Component:AddFunction("parent", "h:e", "", [[
+HoloComponent:AddPreparedFunction( "parent", "h:e", "", [[
 if $IsValid( @value 1 ) and @value 1.Player == Context.player and $IsValid( @value 2 )then
 	@value 1:SetParent(@value 2)
-end]], "" )
+end]] )
 
-Component:AddFunction("parent", "h:h", "", [[
+HoloComponent:AddPreparedFunction( "parent", "h:h", "", [[
 if $IsValid( @value 1 ) and @value 1.Player == Context.player and $IsValid( @value 2 )then
 	@value 1:SetParent(@value 2)
-end]], "" )
+end]] )
 
-Component:AddFunction("parent", "h:p", "", [[
+HoloComponent:AddPreparedFunction( "parent", "h:p", "", [[
 if $IsValid( @value 1 ) and @value 1.Player == Context.player and $IsValid( @value 2 )then
 	@value 1:SetParent(@value 2)
-end]], "" )
+end]] )
 
-Component:AddFunction("unParent", "h:", "", [[
+HoloComponent:AddPreparedFunction( "unParent", "h:", "", [[
 if $IsValid( @value 1 ) and @value 1.Player == Context.player then
 	@value 1:SetParent( nil )
-end]], "" )
+end]] )
 
-Component:AddFunction("getParentHolo", "h:", "h", [[
-local %Val = %NULL_ENTITY
+HoloComponent:AddPreparedFunction( "getParentHolo", "h:", "h", [[
+@define val = $Entity(0)
 
 if $IsValid( @value 1 ) then
-	local %Parent = @value 1:GetParent( )
+	local Parent = @value 1:GetParent( )
 	
-	if %Parent and %Parent:IsValid( ) and %Parent.IsHologram then
-		%Val = %Parent
+	if Parent and Parent:IsValid( ) and Parent.IsHologram then
+		@val = Parent
 	end
-end]], "%Val" )
+end]], "@val" )
 
-Component:AddFunction("getParent", "h:", "e", [[
-local %Val = %NULL_ENTITY
+HoloComponent:AddPreparedFunction( "getParent", "h:", "e", [[
 if $IsValid( @value 1 ) then
-	local %Parent = @value 1:GetParent( )
+	local Parent = @value 1:GetParent( )
 	
-	if %Parent and %Parent:IsValid( ) then
-		%Val = %Parent
+	if Parent and Parent:IsValid( ) then
+		@define val = Parent
 	end
-end]], "%Val" )
+end]], "(@val or $Entity(0))" )
 
 /*==============================================================================================
     Section: Bones
 ==============================================================================================*/
-Component:SetPerf( LEMON_PERF_NORMAL )
-
-Component:AddFunction("setBonePos", "h:n,v", "", [[
+HoloComponent:AddPreparedFunction( "setBonePos", "h:n,v", "", [[
 if $IsValid( @value 1 ) and @value 1.Player == Context.player then
 	@value 1:SetBonePos( @value 2, @value 3 )
-end]], "" )
+end]] )
 
-Component:AddFunction("setBoneAngle", "h:n,a", "", [[
+HoloComponent:AddPreparedFunction( "setBoneAngle", "h:n,a", "", [[
 if $IsValid( @value 1 ) and @value 1.Player == Context.player then
 	@value 1:SetBoneAng( @value 2, @value 3 )
-end]], "" )
+end]] )
 
-Component:AddFunction("setBoneScale", "h:n,v", "", [[
+HoloComponent:AddPreparedFunction( "setBoneScale", "h:n,v", "", [[
 if $IsValid( @value 1 ) and @value 1.Player == Context.player then
 	@value 1:SetBoneScale( @value 2, @value 3 )
-end]], "" )
+end]] )
 
-Component:AddFunction("jiggleBone", "h:n,b", "", [[
+HoloComponent:AddPreparedFunction( "jiggleBone", "h:n,b", "", [[
 if $IsValid( @value 1 ) and @value 1.Player == Context.player then
 	@value 1:SetBoneJiggle( @value 2, @value 3 )
-end]], "" )
+end]] )
 
-Component:AddFunction("getBonePos", "h:n", "v", [[
+HoloComponent:AddPreparedFunction( "getBonePos", "h:n", "v", [[
 if $IsValid( @value 1 ) then
-	%util = @value 1:GetBonePos( @value 2 )
-end]], "Vector3( %util or Vector( 0, 0, 0 ) )" )
+	@define val = @value 1:GetBonePos( @value 2 )
+end]], "( @val or Vector( 0, 0, 0 ) )" )
 
-Component:AddFunction("getBoneAng", "h:n", "v", [[
+HoloComponent:AddPreparedFunction( "getBoneAng", "h:n", "v", [[
+@define val
 if $IsValid( @value 1 ) then
-	%util = @value 1:GetBoneAngle( @value 2 )
-end]], "( %util or Angle( 0, 0, 0 ) )" )
+	@val = @value 1:GetBoneAngle( @value 2 )
+end]], "( @val or Angle( 0, 0, 0 ) )" )
 
-Component:AddFunction("getBoneScale", "h:n", "v", [[
+HoloComponent:AddPreparedFunction( "getBoneScale", "h:n", "v", [[
+@define val
 if $IsValid( @value 1 ) then
-	%util = @value 1:GetBoneScale( @value 2 )
-end]], "Vector3( %util or Vector( 0, 0, 0 ) )" )
+	@val = @value 1:GetBoneScale( @value 2 )
+end]], "( @val or Vector( 0, 0, 0 ) )" )
 
-Component:AddFunction("boneCount", "h:", "n", [[
+HoloComponent:AddPreparedFunction( "boneCount", "h:", "n", [[
+@define val
 if $IsValid( @value 1 ) then
-	%util = @value 1:GetBoneCount( )
-end]], "( %util or 0 )" )
+	@vall = @value 1:GetBoneCount( )
+end]], "( @val or 0 )" )
 
 /*==============================================================================================
     Section: Animation
 ==============================================================================================*/
 Component:SetPerf( LEMON_PERF_CHEAP )
 
-Component:AddFunction("setAnimation", "h:n[,n,n]", "", [[
+HoloComponent:AddPreparedFunction("setAnimation", "h:n[,n,n]", "", [[
 if $IsValid( @value 1 ) and @value 1.Player == Context.player then
 	@value 1:SetHoloAnimation(@value 2, @value 3, value %4)
-end]], "" ) 
+end]] ) 
 
-Component:AddFunction("setAnimation", "h:s[,n,n]", "", [[
+HoloComponent:AddPreparedFunction("setAnimation", "h:s[,n,n]", "", [[
 if $IsValid( @value 1 ) and @value 1.Player == Context.player then
 	@value 1:SetHoloAnimation(@value 1:LookupSequence( @value 2 ), @value 3, value %4)
-end]], "" )
+end]] )
 
-Component:AddFunction("animationLength", "h:", "n", "( $IsValid( @value 1 ) and @value 1:SequenceDuration( ) or 0 )" )
+HoloComponent:AddInlineFunction("animationLength", "h:", "n", "( $IsValid( @value 1 ) and @value 1:SequenceDuration( ) or 0 )" )
 
-Component:AddFunction("setPose", "h:s,n", "", [[
+HoloComponent:AddPreparedFunction("setPose", "h:s,n", "", [[
 if $IsValid( @value 1 ) and @value 1.Player == Context.player then
 	@value 1:SetPoseParameter(@value 2, @value 3 )
 end]], "" )
 
-Component:AddFunction("getPose", "h:s", "n", "( $IsValid( @value 1 ) and @value 1:GetPoseParameter( @value 2 ) or 0 )" )
+HoloComponent:AddInlineFunction("getPose", "h:s", "n", "( $IsValid( @value 1 ) and @value 1:GetPoseParameter( @value 2 ) or 0 )" )
 
-Component:AddFunction("animation", "h:s", "n", [[
+HoloComponent:AddPreparedFunction("animation", "h:s", "n", [[
 if $IsValid( @value 1 ) then
-	%util = @value 1:LookupSequence(@value 2)
-end]], "(%util or 0)" )
+	@define val = @value 1:LookupSequence(@value 2)
+end]], "(@val or 0)" )
 
-Component:AddFunction( "getAnimation", "h:", "n", "( $IsValid( @value 1 ) and @value 1:GetSequence( ) or 0 )" )
+HoloComponent:AddInlineFunction( "getAnimation", "h:", "n", "( $IsValid( @value 1 ) and @value 1:GetSequence( ) or 0 )" )
 
-Component:AddFunction( "getAnimationName", "h:n", "s", "( $IsValid( @value 1 ) and @value 1:GetSequenceName( @value 2 ) or \"\" )" )
+HoloComponent:AddInlineFunction( "getAnimationName", "h:n", "s", "( $IsValid( @value 1 ) and @value 1:GetSequenceName( @value 2 ) or \"\" )" )
 
-Component:AddFunction( "setAnimationRate", "h:n", "", [[
+HoloComponent:AddPreparedFunction( "setAnimationRate", "h:n", "", [[
 if $IsValid( @value 1 ) and @value 1.Player == Context.player then
 	@value 1:SetPlaybackRate(@value 2)
-end]], "" )
+end]] )
 
 /*==============================================================================================
     Section: Remove
 ==============================================================================================*/
-Component:AddFunction("remove", "h:", "", [[
+HoloComponent:AddPreparedFunction( "remove", "h:", "", [[
 if $IsValid( @value 1 ) and @value 1.Player == Context.player then
 	@value 1:Remove( )
-end]], "" )
+end]] )
 
 /*==============================================================================================
     Section: Player Blocking, Does not work on the entity.
 ==============================================================================================*/
-Component:AddFunction("blockPlayer", "h:e", "", [[
+HoloComponent:AddPreparedFunction( "blockPlayer", "h:e", "", [[
 if $IsValid( @value 1 ) and @value 1.Player == Context.player then
 	if IsValid( @value 2 ) and @value 2:IsPlayer( ) then
 		@value 1:BlockPlayer( @value 2 )
 	end
-end]], "" )
+end]] )
 
-Component:AddFunction("unblockPlayer", "h:e", "", [[
+HoloComponent:AddPreparedFunction( "unblockPlayer", "h:e", "", [[
 if $IsValid( @value 1 ) and @value 1.Player == Context.player then
 	if IsValid( @value 2 ) and @value 2:IsPlayer( ) then
 		@value 1:UnblockPlayer( @value 2 )
 	end
-end]], "" )
+end]] )
 
-Component:AddFunction("isBlocked", "h:e", "b", [[
+HoloComponent:AddPreparedFunction( "isBlocked", "h:e", "b", [[
 if $IsValid( @value 1 ) and @value 1.Player == Context.player then
 	if IsValid( @value 2 ) and @value 2:IsPlayer( ) then
-		%util = @value 1:IsBlocked( @value 2 )
+		@define val = @value 1:IsBlocked( @value 2 )
 	end
-end]], "(%util or false)" )
+end]], "(@val or false)" )
