@@ -143,6 +143,7 @@ function EXPADV.LoadCore( )
 	include( "expadv/components/core.lua" )
 	include( "expadv/components/number.lua" )
 	include( "expadv/components/string.lua" )
+	include( "expadv/components/color.lua" )
 
 	EXPADV.LoadComponents( )
 
