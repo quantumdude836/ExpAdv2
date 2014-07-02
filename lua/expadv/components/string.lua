@@ -24,7 +24,7 @@ if WireLib then
 end
 
 /* --- --------------------------------------------------------------------------------
-	@: Logical and Comparason
+	@: Logical and Comparison
    --- */
 
 StringComponent:AddInlineOperator("==", "s,s", "b", "(@value 1 == @value 2)" )
@@ -40,7 +40,7 @@ StringComponent:AddInlineOperator(">=","s,s", "b", "(@value 1 >= @value 2)" )
 StringComponent:AddInlineOperator("<=","s,s", "b", "(@value 1 <= @value 2)" )
 
 /* --- --------------------------------------------------------------------------------
-	@: Assigment
+	@: Assignment
    --- */
 
 StringComponent:AddPreparedOperator( "s=", "n,s", "", [[
@@ -58,7 +58,7 @@ StringComponent:AddPreparedOperator( "~", "n", "b", [[
 
 
 /* --- --------------------------------------------------------------------------------
-	@: Arithmatic
+	@: Arithmetic
    --- */
 
 StringComponent:AddInlineOperator("+","s,s", "s", "(@value 1 .. @value 2)" )

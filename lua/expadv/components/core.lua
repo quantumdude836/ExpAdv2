@@ -84,7 +84,7 @@ EXPADV.AddEvent( nil, "render", "n,n", "" )
 
 EXPADV.ClientOperators( )
 
-EXPADV.AddPreparedFunction( nil, "drawColor", "n,n,n,n", "", "$surface.SetDrawColor( $Color( @value 1, @value 2, @value 3, @value 4 ) )" )
+EXPADV.AddPreparedFunction( nil, "drawColor", "c", "", "$surface.SetDrawColor( @value 1 )" )
 
 EXPADV.AddPreparedFunction( nil, "drawBox", "n,n,n,n", "", "$surface.DrawRect( @value 1, @value 2, @value 3, @value 4 )" )
 
@@ -93,5 +93,3 @@ EXPADV.AddPreparedFunction( nil, "drawText", "s,n,n", "", "$surface.SetTextPos( 
 EXPADV.AddPreparedFunction( nil, "textColor", "n,n,n,n", "", "$surface.SetTextColor( @value 1, @value 2, @value 3, @value 4 )" )
 
 EXPADV.AddPreparedFunction( nil, "textFont", "s", "", "$surface.SetFont( @value 1 )" )
-
-

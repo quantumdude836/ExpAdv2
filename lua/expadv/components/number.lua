@@ -182,11 +182,9 @@ MathComponent:AddInlineFunction( "sign", "n", "n", "(@value 1 > %Round and 1 or 
 MathComponent:AddFunctionHelper( "sign", "n", "Returns the sign of (number)." )
 
 
-
 /*==============================================================================================
 Section: Random Numbers
 ==============================================================================================*/
-
 
 MathComponent:AddInlineFunction( "random", "", "n", "math.random( )" )
 MathComponent:AddFunctionHelper( "random", "", "Returns a floating point between 0 and 1" )
@@ -205,7 +203,6 @@ Section: Advanced Math
 MathComponent:AddInlineFunction( "sqrt", "n", "n", "(@value 1 ^ (1 / 2))" )
 MathComponent:AddFunctionHelper( "sqrt", "n", "Returns the square root of the specified number." )
 
-
 MathComponent:AddInlineFunction( "cbrt", "n", "n", "(@value 1 ^ (1 / 3))" )
 MathComponent:AddFunctionHelper( "cbrt", "n", "Returns the cube root of the speciried number." )
 
@@ -215,11 +212,13 @@ MathComponent:AddFunctionHelper( "root", "n,n", "returns the (number) root of (n
 MathComponent:AddInlineFunction( "exp", "n", "n", "(math.exp(@value 1))" )
 MathComponent:AddFunctionHelper( "exp", "n", "Returns the constant e (2.71828) power of (number) " )
 
+
 /*==============================================================================================
 Section: Trig
 ==============================================================================================*/
+
 MathComponent:AddInlineFunction( "toRad", "n", "n", "(@value 1 * (math.pi / 180)" )
-	MathComponent:AddFunctionHelper( "toRad", "n", "Changes the degree to a radius." )
+MathComponent:AddFunctionHelper( "toRad", "n", "Changes the degree to a radius." )
 
 MathComponent:AddInlineFunction( "toDeg", "n", "n", "(@value 1 * (180 / math.pi ))" )
 MathComponent:AddFunctionHelper( "toDeg", "n", "Changes the radius to a degree." )
@@ -334,4 +333,3 @@ MathComponent:AddFunctionHelper( "log", "n,n", "Returns the logarithm of (number
 
 MathComponent:AddInlineFunction("mix", "n,n,n", "n", "(@value 1 * @value 3 + @value 2 * (1 - @value 3))" )
 MathComponent:AddFunctionHelper( "mix", "n,n,n", "Returns a linear interpolation between three numbers." )
-
