@@ -133,8 +133,10 @@ function LANGUAGE.BuildData( )
 	end
 
 	LANGUAGE:DispatchEvent( "NamespaceChanged" )
-	
-	hook.Remove( "expadv.PostLoadCore", "expadv.GCompute.BuildData" )
+
+	hook.Add( "expadv.UnloadCore", "expadv.GCompute.BuildData", function( )
+		GCompute.Languages.Remove( "EXPADV2" )
+	end )
 end
 
 hook.Add( "Expadv.PostLoadCore", "Expadv.GCompute.RequestData", LANGUAGE.BuildData )
