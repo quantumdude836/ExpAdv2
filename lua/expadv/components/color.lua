@@ -30,9 +30,9 @@ end
 	@: Logical and Comparison
    --- */
 
-ColorComponent:AddInlineOperator("==", "c,c", "b", "(@value 1 == @value 2)" )
+ColorComponent:AddInlineOperator( "==", "c,c", "b", "(@value 1 == @value 2)" )
 
-ColorComponent:AddInlineOperator("!=", "c,c", "b", "(@value 1 ~= @value 2)" )
+ColorComponent:AddInlineOperator( "!=", "c,c", "b", "(@value 1 ~= @value 2)" )
 
 /* --- --------------------------------------------------------------------------------
 	@: Operators
@@ -46,7 +46,7 @@ ColorComponent:AddInlineOperator( "not", "c", "b", "(@value 1 == Color(0, 0, 0, 
 	@: Casting
    --- */
 
-ColorComponent:AddInlineOperator( "string", "c", "s", "string.format( \"Color< %i, %i, %i, %i >\", @value 1.r, @value 1,g, @value 1.b,@value 1.a )" )
+ColorComponent:AddInlineOperator( "string", "c", "s", "string.format( \"Color< %i, %i, %i, %i >\", @value 1.r, @value 1.g, @value 1.b, @value 1.a )" )
 
 ColorComponent:AddInlineOperator( "color", "s", "c", "string.ToColor(@value 1)" )
 
@@ -60,7 +60,7 @@ ColorComponent:AddPreparedOperator( "c=", "n,c", "", [[
 	Context.Memory[@value 1] = @value 2
 ]] )
 
-ColorComponent:AddInlineOperator( "=c","n","c", "(Context.Memory[@value 1] or Color( 255, 255, 255, 255 ))" )
+ColorComponent:AddInlineOperator( "=c", "n", "c", "(Context.Memory[@value 1] or Color( 255, 255, 255, 255 ))" )
 
 /* --- --------------------------------------------------------------------------------
 	@: Constructor
