@@ -51,7 +51,7 @@ function Component:OnShutDown( Context )
 	end
 end
 
-function Component:APIReload( )
+function Component:OnCoreReload( )
 	HolosByPlayer = { }
 
 	for Ent, Holos in pairs( HolosByEntity ) do
@@ -464,9 +464,8 @@ if $IsValid( @value 1 ) and @value 1.Player == Context.player then
 end]] )
 
 HoloComponent:AddPreparedFunction("getColor", "h:", "c", [[
-@define val
 if $IsValid( @value 1 ) then
-	@val = @value 1:GetColor( )
+	@define val = @value 1:GetColor( )
 end]], "(@val or Color(0, 0, 0))" )
 
 /*==============================================================================================
@@ -478,22 +477,19 @@ if $IsValid( @value 1 ) and @value 1.Player == Context.player then
 end]] )
 
 HoloComponent:AddPreparedFunction( "getMaterial", "h:", "s", [[
-@define val = ""
 if $IsValid( @value 1 ) then
-	@val = @value 1:GetMaterial( ) or ""
-end]], "@val" )
+	@define val = @value 1:GetMaterial( ) or ""
+end]], "(@val or \"\")" )
 
 HoloComponent:AddPreparedFunction( "getSkin", "h:", "n", [[
-@define val = ""
 if $IsValid( @value 1 ) then
-	@val = @value 1:GetSkin( ) or 0
-end]], "@val" )
+	@define val = @value 1:GetSkin( ) or 0
+end]], "(@val or \"\")" )
 
 HoloComponent:AddPreparedFunction( "getSkinCount", "h:", "n", [[
-@define val = ""
 if $IsValid( @value 1 ) then
-	@val = @value 1:SkinCount( ) or 0
-end]], "@val" )
+	@define val = @value 1:SkinCount( ) or 0
+end]], "(@val or \"\")" )
 
 HoloComponent:AddPreparedFunction( "setSkin", "h:n", "", [[
 if $IsValid( @value 1 ) and @value 1.Player == Context.player then
@@ -579,21 +575,18 @@ if $IsValid( @value 1 ) then
 end]], "( @val or Vector( 0, 0, 0 ) )" )
 
 HoloComponent:AddPreparedFunction( "getBoneAng", "h:n", "v", [[
-@define val
 if $IsValid( @value 1 ) then
-	@val = @value 1:GetBoneAngle( @value 2 )
+	@define val = @value 1:GetBoneAngle( @value 2 )
 end]], "( @val or Angle( 0, 0, 0 ) )" )
 
 HoloComponent:AddPreparedFunction( "getBoneScale", "h:n", "v", [[
-@define val
 if $IsValid( @value 1 ) then
-	@val = @value 1:GetBoneScale( @value 2 )
+	@define val = @value 1:GetBoneScale( @value 2 )
 end]], "( @val or Vector( 0, 0, 0 ) )" )
 
 HoloComponent:AddPreparedFunction( "boneCount", "h:", "n", [[
-@define val
 if $IsValid( @value 1 ) then
-	@vall = @value 1:GetBoneCount( )
+	@define val = @value 1:GetBoneCount( )
 end]], "( @val or 0 )" )
 
 /*==============================================================================================

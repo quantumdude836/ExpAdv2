@@ -235,6 +235,8 @@ end
    -- ShutDown( Context )*				| Void | Called after the context has shutdown.
    -- Update( Context )*				| Void | Called every tick, when a context has ran that tick.
 
+   -- BuildHologramModels( Table )		| Void | Called when the hologram model look up is made.
+   
    --  function Component:OnPostLoadAliases( ) end
    --  hook.Add( "Expadv.PostLoadAliases", ... )
    -- *Also avaible on Context -> function Context:OnScriptError( Result ) end

@@ -620,58 +620,59 @@ function EXPADV.BuildLuaOperator( Operator )
 		for I = Operator.InputCount, 1, -1 do
 
 			local Input = Inputs[I]
-			local InputInline, InputPrepare = "nil", ""
+			local InputInline, InputPrepare, InputReturn = "nil", ""
 			
-			if !istable( Input ) then
-				print( "NOT TABLE: ", Input )
-			end
-			
-			-- How meany times do we need this Var?
-			local Uses = 0
+			if Input then
+				-- How meany times do we need this Var?
+				local Uses = 0
 
-			if Operator.FLAG == EXPADV_INLINE or Operator.FLAG == EXPADV_INLINEPREPARE then
-				local _, Add = string.gsub( OpInline, "@value " .. I, "" )
-				Uses = Add
-			end
+				if Operator.FLAG == EXPADV_INLINE or Operator.FLAG == EXPADV_INLINEPREPARE then
+					local _, Add = string.gsub( OpInline, "@value " .. I, "" )
+					Uses = Add
+				end
 
-			if Operator.FLAG == EXPADV_PREPARE or Operator.FLAG == EXPADV_INLINEPREPARE then
-				local _, Add = string.gsub( OpPrepare, "@value " .. I, "" )
-				Uses = Uses + Add
-			end
+				if Operator.FLAG == EXPADV_PREPARE or Operator.FLAG == EXPADV_INLINEPREPARE then
+					local _, Add = string.gsub( OpPrepare, "@value " .. I, "" )
+					Uses = Uses + Add
+				end
 
-			-- Generate the inline and preperation.
-			if Uses == 0 then
-				InputInline = "nil" -- This should never happen!
-			elseif Input.FLAG == EXPADV_FUNCTION then
-				InputInline = Compiler:VMToLua( Input )
+				-- Generate the inline and preperation.
+				if Uses == 0 then
+					InputInline = "nil" -- This should never happen!
+					InputReturn = nil -- This should result in void.
+				elseif Input.FLAG == EXPADV_FUNCTION then
+					InputInline = Compiler:VMToLua( Input )
+					InputReturn = Input.Return
+				elseif Input.FLAG == EXPADV_INLINE then
+					InputInline = Input.Inline
+					InputReturn = Input.Return
+				elseif Input.FLAG == EXPADV_PREPARE then
+					InputInline = "nil"
+					InputPrepare = Input.Prepare
+					InputReturn = Input.Return
+				else
+					InputInline = Input.Inline
+					InputPrepare = Input.Prepare
+					InputReturn = Input.Return
+				end
 
-			elseif Input.FLAG == EXPADV_INLINE then
-				InputInline = Input.Inline
-
-			elseif Input.FLAG == EXPADV_PREPARE then
-				InputInline = "nil"
-				InputPrepare = Input.Prepare
-			else
-				InputInline = Input.Inline
-				InputPrepare = Input.Prepare
-			end
-
-			-- Lets see if we need to localize the inline
-			if Uses >= 2 and !Input.IsRaw and !string.StartWith( InputInline, "Context.Definitions" ) then
-				local Local = Compiler:NextLocal( )
-				InputPrepare = string.format( "%s\nContext.Definitions[%s] = %s", InputPrepare, Local, InputInline )
-				InputInline = string.format( "Context.Definitions[%s]", Local )
+				-- Lets see if we need to localize the inline
+				if Uses >= 2 and !Input.IsRaw and !string.StartWith( InputInline, "Context.Definitions" ) then
+					local Local = Compiler:NextLocal( )
+					InputPrepare = string.format( "%s\nContext.Definitions[%s] = %s", InputPrepare, Local, InputInline )
+					InputInline = string.format( "Context.Definitions[%s]", Local )
+				end
 			end
 
 			-- Place inputs into generated code
 			if Operator.FLAG == EXPADV_PREPARE or Operator.FLAG == EXPADV_INLINEPREPARE then
 				OpPrepare = string.gsub( OpPrepare, "@value " .. I, InputInline )
-				OpPrepare = string.gsub( OpPrepare, "@type " .. I, Format( "%q", Input.Return or Operator.Input[I] ) )
+				OpPrepare = string.gsub( OpPrepare, "@type " .. I, Format( "%q", InputReturn or Operator.Input[I] ) )
 			end
 
 			if Operator.FLAG == EXPADV_INLINE or Operator.FLAG == EXPADV_INLINEPREPARE then
 				OpInline = string.gsub( OpInline, "@value " .. I, InputInline )
-				OpInline = string.gsub( OpInline, "@type " .. I, Format( "%q", Input.Return or Operator.Input[I] ) )
+				OpInline = string.gsub( OpInline, "@type " .. I, Format( "%q", InputReturn or Operator.Input[I] ) )
 			end
 
 			-- Now we handel preperation.
@@ -697,14 +698,14 @@ function EXPADV.BuildLuaOperator( Operator )
 					local Input = Input[I]
 
 					if Input.FLAG == EXPADV_FUNCTION then
-						VAInline[ #VAInline + 1 ] = string.format( "{%s,%q}", Compiler:VMToLua( Input ), Input.Return or "NIL" )
+						VAInline[ #VAInline + 1 ] = string.format( "{%s,%q}", Compiler:VMToLua( Input ), InputReturn or "NIL" )
 					elseif Input.FLAG == EXPADV_INLINE then
-						VAInline[ #VAInline + 1 ] = string.format( "{%s,%q}", Input.Inline, Input.Return or "NIL" )
+						VAInline[ #VAInline + 1 ] = string.format( "{%s,%q}", Input.Inline, InputReturn or "NIL" )
 					elseif Input.FLAG == EXPADV_PREPARE then
 						InputInline = "{nil,\"NIL\"}"
 						VAPrepare[ #VAPrepare + 1 ] = Input.Prepare
 					else
-						VAInline[ #VAInline + 1 ] = string.format( "{%s,%q}", Input.Inline, Input.Return or "NIL" )
+						VAInline[ #VAInline + 1 ] = string.format( "{%s,%q}", Input.Inline, InputReturn or "NIL" )
 						VAPrepare[ #VAPrepare + 1 ] = Input.Prepare
 					end
 				end
@@ -766,8 +767,7 @@ function EXPADV.BuildLuaOperator( Operator )
 		if Operator.FLAG == EXPADV_PREPARE or Operator.FLAG == EXPADV_INLINEPREPARE then
 			local DefinedLines = { }
 
-			for StartPos, EndPos in string.gmatch( OpPrepare, "()@define [a-zA-Z_0-9%%, \t]+()" ) do
-				local Assigned = string.find( OpPrepare, "^[ \t]+=", EndPos )
+			for StartPos, EndPos, Assigned in string.gmatch( OpPrepare, "()@define [a-zA-Z_0-9%%, \t]+()(=?)" ) do
 				DefinedLines[ #DefinedLines + 1 ] = { StartPos, EndPos, Assigned }
 			end
 

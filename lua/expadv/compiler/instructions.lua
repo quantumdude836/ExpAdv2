@@ -535,7 +535,7 @@ function Compiler:Compile_FUNC( Trace, Variable, Expressions )
 			Signature = Signature .. Expressions[I].Return
 		end
 
-		MsgN( "Looking for: ", string.format( "%s(%s)", Variable, Signature ) )
+		--MsgN( "Looking for: ", string.format( "%s(%s)", Variable, Signature ) )
 
 		local Operator = EXPADV.Functions[ string.format( "%s(%s)", Variable, Signature ) ] or BestMatch
 		

@@ -516,10 +516,11 @@ EXPADV.BaseEnv = {
 local function CreateEnviroment( )
 	return {
 		EXPADV = EXPADV,
-		Vector = Vector, Angle = Angle,
+		Vector = Vector, Angle = Angle, Color = Color, 
 		pairs = pairs, ipairs = ipairs,
 		pcall = pcall, error = error, unpack = unpack,
 		print = print, MsgN = MsgN, tostring = tostring, tonumber = tonumber,
+		IsValid = IsValid, Entity = Entity,
 	} 
 end
 
