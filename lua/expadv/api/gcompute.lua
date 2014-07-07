@@ -133,11 +133,13 @@ function LANGUAGE.BuildData( )
 	end
 
 	LANGUAGE:DispatchEvent( "NamespaceChanged" )
+	
+	hook.Remove( "expadv.PostLoadCore", "expadv.GCompute.BuildData" )
 end
 
 hook.Add( "Expadv.PostLoadCore", "Expadv.GCompute.RequestData", LANGUAGE.BuildData )
 
-GCompute:AddEventListener( "Unloaded", function( ) hook.Remove( "Expadv.PostLoadCore", "Expadv.GCompute.BuildData" ) end )
+GCompute:AddEventListener( "Unloaded", function( ) hook.Remove( "expadv.PostLoadCore", "expadv.GCompute.BuildData" ) end )
 
 if EXPADV and EXPADV.IsLoaded then LANGUAGE.BuildData( ) end
 

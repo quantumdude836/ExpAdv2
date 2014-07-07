@@ -142,6 +142,11 @@ function EXPADV.AddComponentFile( FileName )
 end
 
 function EXPADV.LoadCore( )
+	if EXPADV.IsLoaded then
+		EXPADV.CallHook( "UnloadCore" )
+		EXPADV.IsLoaded = nil
+	end
+
 	EXPADV.LoadConfig( )
 
 	EXPADV.IncludeCore( )
@@ -182,7 +187,7 @@ function EXPADV.LoadCore( )
 			net.WriteTable( EXPADV.Config )
 		net.Broadcast( )
 
-		hook.Add( "PlayerInitialSpawn", "lemon.config", function( Player )
+		hook.Add( "PlayerInitialSpawn", "expadv.config", function( Player )
 			net.Start( "expadv.config")
 				net.WriteTable( EXPADV.Config )
 			net.Send( Player )
@@ -194,20 +199,13 @@ function EXPADV.LoadCore( )
 	EXPADV.CallHook( "PostLoadCore" )
 end
 
-if CLIET then
-	net.Receive( "expadv.config", function( )
-		EXPADV.Config = net.ReadTable ( )
-
-		EXPADV.LoadCore( )
-	end )
-end
-
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Hooks.
    --- */
 
    -- Think( )							| Void | Called once per think, this is for convenience.
    -- PostLoadCore( )					| Void | Called after the core has finished loading.
+   -- UnloadCore( )						| Void | Called before the core reloads.
    -- PostLoadConfig( Config )			| Void | Called after the main config has loaded.
    -- PreSaveConfig( Config )			| Void | Called before saving the main config file.
    -- PostLoadComponents( ) 			| Void | Called once all components have been loaded.
@@ -263,7 +261,7 @@ end
 	@: Convenience hooks.
    --- */
    
-hook.Add( "Think", "ExpAdv2.Hook", function( )
+hook.Add( "Think", "expadv.Hook", function( )
 	local Ok, Msg = pcall( EXPADV.CallHook, "Think" )
 	if !Ok then MsgN( "ExpAdv2 - Error in main Think hook: ", Msg ) end
 end )
@@ -273,18 +271,28 @@ end )
    --- */
 
 if CLIENT then
-	hook.Add( "GComputeLoaded", "ExpAdv.GCompute", function( )
+	hook.Add( "GComputeLoaded", "expadv.GCompute", function( )
 		include( "expadv/api/gcompute.lua")
 	end )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
-	@: Test Build.
+	@: Load Core.
    --- */
 
-hook.Add( "Initialize", "lemon.babysteps", function( )
-	EXPADV.LoadCore( )
-end )
+if SERVER then
+	hook.Add( "Initialize", "expadv.Loadcore", function( )
+		EXPADV.LoadCore( )
+	end )
 
+	concommand.Add( "expadv_reload", function( Player )
+		EXPADV.LoadCore( )
+	end )
+	
+elseif CLIENT then
+	net.Receive( "expadv.config", function( )
+		EXPADV.Config = net.ReadTable( )
 
-
+		EXPADV.LoadCore( )
+	end )
+end

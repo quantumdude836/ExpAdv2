@@ -154,6 +154,8 @@ end
 
 -- Shuts down the context and execution.
 function EXPADV.RootContext:ShutDown( )
+	if !self.Online then return end
+
 	self.Online = false
 	self:Handel( "ShutDown" )
 end
@@ -192,6 +194,10 @@ function EXPADV.UnregisterContext( Context )
 	Context:Handel( "UnregisterContext" )
 end
 
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Context Updating.
+--- */
+
 local LastUpdated -- Means we dont need a zillion pcalls
 
 local function CheckUpdates( )
@@ -211,4 +217,14 @@ hook.Add( "Tick", "ExpAdv2.Update", function( )
 	end
 	
 	LastUpdated = nil
+end )
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Reloading.
+--- */
+
+hook.Add( "Tick", "ExpAdv2.UnloadCore", function( )
+	for Context, _ in pairs( Registery ) do
+		Context:ShutDown( )
+	end
 end )

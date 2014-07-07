@@ -184,7 +184,7 @@ function EXPADV.LoadOperators( )
 		-- Do we still need to load this?
 		if ShouldNotLoad then continue end
 
-		MsgN( "Built Operator: " .. Operator.Signature )
+		--MsgN( "Built Operator: " .. Operator.Signature )
 
 		-- Lets build this operator.
 		EXPADV.BuildLuaOperator( Operator )
@@ -408,7 +408,7 @@ function EXPADV.LoadFunctions( )
 		-- Do we still need to load this?
 		if ShouldNotLoad then continue end
 
-		MsgN( "Built Function: " .. Operator.Signature )
+		-- MsgN( "Built Function: " .. Operator.Signature )
 
 		-- Lets build this operator.
 		EXPADV.BuildLuaOperator( Operator )
@@ -658,9 +658,9 @@ function EXPADV.BuildLuaOperator( Operator )
 
 				-- Lets see if we need to localize the inline
 				if Uses >= 2 and !Input.IsRaw and !string.StartWith( InputInline, "Context.Definitions" ) then
-					local Local = Compiler:NextLocal( )
-					InputPrepare = string.format( "%s\nContext.Definitions[%s] = %s", InputPrepare, Local, InputInline )
-					InputInline = string.format( "Context.Definitions[%s]", Local )
+					local Defined = Compiler:DefineVariable( )
+					InputPrepare = string.format( "%s\n%s = %s", InputPrepare, Defined, InputInline )
+					InputInline = Defined
 				end
 			end
 
