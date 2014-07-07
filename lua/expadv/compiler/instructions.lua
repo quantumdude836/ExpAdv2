@@ -553,7 +553,7 @@ function Compiler:Compile_METHOD( Trace, Expression, Method, Expressions )
 	local Meta = Expression.Return
 	
 	if #Expressions == 0 then
-		local Operator = EXPADV.Functions[Method .. "(" .. Meta .. ")"] or EXPADV.Functions[Variable .. "(" .. Meta .. "....)"] -- Yes this does look dumb.
+		local Operator = EXPADV.Functions[Method .. "(" .. Meta .. ")"] or EXPADV.Functions[Method .. "(" .. Meta .. "....)"] -- Yes this does look dumb.
 		
 		if !Operator then self:TraceError( Trace, "No such method %s.%s()", self:NiceClass(Meta), Method ) end
 
@@ -581,7 +581,7 @@ function Compiler:Compile_METHOD( Trace, Expression, Method, Expressions )
 
 	local Signature = table.concat( { self:NiceClass( unpack( Expressions ) ) }, "," )
 	
-	self:TraceError( Trace, "No such method %s.%s(%s)", self:NiceClass(Meta), Variable, Signature )
+	self:TraceError( Trace, "No such method %s.%s(%s)", self:NiceClass(Meta), Method, Signature )
 end
 
 function Compiler:Compile_LAMBDA( Trace, Params, UseVarg, Sequence, Memory )
