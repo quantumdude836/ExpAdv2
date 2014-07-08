@@ -141,7 +141,6 @@ MathComponent:AddInlineFunction( "floor", "n", "n", "math.floor(@value 1)" )
 MathComponent:AddFunctionHelper( "floor", "n", "Rounds (number) to the nearest integer (lower) " )
 
 
-
 MathComponent:AddInlineFunction( "abs", "n", "n", "((@value 1 >= 0) and @value 1 or -@value 1)" ) ; 
 MathComponent:AddFunctionHelper( "abs", "n", "returns the absolute value of the specified number." )
 

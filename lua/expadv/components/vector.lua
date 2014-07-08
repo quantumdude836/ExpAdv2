@@ -34,15 +34,18 @@ VectorComponent:AddInlineOperator( ">=", "v,v", "b", "(@value 1 >= @value 2)" )
 VectorComponent:AddInlineOperator( "<=", "v,v", "b", "(@value 1 <= @value 2)" )
 
 /* --- --------------------------------------------------------------------------------
-@: Arithmetic
+	@: Arithmetic
    --- */
 
 VectorComponent:AddInlineOperator( "+", "v,v", "v", "(@value 1 + @value 2)" )
 VectorComponent:AddInlineOperator( "-", "v,v", "v", "(@value 1 - @value 2)" )
 VectorComponent:AddInlineOperator( "*", "v,v", "v", "(@value 1 * @value 2)" )
-VectorComponent:AddInlineOperator( "/", "v,v", "v", "(@value 1 / @value 2)" )
-VectorComponent:AddInlineOperator( "%", "v,v", "v", "(@value 1 % @value 2)" )
-VectorComponent:AddInlineOperator( "^", "v,v", "v", "(@value 1 ^ @value 2)" )
+VectorComponent:AddInlineOperator( "/", "v,v", "v", "(@value 1.x / @value 2.x) (@value 1.y / @value 2.y) (@value 1.z / @value 2.z)" )
+VectorComponent:AddInlineOperator( "%", "v,v", "v", "(math.fmod(@value 1.x, @value 2.x) (math.fmod(@value 1.y, @value 2.y) (math.fmod(@value 1.z, @value 2.z)" )
+
+/* --- --------------------------------------------------------------------------------
+	@: Number Arithmetic
+   --- */
 
 /* --- --------------------------------------------------------------------------------
 	@: Operators
@@ -52,6 +55,11 @@ VectorComponent:AddInlineOperator( "is", "v", "b", "(@value 1 ~= Vector(0, 0, 0)
 VectorComponent:AddInlineOperator( "not", "v", "b", "(@value 1 == Vector(0, 0, 0))" )
 VectorComponent:AddInlineOperator( "-", "n", "b", "(-@value 1)" )
 
+/* --- --------------------------------------------------------------------------------
+	@: Casting
+   --- */
+
+VectorComponent:AddInlineOperator( "string", "v", "s", "string.format( \"Vector< %i, %i, %i >\", @value 1.x, @value 1.y, @value 1.z)" )
 
 /* --- --------------------------------------------------------------------------------
 	@: Assignment
@@ -73,8 +81,9 @@ VectorComponent:AddInlineFunction( "vec", "", "v", "Vector(0, 0, 0)" )
 VectorComponent:AddInlineFunction( "vec", "n", "v", "Vector(@value 1, @value 1, @value 1)" )
 VectorComponent:AddInlineFunction( "vec", "n,n,n", "v", "Vector(@value 1, @value 2, @value 3)" )
 VectorComponent:AddFunctionHelper( "vec", "n,n,n", "Creates a vector object")
-EXPADV.AddFunctionAlias( "vec", "n,n" )
-
+EXPADV.AddFunctionAlias( "vec", "n,n,n" )
+EXPADV.AddFunctionAlias( "vec", "n" )
+EXPADV.AddFunctionAlias( "vec", "" )
 
 /* --- --------------------------------------------------------------------------------
 	@: Accessors
