@@ -553,7 +553,7 @@ function Compiler:Compile_METHOD( Trace, Expression, Method, Expressions )
 	local Meta = Expression.Return
 	
 	if #Expressions == 0 then
-		local Operator = EXPADV.Functions[Method .. "(" .. Meta .. ")"] or EXPADV.Functions[Method .. "(" .. Meta .. "....)"] -- Yes this does look dumb.
+		local Operator = EXPADV.Functions[Method .. "(" .. Meta .. ":)"] or EXPADV.Functions[Method .. "(" .. Meta .. ":...)"] -- Yes this does look dumb.
 		
 		if !Operator then self:TraceError( Trace, "No such method %s.%s()", self:NiceClass(Meta), Method ) end
 
