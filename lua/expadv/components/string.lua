@@ -99,7 +99,7 @@ StringComponent:AddInlineFunction( "find", "s:s,n", "n", "(string.find(@value 1,
 
 StringComponent:AddInlineFunction( "find", "s:s,n,b", "n", "(string.find(@value 1, @value 2, @value 3, @value 4) or 0)" )
 
-StringComponent:AddInlineFunction( "replace", "s.s,s", "s", "(string.Replace(@value 1, @value 2, @value 3) or \"\")" )
+StringComponent:AddInlineFunction( "replace", "s:s,s", "s", "(string.Replace(@value 1, @value 2, @value 3) or \"\")" )
 
 /* --- --------------------------------------------------------------------------------
 	@: Explodes and matches

@@ -355,43 +355,45 @@ function EXPADV.LoadFunctions( )
 				Signature[2] = ":"
 			end
 
-			for I, Input in pairs( string.Explode( ",", Operator.Input ) ) do
+			if Operator.Input and Operator.Input ~= "" then 
+				for I, Input in pairs( string.Explode( ",", Operator.Input ) ) do
 
-				-- First lets check for varargs.
-				if Input == "..." then
-					
-					if I ~= #string.Explode( ",", Operator.Input ) then 
-						ShouldNotLoad = true
-						break -- Vararg is in the wrong place =(
+					-- First lets check for varargs.
+					if Input == "..." then
+						
+						if I ~= #string.Explode( ",", Operator.Input ) then 
+							ShouldNotLoad = true
+							break -- Vararg is in the wrong place =(
+						end
+
+						Signature[ #Signature + 1 ] = "..."
+						Operator.UsesVarg = true
+						break
 					end
 
-					Signature[ #Signature + 1 ] = "..."
-					Operator.UsesVarg = true
-					break
-				end
+					-- Next, check for valid input classes.
+					local Class = EXPADV.GetClass( Input, false, true )
+					
+					if !Class then 
+						MsgN( string.format( "Skipped function: %s(%s), Invalid class for parameter #%i (%s).", Operator.Name, Operator.Input, I, Input ) )
+						ShouldNotLoad = true
+						break
+					end
 
-				-- Next, check for valid input classes.
-				local Class = EXPADV.GetClass( Input, false, true )
-				
-				if !Class then 
-					MsgN( string.format( "Skipped function: %s(%s), Invalid class for parameter #%i %s.", Operator.Name, Operator.Input, I, Input ) )
-					ShouldNotLoad = true
-					break
-				end
+					if !Class.LoadOnServer and Operator.LoadOnServer then
+						MsgN( string.format( "Skipped function: %s(%s), parameter #%i %s is not avalible on server.", Operator.Name, Operator.Input, I, Class.Name ) )
+						ShouldNotLoad = true
+						break
+					elseif !Class.LoadOnClient and Operator.LoadOnClient then
+						MsgN( string.format( "Skipped function: %s(%s), parameter #%i %s is not avalible on clients.", Operator.Name, Operator.Input, I, Class.Name ) )
+						ShouldNotLoad = true
+						break
+					end
 
-				if !Class.LoadOnServer and Operator.LoadOnServer then
-					MsgN( string.format( "Skipped function: %s(%s), parameter #%i %s is not avalible on server.", Operator.Name, Operator.Input, I, Class.Name ) )
-					ShouldNotLoad = true
-					break
-				elseif !Class.LoadOnClient and Operator.LoadOnClient then
-					MsgN( string.format( "Skipped function: %s(%s), parameter #%i %s is not avalible on clients.", Operator.Name, Operator.Input, I, Class.Name ) )
-					ShouldNotLoad = true
-					break
+					Signature[ #Signature + 1 ] = Class.Short
 				end
-
-				Signature[ #Signature + 1 ] = Class.Short
 			end
-
+			
 			Operator.Signature = string.format( "%s(%s)", Operator.Name, table.concat( Signature, "" ) )
 			if Operator.Method then table.remove( Signature, 2 ) end
 
