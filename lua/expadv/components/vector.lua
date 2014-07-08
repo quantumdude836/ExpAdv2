@@ -10,6 +10,7 @@ local VectorComponent = EXPADV.AddComponent( "vector", true )
 
 local VectorObj = VectorComponent:AddClass( "vector", "v" )
 
+VectorObj:StringBuilder( function( Context, Obj ) return string.format( "<Vec: %i, %i, %i>", Obj.x, Obj.y, Obj.z ) end )
 VectorObj:DefaultAsLua( Vector(0, 0, 0) )
 VectorObj:AddAlias( "vec" )
 
@@ -26,6 +27,8 @@ end
 	@: Logical and Comparison
    --- */
 
+VectorComponent:AddInlineOperator( "&&", "v,v", "b", "((@value 1 > Vector.Zero) and (@value 2 > Vector.Zero)")
+
 VectorComponent:AddInlineOperator( "==", "v,v", "b", "(@value 1 == @value 2)" )
 VectorComponent:AddInlineOperator( "!=", "v,v", "b", "(@value 1 ~= @value 2)" )
 VectorComponent:AddInlineOperator( ">", "v,v", "b", "(@value 1 > @value 2)" )
@@ -41,7 +44,8 @@ VectorComponent:AddInlineOperator( "+", "v,v", "v", "(@value 1 + @value 2)" )
 VectorComponent:AddInlineOperator( "-", "v,v", "v", "(@value 1 - @value 2)" )
 VectorComponent:AddInlineOperator( "*", "v,v", "v", "(@value 1 * @value 2)" )
 VectorComponent:AddInlineOperator( "/", "v,v", "v", "(@value 1.x / @value 2.x) (@value 1.y / @value 2.y) (@value 1.z / @value 2.z)" )
-VectorComponent:AddInlineOperator( "%", "v,v", "v", "(math.fmod(@value 1.x, @value 2.x) (math.fmod(@value 1.y, @value 2.y) (math.fmod(@value 1.z, @value 2.z)" )
+VectorComponent:AddInlineOperator( "%", "v,v", "v", "(math.fmod(@value 1.x, @value 2.x)) ((math.fmod(@value 1.y, @value 2.y)) (math.fmod(@value 1.z, @value 2.z))" )
+VectorComponent:AddInlineOperator( "^", "v,v", "v", "(math.pow(@value 1.x, @value 2.x)) (math.pow(@value 1.y, @value 2.y)) (math.pow(@value 1.z, @value 2.z))")
 
 /* --- --------------------------------------------------------------------------------
 	@: Number Arithmetic
@@ -59,7 +63,7 @@ VectorComponent:AddInlineOperator( "-", "n", "b", "(-@value 1)" )
 	@: Casting
    --- */
 
-VectorComponent:AddInlineOperator( "string", "v", "s", "string.format( \"Vector< %i, %i, %i >\", @value 1.x, @value 1.y, @value 1.z)" )
+VectorComponent:AddInlineOperator( "string", "v", "s", "string.format( \"Vec< %i, %i, %i >\", @value 1.x, @value 1.y, @value 1.z)" )
 
 /* --- --------------------------------------------------------------------------------
 	@: Assignment
