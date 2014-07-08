@@ -24,18 +24,18 @@ if WireLib then
 end
 
 /* --- --------------------------------------------------------------------------------
-@: Logical and Comparason
+@: Logical and Comparison
    --- */
 
 MathComponent:AddInlineOperator( "==", "n,n", "b", "(@value 1 == @value 2)" )
 MathComponent:AddInlineOperator( "!=", "n,n", "b", "(@value 1 != @value 2)" )
 MathComponent:AddInlineOperator( ">", "n,n", "b", "(@value 1 > @value 2)" )
 MathComponent:AddInlineOperator( "<", "n,n", "b", "(@value 1 < @value 2)" )
-MathComponent:AddInlineOperator( ">=","n,n", "b", "(@value 1 >= @value 2)" )
-MathComponent:AddInlineOperator( "<=","n,n", "b", "(@value 1 <= @value 2)" )
+MathComponent:AddInlineOperator( ">=", "n,n", "b", "(@value 1 >= @value 2)" )
+MathComponent:AddInlineOperator( "<=", "n,n", "b", "(@value 1 <= @value 2)" )
 
 /* --- --------------------------------------------------------------------------------
-@: Arithmatic
+@: Arithmetic
    --- */
 
 MathComponent:AddInlineOperator( "+", "n,n", "n", "(@value 1 + @value 2)" )
@@ -61,6 +61,7 @@ MathComponent:AddInlineOperator( "|", "n,n", "n", "bit.bor(@value 1 , @value 2)"
 MathComponent:AddInlineOperator( "^^", "n,n", "n", "bit.bxor(@value 1 , @value 2)" )
 MathComponent:AddInlineOperator( ">>", "n,n", "n", "bit.rshift(@value 1 , @value 2)" )
 MathComponent:AddInlineOperator( "<<", "n,n", "n", "bit.lshift(@value 1 , @value 2)" )
+
 /* --- --------------------------------------------------------------------------------
 @: Assigment
    --- */
@@ -138,7 +139,6 @@ EXPADV.AddFunctionAlias( "min", "n,n" )
 
 MathComponent:AddInlineFunction( "floor", "n", "n", "math.floor(@value 1)" )
 MathComponent:AddFunctionHelper( "floor", "n", "Rounds (number) to the nearest integer (lower) " )
-
 
 
 MathComponent:AddInlineFunction( "abs", "n", "n", "((@value 1 >= 0) and @value 1 or -@value 1)" ) ; 

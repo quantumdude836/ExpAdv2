@@ -155,6 +155,7 @@ function EXPADV.LoadCore( )
 	EXPADV.AddComponentFile( "number" )
 	EXPADV.AddComponentFile( "string" )
 	EXPADV.AddComponentFile( "color" )
+	EXPADV.AddComponentFile( "vector" )
 
 	EXPADV.LoadComponents( )
 
