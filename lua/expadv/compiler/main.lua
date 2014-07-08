@@ -355,6 +355,10 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier )
 
 		self.Cells[ MemRef ] = { Variable = Variable, Memory = MemRef, Scope = self.ScopeID, Return = ClassObj.Short, ClassObj = ClassObj, Modifier = nil }
 
+		--if ClassObj.CreateNew then
+		--	self.Memory[ MemRef ] = ClassObj.CreateNew( )
+		--end
+
 		if self.MemoryDeph > 0 then
 			self.FreshMemory[self.MemoryDeph][MemRef] = MemRef
 		end -- This is declaired as fresh memory!
@@ -374,6 +378,10 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier )
 		self.Scope[Variable] = MemRef
 
 		self.Cells[ MemRef ] = { Variable = Variable, Memory = MemRef, Scope = self.ScopeID, Return = ClassObj.Short, ClassObj = ClassObj, Modifier = "static" }
+
+		--if ClassObj.CreateNew then
+		--	self.Memory[ MemRef ] = ClassObj.CreateNew( )
+		--end
 
 		return self.Cells[ MemRef ]
 	end
@@ -395,6 +403,10 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier )
 		end
 
 		self.Scope[ Variable ] = MemRef
+
+		--if ClassObj.CreateNew then
+		--	self.Memory[ MemRef ] = ClassObj.CreateNew( )
+		--end
 
 		return self.Global[ MemRef ]
 	end
@@ -428,6 +440,10 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier )
 
 			self.Scope[ Variable ] = MemRef
 
+			--if ClassObj.CreateNew then
+			--	self.Memory[ MemRef ] = ClassObj.CreateNew( )
+			--end
+
 			return self.InPorts[ MemRef ]
 		end
 
@@ -452,6 +468,10 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier )
 			end
 
 			self.Scope[ Variable ] = MemRef
+
+			--if ClassObj.CreateNew then
+			--	self.Memory[ MemRef ] = ClassObj.CreateNew( )
+			--end
 
 			return self.OutPorts[ MemRef ]
 		end
@@ -553,6 +573,9 @@ local function SoftCompile( self, Script, Files, bIsClientSide, OnError, OnSuces
 		
 	-- Memory:
 		self:BuildScopes( )
+
+		self.Delta = { }
+		self.Memory = { }
 
 		self.Cells = { }
 		self.InPorts = { }

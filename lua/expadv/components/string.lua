@@ -48,7 +48,7 @@ StringComponent:AddPreparedOperator( "s=", "n,s", "", [[
     Context.Memory[@value 1] = @value 2
 ]] )
 
-StringComponent:AddInlineOperator("=s","n","s", "(Context.Memory[@value 1] or \"\")" )
+StringComponent:AddInlineOperator("=s","n","s", "Context.Memory[@value 1]" )
 
 StringComponent:AddPreparedOperator( "~", "n", "b", [[
 	@define value = Context.Memory[@value 1]

@@ -21,10 +21,11 @@ setmetatable = setmetatable
 function EXPADV.BuildNewContext( Instance, Player, Entity ) -- Table, Player, Entity
 	local Context = setmetatable( { player = Player, entity = Entity, Deph = 0, Online = false }, EXPADV.RootContext )
 
-	Context.Memory = { }
-	Context.Delta = { }
 	Context.Trigger = { }
 	Context.Changed = { }
+
+	Context.Memory = { }
+	Context.Delta = { }
 
 	Context.Data = { }
 	Context.Definitions = { }

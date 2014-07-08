@@ -71,7 +71,7 @@ VectorComponent:AddPreparedOperator( "v=", "n,v", "", [[
 	Context.Memory[@value 1] = @value 2
 ]] )
 
-VectorComponent:AddInlineOperator( "=v", "n", "v", "(Context.Memory[@value 1] or Vector( 0, 0, 0 ))" )
+VectorComponent:AddInlineOperator( "=v", "n", "v", "Context.Memory[@value 1]" )
 
 /* --- --------------------------------------------------------------------------------
 	@: Constructor

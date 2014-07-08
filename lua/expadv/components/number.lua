@@ -73,7 +73,7 @@ Context.Memory[@value 1] = @value 2
 Context.Delta[@value 1] = @value
 ]] )
 
-MathComponent:AddInlineOperator("=n","n","n", "(Context.Memory[@value 1] or 0)" )
+MathComponent:AddInlineOperator("=n","n","n", "Context.Memory[@value 1]" )
 
 MathComponent:AddInlineOperator( "$", "n", "n", "((Context.Memory[@value 1] or 0) - (Context.Delta[@value 1] or 0))" )
 

@@ -15,6 +15,12 @@ end
 function Compiler:AcceptToken( Type, Type2, ... )
 	if self.PrepToken and ( self.PrepTokenType == Type ) then
 		self:NextToken( )
+
+		if Type == "var" then
+			MsgN( "Accepted Var: ", self.TokenData )
+			debug.Trace( )
+		end
+
 		return true
 	elseif Type2 then
 		return self:AcceptToken( Type2, ... )
@@ -153,7 +159,7 @@ end
    --- */
 
 function Compiler:Expression( Trace )
-	--MsgN( "Compiler -> Expression" )
+	-- MsgN( "Compiler -> Expression" )
 
 	local _ExprRoot = self.ExpressionRoot
 	self.ExpressionRoot = self:GetTokenTrace( Trace )
@@ -171,11 +177,11 @@ end
 
 -- Stage 1: Grouped Equation
 function Compiler:Expression_1( Trace )
-	--MsgN( "Compiler -> Expression 1" )
+	-- MsgN( "Compiler -> Expression 1" )
 	
 	if self:AcceptToken( "lpa" ) then
 		local Expression = self:Expression_1( Trace )
-
+		
 		if Expression.FLAG == EXPADV_INLINE or Expression.FLAG == EXPADV_INLINEPREPARE then
 			Expression.Inline = string.format( "(%s)", Expression.Inline )
 		end
@@ -190,7 +196,7 @@ end
 
 -- Stage 2: Unary operations, sizeof, casting
 function Compiler:Expression_2( Trace )
-	--MsgN( "Compiler -> Expression 2" )
+	-- MsgN( "Compiler -> Expression 2" )
 
 	if self:AcceptToken( "add" ) then
 		local Trace = self:GetTokenTrace( Trace )
@@ -228,7 +234,7 @@ end
 
 -- Stage 3: Multiplication, division, modulo
 function Compiler:Expression_3( Trace )
-	--MsgN( "Compiler -> Expression 3" )
+	-- MsgN( "Compiler -> Expression 3" )
 
 	local Expression = self:Expression_4( Trace )
 
@@ -250,7 +256,7 @@ end
 
 -- Stage 4: Addition and subtraction
 function Compiler:Expression_4( Trace )
-	--MsgN( "Compiler -> Expression 4" )
+	-- MsgN( "Compiler -> Expression 4" )
 
 	local Expression = self:Expression_5( Trace )
 
@@ -267,7 +273,7 @@ end
 
 -- Stage 5: Bitwise shift left and right
 function Compiler:Expression_5( Trace )
-	--MsgN( "Compiler -> Expression 5" )
+	-- MsgN( "Compiler -> Expression 5" )
 
 	local Expression = self:Expression_6( Trace )
 
@@ -284,7 +290,7 @@ end
 
 -- Stage 6: Comparisons Greater and Less
 function Compiler:Expression_6( Trace )
-	--MsgN( "Compiler -> Expression 6" )
+	-- MsgN( "Compiler -> Expression 6" )
 
 	local Expression = self:Expression_7( Trace )
 
@@ -305,7 +311,7 @@ end
 
 -- Stage 7: Comparisons equal and not equal.
 function Compiler:Expression_7( Trace )
-	--MsgN( "Compiler -> Expression 7" )
+	-- MsgN( "Compiler -> Expression 7" )
 
 	local Expression = self:Expression_8( Trace )
 
@@ -322,7 +328,7 @@ end
 
 -- Stage 8: bitwise and
 function Compiler:Expression_8( Trace )
-	--MsgN( "Compiler -> Expression 8" )
+	-- MsgN( "Compiler -> Expression 8" )
 
 	local Expression = self:Expression_9( Trace )
 
@@ -335,7 +341,7 @@ end
 
 -- Stage 9: bitwise exclusive or
 function Compiler:Expression_9( Trace )
-	--MsgN( "Compiler -> Expression 9" )
+	-- MsgN( "Compiler -> Expression 9" )
 
 	local Expression = self:Expression_10( Trace )
 
@@ -348,7 +354,7 @@ end
 
 -- Stage 10: bitwise or
 function Compiler:Expression_10( Trace )
-	--MsgN( "Compiler -> Expression 10" )
+	-- MsgN( "Compiler -> Expression 10" )
 
 	local Expression = self:Expression_11( Trace )
 
@@ -362,7 +368,7 @@ end
 
 -- Stage 11: logical and
 function Compiler:Expression_11( Trace )
-	--MsgN( "Compiler -> Expression 11" )
+	-- MsgN( "Compiler -> Expression 11" )
 
 	local Expression = self:Expression_12( Trace )
 
@@ -375,7 +381,7 @@ end
 
 -- Stage 12: logical or
 function Compiler:Expression_12( Trace )
-	--MsgN( "Compiler -> Expression 12" )
+	-- MsgN( "Compiler -> Expression 12" )
 
 	local Expression = self:Expression_13( Trace )
 
@@ -389,11 +395,9 @@ end
 
 -- Stage 13: Ternary
 function Compiler:Expression_13( Trace )
-	--MsgN( "Compiler -> Expression 13" )
+	-- MsgN( "Compiler -> Expression 13" )
 
-	local Expression = self:Expression_Value( Trace )
-
-	Expression = self:Expression_17( Trace, Expression )
+	local Expression = self:Expression_14( Trace )
 
 	while self:AcceptToken( "qsm" ) do
 		local Trace = self:GetTokenTrace( Trace )
@@ -408,13 +412,22 @@ function Compiler:Expression_13( Trace )
 	return Expression
 end
 
+-- Stage 14: Value
+function Compiler:Expression_14( Trace )
+	-- MsgN( "Compiler -> Expression 14" )
+
+	local Expression = self:Expression_Value( Trace ) or self:Expression_Variable( Trace )
+
+	return self:Expression_17( Trace, Expression )
+end
+
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Values
    --- */
 
--- Stage 14: Raw Values:
+-- Stage 15: Raw Values:
 function Compiler:Expression_Value( Trace )
-	--MsgN( "Compiler -> Expression Value" )
+	-- MsgN( "Compiler -> Expression Value" )
 
 	if self:AcceptToken( "tre" ) then
 		return self:Compile_BOOL( self:GetTokenTrace( Trace ), true )
@@ -424,15 +437,36 @@ function Compiler:Expression_Value( Trace )
 		return self:Compile_NUM( self:GetTokenTrace( Trace ), self.TokenData )
 	elseif self:AcceptToken( "str" ) then
 		return self:Compile_STR( self:GetTokenTrace( Trace ), self.TokenData )
-	end
+	elseif self:AcceptToken( "func" ) then
+		local Trace = self:GetTokenTrace( Trace )
 
-	return self:Expression_Variable( Trace )
+		self:RequireToken( "lpa", "Left parenthesis (( ), expected after 'function'" )
+
+		self:PushScope( )
+
+		local Perams, UseVarg = self:Util_Perams( Trace )
+
+		self:RequireToken( "rpa", "Right parenthesis ( )), expected to close function perameters" )
+
+		self:RequireToken( "lcb", "Left curly bracket ({) missing, to begin function body" )
+
+		self:PushLambdaDeph( )
+
+		local Sequence = self:Sequence( Trace, "rcb" )
+
+		local Memory = self:PopLambdaDeph( )
+
+		self:PopScope( )
+
+		self:RequireToken( "rcb", "Right curly bracket (}) missing, to close function body" )
+
+		return self:Compile_LAMBDA( Trace, Perams, UseVarg, Sequence, Memory )
+	end
 end
 
--- Stage 15: Increment, Decrement and Variables.
--- This function, also can be used for expression bassed statments.
-function Compiler:Expression_Variable( Trace, bIsStatement )
-	--MsgN( "Compiler -> Expression Variable" )
+-- Stage 16: Increment, Decrement and Variables.
+function Compiler:Expression_Variable( Trace )
+	-- MsgN( "Compiler -> Expression Variable" )
 
 	if self:AcceptToken( "inc" ) then
 		local Trace = self:GetTokenTrace( Trace )
@@ -469,80 +503,32 @@ function Compiler:Expression_Variable( Trace, bIsStatement )
 			return self:Compile_INC( Trace, true, Variable )
 		elseif self:AcceptToken( "dec" ) then
 			return self:Compile_DEC( Trace, true, Variable )
-		elseif !self:CheckToken( "lpa" ) and !bIsStatement  then
+		elseif self:AcceptToken( "lpa" ) then
+					local Expressions = { }
+
+					if !self:CheckToken( "rpa" ) then
+						Expressions[1] = self:Expression( Trace )
+
+						while self:AcceptToken( "com" ) do
+							Expressions[#Expressions + 1] = self:Expression( Trace )
+						end
+					end
+
+					self:RequireToken( "rpa", "Right parenthesis ( )), expected to close function perameters" )
+
+					return self:Compile_FUNC( Trace, Variable, Expressions )
+		else
 			return self:Compile_VAR( Trace, Variable )
 		end
-
-		self:PrevToken( )
-	end
-
-	return self:Expression_Function( Trace, bIsStatement )
-end
-
--- Stage 16: Functions
-function Compiler:Expression_Function( Trace, bIsStatement )
-	--MsgN( "Compiler -> Expression Function" )
-
-	local Trace = self:GetTokenTrace( Trace )
-
-	if self:AcceptToken( "var" ) then
-		local Trace = self:GetTokenTrace( Trace )
-
-		local Variable = self.TokenData
-
-		self:RequireToken( "lpa", "Unexpected error, can not compile expression." )
-		
-		local Expressions = { }
-
-		if !self:CheckToken( "rpa" ) then
-			Expressions[1] = self:Expression( Trace )
-			
-			while self:AcceptToken( "com" ) do
-				Expressions[#Expressions + 1] = self:Expression( Trace )
-			end
-
-		end
-
-		print( self.PrepTokenType )
-		self:RequireToken( "rpa", "Right parenthesis ( )), expected to close function perameters" )
-
-		return self:Compile_FUNC( Trace, Variable, Expressions )
-	end
-
-	if bIsStatement then return end -- This is a statment.
-
-	if self:AcceptToken( "func" ) then
-		local Trace = self:GetTokenTrace( Trace )
-
-		self:RequireToken( "lpa", "Left parenthesis (( ), expected after 'function'" )
-
-		self:PushScope( )
-
-		local Perams, UseVarg = self:Util_Perams( Trace )
-
-		self:RequireToken( "rpa", "Right parenthesis ( )), expected to close function perameters" )
-
-		self:RequireToken( "lcb", "Left curly bracket ({) missing, to begin function body" )
-
-		self:PushLambdaDeph( )
-
-		local Sequence = self:Sequence( Trace, "rcb" )
-
-		local Memory = self:PopLambdaDeph( )
-
-		self:PopScope( )
-
-		self:RequireToken( "rcb", "Right curly bracket (}) missing, to close function body" )
-
-		return self:Compile_LAMBDA( Trace, Perams, UseVarg, Sequence, Memory )
 	end
 end
 
 -- Stage 17: Indexing, Calling
 function Compiler:Expression_17( Trace, Expression )
-	--MsgN( "Compiler -> Expression 17" )
+	-- MsgN( "Compiler -> Expression 17" )
 
 	while self:CheckToken( "prd", "lsb", "lpa" ) do
+
 		-- Methods
 			if self:AcceptToken( "prd" ) then
 				local Trace = self:GetTokenTrace( Trace )
@@ -630,7 +616,7 @@ function Compiler:StatementError( )
 end -- TODO: ^ This
 
 function Compiler:Statement( Trace )
-	--MsgN( "Compiler -> Statement" )
+	-- MsgN( "Compiler -> Statement" )
 
 	local _StmtRoot = self.StatmentRoot
 	self.StatmentRoot = self:GetTokenTrace( Trace )
@@ -675,7 +661,7 @@ end
 
 -- Stage 1: If statments
 function Compiler:Statement_1( Trace )
-	--MsgN( "Compiler -> Statement 1" )
+	-- MsgN( "Compiler -> Statement 1" )
 
 	if self:AcceptToken( "if" ) then
 		local Trace = self:GetTokenTrace( Trace )
@@ -713,7 +699,7 @@ end
 
 -- Stage 2: elseif, else statments
 function Compiler:Statement_2( Trace )
-	--MsgN( "Compiler -> Statement 2" )
+	-- MsgN( "Compiler -> Statement 2" )
 
 	if self:AcceptToken( "eif" ) then
 		local Trace = self:GetTokenTrace( Trace )
@@ -963,7 +949,7 @@ end
 
 -- Stage 6: Variable Assigments.
 function Compiler:Statement_6( Trace )
-	--MsgN( "Compiler -> Statement 6" )
+	-- MsgN( "Compiler -> Statement 6" )
 
 	local Modifier
 
@@ -975,7 +961,7 @@ function Compiler:Statement_6( Trace )
 
 	if Modifier and !self:CheckToken( "var", "func" ) then
 		self:PrevToken( )
-		return self:Expression_Variable( Trace, true )
+		return self:Statement_7( Trace )
 	end -- If modifier is used incorectly, we move on.
 
 	-----------------------------------------------------------------------
@@ -986,7 +972,7 @@ function Compiler:Statement_6( Trace )
 
 		if !self:CheckToken( "var", "ass", "aadd", "asub", "advi", "amul" ) then
 			self:PrevToken( )
-			return self:Expression_Variable( Trace, true )
+			return self:Statement_7( Trace )
 		end
 
 		local Defined = false
@@ -1156,7 +1142,43 @@ function Compiler:Statement_6( Trace )
 		self:PrevToken( )
 	end
 
-	return self:Expression_Variable( Trace, true )
+	return self:Statement_7( Trace )
+end
+
+-- Stage 7: Statment Expressions
+function Compiler:Statement_7( Trace )
+	-- MsgN( "Compiler -> Statement 7" )
+
+	MsgN( "Before: ", self.PrepTokenType )
+
+	local Expression = self:Expression_Value( Trace )
+
+	if Expression and !self:CheckToken( "prd", "lpa" ) then
+		self:TraceError( Trace, "Unexpected value")
+	elseif Expression then
+		return self:Expression_17( Trace, Expression )
+	end
+
+	self:ExcludeToken( "dlt", "Memory operator (delta), must be part of expression or equation.")
+	self:ExcludeToken( "cng", "Memory operator (changed), must be part of expression or equation.")
+
+	if self:AcceptToken( "var" ) then
+		if !self:CheckToken( "prd", "lpa", "inc", "dec" ) then
+			self:TraceError( Trace, "Unexpected variable" )
+		end
+
+		self:PrevToken( )
+	end
+
+	MsgN( "After: ", self.PrepTokenType )
+	Expression = self:Expression_Variable( Trace )
+
+	if Expression then
+		return self:Expression_17( Trace, Expression )
+	end
+	
+	self:TraceError( Trace, "Invalid Statment" )
+	--self:ExpressionError( Trace )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
