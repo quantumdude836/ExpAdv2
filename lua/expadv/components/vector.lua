@@ -80,10 +80,10 @@ VectorComponent:AddInlineOperator( "=v", "n", "v", "(Context.Memory[@value 1] or
 VectorComponent:AddInlineFunction( "vec", "", "v", "Vector(0, 0, 0)" )
 VectorComponent:AddInlineFunction( "vec", "n", "v", "Vector(@value 1, @value 1, @value 1)" )
 VectorComponent:AddInlineFunction( "vec", "n,n,n", "v", "Vector(@value 1, @value 2, @value 3)" )
-VectorComponent:AddFunctionHelper( "vec", "n,n,n", "Creates a vector object")
-EXPADV.AddFunctionAlias( "vec", "n,n,n" )
-EXPADV.AddFunctionAlias( "vec", "n" )
-EXPADV.AddFunctionAlias( "vec", "" )
+
+VectorComponent:AddFunctionHelper( "vec", "n,n,n", "Creates a vector object" )
+VectorComponent:AddFunctionHelper( "vec", "n", "Creates a vector object" )
+VectorComponent:AddFunctionHelper( "vec", "", "Creates a vector object" )
 
 /* --- --------------------------------------------------------------------------------
 	@: Accessors
@@ -92,25 +92,19 @@ EXPADV.AddFunctionAlias( "vec", "" )
 --GETTERS
 VectorComponent:AddInlineFunction( "getX", "v:", "n", "@value 1.x")
 VectorComponent:AddFunctionHelper( "getX", "v:", "Gets the X value of a vector")
-EXPADV.AddFunctionAlias( "getX", "v:n" )
 
 VectorComponent:AddInlineFunction( "getY", "v:", "n", "@value 1.y")
 VectorComponent:AddFunctionHelper( "getY", "v:", "Gets the Y value of a vector")
-EXPADV.AddFunctionAlias( "getY", "v:n" )
 
 VectorComponent:AddInlineFunction( "getZ", "v:", "n", "@value 1.z")
 VectorComponent:AddFunctionHelper( "getZ", "v:", "Gets the Z value of a vector")
-EXPADV.AddFunctionAlias( "getZ", "v:n" )
 
 --SETTERS
 VectorComponent:AddPreparedFunction( "setX", "v:n", "", "@value 1.x = @value 2")
 VectorComponent:AddFunctionHelper( "setX", "v:n", "Sets the X value of a vector")
-EXPADV.AddFunctionAlias( "setX", "v:n" )
 
 VectorComponent:AddPreparedFunction( "setY", "v:n", "", "@value 1.y = @value 2")
 VectorComponent:AddFunctionHelper( "setY", "v:n", "Sets the Y value of a vector")
-EXPADV.AddFunctionAlias( "setY", "v:n" )
 
 VectorComponent:AddPreparedFunction( "setZ", "v:n", "", "@value 1.z = @value 2")
 VectorComponent:AddFunctionHelper( "setZ", "v:n", "Sets the Z value of a vector")
-EXPADV.AddFunctionAlias( "setZ", "v:n" )
