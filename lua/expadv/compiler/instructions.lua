@@ -473,6 +473,10 @@ function Compiler:Compile_ASS( Trace, Variable, Expression, DefinedClass, Modifi
 		self:CreateVariable( Trace, Variable, DefinedClass, Modifier )
 	end
 
+	if !Expression.Return or Expression.Return == "" then
+		self:TraceError( Trace, "Invalid assigment, %s is assigned void.", Variable )
+	end
+
 	local MemRef, Scope = self:FindCell( Trace, Variable, true )
 
 	self:TestCell( Trace, MemRef, Expression.Return, Variable )
