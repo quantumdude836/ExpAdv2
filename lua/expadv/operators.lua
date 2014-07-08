@@ -339,7 +339,7 @@ function EXPADV.LoadFunctions( )
 				local Class = EXPADV.GetClass( Meta, false, true )
 				
 				if !Class then 
-					MsgN( string.format( "Skipped function: %s(%s), Invalid class for method %s.", Operator.Name, Operator.Input, Input ) )
+					MsgN( string.format( "Skipped function: %s(%s), Invalid class for method %s (%s).", Operator.Name, Operator.Input, Input, Meta ) )
 					continue
 				end
 
