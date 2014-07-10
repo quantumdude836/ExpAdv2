@@ -590,7 +590,7 @@ local function SoftCompile( self, Script, Files, bIsClientSide, OnError, OnSuces
 		self:StartTokenizer( )
 
 	-- Wait for next tick to begin:
-		coroutine.yield( )
+		self:Yield( true )
 
 	-- Ok, Run the compiler.
 		local Compiled, Instruction = pcall( self.Sequence, self, { 0, 0 } )
@@ -611,26 +611,21 @@ end
 
 local TimeMark, SysTime = 0, SysTime
 
-local function LineHook( )
-	if SysTime( ) > TimeMark then
+function Compiler:Yield( Force )
+	if Force or SysTime( ) > self.TimeMark then
 		coroutine.yield( )
+		self.TimeMark = SysTime( ) + 0.001
 	end
 end
 
 hook.Add( "Tick", "ExpAdv.Compile", function( )
 	for Instance, Coroutine in pairs( Coroutines ) do
 
-		TimeMark = SysTime( ) + 0.001
+		EXPADV.COMPILER_ENV = Instance.Enviroment
 
-		debug.sethook( Coroutine, LineHook, "l", 25 )
+			coroutine.resume( Coroutine )
 
-			EXPADV.COMPILER_ENV = Instance.Enviroment
-
-				coroutine.resume( Coroutine )
-
-			EXPADV.COMPILER_ENV = nil
-
-		debug.sethook( Coroutine )
+		EXPADV.COMPILER_ENV = nil
 
 	end
 end )

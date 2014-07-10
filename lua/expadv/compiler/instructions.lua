@@ -366,6 +366,8 @@ function Compiler:Compile_SEQ( Trace, Instructions )
 				Sequence[#Sequence + 1] = Instruction.Inline
 			end -- Somtimes the Inline will actually be required preparable code.
 		end
+
+		self:Yield( )
 	end
 
 	return { Trace = Trace, Return = "", Prepare = table.concat( Sequence, "\n" ),FLAG = EXPADV_PREPARE, IsRaw = true }
@@ -537,6 +539,8 @@ function Compiler:Compile_FUNC( Trace, Variable, Expressions )
 			if EXPADV.Functions[ Match ] then BestMatch = EXPADV.Functions[ Match ] end
 
 			Signature = Signature .. Expressions[I].Return
+
+			self:Yield( )
 		end
 
 		--MsgN( "Looking for: ", string.format( "%s(%s)", Variable, Signature ) )
@@ -572,6 +576,8 @@ function Compiler:Compile_METHOD( Trace, Expression, Method, Expressions )
 			if EXPADV.Functions[ Match ] then BestMatch = EXPADV.Functions[ Match ] end
 
 			Signature = Signature .. Expressions[I].Return
+
+			self:Yield( )
 		end
 
 		MsgN( "Looking for: ", string.format( "%s(%s)", Method, Signature ) )
@@ -630,6 +636,8 @@ function Compiler:Compile_LAMBDA( Trace, Params, UseVarg, Sequence, Memory )
 			end
 
 		PreSequence[ #PreSequence + 1 ] = "end"
+
+		self:Yield( )
 	end
 	
 	if UseVarg then Inputs[#Inputs + 1] = "..." end
@@ -702,6 +710,8 @@ function Compiler:Compile_EVENT( Trace, Name, Params, UseVarg, Sequence, Memory 
 				self:TraceError( Trace, "Invalid argument #%i, %s can not be used as event argument", I, self:NiceClass( Type ) )
 			end
 		end
+
+		self:Yield( )
 	end
 	
 	if UseVarg then Inputs[#Inputs + 1] = "..." end

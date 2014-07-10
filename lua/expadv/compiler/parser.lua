@@ -248,6 +248,8 @@ function Compiler:Expression_3( Trace )
 		elseif self:AcceptToken( "exp" ) then
 			Expression = self:Compile_EXP( self:GetTokenTrace( Trace ), Expression, self:Expression_4( Trace ) )
 		end
+
+		self:Yield( )
 	end
 
 	return Expression
@@ -266,6 +268,8 @@ function Compiler:Expression_4( Trace )
 		elseif self:AcceptToken( "sub" ) then
 			Expression = self:Compile_SUB( self:GetTokenTrace( Trace ), Expression, self:Expression_5( Trace ) )
 		end
+
+		self:Yield( )
 	end
 
 	return Expression
@@ -283,6 +287,8 @@ function Compiler:Expression_5( Trace )
 		elseif self:AcceptToken( "bshr" ) then
 			Expression = self:Compile_BSHR( self:GetTokenTrace( Trace ), Expression, self:Expression_6( Trace ) )
 		end
+
+		self:Yield( )
 	end
 
 	return Expression
@@ -304,6 +310,8 @@ function Compiler:Expression_6( Trace )
 		elseif self:AcceptToken( "geq" ) then
 			Expression = self:Compile_GEQ( self:GetTokenTrace( Trace ), Expression, self:Expression_7( Trace ) )
 		end
+
+		self:Yield( )
 	end
 
 	return Expression
@@ -321,6 +329,8 @@ function Compiler:Expression_7( Trace )
 		elseif self:AcceptToken( "neg" ) then
 			Expression = self:Compile_NEG( self:GetTokenTrace( Trace ), Expression, self:Expression_8( Trace ) )
 		end
+
+		self:Yield( )
 	end
 
 	return Expression
@@ -347,6 +357,8 @@ function Compiler:Expression_9( Trace )
 
 	while self:AcceptToken( "bor" ) do
 		Expression = self:Compile_BOR( self:GetTokenTrace( Trace ), Expression, self:Expression_10( Trace ) )
+
+		self:Yield( )
 	end
 
 	return Expression
@@ -360,6 +372,8 @@ function Compiler:Expression_10( Trace )
 
 	while self:AcceptToken( "bxor" ) do
 		Expression = self:Compile_BXOR( self:GetTokenTrace( Trace ), Expression, self:Expression_11( Trace ) )
+
+		self:Yield( )
 	end
 
 	return Expression
@@ -374,6 +388,8 @@ function Compiler:Expression_11( Trace )
 
 	while self:AcceptToken( "and" ) do
 		Expression = self:Compile_AND( self:GetTokenTrace( Trace ), Expression, self:Expression_12( Trace ) )
+
+		self:Yield( )
 	end
 
 	return Expression
@@ -387,6 +403,8 @@ function Compiler:Expression_12( Trace )
 
 	while self:AcceptToken( "or" ) do
 		Expression = self:Compile_OR( self:GetTokenTrace( Trace ), Expression, self:Expression_13( Trace ) )
+
+		self:Yield( )
 	end
 
 	return Expression
@@ -407,6 +425,8 @@ function Compiler:Expression_13( Trace )
 		self:RequireToken( "col", "colon (:) expected for tinary operator." ) -- TODO: This error message is shit.
 
 		Expression = self:Compile_TEN( Trace, Expression, Expression2, self:Expression_1( Trace ) )
+
+		self:Yield( )
 	end
 
 	return Expression
@@ -511,6 +531,8 @@ function Compiler:Expression_Variable( Trace )
 
 						while self:AcceptToken( "com" ) do
 							Expressions[#Expressions + 1] = self:Expression( Trace )
+
+							self:Yield( )
 						end
 					end
 
