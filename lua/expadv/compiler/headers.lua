@@ -84,6 +84,10 @@ function Compiler:Start( Trace )
 
 			local Instance = setmetatable( { }, Compiler )
 
+			Instance.Yield = function( Force )
+				return self:Yield( Force )
+			end
+
 			EXPADV.SoftCompile( Instance, self.CL_Files[ Path ], self.CL_Files, true,
 				function( ErMsg )
 					self:TraceError( CL_Trace, "Client: " .. ErMsg )
