@@ -415,6 +415,8 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier )
 		if Modifier == "input" or Modifier == "output" then
 			if Variable[1] ~= Variable[1]:upper( ) then
 				self:TraceError( "Wire %s's require captialization.", Modifier )
+			elseif self.IsClientScript then
+				self:TraceError( "Wire %s's can not be used clientside.", Modifier )
 			end
 		end
 
