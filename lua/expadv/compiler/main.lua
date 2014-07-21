@@ -93,6 +93,7 @@ end )
    --- */
 
 include( "tokenizer.lua" )
+include( "headers.lua" )
 include( "parser.lua" )
 include( "instructions.lua" )
 
@@ -563,6 +564,7 @@ local function SoftCompile( self, Script, Files, bIsClientSide, OnError, OnSuces
 		self.Len = #Script
 		self.Buffer = Script
 		self.Files = Files or { }
+		self.CL_Files = Files or { }
 
 	-- Holders
 		self.DefineID = 0
@@ -595,7 +597,7 @@ local function SoftCompile( self, Script, Files, bIsClientSide, OnError, OnSuces
 		self:Yield( true )
 
 	-- Ok, Run the compiler.
-		local Compiled, Instruction = pcall( self.Sequence, self, { 0, 0 } )
+		local Compiled, Instruction = pcall( self.Main, self, { 0, 0 } )
 
 	-- Finish!
 		setmetatable( self.Enviroment, EXPADV.BaseEnv )
@@ -606,6 +608,8 @@ local function SoftCompile( self, Script, Files, bIsClientSide, OnError, OnSuces
 
 		return OnSucess( self, Instruction )
 end
+
+EXPADV.SoftCompile = SoftCompile
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Compiler Handeler, From now on we will compile over time!

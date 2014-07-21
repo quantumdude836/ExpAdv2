@@ -40,6 +40,11 @@ function BaseClassObj:StringBuilder( Function ) -- function( table Context, obj 
 	self.ToString = Function
 end
 
+-- Overrides the changed check to use 'Obj.HasChanged == true'
+function BaseClassObj:UsesHasChanged( )
+	self.HasUpdateCheck = true
+end
+
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Wire Support
    --- */

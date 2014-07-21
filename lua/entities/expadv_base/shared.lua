@@ -120,6 +120,7 @@ end
 
 function ENT:CompileScript( Root, Files )
 	self.Compiler = EXPADV.Compile( Root, Files, CLIENT,
+
 		function( ErMsg )
 			local Cmp = self.Compiler
 
@@ -131,7 +132,7 @@ function ENT:CompileScript( Root, Files )
 		function( Instance, Instruction )
 			self.Compiler = nil -- The instance is the compiler :D
 			return self:BuildInstance( Instance, Instruction )
-		end )
+		end
 	) -- Now we wait for the callback!
 end
 

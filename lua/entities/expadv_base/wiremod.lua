@@ -128,8 +128,8 @@ function ENT:TriggerOutputs( )
 		elseif self.OutClick[ Reference ] then
 			local Val = Context.Memory[ Reference ]
 
-			if Val and Val.Click then
-				Val.Click = nil
+			if Val and Val.HasChanged then
+				Val.HasChanged = nil
 				local Value = Class.Wire_Out_Util( Context, Reference )
 				WireLib.TriggerOutput( self, Name, Value )
 			end
