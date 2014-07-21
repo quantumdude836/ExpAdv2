@@ -21,13 +21,12 @@ local function SortPorts( PortA, PortB )
 	end
 end
 
---[[ TODO: ADD THIS SUPPORT LAYER!
 function ENT:BuildInputs( Cells, Ports )
 	local Unsorted = { }
 
 	for Variable, Reference in pairs( Ports ) do
 		local Cell = Cells[ Reference ]
-		Unsorted[ #Unsorted + 1 ] = { Variable, Cell.Class.WireName }
+		Unsorted[ #Unsorted + 1 ] = { Variable, Cell.ClassObj.Wire_In_Type }
 	end
 
 	table.sort( Unsorted, SortPorts )
@@ -53,9 +52,9 @@ function ENT:BuildOutputs( Cells, Ports )
 
 	for Variable, Reference in pairs( Ports ) do
 		local Cell = Cells[ Reference ]
-		Unsorted[ #Unsorted + 1 ] = { Variable, Cell.Class.WireName }
+		Unsorted[ #Unsorted + 1 ] = { Variable, Cell.ClassObj.Wire_Out_Type }
 
-		if Cell.Class.OutClick then
+		if Cell.ClassObj.HasUpdateCheck then
 			OutClick[ Reference ] = Variable
 		end
 	end
@@ -77,6 +76,7 @@ function ENT:BuildOutputs( Cells, Ports )
 	self.Outputs = WireLib.AdjustSpecialOutputs( self, Names, Types )
 end
 
+
 function ENT:LoadFromInputs( )
 	--Note: This will load inports into memory!
 	local Cells = self.Cells
@@ -87,8 +87,8 @@ function ENT:LoadFromInputs( )
 		if Reference then
 			local Cell = Cells[ Reference ]
 
-			if Cell and Port.Type == Cell.Class.WireName then
-				Cell.Class.Wire_In( self.Context, Reference, Port.Value )
+			if Cell and Port.Type == Cell.ClassObj.Wire_In_Type then
+				Cell.ClassObj.Wire_In_Util( self.Context, Reference, Port.Value )
 			end
 		end
 	end
@@ -103,10 +103,11 @@ function ENT:TriggerInput( Key, Value )
 
 	if !Cell then return end
 
-	Cell.Class.Wire_In( self.Context, Reference, Value )
+	Cell.ClassObj.Wire_In_Util( self.Context, Reference, Value )
 	Context.Click[ Reference ] = true
 
-	self:CallEvent( "trigger", Key, Cell.Class.Name )
+	--TODO: Use a new event
+	-- self:CallEvent( "trigger", Key, Cell.Class.Name )
 
 	Context.Click[ Reference ] = false
 end
@@ -118,10 +119,10 @@ function ENT:TriggerOutputs( )
 	local Cells = self.Cells
 
 	for Name, Reference in pairs( self.OutPorts ) do
-		local Class = Cells[ Reference ].Class
+		local Class = Cells[ Reference ].ClassObj
 
 		if Context.Trigger[ Reference ] then
-			local Value = Class.Wire_Out( Context, Reference )
+			local Value = Class.Wire_Out_Util( Context, Reference )
 
 			WireLib.TriggerOutput( self, Name, Value )
 		elseif self.OutClick[ Reference ] then
@@ -129,9 +130,9 @@ function ENT:TriggerOutputs( )
 
 			if Val and Val.Click then
 				Val.Click = nil
-				local Value = Class.Wire_Out( Context, Reference )
+				local Value = Class.Wire_Out_Util( Context, Reference )
 				WireLib.TriggerOutput( self, Name, Value )
 			end
 		end
 	end
-end]]
+end

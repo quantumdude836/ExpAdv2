@@ -8,14 +8,42 @@ include( "shared.lua" )
 	@: [vNet] Receive Code
    --- */
 
-local vNet = require( "vnet" ) -- Nope, You may not know what this is yet :D
-
 function ENT:ReceivePackage( Package )
+	self.player = player.GetByUniqueID( Package:String( ) )
+
 	local Received = Package:Table( )
 
 	if Received.root then
 		self.root = Received.root
 		self.files = Received.files
-	end
 
+		self:CompileScript( self.root, self.files )
+	end
 end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Fake Entity
+		-- Because entitys out of pvs don't exist!
+   --- */
+
+--[[This is retarded :D
+local __ENT = ENT
+
+function EXPADV.GetVirtualEntity( ID )
+	local Context = EXPADV.GetEntityContext( ID )
+
+	if !Context then return end
+
+	if IsValid( Context.Entity ) then return Context.Entity end
+
+	return setmetatable( { 
+		IsValid = function( ) return true end,
+		EntIndex = function( ) return ID end,
+		GetOwner = function( ) return Context.player end,
+
+		Context = Context,
+		player = Context.player
+
+	}, __ENT )
+end]]
+

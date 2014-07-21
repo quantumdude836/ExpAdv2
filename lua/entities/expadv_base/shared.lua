@@ -10,6 +10,20 @@ ENT.Author          = "Rusketh"
 ENT.Contact         = "WM/FacePunch"
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: VNET
+   --- */
+
+local vnet = require( "vnet" ) -- Nope, You may not know what this is yet :D
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Client must always know about this entity.
+   --- */
+
+function ENT:UpdateTransmitState( )	
+	return self.cl_root and TRANSMIT_ALWAYS or TRANSMIT_PVS
+end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Context Look Up
 		-- More useful clientside tbh :D
    --- */
@@ -135,21 +149,37 @@ function ENT:BuildInstance( Instance, Instruction )
 
 	local Compiled = CompileString( Native, "EXPADV2", false )
 
-	Instance.NativeLog["Root"] = Native -- Debuggin purposes!
-
 	if isstring( Compiled ) then
 		return self:OnCompileError( Compiled, Instance )
 	end
 
 	local Context = self:CreateContext( Instance, self.player )
 	
-	-- TODO: WireLib!
+	self.Cells = Instance.Cells 
+
+	if WireLib then
+		self:BuildInputs( self.Cells, Instance.InPorts )
+		self:BuildOutputs( self.Cells, Instance.OutPorts )
+		self:LoadFromInputs( )
+	end
 
 	Context:StartUp( Compiled( ) )
+
+	if CLIENT then
+		local Package = vnet.CreatePacket( "expadv.cl_loaded" )
+
+		Package:Entity( self )
+		
+		Package:String( LocalPlayer( ):UniqueID( ) )
+
+		Package:AddServer( )
+
+		Package:Send( )
+	end
 end
 
 function ENT:GetCompilePer( )
-	if !self.Compiler then return 100 end
+	if !self.Compiler then return self:IsRunning( ) and 100 or 0 end
 
 	return self.Compiler:PercentCompiled( )
 end
