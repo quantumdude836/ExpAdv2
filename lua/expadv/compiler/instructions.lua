@@ -113,6 +113,7 @@ function Compiler:Compile_GTH( Trace, Expresion1, Expression2 )
 end
 
 function Compiler:Compile_LTH( Trace, Expresion1, Expression2 )
+	MsgN( "Test: ", Expresion1, Expression2 )
 	local Operator = self:LookUpOperator( "<", Expresion1.Return, Expression2.Return )
 
 	if !Operator then self:TraceError( Trace, "Comparason operator (less then) does not support '%s < %s'", self:NiceClass( Expresion1.Return, Expression2.Return ) ) end

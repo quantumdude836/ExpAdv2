@@ -300,6 +300,9 @@ if SERVER then
 	end
 
 	function EXPADV.SendInitalDataStream( Player )
+		
+		if !IsValid( Player ) and #player.GetAll( ) == 0 then return end
+
 		local DataStream = { }
 
 		DataStream.config = EXPADV.Config
@@ -310,18 +313,14 @@ if SERVER then
 
 		Package:Table( DataStream )
 
-		if IsValid( Player ) then
-			Package:AddTargets( Targets )
-		else
-			for _, Ply in pairs( player.GetAll( ) ) do
-				Package:AddTargets( { Ply } )
-			end
-		end
+		Package:AddTargets( IsValid( Player ) and { Player } or player.GetAll( ) )
 
-		-- Package:Send( )
+		Package:Send( )
 	end
 
 	function EXPADV.SendDataStream( )
+		if #player.GetAll( ) == 0 then return end
+
 		local DataStream = { }
 
 		if EXPADV.BuildDataStream( DataStream, false ) > 0 then
@@ -396,9 +395,4 @@ if SERVER then
 	concommand.Add( "expadv_reload", function( Player )
 		EXPADV.LoadCore( )
 	end )
-
-else
-	hook.Add( "Initialize", "expadv.Loadcore", function( )
-		EXPADV.LoadCore( )
-	end )-- REMOVE THIS HOOK!
 end
