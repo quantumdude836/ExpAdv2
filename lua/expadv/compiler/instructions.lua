@@ -160,7 +160,7 @@ function Compiler:Compile_EQ( Trace, Expresion1, Expression2 )
 	return Operator.Compile( self, Trace, Expresion1, Expression2 )
 end
 
-function Compiler:Compile_NOTEG( Trace, Expresion1, Expression2 )
+function Compiler:Compile_NEQ( Trace, Expresion1, Expression2 )
 	local Operator = self:LookUpOperator( "!=", Expresion1.Return, Expression2.Return )
 
 	if !Operator then self:TraceError( Trace, "Comparason operator (not equal) does not support '%s != %s'", self:NiceClass( Expresion1.Return, Expression2.Return ) ) end
@@ -192,17 +192,17 @@ function Compiler:Compile_MEQ( Trace, Expression, Expressions )
 	return Expr
 end
 
-function Compiler:Compile_MNOTEQ( Trace, Expression, Expressions )
+function Compiler:Compile_MNEQ( Trace, Expression, Expressions )
 	local Definition = self:DefineVariable( )
 
 	local Prepare = string.format( "%s\n%s = %s", Expression.Prepare or "", Definition, Expression.Inline )
 
 	local Expression = Quick( Definition, Expression.Return )
 
-	local Expr = Compiler:Compile_EQ( Expressions[1].Trace or Trace, Expression, Expressions[1] )
+	local Expr = Compiler:Compile_NEQ( Expressions[1].Trace or Trace, Expression, Expressions[1] )
 
 	for I = 2, #Expressions do
-		local Compare = self:Compile_NOTEQ( Expressions[I].Trace or Trace, Expression, Expressions[I] )
+		local Compare = self:Compile_NEQ( Expressions[I].Trace or Trace, Expression, Expressions[I] )
 
 		Expr = self:Compile_AND( Expressions[I].Trace or Trace, Expr, Compare )
 	end

@@ -16,11 +16,6 @@ function Compiler:AcceptToken( Type, Type2, ... )
 	if self.PrepToken and ( self.PrepTokenType == Type ) then
 		self:NextToken( )
 
-		if Type == "var" then
-			print( "Accepted Var: ", self.TokenData )
-			debug.Trace( )
-		end
-
 		return true
 	elseif Type2 then
 		return self:AcceptToken( Type2, ... )
@@ -323,7 +318,7 @@ function Compiler:Expression_7( Trace )
 
 	local Expression = self:Expression_8( Trace )
 
-	while self:CheckToken( "eq", "neg" ) do
+	while self:CheckToken( "eq", "neq" ) do
 		
 		if self:AcceptToken( "eq" ) then
 				
@@ -344,7 +339,7 @@ function Compiler:Expression_7( Trace )
 					Expression = self:Compile_EQ( self:GetTokenTrace( Trace ), Expression, self:Expression_8( Trace ) )
 				end
 
-		elseif self:AcceptToken( "neg" ) then
+		elseif self:AcceptToken( "neq" ) then
 			
 				if self:AcceptToken( "lsb" ) then
 					
@@ -358,9 +353,9 @@ function Compiler:Expression_7( Trace )
 
 					self:RequireToken( "rsb", "(]) expected to close multi comparason operator." )
 
-					Expression = self:Compile_MNOTEQ( Trace, Expression, Expressions )
+					Expression = self:Compile_MNEQ( Trace, Expression, Expressions )
 				else
-					Expression = self:Compile_NOTEG( self:GetTokenTrace( Trace ), Expression, self:Expression_8( Trace ) )
+					Expression = self:Compile_NEQ( self:GetTokenTrace( Trace ), Expression, self:Expression_8( Trace ) )
 				end
 
 		end
