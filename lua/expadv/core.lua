@@ -133,8 +133,6 @@ end
 	@: Lets loads the core.
    --- */
 
-if SERVER then util.AddNetworkString( "expadv.config" ) end
-
 function EXPADV.AddComponentFile( FileName )
 	EXPADV.SharedOperators( )
 	MsgN( "Loading Component: " .. FileName )
@@ -184,14 +182,10 @@ function EXPADV.LoadCore( )
 	EXPADV.SaveConfig( )
 
 	if SERVER then
-		net.Start( "expadv.config")
-			net.WriteTable( EXPADV.Config )
-		net.Broadcast( )
+		EXPADV.SendInitalDataStream( )
 
-		hook.Add( "PlayerInitialSpawn", "expadv.config", function( Player )
-			net.Start( "expadv.config")
-				net.WriteTable( EXPADV.Config )
-			net.Send( Player )
+		hook.Add( "PlayerInitialSpawn", "expadv.initaldatastream", function( Player )
+			EXPADV.SendInitalDataStream( Player )
 		end )
 	end
 	
@@ -233,12 +227,14 @@ end
    -- StartUp( Context )*				| Void | Called before the initial root execution.
    -- ShutDown( Context )*				| Void | Called after the context has shutdown.
    -- Update( Context )*				| Void | Called every tick, when a context has ran that tick.
-
+   -- ClientLoaded( Entity, Player )	| Void | Called server side once a client confirms an entity has loaded its script.
    -- BuildHologramModels( Table )		| Void | Called when the hologram model look up is made.
-   
+   -- GetDataStream( DataTable )		| Void | Called clientside when data needs to be sent.
+
    --  function Component:OnPostLoadAliases( ) end
    --  hook.Add( "Expadv.PostLoadAliases", ... )
    -- *Also avaible on Context -> function Context:OnScriptError( Result ) end
+   -- @GitHub: Please request hooks, and return behavours via issue page.
 
 function EXPADV.CallHook( Name, ... )
 	
@@ -259,12 +255,123 @@ function EXPADV.CallHook( Name, ... )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: We need a data stream, this will use vnet.
+   --- */
+
+   -- Usage:
+   -- hook.Add -> "Expadv.PreBuildDataStream" -> ( DataTable, Inital Send )
+   -- hook.Add -> "Expadv.PostBuildDataStream" -> ( DataTable, Inital Send )
+   -- Component:BuildDataStream( Inital Send ) -> return Key, Value
+   -- Will sync clients via 1 data stream per tick, 
+
+require( "vnet" )
+
+if SERVER then
+
+	util.AddNetworkString( "expadv.stream" )
+
+	function EXPADV.BuildDataStream( Data, Force )
+		local SendCount = 0
+
+		hook.Run( "Expadv.PreBuildDataStream", Data, Force )
+
+		if EXPADV.Components then
+			for _, Component in pairs( EXPADV.Components ) do
+
+				if !Component.Enabled then continue end
+
+				local Func = Component["BuildDataStream"]
+				
+				if !Func then continue end
+
+				local Key, Value = Func( Force )
+
+				if Key and Key ~= "" and key ~="config" and Value then
+					Data[Key] = Value
+
+					SendCount = SendCount + 1
+				end
+			end
+		end
+
+		hook.Run( "Expadv.PostBuildDataStream", Data, Force )
+
+		return SendCount
+	end
+
+	function EXPADV.SendInitalDataStream( Player )
+		local DataStream = { }
+
+		DataStream.config = EXPADV.Config
+
+		EXPADV.BuildDataStream( DataStream, true )
+
+		local Package = vnet.CreatePacket( "expadv.stream" )
+
+		Package:Table( DataStream )
+
+		if IsValid( Player ) then
+			Package:AddTargets( Targets )
+		else
+			for _, Ply in pairs( player.GetAll( ) ) do
+				Package:AddTargets( { Ply } )
+			end
+		end
+
+		-- Package:Send( )
+	end
+
+	function EXPADV.SendDataStream( )
+		local DataStream = { }
+
+		if EXPADV.BuildDataStream( DataStream, false ) > 0 then
+
+			local Package = vnet.CreatePacket( "expadv.stream" )
+
+			Package:Table( DataStream )
+
+			Package:AddTargets( player.GetAll( ) )
+
+			Package:Send( )
+
+		end
+	end
+
+	hook.Add( "Thick", "expadv.Stream", function( )
+		local Ok, Msg = pcall( EXPADV.SendDataStream )
+		
+		if !Ok then
+			MsgN( "ExpAdv2 - Error in main Data stream: ", Msg )
+		end
+	end )
+
+else
+
+	vnet.Watch( "expadv.stream", function( Package )
+		local Data = Package:Table( )
+
+		if Data.config then
+			EXPADV.Config = Data.config 
+			
+			Data.config = nil
+
+			EXPADV.LoadCore( )
+		end
+
+		EXPADV.CallHook( "GetDataStream", Data )
+	end )
+
+end
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Convenience hooks.
    --- */
    
 hook.Add( "Think", "expadv.Hook", function( )
 	local Ok, Msg = pcall( EXPADV.CallHook, "Think" )
-	if !Ok then MsgN( "ExpAdv2 - Error in main Think hook: ", Msg ) end
+	
+	if !Ok then
+		MsgN( "ExpAdv2 - Error in main Think hook: ", Msg )
+	end
 end )
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -289,11 +396,9 @@ if SERVER then
 	concommand.Add( "expadv_reload", function( Player )
 		EXPADV.LoadCore( )
 	end )
-	
-elseif CLIENT then
-	net.Receive( "expadv.config", function( )
-		EXPADV.Config = net.ReadTable( )
 
+else
+	hook.Add( "Initialize", "expadv.Loadcore", function( )
 		EXPADV.LoadCore( )
-	end )
+	end )-- REMOVE THIS HOOK!
 end

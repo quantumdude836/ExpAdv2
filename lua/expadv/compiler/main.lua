@@ -124,6 +124,13 @@ end
    --- */
 
 function Compiler:Error( Offset, Message, A, ... )
+	if type( Message ) ~= "string" then
+		MsgN( "ExpAdv2 Unknown error:")
+		print( Message, A, ... )
+		debug.Trace( )
+		return self:Error( 0, "Unknown Error, see console!" )
+	end
+
 	if A then Message = Format( Message, A, ... ) end
 	error( Format( "%s at line %i, char %i", Message, self.ReadLine, self.ReadChar + Offset ), 0 )
 end
@@ -597,7 +604,7 @@ local function SoftCompile( self, Script, Files, bIsClientSide, OnError, OnSuces
 		self:Yield( true )
 
 	-- Ok, Run the compiler.
-		local Compiled, Instruction = pcall( self.Main, self, { 0, 0 } )
+		local Compiled, Instruction = pcall( self.Sequence, self, { 0, 0 } ) -- self.Main
 
 	-- Finish!
 		setmetatable( self.Enviroment, EXPADV.BaseEnv )

@@ -13,7 +13,7 @@ ENT.Contact         = "WM/FacePunch"
 	@: VNET
    --- */
 
-local vnet = require( "vnet" ) -- Nope, You may not know what this is yet :D
+require( "vnet" ) -- Nope, You may not know what this is yet :D
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Client must always know about this entity.
@@ -171,7 +171,7 @@ function ENT:BuildInstance( Instance, Instruction )
 
 		Package:Entity( self )
 		
-		Package:String( LocalPlayer( ):UniqueID( ) )
+		Package:Entity( LocalPlayer( ) )
 
 		Package:AddServer( )
 

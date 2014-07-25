@@ -29,6 +29,15 @@ if WireLib then
 	end )
 end
 
+EXPADV.AddInlineOperator( nil, "==", "b,b", "b", "(@value 1 == @value 2)" )
+EXPADV.AddInlineOperator( nil, "!=", "b,b", "b", "(@value 1 != @value 2)" )
+
+EXPADV.AddInlineOperator( nil, "is", "b", "b", "@value 1" )
+EXPADV.AddInlineOperator( nil, "not", "b", "b", "!@value 1" )
+
+EXPADV.AddInlineOperator( nil, "||", "b,b", "b", "(@value 1 or @value 2)" )
+EXPADV.AddInlineOperator( nil, "&&", "b,b", "b", "(@value 1 and @value 2)" )
+
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Register variant class!
    --- */

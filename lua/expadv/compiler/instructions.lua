@@ -104,22 +104,6 @@ function Compiler:Compile_BXOR( Trace, Expresion1, Expression2 )
 	return Operator.Compile( self, Trace, Expresion1, Expression2 )
 end
 
-function Compiler:Compile_EQ( Trace, Expresion1, Expression2 )
-	local Operator = self:LookUpOperator( "==", Expresion1.Return, Expression2.Return )
-
-	if !Operator then self:TraceError( Trace, "Comparason operator (equals) does not support '%s == %s'", self:NiceClass( Expresion1.Return, Expression2.Return ) ) end
-
-	return Operator.Compile( self, Trace, Expresion1, Expression2 )
-end
-
-function Compiler:Compile_NEG( Trace, Expresion1, Expression2 )
-	local Operator = self:LookUpOperator( "!=", Expresion1.Return, Expression2.Return )
-
-	if !Operator then self:TraceError( Trace, "Comparason operator (not equal) does not support '%s != %s'", self:NiceClass( Expresion1.Return, Expression2.Return ) ) end
-
-	return Operator.Compile( self, Trace, Expresion1, Expression2 )
-end
-
 function Compiler:Compile_GTH( Trace, Expresion1, Expression2 )
 	local Operator = self:LookUpOperator( ">", Expresion1.Return, Expression2.Return )
 
@@ -166,6 +150,66 @@ function Compiler:Compile_BSHL( Trace, Expresion1, Expression2 )
 	if !Operator then self:TraceError( Trace, "Binary operator (bitshift left) does not support '%s << %s'", self:NiceClass( Expresion1.Return, Expression2.Return ) ) end
 
 	return Operator.Compile( self, Trace, Expresion1, Expression2 )
+end
+
+function Compiler:Compile_EQ( Trace, Expresion1, Expression2 )
+	local Operator = self:LookUpOperator( "==", Expresion1.Return, Expression2.Return )
+
+	if !Operator then self:TraceError( Trace, "Comparason operator (equals) does not support '%s == %s'", self:NiceClass( Expresion1.Return, Expression2.Return ) ) end
+
+	return Operator.Compile( self, Trace, Expresion1, Expression2 )
+end
+
+function Compiler:Compile_NOTEG( Trace, Expresion1, Expression2 )
+	local Operator = self:LookUpOperator( "!=", Expresion1.Return, Expression2.Return )
+
+	if !Operator then self:TraceError( Trace, "Comparason operator (not equal) does not support '%s != %s'", self:NiceClass( Expresion1.Return, Expression2.Return ) ) end
+
+	return Operator.Compile( self, Trace, Expresion1, Expression2 )
+end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Multi Logical Operators
+   --- */
+
+function Compiler:Compile_MEQ( Trace, Expression, Expressions )
+	local Definition = self:DefineVariable( )
+
+	local Prepare = string.format( "%s\n%s = %s", Expression.Prepare or "", Definition, Expression.Inline )
+
+	local Expression = Quick( Definition, Expression.Return )
+
+	local Expr = Compiler:Compile_EQ( Expressions[1].Trace or Trace, Expression, Expressions[1] )
+
+	for I = 2, #Expressions do
+		local Compare = self:Compile_EQ( Expressions[I].Trace or Trace, Expression, Expressions[I] )
+
+		Expr = self:Compile_OR( Expressions[I].Trace or Trace, Expr, Compare )
+	end
+
+	Expr.Prepare = Prepare .. "\n" .. ( Expr.Prepare or "" )
+
+	return Expr
+end
+
+function Compiler:Compile_MNOTEQ( Trace, Expression, Expressions )
+	local Definition = self:DefineVariable( )
+
+	local Prepare = string.format( "%s\n%s = %s", Expression.Prepare or "", Definition, Expression.Inline )
+
+	local Expression = Quick( Definition, Expression.Return )
+
+	local Expr = Compiler:Compile_EQ( Expressions[1].Trace or Trace, Expression, Expressions[1] )
+
+	for I = 2, #Expressions do
+		local Compare = self:Compile_NOTEQ( Expressions[I].Trace or Trace, Expression, Expressions[I] )
+
+		Expr = self:Compile_AND( Expressions[I].Trace or Trace, Expr, Compare )
+	end
+
+	Expr.Prepare = Prepare .. "\n" .. ( Expr.Prepare or "" )
+
+	return Expr
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------

@@ -9,7 +9,7 @@ include( "shared.lua" )
    --- */
 
 function ENT:ReceivePackage( Package )
-	self.player = player.GetByUniqueID( Package:String( ) )
+	self.player = Package:Entity( )
 
 	local Received = Package:Table( )
 

@@ -17,7 +17,7 @@ function Compiler:AcceptToken( Type, Type2, ... )
 		self:NextToken( )
 
 		if Type == "var" then
-			MsgN( "Accepted Var: ", self.TokenData )
+			print( "Accepted Var: ", self.TokenData )
 			debug.Trace( )
 		end
 
@@ -68,7 +68,7 @@ function Compiler:ExcludeToken( Type, Message, ... )
 	end
 end
 
-function Compiler:ExcludeWhiteSpace( Type, ... )
+function Compiler:ExcludeWhiteSpace( Message, ... )
 	if !self:HasTokens( ) then 
 		self:TokenError( Message, ... )
 	end
@@ -324,10 +324,45 @@ function Compiler:Expression_7( Trace )
 	local Expression = self:Expression_8( Trace )
 
 	while self:CheckToken( "eq", "neg" ) do
+		
 		if self:AcceptToken( "eq" ) then
-			Expression = self:Compile_EQ( self:GetTokenTrace( Trace ), Expression, self:Expression_8( Trace ) )
+				
+				if self:AcceptToken( "lsb" ) then --lth
+					
+					local Trace = self:GetTokenTrace( Trace )
+
+					local Expressions = { self:Expression( Trace ) }
+
+					while self:AcceptToken( "com" ) do
+						Expressions[ #Expressions + 1 ] = self:Expression( Trace )
+					end
+
+					self:RequireToken( "rsb", "(]) expected to close multi comparason operator." ) -- gth
+
+					Expression = self:Compile_MEQ( Trace, Expression, Expressions )
+				else
+					Expression = self:Compile_EQ( self:GetTokenTrace( Trace ), Expression, self:Expression_8( Trace ) )
+				end
+
 		elseif self:AcceptToken( "neg" ) then
-			Expression = self:Compile_NEG( self:GetTokenTrace( Trace ), Expression, self:Expression_8( Trace ) )
+			
+				if self:AcceptToken( "lsb" ) then
+					
+					local Trace = self:GetTokenTrace( Trace )
+
+					local Expressions = { self:Expression( Trace ) }
+
+					while self:AcceptToken( "com" ) do
+						Expressions[ #Expressions + 1 ] = self:Expression( Trace )
+					end
+
+					self:RequireToken( "rsb", "(]) expected to close multi comparason operator." )
+
+					Expression = self:Compile_MNOTEQ( Trace, Expression, Expressions )
+				else
+					Expression = self:Compile_NOTEG( self:GetTokenTrace( Trace ), Expression, self:Expression_8( Trace ) )
+				end
+
 		end
 
 		self:Yield( )
@@ -1171,12 +1206,14 @@ end
 function Compiler:Statement_7( Trace )
 	-- MsgN( "Compiler -> Statement 7" )
 
-	MsgN( "Before: ", self.PrepTokenType )
+	if !self:HasTokens( ) then
+		return
+	end
 
 	local Expression = self:Expression_Value( Trace )
 
 	if Expression and !self:CheckToken( "prd", "lpa" ) then
-		self:TraceError( Trace, "Unexpected value")
+		self:TraceError( Trace, "Unexpected value" )
 	elseif Expression then
 		return self:Expression_17( Trace, Expression )
 	end
@@ -1192,7 +1229,6 @@ function Compiler:Statement_7( Trace )
 		self:PrevToken( )
 	end
 
-	MsgN( "After: ", self.PrepTokenType )
 	Expression = self:Expression_Variable( Trace )
 
 	if Expression then
@@ -1200,7 +1236,6 @@ function Compiler:Statement_7( Trace )
 	end
 	
 	self:TraceError( Trace, "Invalid Statment" )
-	--self:ExpressionError( Trace )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------

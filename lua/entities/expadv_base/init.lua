@@ -8,10 +8,28 @@ AddCSLuaFile( "shared.lua" )
 AddCSLuaFile( "cl_init.lua" )
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
-	@: [vNet] Receive Code
+	@: vNet
    --- */
 
-local vnet = require( "vnet" ) -- Nope, You may not know what this is yet :D
+require( "vnet" ) -- Nope, You may not have this is yet :D
+
+util.AddNetworkString( "expadv.cl_script" )
+util.AddNetworkString( "expadv.cl_loaded" )
+
+vnet.Watch( "expadv.cl_loaded", function( Package )
+	local Ent = Package:Entity( )
+	local Ply = Package:Entity( )
+
+	if !IsValid( Ent ) or !IsValid( Ply ) then return end
+
+	EXPADV.CallHook( "ClientLoaded", Ent, Ply )
+
+	Ent:OnClientLoaded( Ent, Ply )
+end )
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Receive Code
+   --- */
 
 function ENT:ReceivePackage( Package )
 	local Received = Package:Table( )
@@ -39,11 +57,15 @@ function ENT:SendClientPackage( Player, Root, Files )
 
 	Package:Short( self:EntIndex( ) )
 
-	Package:String( self.Player:UniqueID( ) )
+	Package:Entity( self.Player )
 
 	Package:Table( {root = Root, files = Files } )
 
 	Package:AddTargets( Player and { Player } or player.GetAll( ) )
 
 	Package:Send( )
+end
+
+function ENT:OnClientLoaded( Ent, Ply )
+	-- To be used by derived classes
 end
