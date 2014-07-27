@@ -313,9 +313,14 @@ if SERVER then
 
 		Package:Table( DataStream )
 
-		Package:AddTargets( IsValid( Player ) and { Player } or player.GetAll( ) )
+		if isValid( Player ) then
+				Package:AddTargets( { Player } )
 
-		Package:Send( )
+				Package:Send( )
+		else
+			Package:Broadcast( )
+		end
+
 	end
 
 	function EXPADV.SendDataStream( )
@@ -329,10 +334,7 @@ if SERVER then
 
 			Package:Table( DataStream )
 
-			Package:AddTargets( player.GetAll( ) )
-
-			Package:Send( )
-
+			Package:Broadcast( )
 		end
 	end
 
