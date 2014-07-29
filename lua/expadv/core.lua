@@ -68,6 +68,8 @@ EXPADV.ToLuaTable = ToLuaTable
 EXPADV.Config = { }
 
 function EXPADV.LoadConfig( )
+	if CLIENT then return end
+
 	local Config = { }
 
 	if file.Exists( "expadv.txt", "DATA" ) then
@@ -89,6 +91,7 @@ end
 
 -- Saves the config file.
 function EXPADV.SaveConfig( )
+	if CLIENT then return end
 	EXPADV.CallHook( "PreSaveConfig", EXPADV.Config )
 
 	file.Write( "expadv.txt", util.TableToKeyValues( EXPADV.Config ) )
@@ -181,6 +184,8 @@ function EXPADV.LoadCore( )
 
 	EXPADV.SaveConfig( )
 
+	EXPADV.LoadEditor( )
+
 	if SERVER then
 		EXPADV.SendInitalDataStream( )
 
@@ -192,6 +197,36 @@ function EXPADV.LoadCore( )
 	EXPADV.IsLoaded = true
 
 	EXPADV.CallHook( "PostLoadCore" )
+end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Lets loads the old editor.
+   --- */
+
+function EXPADV.LoadEditor( )
+	
+	if CLIENT then
+		include( "expadv/editor/ea_browser.lua" ) -- TODO: Delte this!
+		include( "expadv/editor/ea_filemenu.lua" )
+		include( "expadv/editor/ea_button.lua" )
+		include( "expadv/editor/ea_closebutton.lua" )
+		include( "expadv/editor/ea_editor.lua" )
+		include( "expadv/editor/ea_editorpanel.lua" )
+		include( "expadv/editor/ea_filenode.lua" )
+		include( "expadv/editor/ea_frame.lua" )
+		include( "expadv/editor/ea_helper.lua" )
+		include( "expadv/editor/ea_helperdata.lua" )
+		include( "expadv/editor/ea_hscrollbar.lua" )
+		include( "expadv/editor/ea_imagebutton.lua" )
+		include( "expadv/editor/ea_toolbar.lua" )
+		include( "expadv/editor/syntaxer.lua" )
+		include( "expadv/editor/pastebin.lua" )
+		include( "expadv/editor/repo.lua" )
+		include( "expadv/editor/ea_search.lua" )
+		include( "expadv/editor.lua" )
+	end
+
+	include( "expadv/editor/shared.lua" )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -313,7 +348,7 @@ if SERVER then
 
 		Package:Table( DataStream )
 
-		if isValid( Player ) then
+		if IsValid( Player ) then
 				Package:AddTargets( { Player } )
 
 				Package:Send( )
