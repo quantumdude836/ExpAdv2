@@ -130,6 +130,7 @@ function EXPADV.IncludeCore( )
 	include( "expadv/operators.lua" )
 	include( "expadv/events.lua" )
 	include( "expadv/context.lua" )
+	include( "expadv/cppi.lua" )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
