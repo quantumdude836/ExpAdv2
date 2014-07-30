@@ -51,7 +51,13 @@ end )
 /*---------------------------------------------------------------------------
 	Home Screen
 ---------------------------------------------------------------------------*/
-local HomeScreen = [[Expression Advanced 2]]
+local HomeScreen = [[
+// This is ExpAdv2 - You old code is BROKE!
+// Seriously, its for the best.
+// Still not convinced hu?
+// Oh well, Go play with E2 little boy.
+// This editors for the big boys!
+]]
 
 /*---------------------------------------------------------------------------
 	Syntax Highlighting
