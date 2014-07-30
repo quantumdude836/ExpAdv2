@@ -602,7 +602,7 @@ local function SoftCompile( self, Script, Files, bIsClientSide, OnError, OnSuces
 
 	-- Wait for next tick to begin:
 		self:Yield( true )
-
+		
 	-- Ok, Run the compiler.
 		local Compiled, Instruction = pcall( self.Sequence, self, { 0, 0 } ) -- self.Main
 
@@ -649,8 +649,6 @@ function EXPADV.Compile( Script, Files, bIsClientSide, OnError, OnSucess )
 	Coroutines[self] = Coroutine
 
 	coroutine.resume( Coroutine ,self, Script, Files, bIsClientSide, OnError, OnSucess )
-
-	print( "Added Coroutine: ", self, Coroutine )
 
 	return self, Coroutine
 end

@@ -145,15 +145,11 @@ end
 --		NEW VALIDATOR
 ------------------------------------------------------------------------------------------------------
 
-function PANEL:Validate( Script, NoCompile )
-	return "Depricated!"
-end
-
-function PANEL:DoValidate( Goto, NoCompile, Code )
+function PANEL:DoValidate( Goto, Code )
 	self.ValidationInstance = setmetatable( { }, EXPADV.Compiler )
 	self.ValidationInstance.CoRoutine = coroutine.create( EXPADV.SoftCompile )
 
-	coroutine.resume( self.ValidationInstance.CoRoutine ,self.ValidationInstance, Code, { }, false,
+	coroutine.resume( self.ValidationInstance.CoRoutine ,self.ValidationInstance, Code or self:GetCode( ), { }, false,
 		function( ErrMsg )
 			self:OnValidateError( ErrMsg, GoTo )
 		end, function( Instance, Istr )
@@ -188,11 +184,14 @@ function PANEL:OnValidateSucess( Instance, Istr )
 end
 
 function PANEL:DoValidationStep( )
-	if !self.ValidationInstance then return MsgN( "No Next Step" ) end
+	if !self.ValidationInstance then return end
 
 	coroutine.resume( self.ValidationInstance.CoRoutine )
-	self.ValidateButton:SetColor( Color( 0, 0, 255 ) )
-	self.ValidateButton:SetText( "Validating: " .. self.ValidationInstance:PercentCompiled( ) .. "%" )
+
+	if self.ValidationInstance then
+		self.ValidateButton:SetColor( Color( 0, 0, 255 ) )
+		self.ValidateButton:SetText( "Validating: " .. self.ValidationInstance:PercentCompiled( ) .. "%" )
+	end
 end
 
 
