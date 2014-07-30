@@ -350,6 +350,18 @@ end
 function Compiler:CreateVariable( Trace, Variable, Class, Modifier )
 	local ClassObj = istable( Class ) and Class or self:GetClass( Trace, Class, false )
 
+	if self.IsServerScript and self.IsClientScript then
+		if !ClassObj.LoadOnServer then
+			self:TraceError( Trace, "%s is clientside only can not appear in shared code", ClassObj.Name )
+		elseif !ClassObj.LoadOnClient then
+			self:TraceError( Trace, "%s is serverside only can not appear in shared code", ClassObj.Name )
+		end
+	elseif self.IsServerScript and !ClassObj.LoadOnServer then
+		self:TraceError( Trace, "%s Must not appear in serverside scripts.", ClassObj.Name )
+	elseif self.IsClientScript and !ClassObj.LoadOnClient then
+		self:TraceError( Trace, "%s Must not appear in clientside scripts.", ClassObj.Name )
+	end
+
 	if !Modifier then
 		local MemRef = self.Scope[ Variable ]
 
@@ -560,11 +572,11 @@ end
 
 local Coroutines = { }
 
-local function SoftCompile( self, Script, Files, bIsClientSide, OnError, OnSucess )
+local function SoftCompile( self, Script, Files, OnError, OnSucess )
 
 	-- Client and Server
-		self.IsServerScript = !bIsClientSide
-		self.IsClientScript = bIsClientSide or false
+		self.IsServerScript = true
+		self.IsClientScript = true
 
 	-- Instance
 		self.Pos = 0
@@ -642,13 +654,13 @@ hook.Add( "Tick", "ExpAdv.Compile", function( )
 	end
 end )
 
-function EXPADV.Compile( Script, Files, bIsClientSide, OnError, OnSucess )
+function EXPADV.Compile( Script, Files, OnError, OnSucess )
 	local self = setmetatable( { }, Compiler )
 
 	local Coroutine = coroutine.create( SoftCompile )
 	Coroutines[self] = Coroutine
 
-	coroutine.resume( Coroutine ,self, Script, Files, bIsClientSide, OnError, OnSucess )
+	coroutine.resume( Coroutine ,self, Script, Files, OnError, OnSucess )
 
 	return self, Coroutine
 end

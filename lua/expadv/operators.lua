@@ -508,7 +508,13 @@ end
    --- */
 
 function EXPADV.CanBuildOperator( Compiler, Trace, Operator )
-	if Compiler.IsServerScript and !Operator.LoadOnServer then
+	if Compiler.IsServerScript and Compiler.IsClientScript then
+		if !Operator.LoadOnServer then
+			Compiler:TraceError( Trace, "%s is clientside only and can not appear in shared scripts.", Operator.Signature )
+		elseif !Operator.LoadOnClient then
+			Compiler:TraceError( Trace, "%s is serverside only and can not appear in shared scripts.", Operator.Signature )
+		end
+	elseif Compiler.IsServerScript and !Operator.LoadOnServer then
 		Compiler:TraceError( Trace, "%s Must not appear in serverside scripts.", Operator.Signature )
 	elseif  Compiler.IsClientScript and !Operator.LoadOnClient then
 		Compiler:TraceError( Trace, "%s Must not appear in clientside scripts.", Operator.Signature )

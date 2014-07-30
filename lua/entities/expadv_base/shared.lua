@@ -119,7 +119,7 @@ function ENT:IsCompiling( )
 end
 
 function ENT:CompileScript( Root, Files )
-	self.Compiler = EXPADV.Compile( Root, Files, CLIENT,
+	self.Compiler = EXPADV.Compile( Root, Files,
 
 		function( ErMsg )
 			local Cmp = self.Compiler

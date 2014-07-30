@@ -154,7 +154,7 @@ end
    --- */
 
 function Compiler:Expression( Trace )
-	MsgN( "Compiler -> Expression" )
+	-- MsgN( "Compiler -> Expression" )
 
 	local _ExprRequire = self.ExpressionRequired
 	self.ExpressionRequired = true
@@ -172,7 +172,7 @@ end
 
 -- Stage 1: Grouped Equation
 function Compiler:Expression_1( Trace )
-	MsgN( "Compiler -> Expression 1" )
+	-- MsgN( "Compiler -> Expression 1" )
 	
 	if self:AcceptToken( "lpa" ) then
 		local Expression = self:Expression_1( Trace )
@@ -191,7 +191,7 @@ end
 
 -- Stage 2: Unary operations, sizeof, casting
 function Compiler:Expression_2( Trace )
-	MsgN( "Compiler -> Expression 2" )
+	-- MsgN( "Compiler -> Expression 2" )
 
 	if self:AcceptToken( "add" ) then
 		local Trace = self:GetTokenTrace( Trace )
@@ -229,7 +229,7 @@ end
 
 -- Stage 3: Multiplication, division, modulo
 function Compiler:Expression_3( Trace )
-	MsgN( "Compiler -> Expression 3" )
+	-- MsgN( "Compiler -> Expression 3" )
 
 	local Expression = self:Expression_4( Trace )
 
@@ -253,7 +253,7 @@ end
 
 -- Stage 4: Addition and subtraction
 function Compiler:Expression_4( Trace )
-	MsgN( "Compiler -> Expression 4" )
+	-- MsgN( "Compiler -> Expression 4" )
 
 	local Expression = self:Expression_5( Trace )
 
@@ -272,7 +272,7 @@ end
 
 -- Stage 5: Bitwise shift left and right
 function Compiler:Expression_5( Trace )
-	MsgN( "Compiler -> Expression 5" )
+	-- MsgN( "Compiler -> Expression 5" )
 
 	local Expression = self:Expression_6( Trace )
 
@@ -291,7 +291,7 @@ end
 
 -- Stage 6: Comparisons Greater and Less
 function Compiler:Expression_6( Trace )
-	MsgN( "Compiler -> Expression 6" )
+	-- MsgN( "Compiler -> Expression 6" )
 
 	local Expression = self:Expression_7( Trace )
 
@@ -314,7 +314,7 @@ end
 
 -- Stage 7: Comparisons equal and not equal.
 function Compiler:Expression_7( Trace )
-	MsgN( "Compiler -> Expression 7" )
+	-- MsgN( "Compiler -> Expression 7" )
 
 	local Expression = self:Expression_8( Trace )
 
@@ -368,7 +368,7 @@ end
 
 -- Stage 8: bitwise and
 function Compiler:Expression_8( Trace )
-	MsgN( "Compiler -> Expression 8" )
+	-- MsgN( "Compiler -> Expression 8" )
 
 	local Expression = self:Expression_9( Trace )
 
@@ -381,7 +381,7 @@ end
 
 -- Stage 9: bitwise exclusive or
 function Compiler:Expression_9( Trace )
-	MsgN( "Compiler -> Expression 9" )
+	-- MsgN( "Compiler -> Expression 9" )
 
 	local Expression = self:Expression_10( Trace )
 
@@ -396,7 +396,7 @@ end
 
 -- Stage 10: bitwise or
 function Compiler:Expression_10( Trace )
-	MsgN( "Compiler -> Expression 10" )
+	-- MsgN( "Compiler -> Expression 10" )
 
 	local Expression = self:Expression_11( Trace )
 
@@ -412,7 +412,7 @@ end
 
 -- Stage 11: logical and
 function Compiler:Expression_11( Trace )
-	MsgN( "Compiler -> Expression 11" )
+	-- MsgN( "Compiler -> Expression 11" )
 
 	local Expression = self:Expression_12( Trace )
 
@@ -427,7 +427,7 @@ end
 
 -- Stage 12: logical or
 function Compiler:Expression_12( Trace )
-	MsgN( "Compiler -> Expression 12" )
+	-- MsgN( "Compiler -> Expression 12" )
 
 	local Expression = self:Expression_13( Trace )
 
@@ -443,7 +443,7 @@ end
 
 -- Stage 13: Ternary
 function Compiler:Expression_13( Trace )
-	MsgN( "Compiler -> Expression 13" )
+	-- MsgN( "Compiler -> Expression 13" )
 
 	local Expression = self:Expression_14( Trace )
 
@@ -464,7 +464,7 @@ end
 
 -- Stage 14: Value
 function Compiler:Expression_14( Trace )
-	MsgN( "Compiler -> Expression 14" )
+	-- MsgN( "Compiler -> Expression 14" )
 
 	local Expression = self:Expression_Value( Trace ) or self:Expression_Variable( Trace )
 
@@ -481,7 +481,7 @@ end
 
 -- Stage 15: Raw Values:
 function Compiler:Expression_Value( Trace )
-	MsgN( "Compiler -> Expression Value" )
+	-- MsgN( "Compiler -> Expression Value" )
 
 	if self:AcceptToken( "tre" ) then
 		return self:Compile_BOOL( self:GetTokenTrace( Trace ), true )
@@ -520,7 +520,7 @@ end
 
 -- Stage 16: Increment, Decrement and Variables.
 function Compiler:Expression_Variable( Trace )
-	MsgN( "Compiler -> Expression Variable" )
+	-- MsgN( "Compiler -> Expression Variable" )
 
 	if self:AcceptToken( "inc" ) then
 		local Trace = self:GetTokenTrace( Trace )
@@ -581,7 +581,7 @@ end
 
 -- Stage 17: Indexing, Calling
 function Compiler:Expression_17( Trace, Expression )
-	MsgN( "Compiler -> Expression 17" )
+	-- MsgN( "Compiler -> Expression 17" )
 
 	while self:CheckToken( "prd", "lsb", "lpa" ) do
 
@@ -672,7 +672,7 @@ function Compiler:StatementError( )
 end -- TODO: ^ This
 
 function Compiler:Statement( Trace )
-	MsgN( "Compiler -> Statement" )
+	-- MsgN( "Compiler -> Statement" )
 
 	local _StmtRoot = self.StatmentRoot
 	self.StatmentRoot = self:GetTokenTrace( Trace )
@@ -717,7 +717,7 @@ end
 
 -- Stage 1: If statments
 function Compiler:Statement_1( Trace )
-	MsgN( "Compiler -> Statement 1" )
+	-- MsgN( "Compiler -> Statement 1" )
 
 	if self:AcceptToken( "if" ) then
 		local Trace = self:GetTokenTrace( Trace )
@@ -755,7 +755,7 @@ end
 
 -- Stage 2: elseif, else statments
 function Compiler:Statement_2( Trace )
-	MsgN( "Compiler -> Statement 2" )
+	-- MsgN( "Compiler -> Statement 2" )
 
 	if self:AcceptToken( "eif" ) then
 		local Trace = self:GetTokenTrace( Trace )
@@ -939,10 +939,16 @@ function Compiler:Statement_4( Trace )
 
 		if !Event then
 			self:TraceError( Trace, "No such event %s", Name )
-		elseif !Event.LoadOnClient and Event.LoadOnServer and !self.IsServerScript then
-			self:TraceError( Trace, "Event %s can only appear in serverside code", Name )
-		elseif !Event.LoadOnServer and Event.LoadOnClient and !self.IsClientScript then
-			self:TraceError( Trace, "Event %s can only appear in clientside code", Name )
+		elseif self.IsServerScript and self.IsClientScript then
+			if !Event.LoadOnServer then
+				self:TraceError( Trace, "Event %s is clientside only can not appear in shared code", Name )
+			elseif !Event.LoadOnClient then
+				self:TraceError( Trace, "Event %s is serverside only can not appear in shared code", Name )
+			end
+		elseif self.IsServerScript and !Event.LoadOnServer then
+			self:TraceError( Trace, "Event %s is clientside only can not appear in serverside code", Name )
+		elseif self.IsClientScript and !Event.LoadOnClient then
+			self:TraceError( Trace, "Event %s is serverside only can not appear in clientside code", Name )
 		end
 
 		for I = 1, #Perams do
@@ -1005,7 +1011,7 @@ end
 
 -- Stage 6: Variable Assigments.
 function Compiler:Statement_6( Trace )
-	MsgN( "Compiler -> Statement 6" )
+	-- MsgN( "Compiler -> Statement 6" )
 
 	local Modifier
 
@@ -1201,9 +1207,62 @@ function Compiler:Statement_6( Trace )
 	return self:Statement_7( Trace )
 end
 
--- Stage 7: Statment Expressions
+-- Stage 7: Server / Client seperation.
 function Compiler:Statement_7( Trace )
-	MsgN( "Compiler -> Statement 7" )
+	-- MsgN( "Compiler -> Statement 7" )
+
+	if self:AcceptToken( "sv" ) then
+		local Trace = self:GetTokenTrace( Trace )
+
+		if !self.IsServerScript or !self.IsClientScript then
+			self:TraceError( Trace, "Serverside definition must not appear here.")
+		end
+
+		self:RequireToken( "lcb", "Left curly bracket ({) missing, to open server defintion" )
+
+		self.IsClientScript = false
+		self:PushScope( )
+
+		local Sequence = self:Sequence( Trace, "rcb" )
+
+		self:PopScope( )
+		self.IsClientScript = true
+
+		self:RequireToken( "rcb", "Right curly bracket (}) missing, to close server defintion" )
+
+		if SERVER then return Sequence end
+		return { Trace = Trace, Return = "", Prepare = "",FLAG = EXPADV_PREPARE, IsRaw = true }
+	end
+
+	if self:AcceptToken( "cl" ) then
+		local Trace = self:GetTokenTrace( Trace )
+
+		if !self.IsServerScript or !self.IsClientScript then
+			self:TraceError( Trace, "Client definition must not appear here.")
+		end
+
+		self:RequireToken( "lcb", "Left curly bracket ({) missing, to open client defintion" )
+
+		self.IsServerScript = false
+		self:PushScope( )
+
+		local Sequence = self:Sequence( Trace, "rcb" )
+
+		self:PopScope( )
+		self.IsServerScript = true
+
+		self:RequireToken( "rcb", "Right curly bracket (}) missing, to close client defintion" )
+
+		if CLIENT then return Sequence end
+		return { Trace = Trace, Return = "", Prepare = "",FLAG = EXPADV_PREPARE, IsRaw = true }
+	end
+
+	return self:Statement_8( Trace )
+end
+
+-- Stage 8: Statment Expressions
+function Compiler:Statement_8( Trace )
+	-- MsgN( "Compiler -> Statement 8" )
 
 	if !self:HasTokens( ) then
 		return

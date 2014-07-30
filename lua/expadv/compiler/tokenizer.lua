@@ -383,6 +383,13 @@ function Compiler:BuildToken( )
 			return self:NewToken( "out", "output" )
 		elseif RawData == "static" then
 			return self:NewToken( "stc", "static" )
+
+	-- SERVER && CLIENT:
+
+		elseif RawData == "server" then
+			return self:NewToken( "sv", "server" )
+		elseif RawData == "client" then
+			return self:NewToken( "cl", "client" )
 		end
 
 	-- VARIABLE:

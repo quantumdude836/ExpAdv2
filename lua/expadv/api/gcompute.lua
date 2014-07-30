@@ -321,5 +321,5 @@ function EditorHelperTable:Run( codeEditor, compilerStdOut, compilerStdErr, stdO
 
 	compilerStdOut:WriteLine( "Compiler Started." )
 
-	EXPADV.Compile( codeEditor:GetText( ), { }, true, OnError, OnSucess )
+	EXPADV.Compile( codeEditor:GetText( ), { }, OnError, OnSucess )
 end
