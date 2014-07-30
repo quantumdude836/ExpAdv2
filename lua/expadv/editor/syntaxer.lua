@@ -355,7 +355,7 @@ function Syntaxer:CreateMethodFunction( nRow, sVarName, sFunctionName )
 end 
 
 local function istype( word )
-	return API.Classes[word] and true or false 
+	return (EXPADV.Classes[word] or EXPADV.ClassAliases[word])and true or false 
 end
 
 local function isvar( word )

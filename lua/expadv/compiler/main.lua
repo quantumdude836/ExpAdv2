@@ -566,7 +566,7 @@ local function SoftCompile( self, Script, Files, bIsClientSide, OnError, OnSuces
 		self.IsServerScript = !bIsClientSide
 		self.IsClientScript = bIsClientSide or false
 
-	-- Instance:
+	-- Instance
 		self.Pos = 0
 		self.Len = #Script
 		self.Buffer = Script
@@ -639,20 +639,24 @@ hook.Add( "Tick", "ExpAdv.Compile", function( )
 			coroutine.resume( Coroutine )
 
 		EXPADV.COMPILER_ENV = nil
-
 	end
 end )
 
 function EXPADV.Compile( Script, Files, bIsClientSide, OnError, OnSucess )
 	local self = setmetatable( { }, Compiler )
-	
+
 	local Coroutine = coroutine.create( SoftCompile )
+	Coroutines[self] = Coroutine
 
 	coroutine.resume( Coroutine ,self, Script, Files, bIsClientSide, OnError, OnSucess )
 
-	Coroutines[self] = Coroutine
+	print( "Added Coroutine: ", self, Coroutine )
 
 	return self, Coroutine
+end
+
+function EXPADV.StopCompiler( Instance )
+	Coroutines[Instance] = nil
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------

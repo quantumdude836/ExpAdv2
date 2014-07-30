@@ -137,54 +137,64 @@ function PANEL:Init( )
 
 	self.__bVoice = 0
 	self.__nMicAlpha = 0
+
+	hook.Add( "Think", self, self.DoValidationStep )
+end
+
+------------------------------------------------------------------------------------------------------
+--		NEW VALIDATOR
+------------------------------------------------------------------------------------------------------
+
+function PANEL:Validate( Script, NoCompile )
+	return "Depricated!"
 end
 
 function PANEL:DoValidate( Goto, NoCompile, Code )
-	self.ValidateButton:SetColor( Color( 0, 0, 255 ) )
-	self.ValidateButton:SetText( "Validating..." )
-	
-	local Error = self:Validate( Code or self:GetCode( ), NoCompile )
-	
-	if Error then
-		if Goto then
-			local Row, Col = Error:match("at line ([0-9]+), char ([0-9]+)$")
-			
-			if !Row then
-				Row, Col = Error:match("at line ([0-9]+)$"), 1
-			end
-			
-			if Row then 
-				Row = tonumber( Row )
-				Col = tonumber( Col )
-				if Row < 1 or Col < 1 then 
-					Error = string.match( Error, "^(.-)at line [0-9]+" ) .. "| Invalid trace"
-				else 
-					self:SetCaret( Vector2( tonumber( Row ), tonumber( Col ) ) )
-				end 	
-			end
+	self.ValidationInstance = setmetatable( { }, EXPADV.Compiler )
+	self.ValidationInstance.CoRoutine = coroutine.create( EXPADV.SoftCompile )
+
+	coroutine.resume( self.ValidationInstance.CoRoutine ,self.ValidationInstance, Code, { }, false,
+		function( ErrMsg )
+			self:OnValidateError( ErrMsg, GoTo )
+		end, function( Instance, Istr )
+			self:OnValidateSucess( Instance, Istr )
+		end )
+end
+
+function PANEL:OnValidateError( ErrMsg, GoTo )
+	if Goto then
+		local Row, Col = ErrMsg:match( "at line ([0-9]+), char ([0-9]+)$" )
+		if !Row then Row, Col = ErrMsg:match( "at line ([0-9]+)$" ), 1 end
+
+		if Row then
+			Row, Col = tonumber( Row ), tonumber( Col )
+			if Row < 1 or Col < 1 then 
+				ErrMsg = string.match( ErrMsg, "^(.-)at line [0-9]+" ) .. "| Invalid trace"
+			else 
+				self:SetCaret( Vector2( Row, Col ) )
+			end 
 		end
-		
-		self.ValidateButton:SetColor( Color( 255, 0, 0 ) )
-		self.ValidateButton:SetText( Error )
-	else
-		self.ValidateButton:SetColor( Color( 0, 255, 0 ) )
-		self.ValidateButton:SetText( "Validation Successful!" )
 	end
+
+	self.ValidationInstance = nil
+	self.ValidateButton:SetText( ErrMsg )
+	self.ValidateButton:SetColor( Color( 255, 0, 0 ) )
 end
 
-function PANEL:Validate( Script, NoCompile )
-	/*local Ok, Error = LEMON.Compiler.Execute( Script, nil, NoCompile )
-	
-	if Ok then
-		self.Data = Error
-		return
-	else
-		self.Data = nil
-		return Error
-	end*/
-
-	return "TODO!"
+function PANEL:OnValidateSucess( Instance, Istr )
+	self.ValidationInstance = nil
+	self.ValidateButton:SetColor( Color( 0, 255, 0 ) )
+	self.ValidateButton:SetText( "Validation Successful!" )
 end
+
+function PANEL:DoValidationStep( )
+	if !self.ValidationInstance then return MsgN( "No Next Step" ) end
+
+	coroutine.resume( self.ValidationInstance.CoRoutine )
+	self.ValidateButton:SetColor( Color( 0, 0, 255 ) )
+	self.ValidateButton:SetText( "Validating: " .. self.ValidationInstance:PercentCompiled( ) .. "%" )
+end
+
 
 function PANEL:SetCode( Code, Tab )
 	Tab = Tab or self.TabHolder:GetActiveTab( )
