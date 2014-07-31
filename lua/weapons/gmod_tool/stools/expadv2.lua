@@ -144,7 +144,56 @@ function TOOL:LeftClick( Trace )
 	
 	self:GetOwner( ):AddCleanup( "expadv2", ExpAdv )
 
-	-- TODO: Request Code
+	net.Start( "expadv.request" )
+	net.WriteUInt( ExpAdv:EntIndex( ), 16 )
+	net.Send( self:GetOwner( ) )
 
 	return true
 end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Upload
+   --- */
+
+require( "vnet" )
+
+if SERVER then
+	util.AddNetworkString( "expadv.request" )
+
+	util.AddNetworkString( "expadv.upload" )
+end
+
+function EXPADV.SendCode( ID, Root, Files )
+	local Package = vnet.CreatePacket( "expadv.upload" )
+
+	print( "SEND:", ID, Root, Files )
+
+	Package:Int( ID )
+
+	Package:Entity( LocalPlayer( ) )
+
+	Package:String( Root )
+
+	Package:Table( Files )
+
+	Package:Send( )
+end
+
+net.Receive( "expadv.request", function( )
+	local ID = net.ReadUInt( 16 )
+
+	local Root = EXPADV.Editor.GetCode( )
+	if !Root or Root == "" then return end
+
+	EXPADV.SendCode( ID, Root, { } )
+end )
+
+vnet.Watch( "expadv.upload", function( Package )
+		local Expadv = Entity( Package:Int( ) )
+		local Player = Package:Entity( )
+
+		if !IsValid( Expadv ) then return end
+
+		-- TODO: Owner check.
+		Expadv:ReceivePackage( Package )
+	end )

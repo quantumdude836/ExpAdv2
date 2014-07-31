@@ -32,8 +32,6 @@ end )
    --- */
 
 function ENT:ReceivePackage( Package )
-	local Received = Package:Table( )
-
 	self.root = Package:String( )
 
 	self.files = Package:Table( ) or { }
