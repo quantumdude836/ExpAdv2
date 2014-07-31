@@ -34,22 +34,17 @@ end )
 function ENT:ReceivePackage( Package )
 	local Received = Package:Table( )
 
-	if Received.root then
-		self.root = Received.root
-		self.files = Received.files
-		self:CompileScript( self.root, self.files )
-	end
+	self.root = Package:String( )
 
-	if Received.cl_root then
-		self.cl_root = Received.cl_root
-		self.cl_files = Received.cl_files
+	self.files = Package:Table( )
 
-		self:SendClientPackage( nil, self.cl_root, self.cl_files )
-			
-		hook.Add( "", self, function( self, Ply )
-			self:SendClientPackage( Ply, self.cl_root, self.cl_files )
-		end )
-	end
+	self:CompileScript( self.root, self.files )
+
+	self:SendClientPackage( nil, self.root, self.files )
+	
+	hook.Add( "PlayerConnect", self, function( self, Ply )
+		self:SendClientPackage( Ply, self.root, self.files )
+	end )
 end
 
 function ENT:SendClientPackage( Player, Root, Files )
@@ -59,7 +54,9 @@ function ENT:SendClientPackage( Player, Root, Files )
 
 	Package:Entity( self.Player )
 
-	Package:Table( {root = Root, files = Files } )
+	Package:String( Root )
+	
+	Package:Table( files = Files )
 
 	Package:AddTargets( Player and { Player } or player.GetAll( ) )
 

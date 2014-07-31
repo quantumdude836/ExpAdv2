@@ -11,14 +11,11 @@ include( "shared.lua" )
 function ENT:ReceivePackage( Package )
 	self.player = Package:Entity( )
 
-	local Received = Package:Table( )
+	self.root = Package:String( )
+	
+	self.files = Package:Table( )
 
-	if Received.root then
-		self.root = Received.root
-		self.files = Received.files
-
-		self:CompileScript( self.root, self.files )
-	end
+	self:CompileScript( self.root, self.files )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
