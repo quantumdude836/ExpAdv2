@@ -166,8 +166,6 @@ end
 function EXPADV.SendCode( ID, Root, Files )
 	local Package = vnet.CreatePacket( "expadv.upload" )
 
-	print( "SEND:", ID, Root, Files )
-
 	Package:Int( ID )
 
 	Package:Entity( LocalPlayer( ) )

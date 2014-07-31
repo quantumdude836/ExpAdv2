@@ -36,7 +36,7 @@ local HolosByPlayer = { }
 
 local DeltaPerPlayer = { }
 
-function Component:OnShutDown( Context )
+function HoloComponent:OnShutDown( Context )
 	if IsValid( Context.player ) then
 		local PlyTbl = HolosByPlayer[ Context.player:UniqueID( ) ]
 
@@ -51,7 +51,7 @@ function Component:OnShutDown( Context )
 	end
 end
 
-function Component:OnCoreReload( )
+function HoloComponent:OnCoreReload( )
 	HolosByPlayer = { }
 
 	for Ent, Holos in pairs( HolosByEntity ) do
@@ -427,7 +427,7 @@ HoloComponent:AddInlineFunction("hasShading", "h:", "b", "($IsValid( @value 1 ) 
 /*==============================================================================================
     Section: Clipping
 ==============================================================================================*/
-Component:SetPerf( LEMON_PERF_NORMAL )
+
 
 HoloComponent:AddPreparedFunction("pushClip", "h:n,v,v", "", [[
 if $IsValid( @value 1 ) and @value 1.Player == Context.player then
@@ -504,7 +504,7 @@ end]] )
 /*==============================================================================================
     Section: Parent
 ==============================================================================================*/
-Component:SetPerf( LEMON_PERF_CHEAP )
+
 
 HoloComponent:AddPreparedFunction( "parent", "h:e", "", [[
 if $IsValid( @value 1 ) and @value 1.Player == Context.player and $IsValid( @value 2 )then
@@ -592,7 +592,6 @@ end]], "( @val or 0 )" )
 /*==============================================================================================
     Section: Animation
 ==============================================================================================*/
-Component:SetPerf( LEMON_PERF_CHEAP )
 
 HoloComponent:AddPreparedFunction("setAnimation", "h:n[,n,n]", "", [[
 if $IsValid( @value 1 ) and @value 1.Player == Context.player then

@@ -70,7 +70,7 @@ EXPADV.Config = { }
 function EXPADV.LoadConfig( )
 	if CLIENT then return end
 
-	local Config = { }
+	local Config = { Settings = { } }
 
 	if file.Exists( "expadv.txt", "DATA" ) then
 		Config = util.KeyValuesToTable( file.Read( "expadv.txt", "DATA" ) )
@@ -158,6 +158,7 @@ function EXPADV.LoadCore( )
 	EXPADV.AddComponentFile( "string" )
 	EXPADV.AddComponentFile( "color" )
 	EXPADV.AddComponentFile( "vector" )
+	EXPADV.AddComponentFile( "hologram" )
 
 	EXPADV.LoadComponents( )
 

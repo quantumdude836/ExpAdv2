@@ -170,11 +170,11 @@ function EXPADV.RootContext:Handel( Name, ... )
 	local Hook = self["On" .. Name]
 		
 	if Hook then
-		local Results = { Hook( Context, ... ) }
+		local Results = { Hook( self, ... ) }
 		if Results[1] ~= nil then return unpack( ... ) end
 	end
 
-	return EXPADV.CallHook( Name, Context, ... )
+	return EXPADV.CallHook( Name, self, ... )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
