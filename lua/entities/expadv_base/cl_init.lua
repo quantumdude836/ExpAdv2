@@ -27,6 +27,21 @@ function ENT:Draw( )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Vnet
+   --- */
+require( "vnet" )
+
+vnet.Watch( "expadv.cl_script", function( Package )
+
+	local ID = Package:Short( )
+	local ExpAdv = Entity( ID )
+
+	if !IsValid( ExpAdv ) then return end
+
+	ExpAdv:ReceivePackage( Package )
+end )
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Fake Entity
 		-- Because entitys out of pvs don't exist!
    --- */

@@ -52,7 +52,7 @@ function ENT:SendClientPackage( Player, Root, Files )
 
 	Package:Short( self:EntIndex( ) )
 
-	Package:Entity( self.Player )
+	Package:Entity( self.player )
 
 	Package:String( Root )
 
