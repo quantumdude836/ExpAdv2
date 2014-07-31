@@ -101,7 +101,7 @@ end
 function EXPADV.CreateSetting( Name, Default ) -- String, Obj
 	Name = string.lower( Name )
 
-	EXPADV.Config.Settings[ Name ] = Config.Settings[ Name ] or Default
+	EXPADV.Config.Settings[ Name ] = EXPADV.Config.Settings[ Name ] or Default
 end
 
 -- Reads a setting from the config.

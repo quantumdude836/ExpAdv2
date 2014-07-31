@@ -36,8 +36,10 @@ function ENT:ReceivePackage( Package )
 
 	self.root = Package:String( )
 
-	self.files = Package:Table( )
+	self.files = Package:Table( ) or { }
 
+	if self.root == "" then return end
+	
 	self:CompileScript( self.root, self.files )
 
 	self:SendClientPackage( nil, self.root, self.files )
@@ -55,8 +57,8 @@ function ENT:SendClientPackage( Player, Root, Files )
 	Package:Entity( self.Player )
 
 	Package:String( Root )
-	
-	Package:Table( files = Files )
+
+	Package:Table( Files )
 
 	Package:AddTargets( Player and { Player } or player.GetAll( ) )
 

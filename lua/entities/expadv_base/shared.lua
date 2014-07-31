@@ -16,6 +16,30 @@ ENT.Contact         = "WM/FacePunch"
 require( "vnet" ) -- Nope, You may not know what this is yet :D
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Initalize Entity
+   --- */
+
+function ENT:Initialize( )
+	if SERVER then
+
+		-- self:SetModel( "models/props_junk/TrafficCone001a.mdl" )
+
+		self:PhysicsInit( SOLID_VPHYSICS )
+		self:SetMoveType( MOVETYPE_VPHYSICS )
+		self:SetSolid( SOLID_VPHYSICS )
+
+		self:SetUseType( SIMPLE_USE )
+
+		if WireLib then
+			self.Inputs = WireLib.CreateInputs( self, { } )
+			self.Outputs = WireLib.CreateOutputs( self, { } )
+		end
+	end
+
+end
+
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Client must always know about this entity.
    --- */
 
