@@ -103,6 +103,8 @@ duplicator.RegisterEntityClass( "expadv2", MakeExpadv, "Pos", "Ang", "Model" )
    --- */
 
 function TOOL:RightClick( Trace )
+	if CLIENT then return end
+	
 	if !IsValid( Trace.Entity ) then
 		self:GetOwner( ):SendLua( "EXPADV.Editor.Open( )" )
 		return false
@@ -116,6 +118,8 @@ end
    --- */
 
 function TOOL:LeftClick( Trace )
+	if CLIENT then return end
+
 	local Ang = Trace.HitNormal:Angle( ) + Angle( 90, 0, 0 )
 	local ExpAdv = MakeExpadv( self:GetOwner( ), Trace.HitPos, Ang, self:GetClientInfo( "Model" ) )
 
@@ -187,11 +191,11 @@ net.Receive( "expadv.request", function( )
 end )
 
 vnet.Watch( "expadv.upload", function( Package )
-		local Expadv = Entity( Package:Int( ) )
-		local Player = Package:Entity( )
+	local Expadv = Entity( Package:Int( ) )
+	local Player = Package:Entity( )
 
-		if !IsValid( Expadv ) then return end
+	if !IsValid( Expadv ) then return end
 
-		-- TODO: Owner check.
-		Expadv:ReceivePackage( Package )
-	end )
+	-- TODO: Owner check.
+	Expadv:ReceivePackage( Package )
+end )

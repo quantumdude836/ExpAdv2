@@ -10,7 +10,7 @@ local StringComponent = EXPADV.AddComponent( "string" , true )
 
 local String = StringComponent:AddClass( "string" , "s" )
 
-String:StringBuilder( function( Context, Trace, Obj) return Obj end )
+String:StringBuilder( function( Obj ) return Obj end )
 String:DefaultAsLua( "" )
 String:AddAlias( "str" )
 

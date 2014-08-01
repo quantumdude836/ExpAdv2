@@ -74,9 +74,13 @@ function ENT:OnStartUp( Context ) end
 
 function ENT:OnShutDown( Context ) end
 
-function ENT:OnLuaError( Context, Msg ) end
+function ENT:OnLuaError( Context, Msg )
+	MsgN( "ExpAdv2 Error] -> ", Context, ": ", Msg )
+end
 
-function ENT:OnScriptError( Context, Msg ) end
+function ENT:OnScriptError( Context, Msg )
+	MsgN( "ExpAdv2 Error] -> ", Context, ": ", Msg )
+end
 
 function ENT:OnUncatchedException( Context, Exception ) end --OnException
 
@@ -113,8 +117,6 @@ function ENT:CreateContext( Instance, Player )
 		Context.OnException = function( ctx, exc ) return self:OnUncatchedException( ctx, exc ) end
 		
 		Context.OnUpdate = function( ctx ) return self:OnContextUpdate( ctx ) end
-
-		Context.Print = function( ctx, msg ) return self:DoPrint( ctx, msg ) end
 	end
 
 	ContextFromEntID[ self:EntIndex( ) ] = Context
@@ -160,7 +162,9 @@ function ENT:CompileScript( Root, Files )
 	) -- Now we wait for the callback!
 end
 
-function ENT:OnCompileError( ErMsg, Compiler ) end
+function ENT:OnCompileError( ErMsg, Compiler )
+	MsgN( "ExpAdv2 Error] -> ", Context, ": ", ErMsg )
+end
 
 function ENT:BuildInstance( Instance, Instruction )
 	

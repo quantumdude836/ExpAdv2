@@ -1230,8 +1230,9 @@ function Compiler:Statement_7( Trace )
 
 		self:RequireToken( "rcb", "Right curly bracket (}) missing, to close server defintion" )
 
-		if SERVER then return Sequence end
-		return { Trace = Trace, Return = "", Prepare = "",FLAG = EXPADV_PREPARE, IsRaw = true }
+		Sequence.Prepare = string.format( "if SERVER then\n%s\nend", Sequence.Prepare )
+			
+		return Sequence
 	end
 
 	if self:AcceptToken( "cl" ) then
@@ -1253,8 +1254,9 @@ function Compiler:Statement_7( Trace )
 
 		self:RequireToken( "rcb", "Right curly bracket (}) missing, to close client defintion" )
 
-		if CLIENT then return Sequence end
-		return { Trace = Trace, Return = "", Prepare = "",FLAG = EXPADV_PREPARE, IsRaw = true }
+		Sequence.Prepare = string.format( "if CLIENT then\n%s\nend", Sequence.Prepare )
+			
+		return Sequence
 	end
 
 	return self:Statement_8( Trace )

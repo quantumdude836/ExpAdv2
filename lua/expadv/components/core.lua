@@ -1,17 +1,56 @@
--- Temporary string print!
-	EXPADV.AddFunctionHelper( nil, "print", "s", "Prints to owners/clients chat." )
-
-	EXPADV.AddPreparedFunction( nil, "print", "s", "", "print(@value 1)" )
-
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
-	@: CORE COMPOENT! - NOT REGISTERED AS COMPONENT!
+	@: Print Operator
    --- */
 
-EXPADV.SharedOperators( )
+EXPADV.ServerOperators( )
+
+EXPADV.AddPreparedFunction( nil, "printColor", "...", "",[[
+	@define Tbl = { @... }
+
+	for K, Obj in pairs( @Tbl ) do
+		if Obj[2] == "c" then continue end
+	end
+
+	EXPADV.PrintColor( Context.Player, @Tbl )
+]] )
+
+EXPADV.AddPreparedFunction( nil, "print", "...", "",[[
+	@define Tbl = { @... }
+
+	for K, Obj in pairs( @Tbl ) do
+		@Tbl[K] = EXPADV.ToString( Obj[2], Obj[1] )
+	end
+
+	EXPADV.PrintColor( Context.Player, @Tbl )
+]] )
+
+if SERVER then
+	util.AddNetworkString( "expadv.printcolor" )
+
+	function EXPADV.PrintColor( Player, Tbl )
+		net.Start( "expadv.printcolor" )
+		net.WriteTable( Tbl )
+		net.Send( Player )
+	end
+
+end
+
+if CLIENT then
+	net.Receive( "expadv.printcolor", function( )
+		local Tbl = net.ReadTable( )
+
+		MsgN( "From ExpAdv2:" )
+		PrintTable( Tbl )
+		
+		chat.AddText( unpack( Tbl ) )
+	end )
+end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Define boolean class
    --- */
+
+EXPADV.SharedOperators( )
 
 local Boolean = EXPADV.AddClass( nil, "boolean", "b" )
 	  
@@ -47,7 +86,11 @@ local Variant = EXPADV.AddClass( nil, "variant", "vr" )
 	  Variant:DefaultAsLua( { false, "b" } )
 
 hook.Add( "Expadv.PostRegisterClass", "expad.variant", function( Name, Class )
-	if !Class.LoadOnClient then EXPADV.ServerOperators( ) elseif !Class.LoadOnServer then EXPADV.ClientOperators( ) else EXPADV.SharedOperators( ) end
+	if !Class.LoadOnClient then
+		EXPADV.ServerOperators( )
+	elseif !Class.LoadOnServer then
+		EXPADV.ClientOperators( )
+	else EXPADV.SharedOperators( ) end
 
 	EXPADV.AddInlineOperator( nil, "variant", Class.Short, "vr", "{ @value 1, @type 1 }" )
 
@@ -82,23 +125,3 @@ hook.Add( "Tick", "Expav.Event", function( ) EXPADV.CallEvent( "tick" ) end )
 EXPADV.AddEvent( nil, "think", "", "" )
 
 hook.Add( "Think", "Expav.Event", function( ) EXPADV.CallEvent( "think" ) end )
-
-/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
-@: I WHANT TO TRY RENDERING! -- Remove All this!
---- */
-
-EXPADV.ClientEvents( )
-
-EXPADV.AddEvent( nil, "render", "n,n", "" )
-
-EXPADV.ClientOperators( )
-
-EXPADV.AddPreparedFunction( nil, "drawColor", "c", "", "$surface.SetDrawColor( @value 1 )" )
-
-EXPADV.AddPreparedFunction( nil, "drawBox", "n,n,n,n", "", "$surface.DrawRect( @value 1, @value 2, @value 3, @value 4 )" )
-
-EXPADV.AddPreparedFunction( nil, "drawText", "s,n,n", "", "$surface.SetTextPos( @value 2, @value 3 ); $surface.DrawText( @value 1 )" )
-
-EXPADV.AddPreparedFunction( nil, "textColor", "n,n,n,n", "", "$surface.SetTextColor( @value 1, @value 2, @value 3, @value 4 )" )
-
-EXPADV.AddPreparedFunction( nil, "textFont", "s", "", "$surface.SetFont( @value 1 )" )

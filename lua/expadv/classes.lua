@@ -207,8 +207,8 @@ end
 local ToStringLookUp = { }
 
 -- Used during execution to translate class objects to strings.
-function EXPADV.ToString( Context, Short, Obj ) -- Table, String, Obj
-	return ToStringLookUp[Short]( Context, Obj )
+function EXPADV.ToString( Short, Obj ) -- String, Obj
+	return ToStringLookUp[Short]( Obj )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -289,14 +289,13 @@ function EXPADV.LoadClasses( )
 	 	end
 
 	 	if !Class.ToString then
-	 		function Class.ToString( Context, Trace, Obj )
+	 		function Class.ToString( Obj )
  				return string.format("<%s: %s>", Class.Name, tostring( Obj ) )
  			end
  		end
 
  		ToStringLookUp[Class.Short] = Class.ToString
- 		EXPADV.AddVMFunction( Class.Component, "tostring", Class.Short , "s", Class.ToString )
-
+ 		
  		if Class.DeriveGeneric then continue end
  		if Class == Class_Generic then continue end
  		

@@ -223,7 +223,6 @@ function EXPADV.LoadEditor( )
 		include( "expadv/editor/ea_toolbar.lua" )
 		include( "expadv/editor/syntaxer.lua" )
 		include( "expadv/editor/pastebin.lua" )
-		include( "expadv/editor/repo.lua" )
 		include( "expadv/editor/ea_search.lua" )
 		include( "expadv/editor.lua" )
 	end

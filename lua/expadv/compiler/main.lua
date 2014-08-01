@@ -93,7 +93,6 @@ end )
    --- */
 
 include( "tokenizer.lua" )
-include( "headers.lua" )
 include( "parser.lua" )
 include( "instructions.lua" )
 
@@ -557,7 +556,7 @@ EXPADV.BaseEnv = {
 
 local function CreateEnviroment( )
 	return {
-		EXPADV = EXPADV,
+		EXPADV = EXPADV, SERVER = SERVER, CLIENT = CLIENT,
 		Vector = Vector, Angle = Angle, Color = Color,
 		pairs = pairs, ipairs = ipairs,
 		pcall = pcall, error = error, unpack = unpack,
