@@ -22,8 +22,7 @@ end
 
 if WireLib then
 	TOOL.Name						= "Expression Advanced 2"
-	TOOL.Category					= "Wire - Control"
-	TOOL.Wire_MultiCategories		= "Chips, Gates"
+	TOOL.Category					= "Chips, Gates"
 	TOOL.Tab						= "Wire"
 else
 	TOOL.Name						= "Expression Advanced 2"
@@ -82,7 +81,7 @@ local function MakeExpadv( Player, Position, Angle, Model )
 		return nil
 	end
 	
-	local ExpAdv = ents.Create( "expadv_base" )
+	local ExpAdv = ents.Create( "expadv_gate" )
 	if !IsValid( ExpAdv ) then return end
 
 	ExpAdv:SetPos( Position )

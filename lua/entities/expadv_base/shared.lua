@@ -74,19 +74,13 @@ function ENT:OnStartUp( Context ) end
 
 function ENT:OnShutDown( Context ) end
 
-function ENT:OnLuaError( Context, Msg )
-	MsgN( "ExpAdv2 Error] -> ", Context, ": ", Msg )
-end
+function ENT:OnLuaError( Context, Msg ) end
 
-function ENT:OnScriptError( Context, Msg )
-	MsgN( "ExpAdv2 Error] -> ", Context, ": ", Msg )
-end
+function ENT:OnScriptError( Context, Msg ) end
 
 function ENT:OnUncatchedException( Context, Exception ) end --OnException
 
 function ENT:OnContextUpdate( Context ) end -- OnUpdate
-
-function ENT:DoPrint( Context, Msg ) end -- Print (TEMP)
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Context
@@ -162,9 +156,7 @@ function ENT:CompileScript( Root, Files )
 	) -- Now we wait for the callback!
 end
 
-function ENT:OnCompileError( ErMsg, Compiler )
-	MsgN( "ExpAdv2 Error] -> ", Context, ": ", ErMsg )
-end
+function ENT:OnCompileError( ErMsg, Compiler ) end
 
 function ENT:BuildInstance( Instance, Instruction )
 	
@@ -186,7 +178,7 @@ function ENT:BuildInstance( Instance, Instruction )
 	
 	self.Cells = Instance.Cells 
 
-	if WireLib then
+	if WireLib and SERVER then
 		self:BuildInputs( self.Cells, Instance.InPorts )
 		self:BuildOutputs( self.Cells, Instance.OutPorts )
 		self:LoadFromInputs( )

@@ -1,5 +1,39 @@
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
-	@: Print Operator
+	@: Client Print Operator
+   --- */
+
+EXPADV.ClientOperators( )
+
+EXPADV.AddPreparedFunction( nil, "cl_PrintColor", "...", "",[[
+	-- if Context.player == $LocalPlayer( ) then
+		@define Tbl = { @... }
+
+		for K, Obj in pairs( @Tbl ) do
+			if Obj[2] ~= "c" then
+				@Tbl[K] = EXPADV.ToString( Obj[2], Obj[1] )
+			else
+				@Tbl[K] = Obj[1]
+			end
+		end
+
+		$chat.AddText( $unpack( @Tbl ) )
+	-- end
+]] )
+
+EXPADV.AddPreparedFunction( nil, "cl_Print", "...", "",[[
+	if Context.player == $LocalPlayer( ) then
+		@define Tbl = { @... }
+
+		for K, Obj in pairs( @Tbl ) do
+			@Tbl[K] = EXPADV.ToString( Obj[2], Obj[1] )
+		end
+
+		$chat.AddText( $unpack( @Tbl ) )
+	end
+]] )
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Client Print Operator
    --- */
 
 EXPADV.ServerOperators( )
@@ -8,10 +42,14 @@ EXPADV.AddPreparedFunction( nil, "printColor", "...", "",[[
 	@define Tbl = { @... }
 
 	for K, Obj in pairs( @Tbl ) do
-		if Obj[2] == "c" then continue end
+		if Obj[2] ~= "c" then
+			@Tbl[K] = EXPADV.ToString( Obj[2], Obj[1] )
+		else
+			@Tbl[K] = Obj[1]
+		end
 	end
 
-	EXPADV.PrintColor( Context.Player, @Tbl )
+	EXPADV.PrintColor( Context.player, @Tbl )
 ]] )
 
 EXPADV.AddPreparedFunction( nil, "print", "...", "",[[
@@ -21,7 +59,7 @@ EXPADV.AddPreparedFunction( nil, "print", "...", "",[[
 		@Tbl[K] = EXPADV.ToString( Obj[2], Obj[1] )
 	end
 
-	EXPADV.PrintColor( Context.Player, @Tbl )
+	EXPADV.PrintColor( Context.player, @Tbl )
 ]] )
 
 if SERVER then
@@ -37,12 +75,7 @@ end
 
 if CLIENT then
 	net.Receive( "expadv.printcolor", function( )
-		local Tbl = net.ReadTable( )
-
-		MsgN( "From ExpAdv2:" )
-		PrintTable( Tbl )
-		
-		chat.AddText( unpack( Tbl ) )
+		chat.AddText( unpack( net.ReadTable( ) ) )
 	end )
 end
 

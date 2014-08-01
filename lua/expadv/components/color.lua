@@ -10,7 +10,7 @@ local ColorComponent = EXPADV.AddComponent( "color", true )
 
 local ColorObj = ColorComponent:AddClass( "color", "c" )
 
-ColorObj:StringBuilder( function( _, __, Color) return string.format( "Color< %i, %i, %i, %i >", Color.r, Color.g, Color.b, Color.a ) end )
+ColorObj:StringBuilder( function( Color) return string.format( "Color< %i, %i, %i, %i >", Color.r, Color.g, Color.b, Color.a ) end )
 ColorObj:DefaultAsLua( Color(255, 255, 255, 255) )
 
 if WireLib then
