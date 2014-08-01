@@ -141,6 +141,10 @@ function EXPADV.AddComponentFile( FileName )
 	EXPADV.SharedOperators( )
 	MsgN( "Loading Component: " .. FileName )
 	include( "expadv/components/" .. FileName .. ".lua" )
+
+	if CLIENT then return end
+
+	AddCSLuaFile( "expadv/components/" .. FileName .. ".lua" )
 end
 
 function EXPADV.LoadCore( )

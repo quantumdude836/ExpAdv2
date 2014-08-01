@@ -2,6 +2,8 @@ include( "expadv/core.lua" )
 
 if CLIENT then return end
 
+AddCSLuaFile( )
+
 AddCSLuaFile( "expadv/context.lua" )
 AddCSLuaFile( "expadv/core.lua" )
 AddCSLuaFile( "expadv/components.lua" )
