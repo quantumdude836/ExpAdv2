@@ -9,6 +9,8 @@ AddCSLuaFile( "expadv/core.lua" )
 AddCSLuaFile( "expadv/components.lua" )
 AddCSLuaFile( "expadv/classes.lua" )
 AddCSLuaFile( "expadv/operators.lua" )
+AddCSLuaFile( "expadv/events.lua" )
+AddCSLuaFile( "expadv/cppi.lua" )
 AddCSLuaFile( "expadv/context.lua" )
 
 AddCSLuaFile( "expadv/compiler/main.lua" )
