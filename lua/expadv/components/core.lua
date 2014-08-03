@@ -2,12 +2,48 @@
 	@: Client Print Operator
    --- */
 
-EXPADV.ClientOperators( )
+if CLIENT then
+	EXPADV.SharedOperators( )
 
-EXPADV.AddPreparedFunction( nil, "cl_PrintColor", "...", "",[[
-	-- if Context.player == $LocalPlayer( ) then
+	EXPADV.AddPreparedFunction( nil, "printColor", "...", "",[[
+		-- if Context.player == $LocalPlayer( ) then
+			@define Tbl = { @... }
+
+			for K, Obj in pairs( @Tbl ) do
+				if Obj[2] ~= "c" then
+					@Tbl[K] = EXPADV.ToString( Obj[2], Obj[1] )
+				else
+					@Tbl[K] = Obj[1]
+				end
+			end
+
+			$chat.AddText( $unpack( @Tbl ) )
+		-- end
+	]] )
+
+	EXPADV.AddPreparedFunction( nil, "print", "...", "",[[
+		if Context.player == $LocalPlayer( ) then
+			@define Tbl = { @... }
+
+			for K, Obj in pairs( @Tbl ) do
+				@Tbl[K] = EXPADV.ToString( Obj[2], Obj[1] )
+			end
+
+			$chat.AddText( $unpack( @Tbl ) )
+		end
+	]] )
+end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Server Print Operator
+   --- */
+
+if SERVER then
+	EXPADV.SharedOperators( )
+	
+	EXPADV.AddPreparedFunction( nil, "printColor", "...", "",[[
 		@define Tbl = { @... }
-
+	
 		for K, Obj in pairs( @Tbl ) do
 			if Obj[2] ~= "c" then
 				@Tbl[K] = EXPADV.ToString( Obj[2], Obj[1] )
@@ -15,52 +51,20 @@ EXPADV.AddPreparedFunction( nil, "cl_PrintColor", "...", "",[[
 				@Tbl[K] = Obj[1]
 			end
 		end
-
-		$chat.AddText( $unpack( @Tbl ) )
-	-- end
-]] )
-
-EXPADV.AddPreparedFunction( nil, "cl_Print", "...", "",[[
-	if Context.player == $LocalPlayer( ) then
+	
+		EXPADV.PrintColor( Context.player, @Tbl )
+	]] )
+	
+	EXPADV.AddPreparedFunction( nil, "print", "...", "",[[
 		@define Tbl = { @... }
-
+	
 		for K, Obj in pairs( @Tbl ) do
 			@Tbl[K] = EXPADV.ToString( Obj[2], Obj[1] )
 		end
-
-		$chat.AddText( $unpack( @Tbl ) )
-	end
-]] )
-
-/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
-	@: Client Print Operator
-   --- */
-
-EXPADV.ServerOperators( )
-
-EXPADV.AddPreparedFunction( nil, "printColor", "...", "",[[
-	@define Tbl = { @... }
-
-	for K, Obj in pairs( @Tbl ) do
-		if Obj[2] ~= "c" then
-			@Tbl[K] = EXPADV.ToString( Obj[2], Obj[1] )
-		else
-			@Tbl[K] = Obj[1]
-		end
-	end
-
-	EXPADV.PrintColor( Context.player, @Tbl )
-]] )
-
-EXPADV.AddPreparedFunction( nil, "print", "...", "",[[
-	@define Tbl = { @... }
-
-	for K, Obj in pairs( @Tbl ) do
-		@Tbl[K] = EXPADV.ToString( Obj[2], Obj[1] )
-	end
-
-	EXPADV.PrintColor( Context.player, @Tbl )
-]] )
+	
+		EXPADV.PrintColor( Context.player, @Tbl )
+	]] )
+end
 
 if SERVER then
 	util.AddNetworkString( "expadv.printcolor" )

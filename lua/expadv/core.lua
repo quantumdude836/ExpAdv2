@@ -162,7 +162,9 @@ function EXPADV.LoadCore( )
 	EXPADV.AddComponentFile( "string" )
 	EXPADV.AddComponentFile( "color" )
 	EXPADV.AddComponentFile( "vector" )
+	EXPADV.AddComponentFile( "entity" )
 	EXPADV.AddComponentFile( "hologram" )
+	EXPADV.AddComponentFile( "motionsensor" )
 
 	EXPADV.LoadComponents( )
 
@@ -238,38 +240,39 @@ end
 	@: Hooks.
    --- */
 
-   -- Think( )							| Void | Called once per think, this is for convenience.
-   -- PostLoadCore( )					| Void | Called after the core has finished loading.
-   -- UnloadCore( )						| Void | Called before the core reloads.
-   -- PostLoadConfig( Config )			| Void | Called after the main config has loaded.
-   -- PreSaveConfig( Config )			| Void | Called before saving the main config file.
-   -- PostLoadComponents( ) 			| Void | Called once all components have been loaded.
-   -- EnableComponent( Component ) 		| Void | Called after a component enables.
-   -- PreLoadOperators( )				| Void | Called before operators are loaded.
-   -- PostLoadOperators( )				| Void | Called after operators are loaded.
-   -- PreLoadFunctions( )				| Void | Called before functions are loaded.
-   -- PostLoadFunctions( )				| Void | Called after functions are loaded.
-   -- PreLoadAliases( )					| Void | Called before function aliases are loaded.
-   -- PostLoadAliases( )				| Void | Called after function aliases are loaded.
-   -- PreLoadClasses( )					| Void | Called before classes are loaded.
-   -- PostLoadClasses( )				| Void | Called after classes are loaded.
-   -- PostLoadClassAliases( )			| Void | Called after classes and class aliases are loaded.
-   -- PreRegisterClass( Short, Class )	| Void | Called once per class, before class loading begins (classes can be created here).
-   -- PostRegisterClass( Name, Class )	| Void | Called after each class has been registered and loaded.
-   -- PreLoadCompiler( BaseCompiler )	| Void | Called before the compiler is loaded.
-   -- PostLoadCompiler( BaseCompiler )	| Void | Called after the compiler is loaded.
-   -- BuildCompilerTokens( TokenArray )	| Void | Called before the compiler builds it token list.
-   -- RegisterContext( Context )*		| Void | Called when a context is registered to the core.
-   -- UnregisterContext( Context )*		| Void | Called when a context is unregistered from the core.
-   -- LuaError( Context, Error )*		| Void | Called when an executing context throws a lua error.
-   -- ScriptError( Context, Error )*	| Void | Called when an executing context throws a script error.
-   -- Exception( Context, Exception )*	| Void | Called when an executing context receives an uncatched exception.
-   -- StartUp( Context )*				| Void | Called before the initial root execution.
-   -- ShutDown( Context )*				| Void | Called after the context has shutdown.
-   -- Update( Context )*				| Void | Called every tick, when a context has ran that tick.
-   -- ClientLoaded( Entity, Player )	| Void | Called server side once a client confirms an entity has loaded its script.
-   -- BuildHologramModels( Table )		| Void | Called when the hologram model look up is made.
-   -- GetDataStream( DataTable )		| Void | Called clientside when data needs to be sent.
+   -- Think( )										| Void | Called once per think, this is for convenience.
+   -- PostLoadCore( )								| Void | Called after the core has finished loading.
+   -- UnloadCore( )									| Void | Called before the core reloads.
+   -- PostLoadConfig( Config )						| Void | Called after the main config has loaded.
+   -- PreSaveConfig( Config )						| Void | Called before saving the main config file.
+   -- PostLoadComponents( ) 						| Void | Called once all components have been loaded.
+   -- EnableComponent( Component ) 					| Void | Called after a component enables.
+   -- PreLoadOperators( )							| Void | Called before operators are loaded.
+   -- PostLoadOperators( )							| Void | Called after operators are loaded.
+   -- PreLoadFunctions( )							| Void | Called before functions are loaded.
+   -- PostLoadFunctions( )							| Void | Called after functions are loaded.
+   -- PreLoadAliases( )								| Void | Called before function aliases are loaded.
+   -- PostLoadAliases( )							| Void | Called after function aliases are loaded.
+   -- PreLoadClasses( )								| Void | Called before classes are loaded.
+   -- PostLoadClasses( )							| Void | Called after classes are loaded.
+   -- PostLoadClassAliases( )						| Void | Called after classes and class aliases are loaded.
+   -- PreRegisterClass( Short, Class )				| Void | Called once per class, before class loading begins (classes can be created here).
+   -- PostRegisterClass( Name, Class )				| Void | Called after each class has been registered and loaded.
+   -- PreLoadCompiler( BaseCompiler )				| Void | Called before the compiler is loaded.
+   -- PostLoadCompiler( BaseCompiler )				| Void | Called after the compiler is loaded.
+   -- PreCompileScript( Compiler, Script, Files ) 	| Void | Called before the compiler starts main compiler process.
+   -- BuildCompilerTokens( TokenArray )				| Void | Called before the compiler builds it token list.
+   -- RegisterContext( Context )*					| Void | Called when a context is registered to the core.
+   -- UnregisterContext( Context )*					| Void | Called when a context is unregistered from the core.
+   -- LuaError( Context, Error )*					| Void | Called when an executing context throws a lua error.
+   -- ScriptError( Context, Error )*				| Void | Called when an executing context throws a script error.
+   -- Exception( Context, Exception )*				| Void | Called when an executing context receives an uncatched exception.
+   -- StartUp( Context )*							| Void | Called before the initial root execution.
+   -- ShutDown( Context )*							| Void | Called after the context has shutdown.
+   -- Update( Context )*							| Void | Called every tick, when a context has ran that tick.
+   -- ClientLoaded( Entity, Player )				| Void | Called server side once a client confirms an entity has loaded its script.
+   -- BuildHologramModels( Table )					| Void | Called when the hologram model look up is made.
+   -- GetDataStream( DataTable )					| Void | Called clientside when data needs to be sent.
 
    --  function Component:OnPostLoadAliases( ) end
    --  hook.Add( "Expadv.PostLoadAliases", ... )

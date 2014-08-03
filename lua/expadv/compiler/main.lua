@@ -614,6 +614,9 @@ local function SoftCompile( self, Script, Files, OnError, OnSucess )
 	-- Wait for next tick to begin:
 		self:Yield( true )
 		
+	-- Call hook:
+		EXPADV.CallHook( "preCompileScript", self, Script, Files )
+
 	-- Ok, Run the compiler.
 		local Compiled, Instruction = pcall( self.Sequence, self, { 0, 0 } ) -- self.Main
 

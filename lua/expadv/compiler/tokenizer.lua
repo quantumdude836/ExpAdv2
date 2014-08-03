@@ -148,6 +148,7 @@ function Compiler:NextToken( )
 	end
 
 	if self.PrepToken then
+		self.PrepTokenData = self.PrepToken[1]
 		self.PrepTokenType = self.PrepToken[2]
 		self.PrepTokenName = self.PrepToken[3]
 		self.PrepTokenLine = self.PrepToken[4]
@@ -293,8 +294,16 @@ function Compiler:StringToken( StrChar )
 	self:Error( 0, "Unterminated string (\"%s)", String )
 end
 
+/* ---------------------------------------------------------------------------------------------------------------------------------------------- */
+
+local AddedWords = { }
+
+function Compiler.AddWordToken( Word, Type, Desc )
+	AddedWords[Word] = { Type, Desc }
+end
 
 /* ---------------------------------------------------------------------------------------------------------------------------------------------- */
+
 
 function Compiler:BuildToken( )
 	-- NUMBER:
@@ -390,6 +399,12 @@ function Compiler:BuildToken( )
 			return self:NewToken( "sv", "server" )
 		elseif RawData == "client" then
 			return self:NewToken( "cl", "client" )
+
+	-- ADDED WORDS:
+
+		elseif AddedWords[RawData] then
+			local TokenInfo = AddedWords[RawData]
+			return self:NewToken( TokenInfo[1], TokenInfo[2] )
 		end
 
 	-- VARIABLE:

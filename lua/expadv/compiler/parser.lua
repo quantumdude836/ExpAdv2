@@ -24,6 +24,18 @@ function Compiler:AcceptToken( Type, Type2, ... )
 	return false
 end
 
+function Compiler:AcceptTokenData( Data, Data2, ... )
+	if self.PrepToken and ( self.PrepTokenData == Data ) then
+		self:NextToken( )
+
+		return true
+	elseif Data2 then
+		return self:AcceptTokenData( Data2, ... )
+	end
+	
+	return false
+end
+
 function Compiler:CheckToken( Type, Type2, ... )
 	if self.PrepToken and ( self.PrepTokenType == Type ) then
 		return true
@@ -691,6 +703,7 @@ end
 function Compiler:Sequence( Trace, ExitToken )
 	
 	local Sequence = { }
+	local Result = self.ReturnExpr
 
 	while true do
 
@@ -712,7 +725,8 @@ function Compiler:Sequence( Trace, ExitToken )
 	end
 
 	self.BreakOut = nil
-	return self:Compile_SEQ( Trace, Sequence )
+	self.ReturnExpr = nil
+	return self:Compile_SEQ( Trace, Sequence ), self.ReturnExpr or Result
 end
 
 -- Stage 1: If statments
@@ -1003,7 +1017,15 @@ function Compiler:Statement_5( Trace )
 			return self:Compile_RETURN( Trace )
 		end
 
-		return self:Compile_RETURN( Trace, self:Expression( Trace ) )
+		local Expr = self:Expression( Trace )
+
+		if self.ReturnExpr and Expr.Return ~= self.ReturnExpr.Return then
+			self:TraceError( Trace, "Invalid return type, %s expected got %s", self.ReturnExpr.Return, Expr.Return )
+		end
+
+		self.ReturnExpr = Expr
+
+		return self:Compile_RETURN( Trace, Expr )
 	end
 
 	return self:Statement_6( Trace )
