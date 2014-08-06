@@ -114,6 +114,14 @@ EXPADV.AddInlineOperator( nil, "not", "b", "b", "!@value 1" )
 EXPADV.AddInlineOperator( nil, "||", "b,b", "b", "(@value 1 or @value 2)" )
 EXPADV.AddInlineOperator( nil, "&&", "b,b", "b", "(@value 1 and @value 2)" )
 
+EXPADV.AddPreparedOperator( nil, "b=", "n,c", "", [[
+	@define value = Context.Memory[@value 1]
+	Context.Trigger = Context.Trigger or Context.Delta[@value 1] ~= @value
+	Context.Memory[@value 1] = @value 2
+]] )
+
+EXPADV.AddInlineOperator( nil, "=b", "n", "b", "Context.Memory[@value 1]" )
+
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Register variant class!
    --- */
@@ -134,6 +142,13 @@ hook.Add( "Expadv.PostRegisterClass", "expad.variant", function( Name, Class )
 	EXPADV.AddInlineOperator( nil, Name, "vr", Class.Short, string.format( "( @value 1[2] == %q and @value 1[1] or Context:Throw(@trace, %q, \"Attempt to cast value \" .. EXPADV.TypeName(@value 1[2]) .. \" to %s \") )", Class.Short, "cast", Name ) )
 end )	
 
+EXPADV.AddPreparedOperator( nil, "_vr=", "n,vr", "", [[
+	@define value = Context.Memory[@value 1]
+	Context.Trigger = Context.Trigger or Context.Delta[@value 1] ~= @value
+	Context.Memory[@value 1] = @value 2
+]] )
+
+EXPADV.AddInlineOperator( nil, "=_vr", "n", "vr", "Context.Memory[@value 1]" )
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Define function class
@@ -145,7 +160,15 @@ local FunctionClass = EXPADV.AddClass( nil, "function", "f" )
 	  
 	 FunctionClass:DefaultAsLua( "function( ) end" )
 
-EXPADV.AddInlineOperator( nil, "call", "f,...", "", "@value 1(@...)" )
+EXPADV.AddInlineOperator( nil, "call", "f,...", "_vr", "@value 1(@...)" )
+
+EXPADV.AddPreparedOperator( nil, "f=", "n,f", "", [[
+	@define value = Context.Memory[@value 1]
+	Context.Trigger = Context.Trigger or Context.Delta[@value 1] ~= @value
+	Context.Memory[@value 1] = @value 2
+]] )
+
+EXPADV.AddInlineOperator( nil, "=f", "n", "f", "Context.Memory[@value 1]" )
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Register exception class!

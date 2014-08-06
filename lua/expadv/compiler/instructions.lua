@@ -315,10 +315,27 @@ function Compiler:Compile_VAR( Trace, Variable )
 	local Class = self.Cells[ MemRef ].Return
 
 	local Operator = self:LookUpOperator( "=" ..  Class, "n" )
-	if Operator then return Operator.Compile( self, Trace, Quick( MemRef, "n" ) ) end
+	
+	if Operator then
+		local Instr = Operator.Compile( self, Trace, Quick( MemRef, "n" ) )
+		
+		Instr.Variable = Variable
+		Instr.Scope = MemScope
+		Instr.MemRef = MemRef
+
+		return Instr
+	end
 	
 	local Operator = self:LookUpOperator( "=" ..  Class, "s" )
-	if Operator then return Operator.Compile( self, Trace, Quick( Variable, "s" ) ) end
+	
+	if Operator then
+		local Instr = Operator.Compile( self, Trace, Quick( Variable, "s" ) )
+		Instr.Variable = Variable
+		Instr.Scope = MemScope
+		Instr.MemRef = MemRef
+		
+		return Instr
+	end
 	
 	return { Trace = Trace, Inline = string.format( "Context.Memory[%i]", MemRef ), Return = Class, FLAG = EXPADV_INLINE, IsRaw = true, Variable = Variable, Scope = MemScope, MemRef = MemRef }
 end
@@ -551,8 +568,10 @@ function Compiler:Compile_CALL( Trace, Expression, Expressions )
 
 	local Instruction = Operator.Compile( self, Trace, Expression, unpack( Expressions ) )
 
-	if Expression.Return == "f" and Expression.Variable then
-		Instruction.Return = self.KnownReturnTypes[Expression.Scope][Expression.Variable]
+	MsgN( "We Have: ", Expression.MemRef )
+
+	if Expression.Return == "f" and Expression.MemRef then
+		Instruction.Return = self.KnownReturnTypes[Expression.Scope][Expression.MemRef]
 	end
 
 	return Instruction

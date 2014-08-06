@@ -728,7 +728,7 @@ function EXPADV.BuildLuaOperator( Operator )
 				end
 
 				if Operator.FLAG == EXPADV_INLINE or Operator.FLAG == EXPADV_INLINEPREPARE then
-					OpInline = string.gsub( OpInline, "(@%.%.%.)" .. I, table.concat( VAInline, "," ) )
+					OpInline = string.gsub( OpInline, "(@%.%.%.)", table.concat( VAInline, "," ) )
 				end
 
 			end

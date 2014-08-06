@@ -190,7 +190,7 @@ function PANEL:DoValidationStep( )
 
 	if self.ValidationInstance then
 		self.ValidateButton:SetColor( Color( 0, 0, 255 ) )
-		self.ValidateButton:SetText( "Validating: " .. self.ValidationInstance:PercentCompiled( ) .. "%" )
+		self.ValidateButton:SetText( "Validating: " .. self.ValidationInstance:PercentCompiled( ) .. "% - " .. coroutine.status( self.ValidationInstance.CoRoutine ) )
 	end
 end
 

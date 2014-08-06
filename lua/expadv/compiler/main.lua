@@ -249,7 +249,7 @@ function Compiler:BuildScopes( )
 	self.ScopeID = 1
 	self.Global, self.Scope = { }, { }
 	self.Scopes = { [0] = self.Global, self.Scope }
-	self.ReturnTypes = { [0] = { }, { } }
+	self.KnownReturnTypes = { [0] = { }, { } }
 	self.MemoryRef = 0
 end
 
@@ -312,8 +312,8 @@ end
    function Compiler:PushReturnDeph( ForceClass, Optional )
    		self.ReturnDeph = self.ReturnDeph + 1
    		if ForceClass and ForceClass ~= "" then
-			self.ReturnTypes[ self.ReturnDeph ] = ForceClass
-			self.ReturnOptional[ self.ReturnDeph ] = ForceClass and Optional or nil
+   			self.ReturnTypes[ self.ReturnDeph ] = ForceClass
+			self.ReturnOptional[ self.ReturnDeph ] = Optional
 		end
    end
 
@@ -612,7 +612,6 @@ local function SoftCompile( self, Script, Files, OnError, OnSucess )
 		self.LambdaDeph = 0
 		self.LoopDeph = 0
 
-		self.KnownReturnTypes = { }
 		self.ReturnOptional = { }
 		self.ReturnTypes = { }
 		self.ReturnDeph = 0
@@ -624,7 +623,7 @@ local function SoftCompile( self, Script, Files, OnError, OnSucess )
 		self:Yield( true )
 		
 	-- Call hook:
-		EXPADV.CallHook( "preCompileScript", self, Script, Files )
+		EXPADV.CallHook( "PreCompileScript", self, Script, Files )
 
 	-- Ok, Run the compiler.
 		local Compiled, Instruction = pcall( self.Sequence, self, { 0, 0 } ) -- self.Main
@@ -649,7 +648,7 @@ local TimeMark, SysTime = 0, SysTime
 
 function Compiler:Yield( Force )
 	if Force or SysTime( ) > self.TimeMark then
-		coroutine.yield( )
+		--coroutine.yield( )
 		self.TimeMark = SysTime( ) + 0.001
 	end
 end

@@ -1136,21 +1136,28 @@ function Compiler:Statement_6( Trace )
 	-----------------------------------------------------------------------
 		-- Variable assigments / Arithmatic assigments
 
-	--[[if self:AcceptToken( "func" ) then
+	if self:AcceptToken( "func" ) then
 
-		self.RequireToken( "var", "function return type or void expected") -- TODO: Change this.
+		self:RequireToken( "var", "function return type or void expected" ) -- TODO: Change this.
 
-		local ReturnClass = self:GetClass( Trace, self.TokenData )
+		local ReturnClass
+		if self.TokenData ~= "void" then ReturnClass = self:GetClass( Trace, self.TokenData ).Short end
 
-		self:RequireToken( "lpa", "Left parenthesis ( () missing, after event name" )
+		self:RequireToken( "var", "function name expected" ) -- TODO: Change this.
+
+		local Variable = self.TokenData
+
+		self:RequireToken( "lpa", "Left parenthesis ( () missing, after function name" )
 
 		local Perams, UseVarg = self:Util_Perams( Trace )
 		
-		self:RequireToken( "rpa", "Right parenthesis () ) missing, to close event parameters" )
+		self:RequireToken( "rpa", "Right parenthesis () ) missing, to open function" )
 		
+		self:RequireToken( "lcb", "Left curly bracket ({) missing, to open fnction" )
+
 		self:PushScope( )
 		self:PushLambdaDeph( )
-		self:PushReturnDeph( ReturnClass.Short, true )
+		self:PushReturnDeph( ReturnClass, false )
 
 		local Sequence = self:Sequence( Trace, "rcb" )
 
@@ -1158,12 +1165,16 @@ function Compiler:Statement_6( Trace )
 		self:PopReturnDeph( )
 		self:PopScope( )
 
-		self:RequireToken( "rcb", "Right curly bracket (}) missing, to close event" )
+		self:RequireToken( "rcb", "Right curly bracket (}) missing, to close function" )
 
-		self.KnownReturnTypes[self.ScopeID][Variable] = ReturnClass.Short
+		local Instr = self:Compile_ASS( Trace, Variable, self:Build_Function( Trace, Perams, UseVarg, Sequence, Memory ), "function", Modifier )
+		
+		local MemRef = self:FindCell( Trace, Variable, true )
 
-		return self:Compile_ASS( Trace, Variable, self:Build_Function( Trace, Perams, UseVarg, Sequence, Memory ), "function", Modifier )
-	end]]
+		self.KnownReturnTypes[self.ScopeID][MemRef] = ReturnClass
+
+		return Instr
+	end
 
 	return self:Statement_7( Trace )
 end
