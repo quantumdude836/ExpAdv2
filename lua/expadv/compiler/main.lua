@@ -309,6 +309,20 @@ end
 		return string.format( "local Context = Context:Push( %s, %s )", EXPADV.ToLua( Trace ), EXPADV.ToLua( Memory ) )
    end
 
+   function Compiler:PushReturnDeph( ForceClass, Optional )
+   		self.ReturnDeph = self.ReturnDeph + 1
+   		if ForceClass and ForceClass ~= "" then
+			self.ReturnTypes[ self.ReturnDeph ] = ForceClass
+			self.ReturnOptional[ self.ReturnDeph ] = ForceClass and Optional or nil
+		end
+   end
+
+   function Compiler:PopReturnDeph( )
+   		self.ReturnOptional[ self.ReturnDeph ] = nil
+   		self.ReturnTypes[ self.ReturnDeph ] = nil
+   		self.ReturnDeph = self.ReturnDeph - 1
+   end
+
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Memory Cells
    --- */
@@ -318,13 +332,19 @@ function Compiler:NextMemoryRef( )
 	return self.MemoryRef
 end
 
-function Compiler:TestCell( Trace, MemRef, ClassShort, Variable )
+function Compiler:TestCell( Trace, MemRef, ClassShort, Variable, Comparator )
 	local Cell = self.Cells[ MemRef ]
 
 	if !Cell and Variable then
 		self:TraceError( Trace, "%s of type %s does not exist", Variable, self:NiceClass( ClassShort ) )
 	elseif Cell.Return ~= ClassShort and Variable then
 		self:TraceError( Trace, "%s of type %s can not be assigned as %s", Variable, self:NiceClass( Cell.Return, ClassShort ) )
+	--[[elseif Comparator and Cell.Comparator ~= Comparator then
+		if ClassShort == "_ary" then -- Arrays:
+			self:TraceError( Trace, "%s of type %s[%s] can not be assigned as %s[%s]", Variable, self:NiceClass( Cell.Return, Cell.Comparator, ClassShort, Comparator ) )
+		elseif ClassShort == "l" then -- Lambdas
+			-- self:TraceError( Trace, "lambda function %s must return ", Variable, self:NiceClass( Cell.Return, Cell.Comparator, ClassShort, Comparator ) )
+		end -- No idea where i am going with this :D]] 
 	else
 		return true
 	end
@@ -346,7 +366,11 @@ end
 	@: Memory Cells
    --- */
 
-function Compiler:CreateVariable( Trace, Variable, Class, Modifier )
+function Compiler:CreateVariable( Trace, Variable, Class, Modifier, Comparator )
+	--if Comparator then
+	--	Class, Modifier, Comparator = Comparator, Class, Modifier
+	--end -- ^ omg, I <3 that lua can do this :D
+
 	local ClassObj = istable( Class ) and Class or self:GetClass( Trace, Class, false )
 
 	if self.IsServerScript and self.IsClientScript then
@@ -364,7 +388,7 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier )
 	if !Modifier then
 		local MemRef = self.Scope[ Variable ]
 
-		if MemRef and self:TestCell( Trace, MemRef, Class, Variable ) then
+		if MemRef and self:TestCell( Trace, MemRef, Class, Variable, Comparator ) then
 			return self.Cells[ MemRef ]
 		end
 
@@ -373,10 +397,6 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier )
 		self.Scope[Variable] = MemRef
 
 		self.Cells[ MemRef ] = { Variable = Variable, Memory = MemRef, Scope = self.ScopeID, Return = ClassObj.Short, ClassObj = ClassObj, Modifier = nil }
-
-		--if ClassObj.CreateNew then
-		--	self.Memory[ MemRef ] = ClassObj.CreateNew( )
-		--end
 
 		if self.MemoryDeph > 0 then
 			self.FreshMemory[self.MemoryDeph][MemRef] = MemRef
@@ -388,7 +408,7 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier )
 	if Modifier == "static" then
 		local MemRef = self.Scope[ Variable ]
 
-		if MemRef and self:TestCell( Trace, MemRef, Class, Variable ) then
+		if MemRef and self:TestCell( Trace, MemRef, Class, Variable, Comparator ) then
 			return self.Cells[ MemRef ]
 		end
 
@@ -398,17 +418,13 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier )
 
 		self.Cells[ MemRef ] = { Variable = Variable, Memory = MemRef, Scope = self.ScopeID, Return = ClassObj.Short, ClassObj = ClassObj, Modifier = "static" }
 
-		--if ClassObj.CreateNew then
-		--	self.Memory[ MemRef ] = ClassObj.CreateNew( )
-		--end
-
 		return self.Cells[ MemRef ]
 	end
 
 	if Modifier == "global" then
 		local MemRef = self.Global[ Variable ]
 
-		if MemRef and self:TestCell( Trace, MemRef, Class, Variable ) then
+		if MemRef and self:TestCell( Trace, MemRef, Class, Variable, Comparator ) then
 			return self.Cells[ MemRef ]
 		else
 			MemRef = self:NextMemoryRef( )
@@ -422,10 +438,6 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier )
 		end
 
 		self.Scope[ Variable ] = MemRef
-
-		--if ClassObj.CreateNew then
-		--	self.Memory[ MemRef ] = ClassObj.CreateNew( )
-		--end
 
 		return self.Global[ MemRef ]
 	end
@@ -446,7 +458,7 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier )
 
 			local MemRef = self.InPorts[ Variable ]
 
-			if MemRef and self:TestCell( Trace, MemRef, Class, Variable ) then
+			if MemRef and self:TestCell( Trace, MemRef, Class, Variable, Comparator ) then
 				return self.Cells[ MemRef ]
 			else
 				MemRef = self:NextMemoryRef( )
@@ -461,10 +473,6 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier )
 
 			self.Scope[ Variable ] = MemRef
 
-			--if ClassObj.CreateNew then
-			--	self.Memory[ MemRef ] = ClassObj.CreateNew( )
-			--end
-
 			return self.InPorts[ MemRef ]
 		end
 
@@ -475,7 +483,7 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier )
 
 			local MemRef = self.OutPorts[ Variable ]
 
-			if MemRef and self:TestCell( Trace, MemRef, Class, Variable ) then
+			if MemRef and self:TestCell( Trace, MemRef, Class, Variable, Comparator ) then
 				return self.Cells[ MemRef ]
 			else
 				MemRef = self:NextMemoryRef( )
@@ -489,10 +497,6 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier )
 			end
 
 			self.Scope[ Variable ] = MemRef
-
-			--if ClassObj.CreateNew then
-			--	self.Memory[ MemRef ] = ClassObj.CreateNew( )
-			--end
 
 			return self.OutPorts[ MemRef ]
 		end
@@ -607,6 +611,10 @@ local function SoftCompile( self, Script, Files, OnError, OnSucess )
 		self.MemoryDeph = 0
 		self.LambdaDeph = 0
 		self.LoopDeph = 0
+
+		self.ReturnOptional = { }
+		self.ReturnTypes = { }
+		self.ReturnDeph = 0
 
 	-- Start the Tokenizer:
 		self:StartTokenizer( )

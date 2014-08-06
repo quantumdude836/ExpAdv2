@@ -13,7 +13,9 @@ function Compiler:CurrentToken( Type )
 end
 
 function Compiler:AcceptToken( Type, Type2, ... )
+
 	if self.PrepToken and ( self.PrepTokenType == Type ) then
+		-- MsgN( "ACCEPTED: ", Type, " - ", self.PrepToken[5] ) 
 		self:NextToken( )
 
 		return true
@@ -182,79 +184,67 @@ function Compiler:Expression( Trace )
 	return Expression
 end
 
--- Stage 1: Grouped Equation
-function Compiler:Expression_1( Trace )
-	-- MsgN( "Compiler -> Expression 1" )
-	
-	if self:AcceptToken( "lpa" ) then
-		local Expression = self:Expression_1( Trace )
-		
-		if Expression.FLAG == EXPADV_INLINE or Expression.FLAG == EXPADV_INLINEPREPARE then
-			Expression.Inline = string.format( "(%s)", Expression.Inline )
-		end
+function Compiler:Expression( Trace )
+	-- MsgN( "Compiler -> Expression" )
 
-		self:RequireToken( "rpa", "Right parenthesis ( )) missing, to close grouped equation." )
+	local _ExprRequire = self.ExpressionRequired
+	self.ExpressionRequired = true
 
-		return Expression
-	end
+	local _ExprRoot = self.ExpressionRoot
+	self.ExpressionRoot = self:GetTokenTrace( Trace )
 	
-	return self:Expression_2( Trace )
+	local Expression = self:Expression_1( Trace )
+
+	self.ExpressionRequired = _ExprRequire
+	self.ExpressionRoot = _ExprRoot
+
+	return Expression
 end
 
--- Stage 2: Unary operations, sizeof, casting
+-- Stage 1: Ternary
+function Compiler:Expression_1( Trace )
+	-- MsgN( "Compiler -> Expression 1" )
+
+	local Expression = self:Expression_2( Trace )
+
+	while self:AcceptToken( "qsm" ) do
+		local Trace = self:GetTokenTrace( Trace )
+
+		local Expression2 = self:Expression_1( Trace ) -- Ha Ha, Expression 2 :D
+
+		self:RequireToken( "col", "colon (:) expected for tinary operator." ) -- TODO: This error message is shit.
+
+		Expression = self:Compile_TEN( Trace, Expression, Expression2, self:Expression_1( Trace ) )
+
+		self:Yield( )
+	end
+
+	return Expression
+end
+
+-- Stage 2: logical or
 function Compiler:Expression_2( Trace )
 	-- MsgN( "Compiler -> Expression 2" )
 
-	if self:AcceptToken( "add" ) then
-		local Trace = self:GetTokenTrace( Trace )
-		self:ExcludeWhiteSpace( "Identity operator (+) must not be succeeded by whitespace" )
-		return self:Expression_1( Trace )
+	local Expression = self:Expression_3( Trace )
 
-	elseif self:AcceptToken( "sub" ) then
-		local Trace = self:GetTokenTrace( Trace )
-		self:ExcludeWhiteSpace( "Negation operator (-) must not be succeeded by whitespace" )
-		return self:Compile_NEG( Trace, self:Expression_1( Trace ) )
-	
-	elseif self:AcceptToken( "not" ) then
-		local Trace = self:GetTokenTrace( Trace )
-		self:ExcludeWhiteSpace( "Logical not operator (!) must not be succeeded by whitespace" )
-		return self:Compile_NOT( Trace, self:Expression_1( Trace ) )
-		
-	elseif self:AcceptToken( "len" ) then
-		local Trace = self:GetTokenTrace( Trace )
-		self:ExcludeWhiteSpace( "length operator (#) must not be succeeded by whitespace" )
-		return self:Compile_LEN( Trace, self:Expression_1( Trace ) )
+	while self:AcceptToken( "or" ) do
+		Expression = self:Compile_OR( self:GetTokenTrace( Trace ), Expression, self:Expression_3( Trace ) )
 
-	elseif self:AcceptToken( "cst" ) then
-		local Trace = self:GetTokenTrace( Trace )
-
-		local Class = self.TokenData
-		self:ExcludeWhiteSpace( "casting operator ( (" .. Class .. ") ) must not be succeeded by whitespace" )
-		
-		return self:Compile_CAST( Trace, Class, self:Expression_1( Trace ) )
+		self:Yield( )
 	end
 
-	-- In C-style order of operatorions, Inrement and Decrement should be here.
-	
-	return self:Expression_3( Trace )
+	return Expression
 end
 
--- Stage 3: Multiplication, division, modulo
+-- Stage 3: logical and
 function Compiler:Expression_3( Trace )
 	-- MsgN( "Compiler -> Expression 3" )
 
 	local Expression = self:Expression_4( Trace )
 
-	while self:CheckToken( "mul", "div", "mod", "exp" ) do
-		if self:AcceptToken( "mul" ) then
-			Expression = self:Compile_MUL( self:GetTokenTrace( Trace ), Expression, self:Expression_4( Trace ) )
-		elseif self:AcceptToken( "div" ) then
-			Expression = self:Compile_DIV( self:GetTokenTrace( Trace ), Expression, self:Expression_4( Trace ) )
-		elseif self:AcceptToken( "mod" ) then
-			Expression = self:Compile_MOD( self:GetTokenTrace( Trace ), Expression, self:Expression_4( Trace ) )
-		elseif self:AcceptToken( "exp" ) then
-			Expression = self:Compile_EXP( self:GetTokenTrace( Trace ), Expression, self:Expression_4( Trace ) )
-		end
+	while self:AcceptToken( "and" ) do
+		Expression = self:Compile_AND( self:GetTokenTrace( Trace ), Expression, self:Expression_4( Trace ) )
 
 		self:Yield( )
 	end
@@ -262,19 +252,14 @@ function Compiler:Expression_3( Trace )
 	return Expression
 end
 
-
--- Stage 4: Addition and subtraction
+-- Stage 4: bitwise or
 function Compiler:Expression_4( Trace )
 	-- MsgN( "Compiler -> Expression 4" )
 
 	local Expression = self:Expression_5( Trace )
 
-	while self:CheckToken( "add", "sub" ) do
-		if self:AcceptToken( "add" ) then
-			Expression = self:Compile_ADD( self:GetTokenTrace( Trace ), Expression, self:Expression_5( Trace ) )
-		elseif self:AcceptToken( "sub" ) then
-			Expression = self:Compile_SUB( self:GetTokenTrace( Trace ), Expression, self:Expression_5( Trace ) )
-		end
+	while self:AcceptToken( "bxor" ) do
+		Expression = self:Compile_BXOR( self:GetTokenTrace( Trace ), Expression, self:Expression_5( Trace ) )
 
 		self:Yield( )
 	end
@@ -282,18 +267,14 @@ function Compiler:Expression_4( Trace )
 	return Expression
 end
 
--- Stage 5: Bitwise shift left and right
+-- Stage 5: bitwise exclusive or
 function Compiler:Expression_5( Trace )
 	-- MsgN( "Compiler -> Expression 5" )
 
 	local Expression = self:Expression_6( Trace )
 
-	while self:CheckToken( "bshl", "bshr" ) do
-		if self:AcceptToken( "bshl" ) then
-			Expression = self:Compile_BSHL( self:GetTokenTrace( Trace ), Expression, self:Expression_6( Trace ) )
-		elseif self:AcceptToken( "bshr" ) then
-			Expression = self:Compile_BSHR( self:GetTokenTrace( Trace ), Expression, self:Expression_6( Trace ) )
-		end
+	while self:AcceptToken( "bor" ) do
+		Expression = self:Compile_BOR( self:GetTokenTrace( Trace ), Expression, self:Expression_6( Trace ) )
 
 		self:Yield( )
 	end
@@ -301,24 +282,14 @@ function Compiler:Expression_5( Trace )
 	return Expression
 end
 
--- Stage 6: Comparisons Greater and Less
+-- Stage 6: bitwise and
 function Compiler:Expression_6( Trace )
 	-- MsgN( "Compiler -> Expression 6" )
 
 	local Expression = self:Expression_7( Trace )
 
-	while self:CheckToken( "lth", "leq", "gth", "geq" ) do
-		if self:AcceptToken( "lth" ) then
-			Expression = self:Compile_LTH( self:GetTokenTrace( Trace ), Expression, self:Expression_7( Trace ) )
-		elseif self:AcceptToken( "leq" ) then
-			Expression = self:Compile_LEQ( self:GetTokenTrace( Trace ), Expression, self:Expression_7( Trace ) )
-		elseif self:AcceptToken( "gth" ) then
-			Expression = self:Compile_GTH( self:GetTokenTrace( Trace ), Expression, self:Expression_7( Trace ) )
-		elseif self:AcceptToken( "geq" ) then
-			Expression = self:Compile_GEQ( self:GetTokenTrace( Trace ), Expression, self:Expression_7( Trace ) )
-		end
-
-		self:Yield( )
+	while self:AcceptToken( "band" ) do
+		Expression = self:Compile_BAND( self:GetTokenTrace( Trace ), Expression, self:Expression_7( Trace ) )
 	end
 
 	return Expression
@@ -378,27 +349,41 @@ function Compiler:Expression_7( Trace )
 	return Expression
 end
 
--- Stage 8: bitwise and
+-- Stage 8: Comparisons Greater and Less
 function Compiler:Expression_8( Trace )
-	-- MsgN( "Compiler -> Expression 8" )
+	-- MsgN( "Compiler -> Expression 9" )
 
 	local Expression = self:Expression_9( Trace )
 
-	while self:AcceptToken( "band" ) do
-		Expression = self:Compile_BAND( self:GetTokenTrace( Trace ), Expression, self:Expression_9( Trace ) )
+	while self:CheckToken( "lth", "leq", "gth", "geq" ) do
+		if self:AcceptToken( "lth" ) then
+			Expression = self:Compile_LTH( self:GetTokenTrace( Trace ), Expression, self:Expression_9( Trace ) )
+		elseif self:AcceptToken( "leq" ) then
+			Expression = self:Compile_LEQ( self:GetTokenTrace( Trace ), Expression, self:Expression_9( Trace ) )
+		elseif self:AcceptToken( "gth" ) then
+			Expression = self:Compile_GTH( self:GetTokenTrace( Trace ), Expression, self:Expression_9( Trace ) )
+		elseif self:AcceptToken( "geq" ) then
+			Expression = self:Compile_GEQ( self:GetTokenTrace( Trace ), Expression, self:Expression_9( Trace ) )
+		end
+
+		self:Yield( )
 	end
 
 	return Expression
 end
 
--- Stage 9: bitwise exclusive or
+-- Stage 9: Bitwise shift left and right
 function Compiler:Expression_9( Trace )
 	-- MsgN( "Compiler -> Expression 9" )
 
 	local Expression = self:Expression_10( Trace )
 
-	while self:AcceptToken( "bor" ) do
-		Expression = self:Compile_BOR( self:GetTokenTrace( Trace ), Expression, self:Expression_10( Trace ) )
+	while self:CheckToken( "bshl", "bshr" ) do
+		if self:AcceptToken( "bshl" ) then
+			Expression = self:Compile_BSHL( self:GetTokenTrace( Trace ), Expression, self:Expression_10( Trace ) )
+		elseif self:AcceptToken( "bshr" ) then
+			Expression = self:Compile_BSHR( self:GetTokenTrace( Trace ), Expression, self:Expression_10( Trace ) )
+		end
 
 		self:Yield( )
 	end
@@ -406,14 +391,18 @@ function Compiler:Expression_9( Trace )
 	return Expression
 end
 
--- Stage 10: bitwise or
+-- Stage 10: Addition and subtraction
 function Compiler:Expression_10( Trace )
 	-- MsgN( "Compiler -> Expression 10" )
 
 	local Expression = self:Expression_11( Trace )
 
-	while self:AcceptToken( "bxor" ) do
-		Expression = self:Compile_BXOR( self:GetTokenTrace( Trace ), Expression, self:Expression_11( Trace ) )
+	while self:CheckToken( "add", "sub" ) do
+		if self:AcceptToken( "add" ) then
+			Expression = self:Compile_ADD( self:GetTokenTrace( Trace ), Expression, self:Expression_11( Trace ) )
+		elseif self:AcceptToken( "sub" ) then
+			Expression = self:Compile_SUB( self:GetTokenTrace( Trace ), Expression, self:Expression_11( Trace ) )
+		end
 
 		self:Yield( )
 	end
@@ -421,15 +410,22 @@ function Compiler:Expression_10( Trace )
 	return Expression
 end
 
-
--- Stage 11: logical and
+-- Stage 11: Multiplication, division, modulo
 function Compiler:Expression_11( Trace )
 	-- MsgN( "Compiler -> Expression 11" )
 
 	local Expression = self:Expression_12( Trace )
 
-	while self:AcceptToken( "and" ) do
-		Expression = self:Compile_AND( self:GetTokenTrace( Trace ), Expression, self:Expression_12( Trace ) )
+	while self:CheckToken( "mul", "div", "mod", "exp" ) do
+		if self:AcceptToken( "mul" ) then
+			Expression = self:Compile_MUL( self:GetTokenTrace( Trace ), Expression, self:Expression_12( Trace ) )
+		elseif self:AcceptToken( "div" ) then
+			Expression = self:Compile_DIV( self:GetTokenTrace( Trace ), Expression, self:Expression_12( Trace ) )
+		elseif self:AcceptToken( "mod" ) then
+			Expression = self:Compile_MOD( self:GetTokenTrace( Trace ), Expression, self:Expression_12( Trace ) )
+		elseif self:AcceptToken( "exp" ) then
+			Expression = self:Compile_EXP( self:GetTokenTrace( Trace ), Expression, self:Expression_12( Trace ) )
+		end
 
 		self:Yield( )
 	end
@@ -437,41 +433,61 @@ function Compiler:Expression_11( Trace )
 	return Expression
 end
 
--- Stage 12: logical or
+-- Stage 12: Unary operations, sizeof, casting
 function Compiler:Expression_12( Trace )
-	-- MsgN( "Compiler -> Expression 12" )
+	-- MsgN( "Compiler -> Expression 2" )
 
-	local Expression = self:Expression_13( Trace )
+	if self:AcceptToken( "add" ) then
+		local Trace = self:GetTokenTrace( Trace )
+		self:ExcludeWhiteSpace( "Identity operator (+) must not be succeeded by whitespace" )
+		return self:Expression_1( Trace )
 
-	while self:AcceptToken( "or" ) do
-		Expression = self:Compile_OR( self:GetTokenTrace( Trace ), Expression, self:Expression_13( Trace ) )
+	elseif self:AcceptToken( "sub" ) then
+		local Trace = self:GetTokenTrace( Trace )
+		self:ExcludeWhiteSpace( "Negation operator (-) must not be succeeded by whitespace" )
+		return self:Compile_NEG( Trace, self:Expression_1( Trace ) )
+	
+	elseif self:AcceptToken( "not" ) then
+		local Trace = self:GetTokenTrace( Trace )
+		self:ExcludeWhiteSpace( "Logical not operator (!) must not be succeeded by whitespace" )
+		return self:Compile_NOT( Trace, self:Expression_1( Trace ) )
+		
+	elseif self:AcceptToken( "len" ) then
+		local Trace = self:GetTokenTrace( Trace )
+		self:ExcludeWhiteSpace( "length operator (#) must not be succeeded by whitespace" )
+		return self:Compile_LEN( Trace, self:Expression_1( Trace ) )
 
-		self:Yield( )
-	end
-
-	return Expression
-end
-
-
--- Stage 13: Ternary
-function Compiler:Expression_13( Trace )
-	-- MsgN( "Compiler -> Expression 13" )
-
-	local Expression = self:Expression_14( Trace )
-
-	while self:AcceptToken( "qsm" ) do
+	elseif self:AcceptToken( "cst" ) then
 		local Trace = self:GetTokenTrace( Trace )
 
-		local Expression2 = self:Expression_1( Trace ) -- Ha Ha, Expression 2 :D
-
-		self:RequireToken( "col", "colon (:) expected for tinary operator." ) -- TODO: This error message is shit.
-
-		Expression = self:Compile_TEN( Trace, Expression, Expression2, self:Expression_1( Trace ) )
-
-		self:Yield( )
+		local Class = self.TokenData
+		self:ExcludeWhiteSpace( "casting operator ( (" .. Class .. ") ) must not be succeeded by whitespace" )
+		
+		return self:Compile_CAST( Trace, Class, self:Expression_1( Trace ) )
 	end
 
-	return Expression
+	-- In C-style order of operatorions, Inrement and Decrement should be here.
+	
+	return self:Expression_13( Trace )
+end
+
+-- Stage 13: Grouped Equation
+function Compiler:Expression_13( Trace )
+	-- MsgN( "Compiler -> Expression 13" )
+	
+	if self:AcceptToken( "lpa" ) then
+		local Expression = self:Expression_1( Trace )
+		
+		if Expression.FLAG == EXPADV_INLINE or Expression.FLAG == EXPADV_INLINEPREPARE then
+			Expression.Inline = string.format( "(%s)", Expression.Inline )
+		end
+
+		self:RequireToken( "rpa", "Right parenthesis ( )) missing, to close grouped equation." )
+
+		return Expression
+	end
+	
+	return self:Expression_14( Trace )
 end
 
 -- Stage 14: Value
@@ -503,30 +519,6 @@ function Compiler:Expression_Value( Trace )
 		return self:Compile_NUM( self:GetTokenTrace( Trace ), self.TokenData )
 	elseif self:AcceptToken( "str" ) then
 		return self:Compile_STR( self:GetTokenTrace( Trace ), self.TokenData )
-	elseif self:AcceptToken( "func" ) then
-		local Trace = self:GetTokenTrace( Trace )
-
-		self:RequireToken( "lpa", "Left parenthesis (( ), expected after 'function'" )
-
-		self:PushScope( )
-
-		local Perams, UseVarg = self:Util_Perams( Trace )
-
-		self:RequireToken( "rpa", "Right parenthesis ( )), expected to close function perameters" )
-
-		self:RequireToken( "lcb", "Left curly bracket ({) missing, to begin function body" )
-
-		self:PushLambdaDeph( )
-
-		local Sequence = self:Sequence( Trace, "rcb" )
-
-		local Memory = self:PopLambdaDeph( )
-
-		self:PopScope( )
-
-		self:RequireToken( "rcb", "Right curly bracket (}) missing, to close function body" )
-
-		return self:Compile_LAMBDA( Trace, Perams, UseVarg, Sequence, Memory )
 	end
 end
 
@@ -582,7 +574,7 @@ function Compiler:Expression_Variable( Trace )
 						end
 					end
 
-					self:RequireToken( "rpa", "Right parenthesis ( )), expected to close function perameters" )
+					self:RequireToken( "rpa", self.PrepTokenType ) -- "Right parenthesis ( )), expected to close function perameters" )
 
 					return self:Compile_FUNC( Trace, Variable, Expressions )
 		else
@@ -701,32 +693,33 @@ function Compiler:Statement( Trace )
 end
 
 function Compiler:Sequence( Trace, ExitToken )
+	if !self:HasTokens( ) then return {} end
 	
+	if ExitToken and self:CheckToken( ExitToken ) then return {} end
+
 	local Sequence = { }
-	local Result = self.ReturnExpr
 
 	while true do
+		if self.BreakOut then self:TokenError( "Unreachable code after %s", self.BreakOut ) end
 
-		if !self:HasTokens( ) then
-			break
-		elseif ExitToken and self:CheckToken( ExitToken ) then
-			break
-		elseif self.BreakOut then
-			self:TokenError( "Unreachable code after %s", self.BreakOut )
-		end
+		local Statment = self:Statement( Trace )
 
-		Sequence[#Sequence + 1] = self:Statement( Trace ) 
+		if !Statment then break end
 
-		if !self:HasTokens( ) then
-			break
-		elseif !self:AcceptSeperator( ) and self.PrepTokenLine == self.TokenLine then
+		Sequence[#Sequence + 1] = Statment
+
+		if !self:HasTokens( ) then break end
+	
+		if ExitToken and self:CheckToken( ExitToken ) then break end
+
+		if !self:AcceptSeperator( ) and self.PrepTokenLine == self.TokenLine then
 			self:TokenError( "Statements must be separated by semicolon (;) or newline" )
 		end
 	end
 
 	self.BreakOut = nil
-	self.ReturnExpr = nil
-	return self:Compile_SEQ( Trace, Sequence ), self.ReturnExpr or Result
+
+	return self:Compile_SEQ( Trace, Sequence )
 end
 
 -- Stage 1: If statments
@@ -823,8 +816,6 @@ function Compiler:Statement_2( Trace )
 
 		return self:Compile_ELSE( Trace, Statement )
 	end
-
-	return self:Statement_3( Trace )
 end
 
 -- Stage 3: Try, Catch, Final
@@ -980,18 +971,15 @@ function Compiler:Statement_4( Trace )
 			return self:Comile_EVENT_DEL( Trace, Name )
 		end
 
-		local LastPrediction = self.Current_ReturnClass
-		self.Current_ReturnClass = Event.Return
-
 		self:PushScope( )
 		self:PushLambdaDeph( )
+		self:PushReturnDeph( Event.Return, true )
 
 		local Sequence = self:Sequence( Trace, "rcb" )
 
 		local Memory = self:PopLambdaDeph( )
+		self:PopReturnDeph( )
 		self:PopScope( )
-
-		self.Current_ReturnClass = LastPrediction
 
 		self:RequireToken( "rcb", "Right curly bracket (}) missing, to close event" )
 
@@ -1007,7 +995,9 @@ function Compiler:Statement_5( Trace )
 	if self:AcceptToken( "ret" ) then
 		local Trace = self:GetTokenTrace( Trace )
 		
-		if self.LambdaDeph <= 0 then
+		self:ExcludeVarArg( )
+
+		if self.ReturnDeph <= 0 then
 			self:TraceError( Trace, "Return must no appear outside of a function or event" )
 		end
 
@@ -1017,15 +1007,7 @@ function Compiler:Statement_5( Trace )
 			return self:Compile_RETURN( Trace )
 		end
 
-		local Expr = self:Expression( Trace )
-
-		if self.ReturnExpr and Expr.Return ~= self.ReturnExpr.Return then
-			self:TraceError( Trace, "Invalid return type, %s expected got %s", self.ReturnExpr.Return, Expr.Return )
-		end
-
-		self.ReturnExpr = Expr
-
-		return self:Compile_RETURN( Trace, Expr )
+		return self:Compile_RETURN( Trace, self:Expression( Trace ) )
 	end
 
 	return self:Statement_6( Trace )
@@ -1150,82 +1132,6 @@ function Compiler:Statement_6( Trace )
 
 	end
 
-	-----------------------------------------------------------------------
-		-- Function assigments
-
-	if self:AcceptToken( "func" ) then
-		local Trace = self:GetTokenTrace( Trace )
-
-		if !self:AcceptToken( "var" ) then
-			self:PrevToken( )
-			return self:Expression_Variable( Trace, true )
-		end
-
-		if self:CheckToken( "ass", "com" ) then
-			local Variables = { self.TokenData }
-
-			while self:AcceptToken( "com" ) do
-				self:RequireToken( "var", "Variable expected after comma (,)" )
-				Variables[#Variables + 1] = self.TokenData
-			end
-
-			local Sequence = { }
-			local GetExpression = self:AcceptToken( "ass" )
-			
-			for I, Variable in pairs( Variables ) do
-				local Expression = GetExpression and self:GetExpression( Trace ) or self:Compile_DEFAULT( Trace, "f" ) -- Lambda
-
-				Sequence[I] = self:Compile_ASS( Trace, Variable, Expression, "function" )
-
-				GetExpression = self:AcceptToken( "com" )
-			end
-
-			if GetExpression then
-				self:TraceError( Trace, "Unexpected comma (,)" )
-			end
-
-			return self:Compile_SEQ( Trace, Sequence )
-		end
-
-		if self:CheckToken( "var", "lpa" ) then
-			local Variable, Prediction = self.TokenData
-
-			if self:AcceptToken( "var" ) then
-				Prediction = self:GetClass( Trace, Variable )
-				Variable = self.TokenData
-			end
-
-			self:RequireToken( "lpa", "Left parenthesis (( ), expected after 'function'" )
-
-			self:PushScope( )
-
-			local LastPrediction = self.Current_ReturnClass
-			local Perams, UseVarg = self:Util_Perams( Trace )
-
-			self:RequireToken( "rpa", "Right parenthesis ( )), expected to close function perameters" )
-
-			self:RequireToken( "lcb", "Left curly bracket ({) missing, to begin function body" )
-
-			self:PushLambdaDeph( )
-			self.Current_ReturnClass = Prediction
-
-			local Sequence = self:Sequence( Trace, "rcb" )
-
-			self.Current_ReturnClass = LastPrediction
-			local Memory = self:PopLambdaDeph( )
-
-			self:PopScope( )
-
-			self:RequireToken( "rcb", "Right curly bracket (}) missing, to close function body" )
-
-			self.ReturnTypes[ self.ScopeID ][Variable] = Prediction
-
-			return self:Compile_ASS( Trace, Variable, self:Compile_LAMBDA( Trace, Perams, UseVarg, Sequence, Memory ), "function" )
-		end
-
-		self:PrevToken( )
-	end
-
 	return self:Statement_7( Trace )
 end
 
@@ -1251,7 +1157,7 @@ function Compiler:Statement_7( Trace )
 		self.IsClientScript = true
 
 		self:RequireToken( "rcb", "Right curly bracket (}) missing, to close server defintion" )
-
+		
 		Sequence.Prepare = string.format( "if SERVER then\n%s\nend", Sequence.Prepare )
 			
 		return Sequence
@@ -1300,8 +1206,8 @@ function Compiler:Statement_8( Trace )
 		return self:Expression_17( Trace, Expression )
 	end
 
-	self:ExcludeToken( "dlt", "Memory operator (delta), must be part of expression or equation.")
-	self:ExcludeToken( "cng", "Memory operator (changed), must be part of expression or equation.")
+	self:ExcludeToken( "dlt", "Memory operator (delta), must be part of expression or equation." )
+	self:ExcludeToken( "cng", "Memory operator (changed), must be part of expression or equation." )
 
 	if self:AcceptToken( "var" ) then
 		if !self:CheckToken( "prd", "lpa", "inc", "dec" ) then
@@ -1317,7 +1223,8 @@ function Compiler:Statement_8( Trace )
 		return self:Expression_17( Trace, Expression )
 	end
 	
-	self:TraceError( Trace, "Invalid Statment" )
+	debug.Trace( )
+	self:TraceError( Trace, "Invalid Statment %s / %s", self.Pos, self.Len )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------

@@ -38,7 +38,7 @@ function Compiler:NextPattern( Pattern, Exact )
 			self.Pos = End + 1
 			self.PatternMatch = String
 			self.ReadData = self.ReadData .. String
-
+			
 			if self.Pos > self.Len then
 				self.Char = nil
 			else
@@ -153,8 +153,14 @@ function Compiler:NextToken( )
 		self.PrepTokenName = self.PrepToken[3]
 		self.PrepTokenLine = self.PrepToken[4]
 
-		-- MsgN( "Prep Token: ", self.PrepTokenType )
+		-- MsgN( "Prep Token: ", self.PrepTokenType )#
+	else
+		self.PrepTokenData = nil
+		self.PrepTokenType = nil
+		self.PrepTokenName = nil
+		self.PrepTokenLine = nil
 	end
+
 end
 
 function Compiler:PopToken( )

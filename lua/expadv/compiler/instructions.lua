@@ -113,7 +113,6 @@ function Compiler:Compile_GTH( Trace, Expresion1, Expression2 )
 end
 
 function Compiler:Compile_LTH( Trace, Expresion1, Expression2 )
-	MsgN( "Test: ", Expresion1, Expression2 )
 	local Operator = self:LookUpOperator( "<", Expresion1.Return, Expression2.Return )
 
 	if !Operator then self:TraceError( Trace, "Comparason operator (less then) does not support '%s < %s'", self:NiceClass( Expresion1.Return, Expression2.Return ) ) end
@@ -639,85 +638,26 @@ function Compiler:Compile_METHOD( Trace, Expression, Method, Expressions )
 	self:TraceError( Trace, "No such method %s.%s(%s)", self:NiceClass(Meta), Method, Signature )
 end
 
-function Compiler:Compile_LAMBDA( Trace, Params, UseVarg, Sequence, Memory )
-	local Inputs, PreSequence = { }, { }
-
-	-- { self.TokenData, Class.Short, MemRef }
-
-	for I, Param in pairs( Params ) do
-		local Type = Param[2]
-
-		Inputs[I] = "IN_" .. I
-
-		PreSequence[ #PreSequence + 1 ] = string.format( "if !IN_%i or IN_%i[1] == nil then", I, I )
-		PreSequence[ #PreSequence + 1 ] = string.format( "Context:Throw(%s, \"invoke\", \"Invalid argument #%i, %s expected got void.\" )", self:CompileTrace( Trace ), I, self:NiceClass( Type ) )
-
-		if Param[2] ~= "_vr" then
-			PreSequence[ #PreSequence + 1 ] = string.format( "elseif IN_%i[2] ~= %q then", I, Type )
-			PreSequence[ #PreSequence + 1 ] = string.format( "Context:Throw(%s, \"invoke\", \"Invalid argument #%i, %s expected got \" .. IN_%i[2] )", self:CompileTrace( Trace ), I, self:NiceClass( Type ), I )
-		end
-
-		PreSequence[ #PreSequence + 1 ] = "else"
-
-			local Operator = self:LookUpOperator( Type .. "=", "n", Type )
-			
-			if Operator then
-				Instruction = Operator.Compile( self, Trace, Quick( Param[3], "n" ), Quick( Inputs[I] .. "[1]", Type ) )
-
-				PreSequence[ #PreSequence + 1 ] = Instruction.Prepare
-				PreSequence[ #PreSequence + 1 ] = Instruction.Inline
-			else
-
-				local Operator = self:LookUpOperator( Type .. "=", "n", Type )
-
-				if Operator then
-					Instruction = Operator.Compile( self, Trace, Quick( Param[1], "s" ), Quick( Inputs[I] .. "[1]", Type ) )
-
-					PreSequence[ #PreSequence + 1 ] = Instruction.Prepare
-					PreSequence[ #PreSequence + 1 ] = Instruction.Inline
-				else
-					self:TraceError( Trace, "Invalid argument #%i, %s can not be used as function argument", I, self:NiceClass( Type ) )
-				end
-			end
-
-		PreSequence[ #PreSequence + 1 ] = "end"
-
-		self:Yield( )
-	end
-	
-	if UseVarg then Inputs[#Inputs + 1] = "..." end
-
-	local Lua = table.concat( {
-		"function(" .. table.concat( Inputs, "," ) .. ")",
-		self:FlushMemory( Trace, Memory ),
-		table.concat( PreSequence, "\n" ),
-		Sequence.Prepare or "",
-		Sequence.Inline or "",
-		"end"
-	}, "\n" )
-
-	return { Trace = Trace, Inline = Lua, Return = "f", FLAG = EXPADV_INLINE }
-end
-
 function Compiler:Compile_RETURN( Trace, Expression )
-	
-	if self.Current_ReturnClass then
-		if !Expression then
-			self:TraceError( Trace, "function returns void, %s expected", self.Current_ReturnClass )
-		
-		elseif self.Current_ReturnClass == "_vr" and Expression.Return ~= "_vr" then
-			Expression = self:Compile_CAST( Trace, "variant", Expression )
-		
-		elseif self.Current_ReturnClass ~= Expression.Return then
-			self:TraceError( Trace, "function returns %s, %s expected", self.Current_ReturnClass )
-		end
+	local Optional = self.ReturnOptional[ self.ReturnDeph ]
+	local Expected = self.ReturnTypes[ self.ReturnDeph ]
 
-		Expression.Inline = string.format( "return %s, %q", Expression.Inline, Expression.Return )
-
-		return Expression
+	if !Expression then
+		if Optional or !Expected then return Quick( "return" ) end
+		self:TraceError( Trace, "Can not return void here, %s expected.", self:NiceClass( Expected ) )
 	end
 
-	return Quick( "return" )
+	if Expected and Expression.Return ~= Expected then
+		self:TraceError( Trace, "Can not return %s here, %s expected.", self:NiceClass( Expression.Return, Expected ) )
+	end
+
+	if !Expected and Expression.Return ~= "_vr" then
+		Expression = self:Compile_CAST( Trace, "variant", Expression )
+	end
+
+	Expression.Inline = string.format( "return %s, %q", Expression.Inline, Expression.Return )
+
+	return Expression
 end
 
 function Compiler:Comile_EVENT_DEL( Trace, Name )
@@ -748,7 +688,7 @@ function Compiler:Compile_EVENT( Trace, Name, Params, UseVarg, Sequence, Memory 
 
 			if Operator then
 				Instruction = Operator.Compile( self, Trace, Quick( Param[1], "s" ), Quick( Inputs[I] .. "[1]", Type ) )
---
+
 				PreSequence[ #PreSequence + 1 ] = Instruction.Prepare
 				PreSequence[ #PreSequence + 1 ] = Instruction.Inline
 			else
@@ -764,7 +704,7 @@ function Compiler:Compile_EVENT( Trace, Name, Params, UseVarg, Sequence, Memory 
 	local Lua = table.concat( {
 		string.format( "Context.event_%s = function( %s )", Name, table.concat( Inputs, "," ) ),
 		self:FlushMemory( Trace, Memory ),
-		--table.concat( PreSequence, "\n" ),
+		table.concat( PreSequence, "\n" ),
 		Sequence.Prepare or "",
 		Sequence.Inline or "",
 		"end"
