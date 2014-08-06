@@ -136,6 +136,18 @@ end )
 
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Define function class
+   --- */
+
+EXPADV.SharedOperators( )
+
+local FunctionClass = EXPADV.AddClass( nil, "function", "f" )
+	  
+	 FunctionClass:DefaultAsLua( "function( ) end" )
+
+EXPADV.AddInlineOperator( nil, "call", "f,...", "", "@value 1(@...)" )
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Register exception class!
    --- */
 

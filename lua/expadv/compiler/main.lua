@@ -257,12 +257,12 @@ function Compiler:PushScope( )
 	self.Scope = { }
 	self.ScopeID = self.ScopeID + 1
 	self.Scopes[ self.ScopeID ] = self.Scope
-	self.ReturnTypes[ self.ScopeID ] = { }
+	self.KnownReturnTypes[ self.ScopeID ] = { }
 end
 
 function Compiler:PopScope( )
 	self.Scopes[ self.ScopeID ] = nil
-	self.ReturnTypes[ self.ScopeID ] = nil
+	self.KnownReturnTypes[ self.ScopeID ] = nil
 
 	self.ScopeID = self.ScopeID - 1
 	self.Scope = self.Scopes[ self.ScopeID ]
@@ -612,6 +612,7 @@ local function SoftCompile( self, Script, Files, OnError, OnSucess )
 		self.LambdaDeph = 0
 		self.LoopDeph = 0
 
+		self.KnownReturnTypes = { }
 		self.ReturnOptional = { }
 		self.ReturnTypes = { }
 		self.ReturnDeph = 0

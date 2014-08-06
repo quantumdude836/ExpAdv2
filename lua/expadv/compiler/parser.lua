@@ -671,8 +671,8 @@ end
 	@: Statments
    --- */
 
-function Compiler:StatementError( )
-	self:TokenError( "Invalid Statment!" )
+function Compiler:StatementError( Trace )
+	self:TraceError( Trace, "Invalid Statment %s / %s -> %s", self.Pos, self.Len, self.PropTokenType )
 end -- TODO: ^ This
 
 function Compiler:Statement( Trace )
@@ -684,7 +684,9 @@ function Compiler:Statement( Trace )
 	local Statement = self:Statement_1( Trace )
 
 	if !Statement then
-		self:StatementError( )
+		if !self:HasTokens( ) or self.Char ~= "" then return end
+
+		self:StatementError( Trace )
 	end
 
 	self.StatmentRoot = _StmtRoot
@@ -1088,7 +1090,6 @@ function Compiler:Statement_6( Trace )
 			else
 				self:TokenError( "Variable can not be preceeded by whitespace.")
 			end
-
 		end
 
 		local Sequence = { }
@@ -1131,6 +1132,38 @@ function Compiler:Statement_6( Trace )
 		return self:Compile_SEQ( Trace, Sequence )
 
 	end
+
+	-----------------------------------------------------------------------
+		-- Variable assigments / Arithmatic assigments
+
+	--[[if self:AcceptToken( "func" ) then
+
+		self.RequireToken( "var", "function return type or void expected") -- TODO: Change this.
+
+		local ReturnClass = self:GetClass( Trace, self.TokenData )
+
+		self:RequireToken( "lpa", "Left parenthesis ( () missing, after event name" )
+
+		local Perams, UseVarg = self:Util_Perams( Trace )
+		
+		self:RequireToken( "rpa", "Right parenthesis () ) missing, to close event parameters" )
+		
+		self:PushScope( )
+		self:PushLambdaDeph( )
+		self:PushReturnDeph( ReturnClass.Short, true )
+
+		local Sequence = self:Sequence( Trace, "rcb" )
+
+		local Memory = self:PopLambdaDeph( )
+		self:PopReturnDeph( )
+		self:PopScope( )
+
+		self:RequireToken( "rcb", "Right curly bracket (}) missing, to close event" )
+
+		self.KnownReturnTypes[self.ScopeID][Variable] = ReturnClass.Short
+
+		return self:Compile_ASS( Trace, Variable, self:Build_Function( Trace, Perams, UseVarg, Sequence, Memory ), "function", Modifier )
+	end]]
 
 	return self:Statement_7( Trace )
 end
@@ -1222,9 +1255,6 @@ function Compiler:Statement_8( Trace )
 	if Expression then
 		return self:Expression_17( Trace, Expression )
 	end
-	
-	debug.Trace( )
-	self:TraceError( Trace, "Invalid Statment %s / %s", self.Pos, self.Len )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -1271,4 +1301,3 @@ function Compiler:Util_Perams( Trace )
 	
 	return Params, UseVarg
 end
-

@@ -320,7 +320,7 @@ function Compiler:Compile_VAR( Trace, Variable )
 	local Operator = self:LookUpOperator( "=" ..  Class, "s" )
 	if Operator then return Operator.Compile( self, Trace, Quick( Variable, "s" ) ) end
 	
-	return { Trace = Trace, Inline = string.format( "Context.Memory[%i]", MemRef ), Return = Class, FLAG = EXPADV_INLINE, IsRaw = true, Variable = Variable }
+	return { Trace = Trace, Inline = string.format( "Context.Memory[%i]", MemRef ), Return = Class, FLAG = EXPADV_INLINE, IsRaw = true, Variable = Variable, Scope = MemScope, MemRef = MemRef }
 end
 
 
@@ -550,10 +550,9 @@ function Compiler:Compile_CALL( Trace, Expression, Expressions )
 	end
 
 	local Instruction = Operator.Compile( self, Trace, Expression, unpack( Expressions ) )
-	
-	if Expression.Variable and Instruction.Return and Instruction.Return == "_vr" then
-		local Pred = self.ReturnTypes[ self.ScopeID ][ Variable ]
-		if Pred then Instruction = self:Compile_CAST( Trace, Pred, Instruction ) end
+
+	if Expression.Return == "f" and Expression.Variable then
+		Instruction.Return = self.KnownReturnTypes[Expression.Scope][Expression.Variable]
 	end
 
 	return Instruction
@@ -713,3 +712,62 @@ function Compiler:Compile_EVENT( Trace, Name, Params, UseVarg, Sequence, Memory 
 	return { Trace = Trace, Prepare = Lua, FLAG = EXPADV_PREPARE }
 end
 
+function Compiler:Build_Function( Trace, Params, UseVarg, Sequence, Memory )
+	local Inputs, PreSequence = { }, { }
+
+	-- { self.TokenData, Class.Short, MemRef }
+
+	for I, Param in pairs( Params ) do
+		local Type = Param[2]
+
+		Inputs[I] = "IN_" .. I
+
+		PreSequence[ #PreSequence + 1 ] = string.format( "if !IN_%i or IN_%i[1] == nil then", I, I )
+		PreSequence[ #PreSequence + 1 ] = string.format( "Context:Throw(%s, \"invoke\", \"Invalid argument #%i, %s expected got void.\" )", self:CompileTrace( Trace ), I, self:NiceClass( Type ) )
+
+		if Param[2] ~= "_vr" then
+			PreSequence[ #PreSequence + 1 ] = string.format( "elseif IN_%i[2] ~= %q then", I, Type )
+			PreSequence[ #PreSequence + 1 ] = string.format( "Context:Throw(%s, \"invoke\", \"Invalid argument #%i, %s expected got \" .. IN_%i[2] )", self:CompileTrace( Trace ), I, self:NiceClass( Type ), I )
+		end
+
+		PreSequence[ #PreSequence + 1 ] = "else"
+
+			local Operator = self:LookUpOperator( Type .. "=", "n", Type )
+			
+			if Operator then
+				Instruction = Operator.Compile( self, Trace, Quick( Param[3], "n" ), Quick( Inputs[I] .. "[1]", Type ) )
+
+				PreSequence[ #PreSequence + 1 ] = Instruction.Prepare
+				PreSequence[ #PreSequence + 1 ] = Instruction.Inline
+			else
+
+				local Operator = self:LookUpOperator( Type .. "=", "n", Type )
+
+				if Operator then
+					Instruction = Operator.Compile( self, Trace, Quick( Param[1], "s" ), Quick( Inputs[I] .. "[1]", Type ) )
+
+					PreSequence[ #PreSequence + 1 ] = Instruction.Prepare
+					PreSequence[ #PreSequence + 1 ] = Instruction.Inline
+				else
+					self:TraceError( Trace, "Invalid argument #%i, %s can not be used as function argument", I, self:NiceClass( Type ) )
+				end
+			end
+
+		PreSequence[ #PreSequence + 1 ] = "end"
+
+		self:Yield( )
+	end
+	
+	if UseVarg then Inputs[#Inputs + 1] = "..." end
+
+	local Lua = table.concat( {
+		"function(" .. table.concat( Inputs, "," ) .. ")",
+		self:FlushMemory( Trace, Memory ),
+		table.concat( PreSequence, "\n" ),
+		Sequence.Prepare or "",
+		Sequence.Inline or "",
+		"end"
+	}, "\n" )
+
+	return { Trace = Trace, Inline = Lua, Return = "f", FLAG = EXPADV_INLINE }
+end
