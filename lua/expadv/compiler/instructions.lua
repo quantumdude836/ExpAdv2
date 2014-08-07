@@ -683,7 +683,7 @@ function Compiler:Compile_RETURN( Trace, Expression )
 		Expression = self:Compile_CAST( Trace, "variant", Expression )
 	end
 
-	Expression.Inline = string.format( "return %s, %q", Expression.Inline, Expression.Return )
+	Expression.Inline = string.format( "return %s, %q", Expression.Inline, Expression.Return or "void" )
 
 	return Expression
 end

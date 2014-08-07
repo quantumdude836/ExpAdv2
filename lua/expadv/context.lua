@@ -57,7 +57,7 @@ function EXPADV.RootContext:Push( Trace, Cells ) -- Table, Table
 		__newindex = function( Table, Key, Value ) if Cells[Key] then rawset( Table, Key, Value ) else rawset(self.Changed, Key, Value ) end end,
 	}
 
-	return {
+	return setmetatable( {
 		Data = self.Data,
 		Deph = self.Deph + 1,
 
@@ -70,7 +70,7 @@ function EXPADV.RootContext:Push( Trace, Cells ) -- Table, Table
 		Memory = setmetatable( Memory, Memory ),
 		Delta = setmetatable( Delta, Delta ),
 		Changed = setmetatable( Changed, Changed ),
-	}
+	}, EXPADV.RootContext )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------

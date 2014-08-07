@@ -18,7 +18,7 @@ function ENT:OnScriptError( Context, Msg )
 end
 
 function ENT:OnUncatchedException( Context, Exception )
-	EXPAD.PrintColor( self.player, Color( 255, 0, 0 ), "Expresion Advanced - Uncatched exception: ", Color( 255, 255, 255 ), Exception.Exception )
+	EXPAD.PrintColor( self.player, Color( 255, 0, 0 ), "Expresion Advanced - Uncatched exception: ", Color( 255, 255, 255 ), Exception.Exception, " -> ", Execption.Msg )
 end
 
 function ENT:OnCompileError( ErMsg, Compiler )

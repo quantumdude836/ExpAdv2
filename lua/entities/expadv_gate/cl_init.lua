@@ -17,7 +17,7 @@ function ENT:OnScriptError( Context, Msg )
 end
 
 function ENT:OnUncatchedException( Context, Exception )
-	chat.AddText( Color( 150, 150, 0 ), "[" .. self.player:Name( ) .. "] ", Color( 255, 0, 0 ), "Expresion Advanced - Uncatched exception: ", Color( 255, 255, 255 ), Exception.Exception )
+	chat.AddText( Color( 150, 150, 0 ), "[" .. self.player:Name( ) .. "] ", Color( 255, 0, 0 ), "Expresion Advanced - Uncatched exception: ", Color( 255, 255, 255 ), Exception.Exception, " -> ", Exception.Msg )
 end
 
 function ENT:OnCompileError( ErMsg, Compiler )
