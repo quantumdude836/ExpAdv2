@@ -560,6 +560,22 @@ end
    --- */
 
 function Compiler:Compile_CALL( Trace, Expression, Expressions )
+	local Prediction
+
+	if Expression.Return == "f" and Expression.MemRef then
+		Prediction = self.KnownReturnTypes[Expression.Scope][Expression.MemRef]
+	end
+
+	local SafeOperator = self:LookUpOperator( "call", Expression.Return, "s", "..." )
+	
+	if SafeOperator and Prediction then
+		local Instruction = SafeOperator.Compile( self, Trace, Expression, Quick( Prediction, "s" ), unpack( Expressions ) )
+
+		Instruction.Return = Prediction
+
+		return Prediction
+	end
+
 	local Operator = self:LookUpOperator( "call", Expression.Return, "..." )
 
 	if !Operator then
@@ -568,11 +584,7 @@ function Compiler:Compile_CALL( Trace, Expression, Expressions )
 
 	local Instruction = Operator.Compile( self, Trace, Expression, unpack( Expressions ) )
 
-	MsgN( "We Have: ", Expression.MemRef )
-
-	if Expression.Return == "f" and Expression.MemRef then
-		Instruction.Return = self.KnownReturnTypes[Expression.Scope][Expression.MemRef]
-	end
+	if Prediction then Instruction.Return = Prediction end
 
 	return Instruction
 end
@@ -604,8 +616,6 @@ function Compiler:Compile_FUNC( Trace, Variable, Expressions )
 
 			self:Yield( )
 		end
-
-		--MsgN( "Looking for: ", string.format( "%s(%s)", Variable, Signature ) )
 
 		local Operator = EXPADV.Functions[ string.format( "%s(%s)", Variable, Signature ) ] or BestMatch
 		
@@ -661,7 +671,7 @@ function Compiler:Compile_RETURN( Trace, Expression )
 	local Expected = self.ReturnTypes[ self.ReturnDeph ]
 
 	if !Expression then
-		if Optional or !Expected then return Quick( "return" ) end
+		if Optional or !Expected then return Quick( "return, \"void\"" ) end
 		self:TraceError( Trace, "Can not return void here, %s expected.", self:NiceClass( Expected ) )
 	end
 

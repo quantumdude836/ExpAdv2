@@ -106,7 +106,7 @@ function PANEL:Init( )
 	self.ValidateButton:SetColor( Color( 0, 0, 255 ) )
 	self.ValidateButton:SetTextColor( Color( 0, 0, 0 ) )
 	self.ValidateButton:SetText( "Click to validate." )
-	self.ValidateButton:SetFont( "Trebuchet20")
+	self.ValidateButton:SetFont( "Trebuchet20" )
 	
 	self.ValidateButton.DoClick = function( )
 		self:DoValidate( true )
@@ -615,20 +615,24 @@ function PANEL:SetEditorFont( Editor )
 	Editor:SetFont( self.CurrentFont )
 end
 
-function PANEL:ChangeFont( sFont, nSize )
-	if not sFont or sFont == "" then return end 
-	nSize = nSize or GetConVarNumber( "lemon_editor_font_size" )
-	self.CurrentFont = "EA_" .. sFont .. "_" .. nSize
-	
-	if not self.CreatedFonts[self.CurrentFont] then 
-		surface.CreateFont( self.CurrentFont, {
+function PANEL:CreateFont( Font, sFont, nSize )
+	if not self.CreatedFonts[Font] then 
+		surface.CreateFont( Font, {
 			font = sFont,
 			size = nSize,
 			weight = 400,
 			antialias = false
 		} )
-		self.CreatedFonts[self.CurrentFont] = true 
-	end 
+		self.CreatedFonts[Font] = true 
+	end
+end
+
+function PANEL:ChangeFont( sFont, nSize )
+	if not sFont or sFont == "" then return end 
+	nSize = nSize or GetConVarNumber( "lemon_editor_font_size" )
+	self.CurrentFont = "EA_" .. sFont .. "_" .. nSize
+
+	self:CreateFont( self.CurrentFont, sFont, nSize )
 	
 	RunConsoleCommand( "lemon_editor_font", sFont ) 
 	RunConsoleCommand( "lemon_editor_font_size", nSize ) 

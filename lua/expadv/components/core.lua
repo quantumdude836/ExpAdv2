@@ -160,7 +160,11 @@ local FunctionClass = EXPADV.AddClass( nil, "function", "f" )
 	  
 	 FunctionClass:DefaultAsLua( "function( ) end" )
 
-EXPADV.AddInlineOperator( nil, "call", "f,...", "_vr", "@value 1(@...)" )
+EXPADV.AddPreparedOperator( nil, "call", "f,s,...", "_vr", [[
+	@define Return, Type = @value 1(@...)
+	if @value 2 and @Type ~= @value 2 then
+		Context:Throw( @trace, "invoke", string.format( "Invalid return value, %s expected got %s", @value 2, @Type )
+end]], "@Return" )
 
 EXPADV.AddPreparedOperator( nil, "f=", "n,f", "", [[
 	@define value = Context.Memory[@value 1]
@@ -169,6 +173,8 @@ EXPADV.AddPreparedOperator( nil, "f=", "n,f", "", [[
 ]] )
 
 EXPADV.AddInlineOperator( nil, "=f", "n", "f", "Context.Memory[@value 1]" )
+
+EXPADV.AddException( nil, "invoke" )
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Register exception class!

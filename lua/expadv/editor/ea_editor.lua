@@ -112,7 +112,41 @@ function PANEL:Init( )
 	self.hScrollBar:SetUp( 1, 1 ) 
 	
 	self.Search = self:Add( "EA_Search" )
+
+	--self.OverView = self:Add( "DPanel" )
+	--self.OverView:SetWide( 200 )
+	--self.OverView:Dock( RIGHT )
+
+	--function self.OverView.Paint( OverView, W, H )
+	--	self:PaintOverView( W, H )
+	--end
 end
+
+local Defaultfont = system.IsWindows( ) and "Courier New" or ( system.IsOSX( ) and "Monaco" or "DejaVu Sans Mono" )
+surface.CreateFont( "ea_overview", { font = Defaultfont, size = 10, weight = 400, antialias = false } )
+
+function PANEL:PaintOverView( W, H )
+	local Font = self.Font
+	local Parent = self:GetParent( ):GetParent( )
+	Parent:CreateFont( Font, sFont, nSize )
+
+	self:SetFont( "ea_overview" )
+
+	local painted = 0
+	
+	self.Scroll.x = math_floor( self.ScrollBar:GetScroll( ) + 1 )
+	self.Scroll.y = math_floor( self.hScrollBar:GetScroll( ) + 1 )
+	
+	for i = 1, #self.Rows do
+		self:PaintRow( i, painted )
+		painted = painted + 1
+	end
+
+	self:SetFont( Font )
+end
+
+
+
 
 function PANEL:SetFont( sFont ) 
 	self.Font = sFont 
