@@ -621,7 +621,7 @@ function EXPADV.BuildLuaOperator( Operator )
 		EXPADV.CanBuildOperator( Compiler, Trace, Operator )
 
 		local Trace = table.Copy( Trace )
-		local Inputs = { ... }
+		local Inputs, Preperation = { ... }, { }
 
 		local OpPrepare, OpInline = Operator.Prepare, Operator.Inline
 
@@ -689,9 +689,9 @@ function EXPADV.BuildLuaOperator( Operator )
 				-- First check for manual prepare
 				if string.find( OpPrepare, "@prepare " .. I ) then
 					OpPrepare = string.gsub( OpPrepare, "@prepare " .. I, InputPrepare )
-				else
+				elseif InputPrepare ~= "" then
 					-- Ok, now prepare this ourself.
-					OpPrepare = OpPrepare .. "\n" .. InputPrepare
+					table.insert( Preperation, 1, InputPrepare )
 				end
 
 			end
@@ -720,7 +720,8 @@ function EXPADV.BuildLuaOperator( Operator )
 
 				-- Preare the varargs preperation statments.
 				if #VAPrepare >= 1 then
-					OpPrepare = (OpPrepare or "") .. "\n" .. table.concat( VAPrepare, "\n" )
+					table.insert( Preperation, table.concat( VAPrepare, "\n" ) )
+					-- OpPrepare = (OpPrepare or "") .. "\n" .. table.concat( VAPrepare, "\n" )
 				end
 
 				if Operator.FLAG == EXPADV_PREPARE or Operator.FLAG == EXPADV_INLINEPREPARE then
@@ -810,6 +811,12 @@ function EXPADV.BuildLuaOperator( Operator )
 			OpInline = EXPADV.Interprit( Operator, Compiler, OpInline )
 		end
 
-		return Compiler:NewLuaInstruction( Trace, Operator, OpPrepare, OpInline )
+		if OpPrepare and OpPrepare ~= "" then
+			Preperation[#Preperation + 1] = OpPrepare
+		end
+
+		local PreperedLines = #Preperation >= 1 and table.concat( Preperation, "\n" ) or nil
+
+		return Compiler:NewLuaInstruction( Trace, Operator, PreperedLines, OpInline )
 	end
 end

@@ -569,11 +569,11 @@ function Compiler:Compile_CALL( Trace, Expression, Expressions )
 	local SafeOperator = self:LookUpOperator( "call", Expression.Return, "s", "..." )
 	
 	if SafeOperator and Prediction then
-		local Instruction = SafeOperator.Compile( self, Trace, Expression, Quick( Prediction, "s" ), unpack( Expressions ) )
+		local Instruction = SafeOperator.Compile( self, Trace, Expression, Quick( "\"" .. Prediction .. "\"", "s" ), unpack( Expressions ) )
 
 		Instruction.Return = Prediction
 
-		return Prediction
+		return Instruction
 	end
 
 	local Operator = self:LookUpOperator( "call", Expression.Return, "..." )

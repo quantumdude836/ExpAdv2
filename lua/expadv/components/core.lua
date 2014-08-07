@@ -163,7 +163,7 @@ local FunctionClass = EXPADV.AddClass( nil, "function", "f" )
 EXPADV.AddPreparedOperator( nil, "call", "f,s,...", "_vr", [[
 	@define Return, Type = @value 1(@...)
 	if @value 2 and @Type ~= @value 2 then
-		Context:Throw( @trace, "invoke", string.format( "Invalid return value, %s expected got %s", @value 2, @Type )
+		Context:Throw( @trace, "invoke", string.format( "Invalid return value, %s expected got %s", @value 2, @Type ) )
 end]], "@Return" )
 
 EXPADV.AddPreparedOperator( nil, "f=", "n,f", "", [[

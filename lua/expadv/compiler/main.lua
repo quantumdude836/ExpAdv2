@@ -566,6 +566,7 @@ local function CreateEnviroment( )
 		pcall = pcall, error = error, unpack = unpack,
 		print = print, MsgN = MsgN, tostring = tostring, tonumber = tonumber,
 		IsValid = IsValid, Entity = Entity,
+		math = math, string = string, table = table,
 	} 
 end
 
