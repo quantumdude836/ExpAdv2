@@ -70,6 +70,9 @@ function EXPADV.RootContext:Push( Trace, Cells ) -- Table, Table
 		Memory = setmetatable( Memory, Memory ),
 		Delta = setmetatable( Delta, Delta ),
 		Changed = setmetatable( Changed, Changed ),
+
+		player = self.player,
+		entity = self.entity,
 	}, EXPADV.RootContext )
 end
 
