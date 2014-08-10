@@ -10,17 +10,17 @@ local ColorComponent = EXPADV.AddComponent( "color", true )
 
 local ColorObj = ColorComponent:AddClass( "color", "c" )
 
-ColorObj:StringBuilder( function( Color) return string.format( "Color< %i, %i, %i, %i >", Color.r, Color.g, Color.b, Color.a ) end )
+ColorObj:StringBuilder( function( Color) return string.format( "Color( %i, %i, %i, %i )", Color.r, Color.g, Color.b, Color.a ) end )
 ColorObj:DefaultAsLua( Color(255, 255, 255, 255) )
 
 if WireLib then
-	ColorObj:WireInput( "VECTOR", 
-		function( Context, MemoryRef, InValue ) 
+	ColorObj:WireInput( "VECTOR",
+		function( Context, MemoryRef, InValue )
 			Context.Memory[ MemoryRef ] = Color( InValue.x, InValue.y, InValue.z, 255 )
 		end )
 
-	ColorObj:WireOutput( "VECTOR", 
-		function( Context, MemoryRef ) 
+	ColorObj:WireOutput( "VECTOR",
+		function( Context, MemoryRef )
 			local Color = Context.Memory[ MemoryRef ]
 			return Vector(Color.r, Color.g, Color.b)
 		end )
@@ -46,7 +46,7 @@ ColorComponent:AddInlineOperator( "not", "c", "b", "(@value 1 == Color(0, 0, 0, 
 	@: Casting
    --- */
 
-ColorComponent:AddInlineOperator( "string", "c", "s", "string.format( \"Color< %i, %i, %i, %i >\", @value 1.r, @value 1.g, @value 1.b, @value 1.a )" )
+ColorComponent:AddInlineOperator( "string", "c", "s", "string.format( \"Color( %i, %i, %i, %i )\", @value 1.r, @value 1.g, @value 1.b, @value 1.a )" )
 
 ColorComponent:AddInlineOperator( "color", "s", "c", "string.ToColor(@value 1)" )
 
