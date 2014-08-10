@@ -892,7 +892,7 @@ function Compiler:Statement_3( Trace )
 
 			self:PushScope( )
 
-			local MemRef = self:CreateVariable( Trace, self.TokenData, "exception" )
+			local Cell = self:CreateVariable( Trace, self.TokenData, "exception" )
 
 			self:RequireToken( "rpa", "Right parenthesis ( )) missing, to catch" )
 
@@ -904,7 +904,7 @@ function Compiler:Statement_3( Trace )
 
 			self:RequireToken( "rcb", "Right curly bracket (}) missing, to close catch statement" )
 
-			Catch = self:Compile_CATCH( Trace, MemRef, Accepted, Sequence, Catch )
+			Catch = self:Compile_CATCH( Trace, Cell.Memory, Accepted, Sequence, Catch )
 		end
 
 		if self:AcceptToken( "fnl" ) then
@@ -1243,9 +1243,61 @@ function Compiler:Statement_7( Trace )
 	return self:Statement_8( Trace )
 end
 
--- Stage 8: Statment Expressions
+-- Stage 8: Loops
 function Compiler:Statement_8( Trace )
 	-- MsgN( "Compiler -> Statement 8" )
+
+	if self:AcceptToken( "for" ) then
+		local Trace = self:GetTokenTrace( Trace )
+
+		self:PushScope( )
+		self:PushLoopDeph( )
+
+			self:RequireToken( "lpa", "Left parenthesis (( ) missing, after for" )
+	
+			self:RequireToken( "var", "Variable type expected for loop iterator." )
+			
+			local Class = self:GetClass( Trace, self.TokenData )
+
+			self:RequireToken( "var", "Variable expected for parameter." )
+			
+			local Quick ={ Trace = Trace, Inline = "i", Return = Class.Short, FLAG = EXPADV_INLINE, IsRaw = true }
+
+			local AssInstr = self:Compile_ASS( Trace, self.TokenData, Quick, Class.Name )
+			
+			self:RequireToken( "ass", "Assigment expected for loop decleration" )
+
+			local Start = self:Expression( Trace )
+
+			self:RequireToken( "sep", "Semicolon (;) exspected after loop decleration." )
+
+			local End = self:Expression( Trace )
+
+			self:RequireToken( "sep", "Semicolon (;) exspected after loop end" )
+
+			local Step = self:Expression( Trace )
+
+			self:RequireToken( "rpa", "Right parenthesis ( )) missing, after for loop step" )
+
+			self:RequireToken( "lcb", "Left curly bracket ({) missing, to open loop" )
+
+			local Sequence = self:Sequence( Trace, "rcb" )
+			
+			self:RequireToken( "rcb", "Right curly bracket (}) missing, to close loop" )
+
+		local Memory = self:PopLoopDeph( )
+		self:PopScope( )
+		
+		return self:Compile_FOR( Trace, Class, AssInstr, Memory, Start, End, Step, Sequence )
+	end
+
+	return self:Statement_9( Trace )
+end
+
+
+-- Stage 9: Statment Expressions
+function Compiler:Statement_9( Trace )
+	-- MsgN( "Compiler -> Statement 9" )
 
 	if !self:HasTokens( ) then
 		return
@@ -1290,23 +1342,13 @@ function Compiler:Util_Perams( Trace )
 
 			self:ExcludeToken( "com", "Parameter separator (,) must not appear here" )
 			
-			local Class, Prediction
+			self:ExcludeToken( "func", "functions may not be passed as an argument, cast to a delegate first." )
+			
+			self:RequireToken( "var", "Function return type or void expected after function." )
 
-			if self:AcceptToken( "func" ) then
-				Class = self:GetClass( Trace, self.TokenData )
-
-				self:RequireToken( "var", "Function return type or void expected after function." )
-
-				if self.TokenData ~= "void" then
-					Prediction = self:GetClass( Trace, self.TokenData ).Short
-				else
-					Prediction = "void"
-				end
-			else
-				self:RequireToken( "var", "Variable type expected for function parameter." )
+			self:RequireToken( "var", "Variable type expected for function parameter." )
 				
-				Class = self:GetClass( Trace, self.TokenData )
-			end
+			local Class = self:GetClass( Trace, self.TokenData )
 
 			self:RequireToken( "var", "Variable expected for parameter." )
 			
@@ -1316,11 +1358,7 @@ function Compiler:Util_Perams( Trace )
 
 			local Cell = self:CreateVariable( Trace, self.TokenData, Class.Name )
 
-			if Prediction then
-				self.KnownReturnTypes[Cell.Scope][Cell.Memory] = Prediction 
-			end
-
-			Params[#Params + 1] = { self.TokenData, Class.Short, Cell.Memory, Prediction }
+			Params[#Params + 1] = { self.TokenData, Class.Short, Cell.Memory }
 				
 			Used[ self.TokenData ] = true
 			

@@ -177,6 +177,24 @@ EXPADV.AddInlineOperator( nil, "=f", "n", "f", "Context.Memory[@value 1]" )
 EXPADV.AddException( nil, "invoke" )
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Define delegate class
+   --- */
+
+local DelgateClass = EXPADV.AddClass( nil, "delegate", "d" )
+
+EXPADV.AddPreparedOperator( nil, "d=", "n,d", "", [[
+	@define value = Context.Memory[@value 1]
+	Context.Trigger = Context.Trigger or Context.Delta[@value 1] ~= @value
+	Context.Memory[@value 1] = @value 2
+]] )
+
+EXPADV.AddInlineOperator( nil, "=d", "n", "d", "Context.Memory[@value 1]" )
+
+EXPADV.AddInlineOperator( nil, "delegate", "f", "d", "@value 1" )
+
+EXPADV.AddInlineOperator( nil, "function", "d", "f", "@value 1" )
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Register exception class!
    --- */
 

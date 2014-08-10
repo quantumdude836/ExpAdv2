@@ -290,8 +290,9 @@ end
    end
 
    function Compiler:PopLoopDeph( )
-   		self:PopMemory( )
+   		local Memory = self:PopMemory( )
    		self.LoopDeph = self.LoopDeph - 1
+   		return Memory
    end
 
    function Compiler:PushLambdaDeph( )
@@ -306,7 +307,7 @@ end
    end
 
    function Compiler:FlushMemory( Trace, Memory )
-		return string.format( "local Context = Context:Push( %s, %s )", EXPADV.ToLua( Trace ), EXPADV.ToLua( Memory ) )
+		return string.format( "local Context = Context:Push( %s, %s )", EXPADV.ToLua( Trace ), EXPADV.ToLua( Memory or { } ) )
    end
 
    function Compiler:PushReturnDeph( ForceClass, Optional )

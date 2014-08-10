@@ -127,7 +127,7 @@ function EXPADV.LoadOperators( )
 		end
 
 		-- Second we check the input types, and build our signatures!
-		local ShouldNotLoad = false
+		local ShouldNotLoad, TotalInputs = false, 0
 
 		if Operator.Input and Operator.Input ~= "" then
 			local Signature = { }
@@ -143,9 +143,12 @@ function EXPADV.LoadOperators( )
 						break
 					end
 
-					Signature[ I ] = "..."
+					Signature[ #Signature + 1 ] = "..."
 					Operator.UsesVarg = true
 					break
+				elseif Input == "?" then
+					TotalInputs = TotalInputs + 1
+					continue
 				end
 
 				-- Next, check for valid input classes.
@@ -167,11 +170,12 @@ function EXPADV.LoadOperators( )
 					break
 				end
 
-				Signature[ I ] = Class.Short
+				Signature[ #Signature + 1 ] = Class.Short
+				TotalInputs = TotalInputs + 1
 			end
 
 			Operator.Input = Signature
-			Operator.InputCount = #Signature
+			Operator.InputCount = TotalInputs
 			Operator.Signature = string.format( "%s(%s)", Operator.Name, table.concat( Signature, "" ) )
 
 			if Operator.UsesVarg then Operator.InputCount = Operator.InputCount - 1 end
@@ -571,7 +575,10 @@ function EXPADV.BuildVMOperator( Operator )
 		for I = 1, Operator.InputCount do
 			local Instruction = Instructions[I]
 
-			if isstring( Instruction ) then
+			if !Instruction then
+				Arguments[I] = "nil"
+
+			elseif isstring( Instruction ) then
 
 				Arguments[I] = "\"" .. Instruction .. "\""
 
@@ -648,6 +655,11 @@ function EXPADV.BuildLuaOperator( Operator )
 				if Uses == 0 then
 					InputInline = "nil" -- This should never happen!
 					InputReturn = nil -- This should result in void.
+					
+					if Input.FLAG == EXPADV_PREPARE or Input.FLAG == EXPADV_INLINEPREPARE then
+						InputPrepare = Input.Prepare
+					end
+					
 				elseif Input.FLAG == EXPADV_FUNCTION then
 					InputInline = Compiler:VMToLua( Input )
 					InputReturn = Input.Return
@@ -675,7 +687,7 @@ function EXPADV.BuildLuaOperator( Operator )
 			-- Place inputs into generated code
 			if Operator.FLAG == EXPADV_PREPARE or Operator.FLAG == EXPADV_INLINEPREPARE then
 				OpPrepare = string.gsub( OpPrepare, "@value " .. I, InputInline )
-				OpPrepare = string.gsub( OpPrepare, "@type " .. I, Format( "%q", InputReturn or Operator.Input[I] ) )
+				OpPrepare = string.gsub( OpPrepare, "@type " .. I, Format( "%q", InputReturn or Operator.Input[I] or "void" ) )
 			end
 
 			if Operator.FLAG == EXPADV_INLINE or Operator.FLAG == EXPADV_INLINEPREPARE then

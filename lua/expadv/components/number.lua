@@ -333,3 +333,13 @@ MathComponent:AddFunctionHelper( "log", "n,n", "Returns the logarithm of (number
 
 MathComponent:AddInlineFunction("mix", "n,n,n", "n", "(@value 1 * @value 3 + @value 2 * (1 - @value 3))" )
 MathComponent:AddFunctionHelper( "mix", "n,n,n", "Returns a linear interpolation between three numbers." )
+
+/* --- --------------------------------------------------------------------------------
+@: Loop
+   --- */
+
+MathComponent:AddPreparedOperator( "for=n", "n,n,n,?", "", [[
+   for i = @value 1, @value 2, @value 3 do
+      @prepare 4
+   end
+]] ) 

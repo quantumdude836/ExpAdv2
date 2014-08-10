@@ -542,6 +542,12 @@ function Compiler:Compile_ASS( Trace, Variable, Expression, DefinedClass, Modifi
 
 	local MemRef, Scope = self:FindCell( Trace, Variable, true )
 
+	local Cell = self.Cells[MemRef]
+
+	if Cell and Cell.Return ~= Expression.Return then
+		Expression = self:Compile_CAST( Trace, Cell.Return, Expression )
+	end -- We cast automatically, to allow us to assign numbers to strings and so forth.
+
 	self:TestCell( Trace, MemRef, Expression.Return, Variable )
 	
 	local Operator = self:LookUpOperator( Expression.Return .. "=", "n", Expression.Return )
@@ -578,7 +584,9 @@ function Compiler:Compile_CALL( Trace, Expression, Expressions )
 
 	local Operator = self:LookUpOperator( "call", Expression.Return, "..." )
 
-	if !Operator then
+	if SafeOperator and !Operator then
+		self:TraceError( Trace, "Type %s can not be called in this way.", self:NiceClass( Expression.Return ) )
+	elseif !Operator then
 		self:TraceError( Trace, "No such call operation, %s( ... )", self:NiceClass( Expression.Return ) )
 	end
 
@@ -799,4 +807,25 @@ function Compiler:Build_Function( Trace, Params, UseVarg, Sequence, Memory )
 	}, "\n" )
 
 	return { Trace = Trace, Inline = Lua, Return = "f", FLAG = EXPADV_INLINE }
+end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Loops
+   --- */
+
+function Compiler:Compile_FOR( Trace, Class, AssInstr, Memory, Start, End, Step, Sequence )
+	local Operator = self:LookUpOperator( "for=" .. Class.Short, Start.Return, End.Return, Step.Return )
+
+	if !Operator then
+		self:TraceError( Trace, "No such loop 'for(%s = %s, %s, %s)'", self:NiceClass( Class.Short, Start.Return, End.Return, Step.Return ) )
+	end
+
+	local Lua = string.format( "%s\n%s; %s\n%s; %s",
+		self:FlushMemory( Trace, Memory ),
+		AssInstr.Prepare or "", AssInstr.Inline or "",
+		Sequence.Prepare or "", Sequence.Inline or "" )
+	
+	local NewSequence = { Trace = Trace, Prepare = Lua, Return = "", FLAG = EXPADV_PREPARE }
+
+	return Operator.Compile( self, Trace, Start, End, Step, NewSequence )
 end
