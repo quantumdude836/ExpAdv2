@@ -27,19 +27,18 @@ end
 local Hologram = HologramComponent:ExtendClass( "e" )
 -- This will derive a new class from an old one (such as entity for holograms )
 
+
 /*=================================================================================
 		Section: Operators
 =================================================================================*/
-/*
 Number:AddInlineOperator( Name, Input, Return, Inline )
 Number:AddPreparedOperator( Name, Input, Return, Prepare, Inline )
 
 These are collision values - to prevent collision with other variables.
-%define A,B,C = 1,2,3
+@define A,B,C = 1,2,3
 print(@A)
 
 Number:AddVMOperator( Name, Input, Return, Function ) -- function( Context, Trace, ... )
-*/
 
 
 /*=================================================================================

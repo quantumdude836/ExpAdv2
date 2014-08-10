@@ -39,12 +39,12 @@ local BONES = {
 	LeftSholder = SENSORBONE.SHOULDER_Right,
 	RightSholder = SENSORBONE.SHOULDER_Left,
 	CenterShoulder = SENSORBONE.SHOULDER,
-	LeftHip = SENSORBONE.HIP_Left,		
+	LeftHip = SENSORBONE.HIP_Left,
 	RightHip = SENSORBONE.HIP_Right,
-	CenterHip = SENSORBONE.HIP,			
+	CenterHip = SENSORBONE.HIP,
 	LeftElbow = SENSORBONE.ELBOW_Left,
 	RightElbow = SENSORBONE.ELBOW_Right,
-	LeftKnee = SENSORBONE.KNEE_Left
+	LeftKnee = SENSORBONE.KNEE_Left,
 	RightKnee = SENSORBONE.KNEE_Right,
 	RightWrist = SENSORBONE.WRIST_Right,
 	LeftAnkle = SENSORBONE.ANKLE_Left,
@@ -56,14 +56,14 @@ local BONES = {
 	RightAnkle = SENSORBONE.ANKLE_Right,
 	CenterSpine = SENSORBONE.SPINE,
 	Head = SENSORBONE.HEAD,
-	
+
 }
 
 /* ---	--------------------------------------------------------------------------------
 	@: Server Only Functions
    ---	*/
 
-EXPAD.ServerOperators( )
+EXPADV.ServerOperators( )
 
 MSComponent:AddInlineFunction( "hasMotionSensor", "ply:", "b", "(IsValid( @value 1 ) and @value 1:( 'expadv_status_msensor', 0) >= 1)")
 MSComponent:AddFunctionHelper( "hasMotionSensor", "ply:", "returns true if player has a motion sensor." )
@@ -74,16 +74,16 @@ end]] )
 
 MSComponent:AddFunctionHelper( "startMotionSensor", "", "Starts the players motion sensor, player has enabled 'expadv_allow_msensor'." )
 
-for Name, Num in pairs( BONES )
+for Name, Num in pairs( BONES ) do
 	local function Virtual( Context, Trace, Player )
-		if !IsValid( Player ) or ( Player:GetInfoNum( 'expadv_status_msensor', 0) ~= 2 and Player ~= Context.player then
+		if !IsValid( Player ) or ( Player:GetInfoNum( 'expadv_status_msensor', 0) ~= 2 ) and Player ~= Context.player then
 			return Vector( 0, 0, 0 )
 		end
 
-		return Player:MotionSensorPos( Num ) )
+		return Player:MotionSensorPos( Num )
 	end
 
-	MSComponent:AddVirtualFunction( "getSensor" .. Name, "ply:", "v", Virtual )
+	MSComponent:AddVMFunction( "getSensor" .. Name, "ply:", "v", Virtual )
 	MSComponent:AddFunctionHelper( "getSensor" .. Name, "ply:", "returns the " .. Name .. " from the players motion sensor." )
 end
 
@@ -91,11 +91,11 @@ end
 	@: Shared Functions
    ---	*/
 
-EXPAD.SharedOperators( )
+EXPADV.SharedOperators( )
 
 if SERVER then
 	MSComponent:AddInlineFunction( "hasMotionSensor", "", "b", "(IsValid( Context.player ) and Context.player:( 'expadv_status_msensor', 0) >= 1)")
-	
+
 	MSComponent:AddPreparedFunction( "startMotionSensor", "", "", [[if IsValid( Context.player ) and Context.player:( 'expadv_status_msensor', 0) >= 1) then
 		Context.player:SendLua( 'motionsensor.Start( )' )
 	end]] )
@@ -112,27 +112,28 @@ if CLIENT then
 	MSComponent:AddFunctionHelper( "startMotionSensor", "", "Same as player:startMotionSensor( ), uses owner as player serverside and localplayer clientside." )
 end
 
-for Name, Num in pairs( BONES )
+for Name, Num in pairs( BONES ) do
 
 	if SERVER then
-			MSComponent:AddVirtualFunction( "getSensor" .. Name, "", "v", function( Context, Trace )
-				if !IsValid( Context.player ) or ( Context.player:GetInfoNum( 'expadv_status_msensor', 0) ~= 2 then
+			MSComponent:AddVMFunction( "getSensor" .. Name, "", "v", function( Context, Trace )
+				if !IsValid( Context.player ) or ( Context.player:GetInfoNum( 'expadv_status_msensor', 0) ~= 2 ) then
 					return Vector( 0, 0, 0 )
 				end
-		
+
 				return Context.player:MotionSensorPos( Num )
 			end )
 	end
 
 	if CLIENT then
-		MSComponent:AddVirtualFunction( "getSensor" .. Name, "", "v", function( Context, Trace )
-			if !IsValid( Player ) or ( GetConVarNumber( 'expadv_status_msensor' ) ~= 2 then
+		MSComponent:AddVMFunction( "getSensor" .. Name, "", "v", function( Context, Trace )
+			if !IsValid( Player ) or ( GetConVarNumber( 'expadv_status_msensor' ) ~= 2 ) then
 				return Vector( 0, 0, 0 )
 			end
-	
+
 			return LocalPlayer:MotionSensorPos( Num )
 		end )
 
 		MSComponent:AddFunctionHelper( "getSensor" .. Name, "", "same as player:" .. Name .. "(), uses owner as player serverside and localplayer clientside." )
 	end
+
 end
