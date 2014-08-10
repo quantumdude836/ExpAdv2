@@ -1344,8 +1344,6 @@ function Compiler:Util_Perams( Trace )
 			
 			self:ExcludeToken( "func", "functions may not be passed as an argument, cast to a delegate first." )
 			
-			self:RequireToken( "var", "Function return type or void expected after function." )
-
 			self:RequireToken( "var", "Variable type expected for function parameter." )
 				
 			local Class = self:GetClass( Trace, self.TokenData )

@@ -178,7 +178,7 @@ function EXPADV.LoadOperators( )
 			Operator.InputCount = TotalInputs
 			Operator.Signature = string.format( "%s(%s)", Operator.Name, table.concat( Signature, "" ) )
 
-			if Operator.UsesVarg then Operator.InputCount = Operator.InputCount - 1 end
+			--if Operator.UsesVarg then Operator.InputCount = Operator.InputCount - 1 end
 		else
 			Operator.Input = { }
 			Operator.InputCount = 0
@@ -659,7 +659,7 @@ function EXPADV.BuildLuaOperator( Operator )
 					if Input.FLAG == EXPADV_PREPARE or Input.FLAG == EXPADV_INLINEPREPARE then
 						InputPrepare = Input.Prepare
 					end
-					
+
 				elseif Input.FLAG == EXPADV_FUNCTION then
 					InputInline = Compiler:VMToLua( Input )
 					InputReturn = Input.Return

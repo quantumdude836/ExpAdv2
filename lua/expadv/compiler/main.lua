@@ -235,6 +235,7 @@ function Compiler:GetClass( Trace, ClassName, bNoError )
 
 	if !Class or Class.Name ~= ClassName then
 		if bNoError then return end
+		debug.Trace( )
 		self:TraceError( Trace, "No such class %q", ClassName or "WTF" )
 	end
 

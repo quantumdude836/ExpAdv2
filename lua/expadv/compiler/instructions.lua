@@ -545,7 +545,7 @@ function Compiler:Compile_ASS( Trace, Variable, Expression, DefinedClass, Modifi
 	local Cell = self.Cells[MemRef]
 
 	if Cell and Cell.Return ~= Expression.Return then
-		Expression = self:Compile_CAST( Trace, Cell.Return, Expression )
+		Expression = self:Compile_CAST( Trace, self:NiceClass( Cell.Return ), Expression )
 	end -- We cast automatically, to allow us to assign numbers to strings and so forth.
 
 	self:TestCell( Trace, MemRef, Expression.Return, Variable )
