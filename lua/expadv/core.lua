@@ -419,6 +419,51 @@ hook.Add( "Think", "expadv.Hook", function( )
 end )
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Code upload
+   --- */
+
+require( "vnet" )
+
+if SERVER then
+	util.AddNetworkString( "expadv.request" )
+
+	util.AddNetworkString( "expadv.upload" )
+end
+
+function EXPADV.SendCode( ID, Root, Files )
+	local Package = vnet.CreatePacket( "expadv.upload" )
+
+	Package:Int( ID )
+
+	Package:Entity( LocalPlayer( ) )
+
+	Package:String( Root )
+
+	Package:Table( Files )
+
+	Package:Send( )
+end
+
+net.Receive( "expadv.request", function( )
+	local ID = net.ReadUInt( 16 )
+	local Root = EXPADV.Editor.GetCode( )
+	if !Root or Root == "" then return end
+	EXPADV.SendCode( ID, Root, { } )
+end )
+
+MsgN( "RIGHT HERE:" )
+vnet.Watch( "expadv.upload", function( Package )
+	local Expadv = Entity( Package:Int( ) )
+	local Player = Package:Entity( )
+	
+	if !IsValid( Expadv ) or !Expadv.ReceivePackage then return end
+	
+	-- TODO: Owner check.
+	
+	Expadv:ReceivePackage( Package )
+end, vnet.OPTION_WATCH_OVERRIDE )
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: API.
    --- */
 

@@ -1,4 +1,4 @@
---[[	vNet 1.1.4
+--[[	vNet 1.1.5
 
 	Copyright 2014 Alexandru-Mihai Maftei
 			   aka Vercas
@@ -38,7 +38,7 @@
 -----------------------------------------------------------------------------------------------------------------------------
 	
 	New in this version:
-		-	Added a 'Broadcast' function to outgoing packets.
+		-	Fixed typo at line 1152, where 'v' was typed instead of 'val', yielding errors when writing strings.
 --]]
 
 
@@ -2262,5 +2262,8 @@ if CLIENT then
 end
 
 
+
+vnet.versionString = "1.1.5"
+vnet.versionNumber = 1001005
 
 return vnet

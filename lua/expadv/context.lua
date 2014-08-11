@@ -89,22 +89,25 @@ end
 EXPADV.CVarTickQuota = CreateConVar( "expadv_tick_quota", "16000", {FCVAR_REPLICATED} )
 EXPADV.CVarSoftQuota = CreateConVar( "expadv_soft_quota", "4000", {FCVAR_REPLICATED} )
 EXPADV.CVarHardQuota = CreateConVar( "expadv_hard_quota", "50000", {FCVAR_REPLICATED} )
-EXPADV.CVarQuotaHook = CreateConVar( "expadv_quota_hook", "250", {FCVAR_REPLICATED} )
+EXPADV.CVarQuotaHook = CreateConVar( "expadv_quota_hook", "1500", {FCVAR_REPLICATED} )
 
 local SysTime = SysTime
 
 local function debug_hook( )
+	local Time = SysTime( )
+
 	local Context = EXPADV.EXECUTOR
 	if !Context then return error( "Somthing bad just happened!" ) end
 
-	local Time = SysTime( )
-
 	Context.Status.TickQuota = Context.Status.TickQuota + (Time - Context.Status.Bench)
-	Context.Status.Bench = Time
 
-	if Context.Status.TickQuota > EXPADV.CVarTickQuota:GetInt( ) then
+	local MaxQuota = EXPADV.CVarTickQuota:GetInt( ) * (engine.TickInterval()/0.0303030303) / 1000000
+	if Context.Status.TickQuota > MaxQuota then
 		error( { Trace = {0,0}, Quota = true, Msg = Message, Context = Context }, 0 )
 	end
+
+	print( "debug_hook:", Context.Status.TickQuota, " vs ", MaxQuota )
+	Context.Status.Bench = SysTime( )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
