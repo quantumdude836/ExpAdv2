@@ -22,8 +22,6 @@ require( "vnet" ) -- Nope, You may not know what this is yet :D
 function ENT:Initialize( )
 	if SERVER then
 
-		-- self:SetModel( "models/props_junk/TrafficCone001a.mdl" )
-
 		self:PhysicsInit( SOLID_VPHYSICS )
 		self:SetMoveType( MOVETYPE_VPHYSICS )
 		self:SetSolid( SOLID_VPHYSICS )
@@ -36,8 +34,14 @@ function ENT:Initialize( )
 		end
 	end
 
+	self:ResetStatus( )
 end
 
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Status
+   --- */
+
+function ENT:ResetStatus( ) end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Client must always know about this entity.
@@ -80,7 +84,13 @@ function ENT:OnScriptError( Context, Msg ) end
 
 function ENT:OnUncatchedException( Context, Exception ) end --OnException
 
-function ENT:OnContextUpdate( Context ) end -- OnUpdate
+function ENT:OnUpdate( Context )
+	if WireLib then self:TriggerOutputs( ) end
+end
+
+function ENT:OnHitQuota( Context )
+	Context:ShutDown( )
+end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Context
@@ -110,7 +120,9 @@ function ENT:CreateContext( Instance, Player )
 
 		Context.OnException = function( ctx, exc ) return self:OnUncatchedException( ctx, exc ) end
 		
-		Context.OnUpdate = function( ctx ) return self:OnContextUpdate( ctx ) end
+		Context.OnUpdate = function( ctx ) return self:OnUpdate( ctx ) end
+		
+		Context.OnHitQuota = function( ctx ) return self:OnHitQuota( ctx ) end
 	end
 
 	ContextFromEntID[ self:EntIndex( ) ] = Context
