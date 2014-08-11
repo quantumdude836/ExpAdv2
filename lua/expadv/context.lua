@@ -89,24 +89,28 @@ end
 EXPADV.CVarTickQuota = CreateConVar( "expadv_tick_quota", "16000", {FCVAR_REPLICATED} )
 EXPADV.CVarSoftQuota = CreateConVar( "expadv_soft_quota", "4000", {FCVAR_REPLICATED} )
 EXPADV.CVarHardQuota = CreateConVar( "expadv_hard_quota", "50000", {FCVAR_REPLICATED} )
-EXPADV.CVarQuotaHook = CreateConVar( "expadv_quota_hook", "1500", {FCVAR_REPLICATED} )
+EXPADV.CVarQuotaHook = CreateConVar( "expadv_quota_hook", "500", {FCVAR_REPLICATED} )
 
 local SysTime = SysTime
 
 local function debug_hook( )
 	local Time = SysTime( )
 
-	local Context = EXPADV.EXECUTOR
-	if !Context then return error( "Somthing bad just happened!" ) end
+	if !EXPADV.EXECUTOR then return debug.sethook( ) end
 
+
+	local Context = EXPADV.EXECUTOR
 	Context.Status.TickQuota = Context.Status.TickQuota + (Time - Context.Status.Bench)
 
-	local MaxQuota = EXPADV.CVarTickQuota:GetInt( ) * (engine.TickInterval()/0.0303030303) / 1000000
+	local MaxQuota = EXPADV.CVarTickQuota:GetInt( ) * (engine.TickInterval( )/0.0303030303) / 1000000
+
 	if Context.Status.TickQuota > MaxQuota then
+		debug.sethook( )
+		MsgN( "Tick Exceed: ", Context.Status.TickQuota, " / ", MaxQuota )
 		error( { Trace = {0,0}, Quota = true, Msg = Message, Context = Context }, 0 )
 	end
 
-	print( "debug_hook:", Context.Status.TickQuota, " vs ", MaxQuota )
+	MsgN( "debug_hook: ", Context.Status.TickQuota, " / ", MaxQuota )
 	Context.Status.Bench = SysTime( )
 end
 
@@ -116,28 +120,21 @@ end
    
 EXPADV.Updates = { }
 
-
-local _f, _s, _n
-
 -- Should be called before executing.
 function EXPADV.RootContext:PreExecute( )
 	EXPADV.EXECUTOR = self
 	self.Status.Bench = SysTime( )
 
-	_f, _s, _n = debug.gethook( )
 	debug.sethook( debug_hook, "l", EXPADV.CVarQuotaHook:GetInt( ) )
 end
 
 -- Should be called after executing.
 function EXPADV.RootContext:PostExecute( )
-	_f, _s, _n = debug.sethook( _f, _s, _n )
-	-- Why, because it returns nil, nil, nil :P
-
+	debug.sethook( )
+	
 	EXPADV.EXECUTOR = nil
 	self.Definitions = { }
 	self.Status.TickQuota = self.Status.TickQuota + (SysTime( ) - self.Status.Bench)
-
-	MsgN( "Post Execute: ", self.Status.TickQuota )
 end
 
 -- Safely execute a function on this context.
@@ -153,7 +150,7 @@ function EXPADV.RootContext:Execute( Location, Operation, ... ) -- String, Funct
 
 	elseif Ok or Result.Exit then
 
-		if self.Status.TickQuota > EXPADV.CVarTickQuota:GetInt( ) then
+		if self.Status.TickQuota > EXPADV.CVarTickQuota:GetInt( ) * (engine.TickInterval()/0.0303030303) / 1000000 then
 			return self:Handel( "HitQuota", Result )
 		end
 
