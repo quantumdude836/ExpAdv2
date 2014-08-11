@@ -70,7 +70,8 @@ function EXPADV.RootContext:Push( Trace, Cells ) -- Table, Table
 		Strings = self.Strings,
 		Instructions = self.Instructions,
 		Enviroment = self.Enviroment,
-		
+		Status = self.Status,
+
 		Memory = setmetatable( Memory, Memory ),
 		Delta = setmetatable( Delta, Delta ),
 		Changed = setmetatable( Changed, Changed ),
@@ -132,6 +133,8 @@ function EXPADV.RootContext:PostExecute( )
 	EXPADV.EXECUTOR = nil
 	self.Definitions = { }
 	self.Status.TickQuota = self.Status.TickQuota + (SysTime( ) - self.Status.Bench)
+
+	MsgN( "Post Execute: ", self.Status.TickQuota )
 end
 
 -- Safely execute a function on this context.

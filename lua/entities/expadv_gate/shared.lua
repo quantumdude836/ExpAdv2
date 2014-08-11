@@ -72,6 +72,8 @@ function ENT:OnUpdate( )
 	Context.Status.TickQuota = 0
 
 	if SERVER and WireLib then self:TriggerOutputs( ) end
+
+	MsgN( "Update: ", NewQuota, " vs ", SoftQuota )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------

@@ -820,7 +820,7 @@ function Compiler:Compile_FOR( Trace, Class, AssInstr, Memory, Start, End, Step,
 		self:TraceError( Trace, "No such loop 'for(%s = %s, %s, %s)'", self:NiceClass( Class.Short, Start.Return, End.Return, Step.Return ) )
 	end
 
-	local Lua = string.format( "%s\n%s; %s\n%s; %s",
+	local Lua = string.format( "%s\n%s\n%s\n%s\n%s",
 		self:FlushMemory( Trace, Memory ),
 		AssInstr.Prepare or "", AssInstr.Inline or "",
 		Sequence.Prepare or "", Sequence.Inline or "" )
