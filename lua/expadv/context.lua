@@ -106,11 +106,9 @@ local function debug_hook( )
 
 	if Context.Status.TickQuota > MaxQuota then
 		debug.sethook( )
-		MsgN( "Tick Exceed: ", Context.Status.TickQuota, " / ", MaxQuota )
 		error( { Trace = {0,0}, Quota = true, Msg = Message, Context = Context }, 0 )
 	end
 
-	MsgN( "debug_hook: ", Context.Status.TickQuota, " / ", MaxQuota )
 	Context.Status.Bench = SysTime( )
 end
 

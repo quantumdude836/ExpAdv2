@@ -73,6 +73,8 @@ function ENT:OnUpdate( )
 
 	if SERVER and WireLib then self:TriggerOutputs( ) end
 
+	self:CheckUsage( )
+	
 	MsgN( "Update: ", NewQuota, " vs ", SoftQuota )
 end
 
@@ -110,8 +112,9 @@ function ENT:OnHitQuota( )
 		self:SetSparking( false )
 		self:SetIgnited( false )
 		self:SetCrashed( true )
-		self:OnScriptError( self.Context, "Tick Quota Exceeded." )
 	end
+	
+	self:OnScriptError( self.Context, "Tick Quota Exceeded." )
 
 	self.Context:ShutDown( )
 end
@@ -130,8 +133,9 @@ function ENT:OnHitHardQuota( )
 		self:SetSparking( false )
 		self:SetIgnited( true )
 		self:SetCrashed( true )
-		self:OnScriptError( self.Context, "Hard Quota Exceeded." )
 	end
+	
+	self:OnScriptError( self.Context, "Hard Quota Exceeded." )
 
 	self.Context:ShutDown( )
 end
