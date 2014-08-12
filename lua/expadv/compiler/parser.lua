@@ -724,39 +724,85 @@ function Compiler:Sequence( Trace, ExitToken )
 	return self:Compile_SEQ( Trace, Sequence )
 end
 
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Block
+   --- */
+
+function Compiler:GetBlock( Trace, RCB )
+	if self:AcceptToken( "lcb" ) then
+
+		self:PushScope( )
+
+		local Sequence = self:Sequence( Trace, "rcb" )
+
+		self:PopScope( )
+
+		self:RequireToken( "rcb", "Right curly bracket (}) missing, ", RCB, "to close block" )
+
+		return Sequence
+	end
+
+	self:PushScope( )
+
+	local Statement = self:Statement( Trace )
+	
+	self:PopScope( )
+
+	return Statement
+end
+
+function Compiler:GetCondition( Trace, LPA, RPA )
+	local Trace = self:GetTokenTrace( Trace )
+
+	self:RequireToken( "lpa", "Left parenthesis (( ) missing, %s", LPA or "to open condition" )
+
+	local Expression = self:Expression( Trace )
+
+	self:RequireToken( "rpa", "Right parenthesis ( )) missing, %s", RPA or "to close condition" )
+
+	return Expression
+end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Statments
+   --- */
+
 -- Stage 1: If statments
 function Compiler:Statement_1( Trace )
 	-- MsgN( "Compiler -> Statement 1" )
 
 	if self:AcceptToken( "if" ) then
-		local Trace = self:GetTokenTrace( Trace )
+		--[[
+			local Trace = self:GetTokenTrace( Trace )
 
-		self:RequireToken( "lpa", "Left parenthesis (( ) missing, to open condition" )
+			self:RequireToken( "lpa", "Left parenthesis (( ) missing, to open condition" )
 
-		local Expression = self:Expression( Trace )
+			local Expression = self:Expression( Trace )
 
-		self:RequireToken( "rpa", "Right parenthesis ( )) missing, to close condition" )
+			self:RequireToken( "rpa", "Right parenthesis ( )) missing, to close condition" )
 
-		if self:AcceptToken( "lcb" ) then
+			if self:AcceptToken( "lcb" ) then
+
+				self:PushScope( )
+
+				local Sequence = self:Sequence( Trace, "rcb" )
+
+				self:PopScope( )
+
+				self:RequireToken( "rcb", "Right curly bracket (}) missing, to close if statement" )
+
+				return self:Compile_IF( Trace, Expression, Sequence, self:Statement_2( Trace ) )
+			end
 
 			self:PushScope( )
 
-			local Sequence = self:Sequence( Trace, "rcb" )
+			local Statement = self:Statement( Trace )
 
 			self:PopScope( )
+		]]
 
-			self:RequireToken( "rcb", "Right curly bracket (}) missing, to close if statement" )
-
-			return self:Compile_IF( Trace, Expression, Sequence, self:Statement_2( Trace ) )
-		end
-
-		self:PushScope( )
-
-		local Statement = self:Statement( Trace )
-
-		self:PopScope( )
-
-		return self:Compile_IF( Trace, Expression, Statement, self:Statement_2( Trace ) )
+		return self:Compile_IF( Trace, self:GetCondition( Trace ), self:GetBlock( Trace, "to close if statment" ), self:Statement_2( Trace ) )
 	end
 
 	return self:Statement_3( Trace )
@@ -767,56 +813,60 @@ function Compiler:Statement_2( Trace )
 	-- MsgN( "Compiler -> Statement 2" )
 
 	if self:AcceptToken( "eif" ) then
-		local Trace = self:GetTokenTrace( Trace )
+		--[[
+			local Trace = self:GetTokenTrace( Trace )
 
-		self:RequireToken( "lpa", "Left parenthesis (( ) missing, to open condition" )
+			self:RequireToken( "lpa", "Left parenthesis (( ) missing, to open condition" )
 
-		local Expression = self:Expression( Trace )
+			local Expression = self:Expression( Trace )
 
-		self:RequireToken( "rpa", "Right parenthesis ( )) missing, to close condition" )
+			self:RequireToken( "rpa", "Right parenthesis ( )) missing, to close condition" )
 
-		if self:AcceptToken( "lcb" ) then
+			if self:AcceptToken( "lcb" ) then
+				self:PushScope( )
+
+				local Sequence = self:Sequence( Trace, "rcb" )
+
+				self:PopScope( )
+
+				self:RequireToken( "rcb", "Right curly bracket (}) missing, to close elseif statement" )
+
+				return self:Compile_ELSEIF( Trace, Expression, Sequence, self:Statement_2( Trace ) )
+			end
+
 			self:PushScope( )
 
-			local Sequence = self:Sequence( Trace, "rcb" )
+			local Statement = self:Statement( Trace )
 
 			self:PopScope( )
+		]]
 
-			self:RequireToken( "rcb", "Right curly bracket (}) missing, to close elseif statement" )
-
-			return self:Compile_ELSEIF( Trace, Expression, Sequence, self:Statement_2( Trace ) )
-		end
-
-		self:PushScope( )
-
-		local Statement = self:Statement( Trace )
-
-		self:PopScope( )
-
-		return self:Compile_ELSEIF( Trace, Expression, Statement, self:Statement_2( Trace ) )
+		return self:Compile_ELSEIF( Trace, self:GetCondition( Trace ), self:GetBlock( Trace, "to close elseif statment" ), self:Statement_2( Trace ) )
 
 	elseif self:AcceptToken( "els" ) then
-		local Trace = self:GetTokenTrace( Trace )
+		--[[
+			local Trace = self:GetTokenTrace( Trace )
 
-		if self:AcceptToken( "lcb" ) then
+			if self:AcceptToken( "lcb" ) then
+				self:PushScope( )
+
+				local Sequence = self:Sequence( Trace, "rcb" )
+
+				self:PopScope( )
+
+				self:RequireToken( "rcb", "Right curly bracket (}) missing, to close elseif statement" )
+
+				return self:Compile_ELSE( Trace, Sequence )
+			end
+
 			self:PushScope( )
 
-			local Sequence = self:Sequence( Trace, "rcb" )
+			local Statement = self:Statement( Trace )
 
 			self:PopScope( )
+		]]
 
-			self:RequireToken( "rcb", "Right curly bracket (}) missing, to close elseif statement" )
-
-			return self:Compile_ELSE( Trace, Sequence )
-		end
-
-		self:PushScope( )
-
-		local Statement = self:Statement( Trace )
-
-		self:PopScope( )
-
-		return self:Compile_ELSE( Trace, Statement )
+		return self:Compile_ELSE( Trace, self:GetBlock( Trace, "to close else statment" ) )
 	end
 end
 
@@ -825,15 +875,19 @@ function Compiler:Statement_3( Trace )
 	if self:AcceptToken( "try" ) then
 		local Trace = self:GetTokenTrace( Trace )
 
-		self:RequireToken( "lcb", "Left curly bracket ({) missing, to open try statement" )
+		--[[
+			self:RequireToken( "lcb", "Left curly bracket ({) missing, to open try statement" )
 
-		self:PushScope( )
+			self:PushScope( )
 
-		local Sequence = self:Sequence( Trace, "rcb" )
+			local Sequence = self:Sequence( Trace, "rcb" )
 
-		self:PopScope( )
+			self:PopScope( )
 
-		self:RequireToken( "rcb", "Right curly bracket (}) missing, to close try statement" )
+			self:RequireToken( "rcb", "Right curly bracket (}) missing, to close try statement" )
+		]]
+
+		local Sequence = self:GetBlock( Trace, "to close try statement" )
 
 		local Catch, Final
 
@@ -895,30 +949,34 @@ function Compiler:Statement_3( Trace )
 			local Cell = self:CreateVariable( Trace, self.TokenData, "exception" )
 
 			self:RequireToken( "rpa", "Right parenthesis ( )) missing, to catch" )
+			--[[
+				self:RequireToken( "lcb", "Left curly bracket ({) missing, to open catch statement" )
+	
+				local Sequence = self:Sequence( Trace, "rcb" )
+	
+				self:PopScope( )
+	
+				self:RequireToken( "rcb", "Right curly bracket (}) missing, to close catch statement" )
+			]]
 
-			self:RequireToken( "lcb", "Left curly bracket ({) missing, to open catch statement" )
-
-			local Sequence = self:Sequence( Trace, "rcb" )
-
-			self:PopScope( )
-
-			self:RequireToken( "rcb", "Right curly bracket (}) missing, to close catch statement" )
-
-			Catch = self:Compile_CATCH( Trace, Cell.Memory, Accepted, Sequence, Catch )
+			Catch = self:Compile_CATCH( Trace, Cell.Memory, Accepted, self:GetBlock( Trace, "to close catch statement" ), Catch )
 		end
 
 		if self:AcceptToken( "fnl" ) then
 			local Trace = self:GetTokenTrace( Trace )
+			--[[
+				self:PushScope( )
+	
+				self:RequireToken( "lcb", "Left curly bracket ({) missing, to open final statement" )
+	
+				Final = self:Sequence( Trace, "rcb" )
+	
+				self:PopScope( )
+	
+				self:RequireToken( "rcb", "Right curly bracket (}) missing, to close final statement" )
+			]]
 
-			self:PushScope( )
-
-			self:RequireToken( "lcb", "Left curly bracket ({) missing, to open final statement" )
-
-			Final = self:Sequence( Trace, "rcb" )
-
-			self:PopScope( )
-
-			self:RequireToken( "rcb", "Right curly bracket (}) missing, to close final statement" )
+			Final = self:GetBlock( Trace, "to close final statement" )
 		end
 
 
@@ -1010,6 +1068,34 @@ function Compiler:Statement_5( Trace )
 		end
 
 		return self:Compile_RETURN( Trace, self:Expression( Trace ) )
+	end
+
+	if self:AcceptToken( "cnt" ) then
+		local Trace = self:GetTokenTrace( Trace )
+		
+		self:ExcludeVarArg( )
+
+		if self.LoopDeph <= 0 then
+			self:TraceError( Trace, "return must no appear outside of a loop" )
+		end
+
+		self.BreakOut = "continue"
+
+		return { Trace = Trace, Inline = "continue", Return = "", FLAG = EXPADV_INLINE, IsRaw = true }
+	end
+
+	if self:AcceptToken( "brk" ) then
+		local Trace = self:GetTokenTrace( Trace )
+		
+		self:ExcludeVarArg( )
+
+		if self.LoopDeph <= 0 then
+			self:TraceError( Trace, "break must no appear outside of a loop" )
+		end
+
+		self.BreakOut = "break"
+
+		return { Trace = Trace, Inline = "break", Return = "", FLAG = EXPADV_INLINE, IsRaw = true }
 	end
 
 	return self:Statement_6( Trace )
@@ -1199,19 +1285,26 @@ function Compiler:Statement_7( Trace )
 			self:TraceError( Trace, "Serverside definition must not appear here.")
 		end
 
-		self:RequireToken( "lcb", "Left curly bracket ({) missing, to open server defintion" )
-
 		self.IsClientScript = false
-		self:PushScope( )
 
-		local Sequence = self:Sequence( Trace, "rcb" )
+		--[[
+			self:RequireToken( "lcb", "Left curly bracket ({) missing, to open server defintion" )
 
-		self:PopScope( )
-		self.IsClientScript = true
+			self:PushScope( )
 
-		self:RequireToken( "rcb", "Right curly bracket (}) missing, to close server defintion" )
-		
+			local Sequence = self:Sequence( Trace, "rcb" )
+
+			self:PopScope( )
+			self.IsClientScript = true
+
+			self:RequireToken( "rcb", "Right curly bracket (}) missing, to close server defintion" )
+		]]
+
+		local Sequence = self:GetBlock( Trace, "to close server defintion" )
+
 		Sequence.Prepare = string.format( "if SERVER then\n%s\nend", Sequence.Prepare )
+
+		self.IsClientScript = true
 			
 		return Sequence
 	end
@@ -1223,19 +1316,25 @@ function Compiler:Statement_7( Trace )
 			self:TraceError( Trace, "Client definition must not appear here.")
 		end
 
-		self:RequireToken( "lcb", "Left curly bracket ({) missing, to open client defintion" )
-
 		self.IsServerScript = false
-		self:PushScope( )
 
-		local Sequence = self:Sequence( Trace, "rcb" )
+		--[[
+			self:RequireToken( "lcb", "Left curly bracket ({) missing, to open client defintion" )
 
-		self:PopScope( )
-		self.IsServerScript = true
+			self:PushScope( )
 
-		self:RequireToken( "rcb", "Right curly bracket (}) missing, to close client defintion" )
+			local Sequence = self:Sequence( Trace, "rcb" )
+
+			self:PopScope( )
+
+			self:RequireToken( "rcb", "Right curly bracket (}) missing, to close client defintion" )
+		]]
+
+		local Sequence = self:GetBlock( Trace, "to close server defintion" )
 
 		Sequence.Prepare = string.format( "if CLIENT then\n%s\nend", Sequence.Prepare )
+		
+		self.IsServerScript = true
 			
 		return Sequence
 	end
@@ -1279,11 +1378,15 @@ function Compiler:Statement_8( Trace )
 
 			self:RequireToken( "rpa", "Right parenthesis ( )) missing, after for loop step" )
 
-			self:RequireToken( "lcb", "Left curly bracket ({) missing, to open loop" )
+			--[[
+				self:RequireToken( "lcb", "Left curly bracket ({) missing, to open loop" )
+	
+				local Sequence = self:Sequence( Trace, "rcb" )
+				
+				self:RequireToken( "rcb", "Right curly bracket (}) mis sing, to close loop" )
+			]]
 
-			local Sequence = self:Sequence( Trace, "rcb" )
-			
-			self:RequireToken( "rcb", "Right curly bracket (}) missing, to close loop" )
+			local Sequence = self:GetBlock( Trace, "to close for loop" )
 
 		local Memory = self:PopLoopDeph( )
 		self:PopScope( )
