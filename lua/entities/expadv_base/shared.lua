@@ -22,6 +22,7 @@ require( "vnet" ) -- Nope, You may not know what this is yet :D
 function ENT:Initialize( )
 	if SERVER then
 
+		--self:SetModel( "models/props_junk/TrafficCone001a.mdl" )
 		self:PhysicsInit( SOLID_VPHYSICS )
 		self:SetMoveType( MOVETYPE_VPHYSICS )
 		self:SetSolid( SOLID_VPHYSICS )

@@ -89,9 +89,11 @@ function ENT:CheckUsage( )
 
 	if !self.Context then return end
 
-	if SoftQuota > EXPADV.CVarHardQuota:GetInt( ) then
+	MaxHardQuota = EXPADV.CVarTickQuota:GetInt( ) * (engine.TickInterval( )/0.0303030303) / 1000000
+	
+	if SoftQuota > MaxHardQuota then
 		self:OnHitHardQuota( )
-	elseif SoftQuota > EXPADV.CVarHardQuota:GetInt( ) * 0.3 then
+	elseif SoftQuota > MaxHardQuota * 0.3 then
 		self:OnHitSoftQuota( )
 	elseif SERVER then
 		self:SetSparking( false )

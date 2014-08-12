@@ -58,9 +58,15 @@ function ENT:SendClientPackage( Player, Root, Files )
 
 	Package:Table( Files )
 
-	Package:AddTargets( Player and { Player } or player.GetAll( ) )
+	if IsValid(Player) then
+		Package:AddTargets( { Player } ) 
 
-	Package:Send( )
+		Package:Send( )
+
+		return
+	end
+
+	Package:Broadcast( )
 end
 
 function ENT:OnClientLoaded( Ent, Ply )
