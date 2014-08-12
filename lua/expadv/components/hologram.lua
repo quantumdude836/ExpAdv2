@@ -268,7 +268,7 @@ local function NewHolo( Context, Trace, Model, Position, Angle )
 	
 	if CPPI then Entity:CPPISetOwner( Context.player ) end
 
-	HolosByEntity[ Context.Entity ] = HolosByEntity[ Context.Entity ] or { }
+	HolosByEntity[ Context.Entity ] = HolosByEntity[ Context.entity ] or { }
 
 	HolosByEntity[ Context.Entity ][ Entity ] = Entity
 
@@ -325,6 +325,7 @@ local function CanHolo( Context )
 end
 
 HoloComponent:AddVMFunction( "canMakeHologram", "", "b", CanHolo )
+HoloComponent:AddFunctionHelper( "canMakeHologram", "", "Returns true if a hologram can be made this tick." )
 
 /*==============================================================================================
     Position
@@ -343,6 +344,11 @@ HoloComponent:AddPreparedFunction("stopMove", "h:", "",[[
 if $IsValid( @value 1 ) and @value 1.Player == Context.player then
 	@value 1:StopMove( )
 end]] )
+
+
+HoloComponent:AddFunctionHelper( "setPos", "h:v", "Sets the postion of the hologram." )
+HoloComponent:AddFunctionHelper( "moveTo", "h:v,n", "Moves the hologram to position V at speed N" )
+HoloComponent:AddFunctionHelper( "stopMove", "h:", "If a hologram is being moved, by a call to h:moveTo(v,) this stops it." )
 
 /*==============================================================================================
     Angles
@@ -593,15 +599,21 @@ end]], "( @val or 0 )" )
     Section: Animation
 ==============================================================================================*/
 
-HoloComponent:AddPreparedFunction("setAnimation", "h:n[,n,n]", "", [[
+HoloComponent:AddPreparedFunction("setAnimation", "h:n,n,n", "", [[
 if $IsValid( @value 1 ) and @value 1.Player == Context.player then
 	@value 1:SetHoloAnimation(@value 2, @value 3, value %4)
-end]] ) 
+end]] )
 
-HoloComponent:AddPreparedFunction("setAnimation", "h:s[,n,n]", "", [[
+EXPADV.AddFunctionAlias( "setAnimation", "h:n,n" )
+EXPADV.AddFunctionAlias( "setAnimation", "h:n" )
+
+HoloComponent:AddPreparedFunction("setAnimation", "h:s,n,n", "", [[
 if $IsValid( @value 1 ) and @value 1.Player == Context.player then
 	@value 1:SetHoloAnimation(@value 1:LookupSequence( @value 2 ), @value 3, value %4)
 end]] )
+
+EXPADV.AddFunctionAlias( "setAnimation", "h:s,n" )
+EXPADV.AddFunctionAlias( "setAnimation", "h:s" )
 
 HoloComponent:AddInlineFunction("animationLength", "h:", "n", "( $IsValid( @value 1 ) and @value 1:SequenceDuration( ) or 0 )" )
 

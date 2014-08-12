@@ -749,7 +749,7 @@ function Compiler:GetBlock( Trace, RCB )
 	
 	self:PopScope( )
 
-	return Statement
+	return self:Compile_SEQ( Trace, { Statement } )
 end
 
 function Compiler:GetCondition( Trace, LPA, RPA )

@@ -483,7 +483,7 @@ function Compiler:Compile_TRY( Trace, Sequence, Catch, Final )
 	local _, VM_ID = self:MakeVirtual( Sequence )
 
 	local Native = {
-		"local Ok, Result = pcall( .Instructions[" .. VM_ID .. "], Context )",
+		"local Ok, Result = pcall( Context.Instructions[" .. VM_ID .. "], Context )",
 		"if !Ok and istable( Result) and Result.Exception then",
 		Catch.Prepare,
 		[[elseif !Ok then

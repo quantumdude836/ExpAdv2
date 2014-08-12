@@ -587,7 +587,7 @@ function EXPADV.BuildVMOperator( Operator )
 				Arguments[I] = Instruction
 
 			elseif Instruction.FLAG == EXPADV_FUNCTION then
-				-- TODO: Figure this one out later
+				error( "Compiler is yet to support virtuals" )
 
 			elseif Instruction.FLAG == EXPADV_INLINE then
 
@@ -609,7 +609,9 @@ function EXPADV.BuildVMOperator( Operator )
 		
 		Compiler.VMInstructions[ID] = Operator.Function
 		
-		local Inline = string.format( "Context.Instructions[%i]( Context, %s, %s )", ID, Compiler:CompileTrace( Trace ), table.concat( Arguments, "," ) )
+		local InlineArgs = #Arguments >= 1 and table.concat( Arguments, "," ) or "nil"
+
+		local Inline = string.format( "Context.Instructions[%i]( Context, %s, %s )", ID, Compiler:CompileTrace( Trace ), InlineArgs )
 	
 		local Instruction = Compiler:NewLuaInstruction( Trace, Operator, table.concat( Prepare, "\n" ), Inline )
 		
@@ -661,8 +663,9 @@ function EXPADV.BuildLuaOperator( Operator )
 					end
 
 				elseif Input.FLAG == EXPADV_FUNCTION then
-					InputInline = Compiler:VMToLua( Input )
-					InputReturn = Input.Return
+					--InputInline = Compiler:VMToLua( Input )
+					--InputReturn = Input.Return
+					error( "Compiler is yet to support virtuals" )
 				elseif Input.FLAG == EXPADV_INLINE then
 					InputInline = Input.Inline
 					InputReturn = Input.Return
