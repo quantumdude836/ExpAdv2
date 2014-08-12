@@ -50,55 +50,47 @@ end
 	@: Update Info
    --- */
 
-function ENT:OnUpdate( )
-	local Context = self.Context
+function ENT:OnUpdate( Context )
 	if !Context then return end
 
-	local NewQuota = (self:GetTickQuota( ) + Context.Status.TickQuota) * 1000000
-	local SoftQuota = math.max( 0, self:GetSoftQuota( ) ) + NewQuota - EXPADV.CVarSoftQuota:GetInt( ) * (engine.TickInterval()/0.0303030303) / 1000000
+	if SERVER and WireLib then
+		self:TriggerOutputs( )
+	end
 
 	if SERVER then
-		self:SetTickQuota( NewQuota )
-		self:SetSoftQuota( SoftQuota )
-		self:SetAvgeQuota( (self:GetAvgeQuota( ) * 0.95) + (NewQuota * 0.5) )
+		self:SetTickQuota( Context.Status.TickQuota * 1000000 )
+		self:SetSoftQuota( Context.Status.QuotaCount * 1000000 )
+		self:SetAvgeQuota( Context.Status.AverageQuota * 1000000 )
 	end
 
 	if CLIENT then
-		self.cl_TickQuota = NewQuota
-		self.cl_SoftQuota = SoftQuota
-		self.cl_AvgeQuota = (self:GetAvgeQuota( ) * 0.95) + (NewQuota * 0.5)
+		self.cl_TickQuota = Context.Status.TickQuota * 1000000 
+		self.cl_SoftQuota = Context.Status.QuotaCount * 1000000 
+		self.cl_AvgeQuota = Context.Status.AverageQuota * 1000000 
 	end
 
-	Context.Status.TickQuota = 0
-
-	if SERVER and WireLib then self:TriggerOutputs( ) end
-
-	self:CheckUsage( )
-	
-	MsgN( "Update: ", NewQuota, " vs ", SoftQuota )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
-	@: Status
+	@: Think
    --- */
+function ENT:Think( )
+	self.BaseClass.Think( self )
+	self:NextThink( CurTime( ) + 0.030303 )
 
-function ENT:CheckUsage( )
-	local TickQuota = self.cl_TickQuota or self:GetTickQuota( )
-	local SoftQuota = self.cl_SoftQuota or self:GetSoftQuota( )
-	local AvgeQuota = self.cl_AvgeQuota or self:GetAvgeQuota( )
+	if self:IsRunning( ) then
+		local Status = self.Context.Status
 
-	if !self.Context then return end
+		Status.QuotaCount = Status.QuotaCount + Status.TickQuota - expadv_softquota
+		
+		Status.AverageQuota = Status.AverageQuota * 0.95 + Status.TickQuota * 0.05
 
-	MaxHardQuota = EXPADV.CVarTickQuota:GetInt( ) * (engine.TickInterval( )/0.0303030303) / 1000000
-	
-	if SoftQuota > MaxHardQuota then
-		self:OnHitHardQuota( )
-	elseif SoftQuota > MaxHardQuota * 0.3 then
-		self:OnHitSoftQuota( )
-	elseif SERVER then
-		self:SetSparking( false )
-		self:SetIgnited( false )
+		Status.TickQuota = 0
+
+		if Status.QuotaCount < 0 then Status.QuotaCount = 0 end
 	end
+
+	return true
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -121,15 +113,6 @@ function ENT:OnHitQuota( )
 	self.Context:ShutDown( )
 end
 
-function ENT:OnHitSoftQuota( )
-	if SERVER then
-		self:SetSparking( true )
-		self:SetIgnited( false )
-	end
-
-	self.Context:ShutDown( )
-end
-
 function ENT:OnHitHardQuota( )
 	if SERVER then
 		self:SetSparking( false )
@@ -141,7 +124,3 @@ function ENT:OnHitHardQuota( )
 
 	self.Context:ShutDown( )
 end
-
---[[function ENT:OnShutDown( )
-
-end]]

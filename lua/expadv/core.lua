@@ -451,7 +451,6 @@ net.Receive( "expadv.request", function( )
 	EXPADV.SendCode( ID, Root, { } )
 end )
 
-MsgN( "RIGHT HERE:" )
 vnet.Watch( "expadv.upload", function( Package )
 	local Expadv = Entity( Package:Int( ) )
 	local Player = Package:Entity( )
@@ -462,6 +461,21 @@ vnet.Watch( "expadv.upload", function( Package )
 	
 	Expadv:ReceivePackage( Package )
 end, vnet.OPTION_WATCH_OVERRIDE )
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Quota Managment
+   --- */
+
+local cv_expadv_tickquota = CreateConVar( "expadv_tick_quota", "16000", {FCVAR_REPLICATED} )
+local cv_expadv_softquota = CreateConVar( "expadv_soft_quota", "4000", {FCVAR_REPLICATED} )
+local cv_expadv_hardquota = CreateConVar( "expadv_hard_quota", "50000", {FCVAR_REPLICATED} )
+
+timer.Create( "expadv.quota", 1, 0, function( )
+	expadv_tickmult  = ( engine.TickInterval( )/0.0303030303 ) / 1000000
+	expadv_tickquota = cv_expadv_tickquota:GetInt( ) * expadv_tickmult
+	expadv_softquota = cv_expadv_softquota:GetInt( ) * expadv_tickmult
+	expadv_hardquota = cv_expadv_hardquota:GetInt( ) * expadv_tickmult
+end)
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: API.

@@ -826,6 +826,5 @@ function Compiler:Compile_FOR( Trace, Class, AssInstr, Memory, Start, End, Step,
 		Sequence.Prepare or "", Sequence.Inline or "" )
 	
 	local NewSequence = { Trace = Trace, Prepare = Lua, Return = "", FLAG = EXPADV_PREPARE }
-
 	return Operator.Compile( self, Trace, Start, End, Step, NewSequence )
 end

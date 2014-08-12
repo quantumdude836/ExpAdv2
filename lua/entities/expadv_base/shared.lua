@@ -115,7 +115,7 @@ function ENT:CreateContext( Instance, Player )
 
 		Context.OnShutDown = function( ctx ) return self:OnShutDown( ctx ) end
 
-		Context.OnLuaError = function( ctx, msg ) return self:OnLuaError( ctx, msg ) end
+		Context.OnLuaError = function( ctx, msg ) MsgN( "LUA ERROR: ", msg ) end -- return self:OnLuaError( ctx, msg ) end
 
 		Context.OnScriptError = function( ctx ) return self:OnScriptError( ctx, msg ) end
 

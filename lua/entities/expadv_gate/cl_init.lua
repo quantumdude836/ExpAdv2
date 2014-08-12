@@ -23,3 +23,7 @@ end
 function ENT:OnCompileError( ErMsg, Compiler )
 	chat.AddText( Color( 150, 150, 0 ), "[" .. self.player:Name( ) .. "] ", Color( 255, 0, 0 ), "Expresion Advanced - Validate Error: ", Color( 255, 255, 255 ), ErMsg )
 end
+
+function ENT:OnShutDown( Context )
+	chat.AddText( Color( 255, 0, 0 ), "Expresion Advanced - ShutDown: ", Color( 255, 255, 255 ), tostring( self ) )
+end

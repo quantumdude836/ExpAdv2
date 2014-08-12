@@ -135,6 +135,8 @@ end
 function EXPADV.CallEvent( Name, ... )
 	local Result
 	
+	if !EXPADV.IsLoaded then return end
+
 	for _, Context in pairs( EXPADV.CONTEXT_REGISTERY ) do
 		if !Context.Online then continue end
 		
@@ -152,6 +154,8 @@ end
 
 function EXPADV.CallPlayerEvent( Player, Name, ... )
 	local Result
+	
+	if !EXPADV.IsLoaded then return end
 	
 	for _, Context in pairs( EXPADV.CONTEXT_REGISTERY ) do
 		if !Context.Online then continue end
@@ -172,6 +176,8 @@ end
 
 function EXPADV.CallPlayerReturnableEvent( Player, Name, ... )
 	local Result
+	
+	if !EXPADV.IsLoaded then return end
 	
 	for _, Context in pairs( EXPADV.CONTEXT_REGISTERY ) do
 		if !Context.Online then continue end

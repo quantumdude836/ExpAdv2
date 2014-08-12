@@ -27,6 +27,8 @@ end
 
 -- function ENT:OnStartUp( Context ) end
 
--- function ENT:OnShutDown( Context ) end
+function ENT:OnShutDown( Context )
+	EXPADV.PrintColor( self.player, Color( 255, 0, 0 ), "Expresion Advanced - ShutDown: ", Color( 255, 255, 255 ), tostring( self ) )
+end
 
 -- function ENT:OnContextUpdate( Context ) end

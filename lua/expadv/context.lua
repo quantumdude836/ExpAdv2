@@ -38,6 +38,8 @@ function EXPADV.BuildNewContext( Instance, Player, Entity ) -- Table, Player, En
 	Context.Status = { }
 	Context.Status.Bench = 0
 	Context.Status.TickQuota = 0
+	Context.Status.QuotaCount = 0
+	Context.Status.AverageQuota = 0
 
 	return Context
 end
@@ -81,40 +83,33 @@ function EXPADV.RootContext:Push( Trace, Cells ) -- Table, Table
 	}, EXPADV.RootContext )
 end
 
-
-/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
-	@: Quota Managment
-   --- */
-
-EXPADV.CVarTickQuota = CreateConVar( "expadv_tick_quota", "16000", {FCVAR_REPLICATED} )
-EXPADV.CVarSoftQuota = CreateConVar( "expadv_soft_quota", "4000", {FCVAR_REPLICATED} )
-EXPADV.CVarHardQuota = CreateConVar( "expadv_hard_quota", "50000", {FCVAR_REPLICATED} )
-EXPADV.CVarQuotaHook = CreateConVar( "expadv_quota_hook", "500", {FCVAR_REPLICATED} )
-
 local SysTime = SysTime
 
 local function debug_hook( )
 	local Time = SysTime( )
 
-	if !EXPADV.EXECUTOR then return debug.sethook( ) end
+	if !EXPADV.EXECUTOR then
+		return debug.sethook( )
+	else
+		local Context = EXPADV.EXECUTOR
+		local TickQuota = Context.Status.TickQuota + (Time - Context.Status.Bench)
+		Context.Status.TickQuota = TickQuota
 
+		if TickQuota > expadv_tickquota then
+			debug.sethook( )
+			error( { Trace = {0,0}, Quota = true, Msg = Message, Context = Context }, 0 )
+		end
 
-	local Context = EXPADV.EXECUTOR
-	Context.Status.TickQuota = Context.Status.TickQuota + (Time - Context.Status.Bench)
-
-	local MaxQuota = EXPADV.CVarTickQuota:GetInt( ) * (engine.TickInterval( )/0.0303030303) / 1000000
-
-	if Context.Status.TickQuota > MaxQuota then
-		debug.sethook( )
-		error( { Trace = {0,0}, Quota = true, Msg = Message, Context = Context }, 0 )
+		Context.Status.Bench = SysTime( )
 	end
-
-	Context.Status.Bench = SysTime( )
+	
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Executeion
    --- */
+
+local cv_expadv_luahook   = CreateConVar( "expadv_quota_hook", "500", {FCVAR_REPLICATED} )
    
 EXPADV.Updates = { }
 
@@ -123,7 +118,7 @@ function EXPADV.RootContext:PreExecute( )
 	EXPADV.EXECUTOR = self
 	self.Status.Bench = SysTime( )
 
-	debug.sethook( debug_hook, "l", EXPADV.CVarQuotaHook:GetInt( ) )
+	debug.sethook( debug_hook, "l", cv_expadv_luahook:GetInt( ) )
 end
 
 -- Should be called after executing.
@@ -132,7 +127,6 @@ function EXPADV.RootContext:PostExecute( )
 	
 	EXPADV.EXECUTOR = nil
 	self.Definitions = { }
-	self.Status.TickQuota = self.Status.TickQuota + (SysTime( ) - self.Status.Bench)
 end
 
 -- Safely execute a function on this context.
@@ -141,6 +135,8 @@ function EXPADV.RootContext:Execute( Location, Operation, ... ) -- String, Funct
 
 	local Ok, Result = pcall( Operation, ... )
 
+	local TimeMrk = SysTime( )
+
 	self:PostExecute( )
 	
 	if !Ok and isstring( Result ) then
@@ -148,8 +144,14 @@ function EXPADV.RootContext:Execute( Location, Operation, ... ) -- String, Funct
 
 	elseif Ok or Result.Exit then
 
-		if self.Status.TickQuota > EXPADV.CVarTickQuota:GetInt( ) * (engine.TickInterval()/0.0303030303) / 1000000 then
+		local TickQuota = self.Status.TickQuota + (TimeMrk - self.Status.Bench)
+		
+		self.Status.TickQuota = TickQuota
+
+		if TickQuota > expadv_tickquota then
 			return self:Handel( "HitQuota", Result )
+		elseif self.Status.QuotaCount + TickQuota - expadv_softquota > expadv_hardquota then
+			return self:Handel( "HitHardQuota", Result )
 		end
 
 		EXPADV.Updates[self] = true
@@ -268,7 +270,7 @@ end )
 	@: Reloading.
 --- */
 
-hook.Add( "Tick", "ExpAdv2.UnloadCore", function( )
+hook.Add( "ExpAdv2.UnloadCore", "expadv.context", function( )
 	for Context, _ in pairs( Registery ) do
 		Context:ShutDown( )
 	end
