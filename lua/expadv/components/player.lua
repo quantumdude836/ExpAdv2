@@ -20,9 +20,16 @@ PlayerClass:ExtendClass( "e" )
 	@: Casting
    --- */
 
+Component:AddInlineOperator( "player", "e", "ply", "((IsValid(@value 1) and @value 1:IsPlayer( )) and @value 1 or $Entity(0))" )
+
+Component:AddInlineOperator( "entity", "ply", "e", "@value 1" )
+
 /* --- --------------------------------------------------------------------------------
 	@: Functions
    --- */
+
+Component:AddInlineFunction( "isPlayer", "e:", "b", "(IsValid(@value 1) and @value 1:IsPlayer( ))")
+Component:AddFunctionHelper( "isPlayer", "e:", "Returns true if the entity is a player.")
 
 /* --- --------------------------------------------------------------------------------
 	@: 

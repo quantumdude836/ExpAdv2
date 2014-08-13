@@ -28,11 +28,9 @@ function BaseClassObj:ExtendClass( ExtendClass ) -- String
 	self.DeriveFrom = ExtendClass
 end
 
-local Temp_Aliases = { }
-
 -- Allows more convenient names to be used when defining class type in expadv2 script.
 function BaseClassObj:AddAlias( Alias ) -- String
-	Temp_Aliases[ Alias ] = self
+	self.AliasList[Alias] = true
 end
 
 -- Use this to define a tostring method for your class, this takes the natives context into account.
@@ -149,7 +147,7 @@ local Temp_Classes = { }
 function EXPADV.AddClass( Component, Name, Short ) -- table, string, string
 	if #Short > 1 then Short = "_" .. Short end
 
-	local Class = setmetatable( { Component = Component, Name = Name, Short = Short, DeriveFrom = "generic" }, EXPADV.BaseClassObj )
+	local Class = setmetatable( { Component = Component, Name = Name, Short = Short, DeriveFrom = "generic", AliasList = { } }, EXPADV.BaseClassObj )
 
 	Temp_Classes[ #Temp_Classes + 1 ] = Class
 
@@ -174,12 +172,14 @@ local Class_Generic = setmetatable( { Name = "generic", Short = "g" }, EXPADV.Ba
    --- */
 
 -- Returns a classes module, using either name or id as look up.
-function EXPADV.GetClass( Name ) -- String
+function EXPADV.GetClass( Name, bNoShort ) -- String
 	if !Name then return end
 
 	if EXPADV.Classes[ Name ] then return EXPADV.Classes[ Name ] end
 
 	if EXPADV.ClassAliases[ Name ] then return EXPADV.ClassAliases[ Name ] end
+
+	if bNoShort then return end
 
 	if #Name > 1 and Name[1] ~= "_" then Name = "_" .. Name end
 
@@ -267,6 +267,10 @@ function EXPADV.LoadClasses( )
 
  		EXPADV.ClassAliases[ Class.Name ] = Class
 
+ 		for Alias, _ in pairs( Class.AliasList ) do
+ 			EXPADV.ClassAliases[ Alias ] = Class
+ 		end
+
  		MsgN( "Registered Class: " .. Class.Name .. " - " .. Class.Short )
  	end -- ^ Derive classes!
 
@@ -334,16 +338,4 @@ function EXPADV.LoadClasses( )
  	for Name, Class in pairs( EXPADV.Classes ) do
  		EXPADV.CallHook( "PostRegisterClass", Name, Class )
  	end
-
- 	EXPADV.CallHook( "PostLoadClasses" )
-
- 	for Alias, Class in pairs( EXPADV.ClassAliases ) do
- 		
- 		if Class.Component and !Class.Component.Enabled then
- 			EXPADV.ClassAliases[Alias] = nil
- 		end
-
- 	end
-
- 	EXPADV.CallHook( "PostLoadClassAliases" )
 end

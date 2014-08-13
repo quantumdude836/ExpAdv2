@@ -314,29 +314,6 @@ function Compiler:Compile_VAR( Trace, Variable )
 
 	local Class = self.Cells[ MemRef ].Return
 
-	local Operator = self:LookUpOperator( "=" ..  Class, "n" )
-	
-	if Operator then
-		local Instr = Operator.Compile( self, Trace, Quick( MemRef, "n" ) )
-		
-		Instr.Variable = Variable
-		Instr.Scope = MemScope
-		Instr.MemRef = MemRef
-
-		return Instr
-	end
-	
-	local Operator = self:LookUpOperator( "=" ..  Class, "s" )
-	
-	if Operator then
-		local Instr = Operator.Compile( self, Trace, Quick( Variable, "s" ) )
-		Instr.Variable = Variable
-		Instr.Scope = MemScope
-		Instr.MemRef = MemRef
-		
-		return Instr
-	end
-	
 	return { Trace = Trace, Inline = string.format( "Context.Memory[%i]", MemRef ), Return = Class, FLAG = EXPADV_INLINE, IsRaw = true, Variable = Variable, Scope = MemScope, MemRef = MemRef }
 end
 
@@ -549,16 +526,14 @@ function Compiler:Compile_ASS( Trace, Variable, Expression, DefinedClass, Modifi
 	end -- We cast automatically, to allow us to assign numbers to strings and so forth.
 
 	self:TestCell( Trace, MemRef, Expression.Return, Variable )
-	
-	local Operator = self:LookUpOperator( Expression.Return .. "=", "n", Expression.Return )
-	
-	if Operator then return Operator.Compile( self, Trace, Quick( MemRef, "n" ), Expression ) end
 
-	local Operator = self:LookUpOperator( Expression.Return .. "=", "s", Expression.Return )
+	local Operator = self:LookUpOperator( "=", Expression.Return, "n" )
 	
-	if !Operator then self:TraceError( Trace, "Assigment operator (=) does not support 'var = %s'", self:NiceClass( Expression.Return ) ) end
+	if !Operator then
+		self:TraceError( Trace, "Assigment operator (=) does not support 'var = %s'", self:NiceClass( Expression.Return ) )
+	end
 
-	return Operator.Compile( self, Trace, Quick( Variable, "s" ), Expression )
+	return Operator.Compile( self, Trace, Expression, Quick( MemRef, "n" ) )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -704,47 +679,27 @@ function Compiler:Compile_EVENT( Trace, Name, Params, UseVarg, Sequence, Memory 
 
 	local Inputs, PreSequence = { }, { }
 
-	-- { self.TokenData, Class.Short, MemRef }
-
 	for I, Param in pairs( Params ) do
 		local Type = Param[2]
 
 		Inputs[I] = "IN_" .. I
 
-		local Operator = self:LookUpOperator( Type .. "=", "n", Type )
-		
-		if Operator then
-			Instruction = Operator.Compile( self, Trace, Quick( Param[3], "n" ), Quick( Inputs[I] .. "[1]", Type ) )
-			
-			PreSequence[ #PreSequence + 1 ] = Instruction.Prepare
-			PreSequence[ #PreSequence + 1 ] = Instruction.Inline
-		else
+		local Operator = self:LookUpOperator( "=", Type, "n" )
 
-			local Operator = self:LookUpOperator( Type .. "=", "n", Type )
-
-			if Operator then
-				Instruction = Operator.Compile( self, Trace, Quick( Param[1], "s" ), Quick( Inputs[I] .. "[1]", Type ) )
-
-				PreSequence[ #PreSequence + 1 ] = Instruction.Prepare
-				PreSequence[ #PreSequence + 1 ] = Instruction.Inline
-			else
-				self:TraceError( Trace, "Invalid argument #%i, %s can not be used as event argument", I, self:NiceClass( Type ) )
-			end
+		if !Operator then
+			self:TraceError( Trace, "Invalid argument #%i, %s can not be used as event argument", I, self:NiceClass( Type ) )
 		end
 
+		PreSequence[ #PreSequence + 1 ] = Operator.Compile( self, Trace, Quick( Param[3], "n" ), Quick( Inputs[I] .. "[1]", Type ) )
+				
 		self:Yield( )
 	end
 	
 	if UseVarg then Inputs[#Inputs + 1] = "..." end
 
-	local Lua = table.concat( {
-		string.format( "Context.event_%s = function( %s )", Name, table.concat( Inputs, "," ) ),
-		self:FlushMemory( Trace, Memory ),
-		table.concat( PreSequence, "\n" ),
-		Sequence.Prepare or "",
-		Sequence.Inline or "",
-		"end"
-	}, "\n" )
+	local Sequence = self:Compile_SEQ( Trace, { self:Compile_SEQ( Trace, PreSequence ), Sequence } )
+
+	local Lua = string.format( "Context.event_%s = function( %s )\n%s\n%s\n%send", Name, table.concat( Inputs, "," ), self:FlushMemory( Trace, Memory ), Sequence.Prepare or "", Sequence.Inline or "" )
 
 	return { Trace = Trace, Prepare = Lua, FLAG = EXPADV_PREPARE }
 end
@@ -754,57 +709,44 @@ function Compiler:Build_Function( Trace, Params, UseVarg, Sequence, Memory )
 
 	-- { self.TokenData, Class.Short, MemRef }
 
+	local CompiledTrace = self:CompileTrace( Trace )
+
 	for I, Param in pairs( Params ) do
 		local Type = Param[2]
 
 		Inputs[I] = "IN_" .. I
 
-		PreSequence[ #PreSequence + 1 ] = string.format( "if !IN_%i or IN_%i[1] == nil then", I, I )
-		PreSequence[ #PreSequence + 1 ] = string.format( "Context:Throw(%s, \"invoke\", \"Invalid argument #%i, %s expected got void.\" )", self:CompileTrace( Trace ), I, self:NiceClass( Type ) )
+		local Operator = self:LookUpOperator( "=", Type, "n" )
+
+		if !Operator then
+			self:TraceError( Trace, "Invalid argument #%i, %s can not be used as event argument", I, self:NiceClass( Type ) )
+		end
+		
+		local Lua = string.format( [[
+		if IN_%i == nil or IN_%i[1] == nil then
+			Context:Throw( %s, "invoke", "Invalid argument #%i, %s expected got void." )
+		]], I, I, CompiledTrace, I, self:NiceClass( Type ) )
 
 		if Param[2] ~= "_vr" then
-			PreSequence[ #PreSequence + 1 ] = string.format( "elseif IN_%i[2] ~= %q then", I, Type )
-			PreSequence[ #PreSequence + 1 ] = string.format( "Context:Throw(%s, \"invoke\", \"Invalid argument #%i, %s expected got \" .. IN_%i[2] )", self:CompileTrace( Trace ), I, self:NiceClass( Type ), I )
+			Lua = Lua .. string.format( [[
+			elseif IN_%i[2] ~= %q then
+				Context:Throw( %s, "invoke", "Invalid argument #%i, %s expected got " .. IN_%i[2] )
+			]], I, Type, CompiledTrace, I, self:NiceClass( Type ), I )
 		end
 
-		PreSequence[ #PreSequence + 1 ] = "else"
-
-			local Operator = self:LookUpOperator( Type .. "=", "n", Type )
-			
-			if Operator then
-				Instruction = Operator.Compile( self, Trace, Quick( Param[3], "n" ), Quick( Inputs[I] .. "[1]", Type ) )
-
-				PreSequence[ #PreSequence + 1 ] = Instruction.Prepare
-				PreSequence[ #PreSequence + 1 ] = Instruction.Inline
-			else
-
-				local Operator = self:LookUpOperator( Type .. "=", "n", Type )
-
-				if Operator then
-					Instruction = Operator.Compile( self, Trace, Quick( Param[1], "s" ), Quick( Inputs[I] .. "[1]", Type ) )
-
-					PreSequence[ #PreSequence + 1 ] = Instruction.Prepare
-					PreSequence[ #PreSequence + 1 ] = Instruction.Inline
-				else
-					self:TraceError( Trace, "Invalid argument #%i, %s can not be used as function argument", I, self:NiceClass( Type ) )
-				end
-			end
-
-		PreSequence[ #PreSequence + 1 ] = "end"
+		Lua = Lua .. "end"
+		
+		PreSequence[ #PreSequence + 1 ] = { Trace = Trace, Return = "", Prepare = Lua, FLAG = EXPADV_PREPARE }
+		PreSequence[ #PreSequence + 1 ] = Operator.Compile( self, Trace, Quick( Param[3], "n" ), Quick( Inputs[I] .. "[1]", Type ) )
 
 		self:Yield( )
 	end
 	
 	if UseVarg then Inputs[#Inputs + 1] = "..." end
 
-	local Lua = table.concat( {
-		"function(" .. table.concat( Inputs, "," ) .. ")",
-		self:FlushMemory( Trace, Memory ),
-		table.concat( PreSequence, "\n" ),
-		Sequence.Prepare or "",
-		Sequence.Inline or "",
-		"end"
-	}, "\n" )
+	local Sequence = self:Compile_SEQ( Trace, { self:Compile_SEQ( Trace, PreSequence ), Sequence } )
+
+	local Lua = string.format( "function( %s )\n%s\n%s\n%send", table.concat( Inputs, "," ), self:FlushMemory( Trace, Memory ), Sequence.Prepare or "", Sequence.Inline or "" )
 
 	return { Trace = Trace, Inline = Lua, Return = "f", FLAG = EXPADV_INLINE }
 end

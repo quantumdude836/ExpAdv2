@@ -230,13 +230,12 @@ end
    --- */
 function Compiler:GetClass( Trace, ClassName, bNoError )
 
-	local Class = EXPADV.GetClass( ClassName )
+	local Class = EXPADV.GetClass( ClassName, true )
 	if !Class and bNoError then return end
 
-	if !Class or Class.Name ~= ClassName then
+	if !Class then --or (Class.Name ~= ClassName and !EXPADV.ClassAliases[ ClassName ] ) then
 		if bNoError then return end
-		debug.Trace( )
-		self:TraceError( Trace, "No such class %q", ClassName or "WTF" )
+		self:TraceError( Trace, "No such class %q", ClassName or "Error" )
 	end
 
 	return Class

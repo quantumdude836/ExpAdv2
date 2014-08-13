@@ -66,14 +66,11 @@ MathComponent:AddInlineOperator( "<<", "n,n", "n", "bit.lshift(@value 1 , @value
 @: Assigment
    --- */
 
-MathComponent:AddPreparedOperator( "n=", "n,n", "", [[
-@define value = Context.Memory[@value 1]
-Context.Trigger = Context.Delta[@value 1] ~= @value
-Context.Memory[@value 1] = @value 2
-Context.Delta[@value 1] = @value
+MathComponent:AddPreparedOperator( "=", "n,n", "", [[
+@define value = Context.Memory[@value 2]
+Context.Memory[@value 2] = @value 1
+Context.Delta[@value 2] = @value
 ]] )
-
-MathComponent:AddInlineOperator("=n","n","n", "Context.Memory[@value 1]" )
 
 MathComponent:AddInlineOperator( "$", "n", "n", "((Context.Memory[@value 1] or 0) - (Context.Delta[@value 1] or 0))" )
 

@@ -252,8 +252,6 @@ end
    -- PostLoadOperators( )							| Void | Called after operators are loaded.
    -- PreLoadFunctions( )							| Void | Called before functions are loaded.
    -- PostLoadFunctions( )							| Void | Called after functions are loaded.
-   -- PreLoadAliases( )								| Void | Called before function aliases are loaded.
-   -- PostLoadAliases( )							| Void | Called after function aliases are loaded.
    -- PreLoadClasses( )								| Void | Called before classes are loaded.
    -- PostLoadClasses( )							| Void | Called after classes are loaded.
    -- PostLoadClassAliases( )						| Void | Called after classes and class aliases are loaded.

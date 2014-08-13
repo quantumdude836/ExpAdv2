@@ -77,13 +77,11 @@ VectorComponent:AddInlineOperator( "string", "v", "s", "string.format( \"Vec( %i
 	@: Assignment
    --- */
 
-VectorComponent:AddPreparedOperator( "v=", "n,v", "", [[
-	@define value = Context.Memory[@value 1]
-	Context.Trigger = Context.Delta[@value 1] ~= @value
-	Context.Memory[@value 1] = @value 2
+VectorComponent:AddPreparedOperator( "v", "v,n", "", [[
+	@define value = Context.Memory[@value 2]
+	Context.Memory[@value 2] = @value 1
+	Context.Delta[@value 2] = @value
 ]] )
-
-VectorComponent:AddInlineOperator( "=v", "n", "v", "Context.Memory[@value 1]" )
 
 /* -----------------------------------------------------------------------------------
 	@: Constructor

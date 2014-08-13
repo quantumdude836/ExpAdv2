@@ -43,12 +43,9 @@ StringComponent:AddInlineOperator("<=","s,s", "b", "(@value 1 <= @value 2)" )
 	@: Assignment
    --- */
 
-StringComponent:AddPreparedOperator( "s=", "n,s", "", [[
-    Context.Trigger = Context.Trigger or Context.Memory[@value 1] ~= @value 2
-    Context.Memory[@value 1] = @value 2
+StringComponent:AddPreparedOperator( "=", "s,s", "", [[
+    Context.Memory[@value 2] = @value 1
 ]] )
-
-StringComponent:AddInlineOperator("=s","n","s", "Context.Memory[@value 1]" )
 
 StringComponent:AddPreparedOperator( "~", "n", "b", [[
 	@define value = Context.Memory[@value 1]

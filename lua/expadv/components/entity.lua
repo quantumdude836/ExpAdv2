@@ -4,13 +4,13 @@
 
 EXPADV.ServerOperators( )
 
-local EntityComponent = EXPADV.AddComponent( "entity", true )
+local Component = EXPADV.AddComponent( "entity", true )
 
 /* --- --------------------------------------------------------------------------------
 	@: Entity Class
    --- */
 
-local EntityClass = EntityComponent:AddClass( "entity", "e" )
+local EntityClass = Component:AddClass( "entity", "e" )
 
 EntityClass:DefaultAsLua( Entity(0) )
 
@@ -50,6 +50,5 @@ if SERVER then
 		local Attacker = Attacker or Entity( 0 )
 		EXPADV.CallEvent( "propBreak", Ent, Attacker )
 	end)
-
 	
 end
