@@ -1,5 +1,5 @@
 /* --- --------------------------------------------------------------------------------
-	@: Player Component
+	@: Entity Component
    --- */
 
 EXPADV.ServerOperators( )
@@ -15,12 +15,41 @@ local EntityClass = EntityComponent:AddClass( "entity", "e" )
 EntityClass:DefaultAsLua( Entity(0) )
 
 /* --- --------------------------------------------------------------------------------
-	@: Player Class
+	@: Entity Events
    --- */
 
-local PlayerClass = EntityComponent:AddClass( "player", "ply" )
+EXPADV.ServerEvents( )
+Component:AddEvent( "onKill", "e,e,e", "" )
+Component:AddEvent( "onDamage", "e,e,n,v", "" )
+Component:AddEvent( "propBreak", "e,e", "" )
 
-PlayerClass:DefaultAsLua( Entity(0) )
+/* --- --------------------------------------------------------------------------------
+	@: Server Hooks
+   --- */
 
-PlayerClass:ExtendClass( "e" )
+if SERVER then
 
+   hook.Add( "PlayerDeath", "Expav.Event", function( Killed, Inflictor, Attacker )
+		Attacker = Attacker or Entity( 0 )
+		EXPADV.CallEvent( "onKill", Killed, Attacker, Inflictor or Attacker )
+	end)
+
+	hook.Add( "OnNPCKilled", "Expav.Event", function( Killed, Attacker, Inflictor )
+		Attacker = Attacker or Entity( 0 )
+		EXPADV.CallEvent( "onKill", Killed, Attacker, Inflictor or Attacker )
+	end)
+
+	hook.Add("EntityTakeDamage", "Expav.Event", function( Ent, Damage )
+		local Attacker = Damage:GetAttacker( ) or Entity( 0 )
+		local Num = Damage:GetDamage( ) or 0
+		local Pos = Damage:GetDamagePosition( ) or Vector( 0, 0, 0 )
+		EXPADV.CallEvent( "onDamage", Ent, Attacker, Num, Pos )
+	end)
+
+	hook.Add("PropBreak", "Expav.Event", function( Attacker, Ent )
+		local Attacker = Attacker or Entity( 0 )
+		EXPADV.CallEvent( "propBreak", Ent, Attacker )
+	end)
+
+	
+end

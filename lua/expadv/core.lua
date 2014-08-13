@@ -163,6 +163,7 @@ function EXPADV.LoadCore( )
 	EXPADV.AddComponentFile( "color" )
 	EXPADV.AddComponentFile( "vector" )
 	EXPADV.AddComponentFile( "entity" )
+	EXPADV.AddComponentFile( "player" )
 	EXPADV.AddComponentFile( "hologram" )
 	EXPADV.AddComponentFile( "motionsensor" )
 

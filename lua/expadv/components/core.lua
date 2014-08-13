@@ -213,11 +213,18 @@ EXPADV.AddException( nil, "cast" )
 --- */
 
 EXPADV.SharedEvents( )
-
+	
 EXPADV.AddEvent( nil, "tick", "", "" )
-
-hook.Add( "Tick", "Expav.Event", function( ) EXPADV.CallEvent( "tick" ) end )
-
 EXPADV.AddEvent( nil, "think", "", "" )
 
-hook.Add( "Think", "Expav.Event", function( ) EXPADV.CallEvent( "think" ) end )
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+@: Shared Hooks
+--- */
+
+hook.Add( "Tick", "Expav.Event", function( )
+	EXPADV.CallEvent( "tick" )
+end )
+
+hook.Add( "Think", "Expav.Event", function( )
+	EXPADV.CallEvent( "think" )
+end )

@@ -133,7 +133,7 @@ end
    --- */
 
 function EXPADV.CallEvent( Name, ... )
-	local Result
+	local Result, ResultType
 	
 	if !EXPADV.IsLoaded then return end
 
@@ -144,16 +144,16 @@ function EXPADV.CallEvent( Name, ... )
 		
 		if !Event then continue end
 		
-		local Ok, Value = Context:Execute( "Event " .. Name, Event, ... )
+		local Ok, Value, Type = Context:Execute( "Event " .. Name, Event, ... )
 		
-		if !Result and Ok and Value ~= nil then Result = Value end
+		if !Result and Ok and Value ~= nil then Result, ResultType = Value, Type end
 	end
 	
-	return Result
+	return Result, ResultType
 end
 
 function EXPADV.CallPlayerEvent( Player, Name, ... )
-	local Result
+	local Result, ResultType
 	
 	if !EXPADV.IsLoaded then return end
 	
@@ -166,16 +166,16 @@ function EXPADV.CallPlayerEvent( Player, Name, ... )
 		
 		if !Event then continue end
 		
-		local Ok, Value = Context:Execute( "Event " .. Name, Event, ... )
+		local Ok, Value, Type = Context:Execute( "Event " .. Name, Event, ... )
 		
-		if !Result and Ok and Value ~= nil then Result = Value end
+		if !Result and Ok and Value ~= nil then Result, ResultType = Value, Type end
 	end
 	
-	return Result
+	return Result, ResultType
 end
 
 function EXPADV.CallPlayerReturnableEvent( Player, Name, ... )
-	local Result
+	local Result, ResultType
 	
 	if !EXPADV.IsLoaded then return end
 	
@@ -186,12 +186,12 @@ function EXPADV.CallPlayerReturnableEvent( Player, Name, ... )
 		
 		if !Event then continue end
 		
-		local Ok, Value = Context:Execute( "Event " .. Name, Event, ... )
+		local Ok, Value, Type = Context:Execute( "Event " .. Name, Event, ... )
 		
 		if Context.player ~= Player then continue end
 		
-		if !Result and Ok and Value ~= nil then Result = Value end
+		if !Result and Ok and Value ~= nil then Result, ResultType = Value, Type end
 	end
 	
-	return Result
+	return Result, ResultType
 end
