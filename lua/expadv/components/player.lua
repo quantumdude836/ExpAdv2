@@ -2,7 +2,7 @@
 	@: Player Component
    --- */
 
-EXPADV.ServerOperators( )
+EXPADV.SharedOperators( )
 
 local Component = EXPADV.AddComponent( "player", true )
 
@@ -31,9 +31,13 @@ Component:AddInlineOperator( "entity", "ply", "e", "@value 1" )
 Component:AddInlineFunction( "isPlayer", "e:", "b", "(IsValid(@value 1) and @value 1:IsPlayer( ))")
 Component:AddFunctionHelper( "isPlayer", "e:", "Returns true if the entity is a player.")
 
-/* --- --------------------------------------------------------------------------------
-	@: 
-   --- */
+Component:AddInlineFunction( "owner", "", "ply", "Context.player")
+Component:AddFunctionHelper( "owner", "", "Returns the owner of the gate.")
+
+EXPADV.ClientOperators( )
+
+Component:AddInlineFunction( "localPlayer", "", "ply", "$LocalPlayer()")
+Component:AddFunctionHelper( "localPlayer", "", "Returns the clientside player.")
 
 /* --- --------------------------------------------------------------------------------
 	@: Player Events
