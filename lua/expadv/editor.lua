@@ -54,61 +54,63 @@ end )
 local HomeScreen = [[
 /*----------------------------------------------------
     Welcome to Expression Advanced 2 - Alpha:
-        Your Lemon-Gate code is won't work.
+  Your Lemon-Gate code is outdated and won't work.
 ----------------------------------------------------*/
-
+ 
 //Define Variables:
     number var = 22;
-
+ 
 //Define functions:
     function number add( number a, number b ) {
         return a + b;
     }
-
+ 
 //Method operator is now period (.):
     "colon".replace( "colon", "period" );
-
+ 
 //For loops are now inbeded:
     for ( number i = 1; 100; 2 ) {
         print( i );
     }
-
+ 
 /*----------------------------------------------------
-    Your code now runs on the server and the clients.
+    Your code now runs on the server and client.
         for now clientside code is usless.
 ----------------------------------------------------*/
-
+ 
 //Define serverside code:
     server {
         print( "SERVERSIDE" );
     }
-
+ 
 //Define clientside code:
     client {
         print( "CLIENTSIDE" );
     }
-
+ 
 /*----------------------------------------------------
     Any code not defined inside one of these defintions
     is considered both serverside and clientside.
         (Root is serverside and clientside.)
-
-    You can also prefix statments with server/client.
+ 
+    You can also prefix statements with server/client.
 ----------------------------------------------------*/
-
+ 
     number Var = 22;
-    server Var = Var + 10;
-    print( Var );
 
+    server Var += 10;
+
+    print( Var );
+ 
 /*----------------------------------------------------
-    The github repositry can be found here:
+    The github repository can be found here:
         https://github.com/Rusketh/ExpAdv2
 	
     The bug tracker can be found here:
         https://github.com/Rusketh/ExpAdv2/issues
-
-    For Function requests please use the bug tracker.
-        Well will add them as requested.
+ 
+    For function requests please use the bug tracker.
+        We will add functions as they are requested.
 ----------------------------------------------------*/
 ]]
 

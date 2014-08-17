@@ -93,7 +93,7 @@ end
    
 function Compiler:AcceptSeperator( )
 	local Accepted = false
-	
+
 	if self:AcceptToken( "sep" ) then
 		Accepted = true
 		
@@ -1165,7 +1165,7 @@ function Compiler:Statement_6( Trace )
 
 		elseif !Defined then
 
-			if self:AcceptToken( "add" ) then
+			if self:AcceptToken( "aadd" ) then
 				self:ExcludeWhiteSpace( "Assigment operator (+=), must not be preceeded by whitespace." )
 				Assigment = "add"
 			elseif self:AcceptToken( "asub" ) then
