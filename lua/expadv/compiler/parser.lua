@@ -92,15 +92,17 @@ end
    --- */
    
 function Compiler:AcceptSeperator( )
+	local Accepted = false
+	
 	if self:AcceptToken( "sep" ) then
-		self.LastSeperator = true
+		Accepted = true
 		
 		while self:AcceptToken( "sep" ) do
 			-- Nom all these seperators!
 		end
 	end
 
-	return self.LastSeperator
+	return Accepted
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -691,7 +693,9 @@ function Compiler:Statement( Trace )
 
 	self.StatmentRoot = _StmtRoot
 
-	return Statement
+	local Seperator = self:AcceptSeperator( )
+
+	return Statement, Seperator
 end
 
 function Compiler:Sequence( Trace, ExitToken )
@@ -704,7 +708,7 @@ function Compiler:Sequence( Trace, ExitToken )
 	while true do
 		if self.BreakOut then self:TokenError( "Unreachable code after %s", self.BreakOut ) end
 
-		local Statment = self:Statement( Trace )
+		local Statment, Seperator = self:Statement( Trace )
 
 		if !Statment then break end
 
@@ -714,7 +718,7 @@ function Compiler:Sequence( Trace, ExitToken )
 	
 		if ExitToken and self:CheckToken( ExitToken ) then break end
 
-		if !self:AcceptSeperator( ) and self.PrepTokenLine == self.TokenLine then
+		if !Seperator and self.PrepTokenLine == self.TokenLine then
 			self:TokenError( "Statements must be separated by semicolon (;) or newline" )
 		end
 	end
