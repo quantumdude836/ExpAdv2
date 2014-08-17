@@ -45,11 +45,12 @@ function PANEL:Init( )
 	self.btnFind = self:SetupButton( "Find in code", Material( "fugue/binocular.png" ), LEFT )
 	
 	self:AddTabNamer( )
-
+	
 	self.btnOptions = self:SetupButton( "Options", Material( "fugue/gear.png" ), RIGHT )
+	self.btnHelp = self:SetupButton( "Open helper", Material( "fugue/question.png" ), RIGHT )
 	
 	self:AddInviteMenu( )
-
+	
 	self.btnFontPlus = self:SetupButton( "Increase font size.", Material( "fugue/edit-size-up.png" ), RIGHT )
 	self.btnFontMinus = self:SetupButton( "Decrease font size.", Material( "fugue/edit-size-down.png" ), RIGHT )
 	
@@ -87,6 +88,10 @@ function PANEL:Init( )
 	
 	function self.btnOptions:DoClick( ) 
 		self:GetParent( ):OpenOptions( ) 
+	end 
+	
+	function self.btnHelp:DoClick( ) 
+		self:GetParent( ):OpenHelper( ) 
 	end 
 	
 	function self.btnFontPlus:DoClick( )
@@ -433,6 +438,12 @@ function PANEL:OpenOptions( )
 	self.Options:SetVisible( true ) 
 	self.Options:MakePopup( ) 
 end
+
+function PANEL:OpenHelper( ) 
+	if !ValidPanel( EXPADV.Helper ) then EXPADV.Helper = vgui.Create( "EA_Helper" ) end 
+	EXPADV.Helper:SetVisible( true )
+	EXPADV.Helper:MakePopup( ) 
+end 
 
 function PANEL:Paint( w, h ) 
 	surface.SetDrawColor( self.btnSave:GetColor( ) )

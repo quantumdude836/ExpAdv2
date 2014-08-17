@@ -565,10 +565,10 @@ function PANEL:Close( )
 	cookie.Set( "eaeditor_h", self:GetTall( ) )
 	
 	self:SetVisible( false )
-	/*if ValidPanel( LEMON.Helper ) and LEMON.Helper:IsVisible( ) then
+	if ValidPanel( EXPADV.Helper ) and EXPADV.Helper:IsVisible( ) then
 		self.OpenHelper = true
-		LEMON.Helper:Close( )
-	end*/
+		EXPADV.Helper:Close( )
+	end
 	
 	if ValidPanel( self.ToolBar.Options ) and self.ToolBar.Options:IsVisible( ) then 
 		self.ToolBar.Options:Close( ) 
