@@ -446,15 +446,15 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier, Comparator )
 	if WireLib then
 		if Modifier == "input" or Modifier == "output" then
 			if Variable[1] ~= Variable[1]:upper( ) then
-				self:TraceError( "Wire %s's require captialization.", Modifier )
+				self:TraceError( Trace, "Wire %s's require captialization.", Modifier )
 			elseif self.IsClientScript then
-				self:TraceError( "Wire %s's can not be used clientside.", Modifier )
+				self:TraceError( Trace, "Wire %s's can not be used clientside.", Modifier )
 			end
 		end
 
 		if Modifier == "input" then
-			if !ClassObject.Wire_In_Type then
-				self:TraceError( "Wire inputs of class %q are not supported.", Class )
+			if !ClassObj.Wire_In_Type then
+				self:TraceError( Trace, "Wire inputs of class %q are not supported.", Class )
 			end
 
 			local MemRef = self.InPorts[ Variable ]
@@ -478,7 +478,7 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier, Comparator )
 		end
 
 		if Modifier == "output" then
-			if !ClassObject.Wire_In_Type then
+			if !ClassObj.Wire_In_Type then
 				self:TraceError( "Wire outputs of class %q are not supported.", Class )
 			end
 

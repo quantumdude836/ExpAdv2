@@ -1000,6 +1000,8 @@ function Compiler:Statement_4( Trace )
 		local Name = self.TokenData
 		local Event = EXPADV.Events[Name]
 
+		if !Event then self:TraceError( Trace, "No such event %s", Name ) end
+		
 		self:RequireToken( "lpa", "Left parenthesis ( () missing, after event name" )
 
 		self:PushScope( )
@@ -1010,9 +1012,7 @@ function Compiler:Statement_4( Trace )
 		
 		self:RequireToken( "rpa", "Right parenthesis () ) missing, to close event parameters" )
 
-		if !Event then
-			self:TraceError( Trace, "No such event %s", Name )
-		elseif self.IsServerScript and self.IsClientScript then
+		if self.IsServerScript and self.IsClientScript then
 			if !Event.LoadOnServer then
 				self:TraceError( Trace, "Event %s is clientside only can not appear in shared code", Name )
 			elseif !Event.LoadOnClient then
