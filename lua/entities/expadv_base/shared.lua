@@ -3,7 +3,7 @@
    --- */
 
 ENT.Type 			= "anim"
-ENT.Base 			= "base_anim"
+ENT.Base 			= "base_gmodentity"
 
 ENT.PrintName       = "Expression Advanced 2"
 ENT.Author          = "Rusketh"
