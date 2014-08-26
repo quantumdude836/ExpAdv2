@@ -8,6 +8,7 @@ ENT.Base 			= "base_gmodentity"
 ENT.PrintName       = "Expression Advanced 2"
 ENT.Author          = "Rusketh"
 ENT.Contact         = "WM/FacePunch"
+ENT.ExpAdv 			= true
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: VNET
@@ -91,6 +92,7 @@ end
 
 function ENT:OnHitQuota( Context )
 	Context:ShutDown( )
+	EXPADV.UnregisterContext( self.Context )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -152,6 +154,12 @@ function ENT:IsCompiling( )
 end
 
 function ENT:CompileScript( Root, Files )
+
+	if self:IsRunning( ) then
+		self.Context:ShutDown( )
+		EXPADV.UnregisterContext( self.Context )
+	end
+
 	self.Compiler = EXPADV.Compile( Root, Files,
 
 		function( ErMsg )

@@ -11,9 +11,10 @@ ENT.Base 			= "expadv_base"
 
 function ENT:SetupDataTables( )
 
-	self:NetworkVar( "Bool", 0, "Crashed" )
-	self:NetworkVar( "Bool", 1, "Sparking" )
-	self:NetworkVar( "Bool", 2, "Ignited" )
+	self:NetworkVar( "Bool", 0, "Online" )
+	self:NetworkVar( "Bool", 1, "Crashed" )
+	self:NetworkVar( "Bool", 2, "Sparking" )
+	self:NetworkVar( "Bool", 3, "Ignited" )
 
 	self:NetworkVar( "String", 0, "Title" )
 	self:NetworkVar( "String", 1, "CrashMsg" )
@@ -30,6 +31,7 @@ end
 
 function ENT:ResetStatus( )
 	if SERVER then
+		self:SetOnline( false )
 		self:SetCrashed( false )
 		self:SetSparking( false )
 		self:SetIgnited( false )
@@ -56,19 +58,27 @@ function ENT:OnUpdate( Context )
 	if SERVER and WireLib then
 		self:TriggerOutputs( )
 	end
+end
+
+function ENT:UpdateOverlay( )
+	local Context = self.Context
+
+	if !Context then
+		return self:ResetStatus( )
+	end
 
 	if SERVER then
-		self:SetTickQuota( Context.Status.TickQuota * 1000000 )
-		self:SetSoftQuota( Context.Status.QuotaCount * 1000000 )
-		self:SetAvgeQuota( Context.Status.AverageQuota * 1000000 )
+		self:SetOnline( Context.Online )
+		self:SetTickQuota( Context.Status.TickQuota )
+		self:SetSoftQuota( Context.Status.QuotaCount )
+		self:SetAvgeQuota( Context.Status.AverageQuota )
 	end
 
 	if CLIENT then
-		self.cl_TickQuota = Context.Status.TickQuota * 1000000 
-		self.cl_SoftQuota = Context.Status.QuotaCount * 1000000 
-		self.cl_AvgeQuota = Context.Status.AverageQuota * 1000000 
+		self.cl_TickQuota = Context.Status.TickQuota
+		self.cl_SoftQuota = Context.Status.QuotaCount
+		self.cl_AvgeQuota = Context.Status.AverageQuota
 	end
-
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -89,6 +99,8 @@ function ENT:Think( )
 
 		if Status.QuotaCount < 0 then Status.QuotaCount = 0 end
 	end
+
+	self:UpdateOverlay( )
 
 	return true
 end
@@ -123,4 +135,5 @@ function ENT:OnHitHardQuota( )
 	self:OnScriptError( self.Context, "Hard Quota Exceeded." )
 
 	self.Context:ShutDown( )
+	EXPADV.UnregisterContext( self.Context )
 end

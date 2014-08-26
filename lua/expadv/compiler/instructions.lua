@@ -277,7 +277,7 @@ function Compiler:Compile_INC( Trace, bVarFirst, Variable )
 
 	local Class = self.Cells[ MemRef ].Return
 
-	local Operator = self:LookUpOperator( string.format( bVarFirst and "%s++" or "%s++", Class.Short ) )
+	local Operator = self:LookUpOperator( string.format( bVarFirst and "%s++" or "%s++", Class ) )
 
 	if !Operator then
 		if bVarFirst then
@@ -296,7 +296,7 @@ function Compiler:Compile_DEC( Trace, bVarFirst, Variable )
 
 	local Class = self.Cells[ MemRef ].Return
 
-	local Operator = self:LookUpOperator( string.format( bVarFirst and "%s--" or "%s--", Class.Short ) )
+	local Operator = self:LookUpOperator( string.format( bVarFirst and "%s--" or "%s--", Class ) )
 
 	if !Operator then
 		if bVarFirst then

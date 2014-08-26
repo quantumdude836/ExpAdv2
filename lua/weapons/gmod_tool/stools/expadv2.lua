@@ -120,6 +120,15 @@ end
 function TOOL:LeftClick( Trace )
 	if CLIENT then return end
 
+	if IsValid( Trace.Entity ) and EXPADV.IsFriend( Trace.Entity, self:GetOwner( ) ) then
+		if !Trace.Entity.ExpAdv then return end
+
+		net.Start( "expadv.request" )
+		net.WriteUInt( Trace.Entity:EntIndex( ), 16 )
+		net.Send( self:GetOwner( ) )
+		return
+	end
+
 	local Ang = Trace.HitNormal:Angle( ) + Angle( 90, 0, 0 )
 	local ExpAdv = MakeExpadv( self:GetOwner( ), Trace.HitPos, Ang, self:GetClientInfo( "Model" ) )
 

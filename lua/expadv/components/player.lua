@@ -73,7 +73,7 @@ if SERVER then
 	end )
 
 	hook.Add( "PlayerSay", "Expav.Event", function( Player, Text, Team )
-		local Result, ResultType = EXPADV.CallPlayerReturnableEvent( "playerChat", Player, Player, Text, Team )
+		local Result, ResultType = EXPADV.CallPlayerReturnableEvent( Player, "playerChat", Player, Text, Team )
 		if Result and ResultType == "s" then return Result end
 	end )
 
