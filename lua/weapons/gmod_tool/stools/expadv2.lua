@@ -90,6 +90,7 @@ local function MakeExpadv( Player, Position, Angle, Model )
 	ExpAdv:Activate( )
 	ExpAdv:Spawn( )
 
+	Player:AddCount( "expadv", ExpAdv )
 	ExpAdv:SetPlayer( Player )
 	ExpAdv.player = Player
 
