@@ -119,15 +119,18 @@ end
    --- */
 
 function TOOL:LeftClick( Trace )
-	if CLIENT then return end
+	if IsValid( Trace.Entity ) then -- and EXPADV.IsFriend( Trace.Entity, self:GetOwner( ) ) then
+		if !Trace.Entity.ExpAdv then
+			return
+		elseif SERVER then
+			net.Start( "expadv.request" )
+			net.WriteUInt( Trace.Entity:EntIndex( ), 16 )
+			net.Send( self:GetOwner( ) )
+		end
 
-	if IsValid( Trace.Entity ) and EXPADV.IsFriend( Trace.Entity, self:GetOwner( ) ) then
-		if !Trace.Entity.ExpAdv then return end
-
-		net.Start( "expadv.request" )
-		net.WriteUInt( Trace.Entity:EntIndex( ), 16 )
-		net.Send( self:GetOwner( ) )
-		return
+		return true
+	elseif CLIENT then
+		return true
 	end
 
 	local Ang = Trace.HitNormal:Angle( ) + Angle( 90, 0, 0 )
@@ -163,4 +166,16 @@ function TOOL:LeftClick( Trace )
 	net.Send( self:GetOwner( ) )
 
 	return true
+end
+
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Left Click
+   --- */
+if CLIENT then
+	function TOOL.BuildCPanel( CPanel )
+		CPanel:AddControl( "PropSelect", { Label = "Select Model:", ConVar = "expadv2_model", Models = list.Get( "expadv2.models" ), Height = 1 } )
+		CPanel:AddControl( "Checkbox", { Label = "Weld to world.", Command = "expadv2_weldworld" } )
+		CPanel:AddControl( "Checkbox", { Label = "Place frozen.", Command = "expadv2_frozen" } )
+	end
 end

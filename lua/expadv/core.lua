@@ -167,6 +167,7 @@ function EXPADV.LoadCore( )
 	EXPADV.AddComponentFile( "player" )
 	EXPADV.AddComponentFile( "hologram" )
 	EXPADV.AddComponentFile( "motionsensor" )
+	EXPADV.AddComponentFile( "stream" )
 
 	EXPADV.LoadComponents( )
 
@@ -279,7 +280,6 @@ end
    -- @GitHub: Please request hooks, and return behavours via issue page.
 
 function EXPADV.CallHook( Name, ... )
-	
 	if EXPADV.Components then
 		for _, Component in pairs( EXPADV.Components ) do
 			if !Component.Enabled then continue end -- Shouldn't be possible!
@@ -326,7 +326,7 @@ if SERVER then
 				
 				if !Func then continue end
 
-				local Key, Value = Func( Force )
+				local Key, Value = Func( Component, Force )
 
 				if Key and Key ~= "" and key ~="config" and Value then
 					Data[Key] = Value

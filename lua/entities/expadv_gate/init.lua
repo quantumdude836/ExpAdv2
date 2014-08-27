@@ -32,3 +32,19 @@ function ENT:OnShutDown( Context )
 end
 
 -- function ENT:OnContextUpdate( Context ) end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Events
+   --- */
+
+function ENT:OnClientLoaded( Ply )
+	local Context = self.Context
+
+	-- timer.Simple( 1, function( ) -- Delay this, allowing the clients code to properly function.
+	--if !IsValid( self ) or !IsValid( Ply ) then return end
+
+		if Context and Context.Online and Context.event_clientLoaded then
+			Context:Execute( "Event clientLoaded", Context.event_clientLoaded, Ply )
+		end
+	-- end )
+end

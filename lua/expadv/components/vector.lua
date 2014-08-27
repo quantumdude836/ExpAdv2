@@ -110,7 +110,7 @@ VectorComponent:AddInlineFunction( "getY", "v:", "n", "@value 1.y" )
 VectorComponent:AddFunctionHelper( "getY", "v:", "Gets the Y value of a vector" )
 
 VectorComponent:AddInlineFunction( "getZ", "v:", "n", "@value 1.z" )
-VectorComponent:AddInlineFunction( "getZ", "v:", "Gets the Z value of a vector" )
+VectorComponent:AddFunctionHelper( "getZ", "v:", "Gets the Z value of a vector" )
 
 --SETTERS
 VectorComponent:AddPreparedFunction( "setX", "v:n", "", "@value 1.x = @value 2" )

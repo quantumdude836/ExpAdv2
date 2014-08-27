@@ -522,6 +522,7 @@ function Compiler:Compile_ASS( Trace, Variable, Expression, DefinedClass, Modifi
 	local Cell = self.Cells[MemRef]
 
 	if Cell and Cell.Return ~= Expression.Return then
+		MsgN( Cell.Return, Expression.Return )
 		Expression = self:Compile_CAST( Trace, self:NiceClass( Cell.Return ), Expression )
 	end -- We cast automatically, to allow us to assign numbers to strings and so forth.
 
@@ -612,17 +613,16 @@ function Compiler:Compile_FUNC( Trace, Variable, Expressions )
 	self:TraceError( Trace, "No such function %s(%s)", Variable, Signature )
 end
 
-function Compiler:Compile_METHOD( Trace, Expression, Method, Expressions )
+function Compiler:Compile_METHOD( Trace, Expression, Method, Expressions, bNoError )
 	local Meta = Expression.Return
 	
 	if #Expressions == 0 then
 		local Operator = EXPADV.Functions[Method .. "(" .. Meta .. ":)"] or EXPADV.Functions[Method .. "(" .. Meta .. ":...)"] -- Yes this does look dumb.
 		
-		if !Operator then self:TraceError( Trace, "No such method %s.%s()", self:NiceClass(Meta), Method ) end
-
-		return Operator.Compile( self, Trace, Expression )
+		if Operator then 
+			return Operator.Compile( self, Trace, Expression )
+		end
 	else
-
 		local Signature, BestMatch = Meta .. ":"
 
 		for I = 1, #Expressions do
@@ -643,6 +643,19 @@ function Compiler:Compile_METHOD( Trace, Expression, Method, Expressions )
 			return Operator.Compile( self, Trace, Expression, unpack( Expressions ) )
 		end
 	end
+
+	local Class = EXPADV.GetClass( Meta )
+	
+	if Class and Class.DerivedClass then
+		Expression.Return = Class.DerivedClass.Short
+
+		local Instr = self:Compile_METHOD( Trace, Expression, Method, Expressions, true )
+
+		if Instr then return Instr end
+	end
+
+	if bNoError then return end
+	if #Expressions == 0 then self:TraceError( Trace, "No such method %s.%s()", self:NiceClass(Meta), Method ) end
 
 	local Signature = table.concat( { self:NiceClass( unpack( Expressions ) ) }, "," )
 	
@@ -690,7 +703,7 @@ function Compiler:Compile_EVENT( Trace, Name, Params, UseVarg, Sequence, Memory 
 			self:TraceError( Trace, "Invalid argument #%i, %s can not be used as event argument", I, self:NiceClass( Type ) )
 		end
 
-		PreSequence[ #PreSequence + 1 ] = Operator.Compile( self, Trace, Quick( Param[3], "n" ), Quick( Inputs[I] .. "[1]", Type ) )
+		PreSequence[ #PreSequence + 1 ] = Operator.Compile( self, Trace, Quick( Inputs[I] .. "[1]", Type ), Quick( Param[3], "n" ) )
 				
 		self:Yield( )
 	end
@@ -730,14 +743,14 @@ function Compiler:Build_Function( Trace, Params, UseVarg, Sequence, Memory )
 		if Param[2] ~= "_vr" then
 			Lua = Lua .. string.format( [[
 			elseif IN_%i[2] ~= %q then
-				Context:Throw( %s, "invoke", "Invalid argument #%i, %s expected got " .. IN_%i[2] )
+				Context:Throw( %s, "invoke", "Invalid argument #%i, %s expected got " .. EXPADV.TypeName( IN_%i[2] ) )
 			]], I, Type, CompiledTrace, I, self:NiceClass( Type ), I )
 		end
 
 		Lua = Lua .. "end"
 		
 		PreSequence[ #PreSequence + 1 ] = { Trace = Trace, Return = "", Prepare = Lua, FLAG = EXPADV_PREPARE }
-		PreSequence[ #PreSequence + 1 ] = Operator.Compile( self, Trace, Quick( Param[3], "n" ), Quick( Inputs[I] .. "[1]", Type ) )
+		PreSequence[ #PreSequence + 1 ] = Operator.Compile( self, Trace, Quick( Inputs[I] .. "[1]", Type ), Quick( Param[3], "n" ) )
 
 		self:Yield( )
 	end

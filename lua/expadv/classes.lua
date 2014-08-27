@@ -126,15 +126,17 @@ function BaseClassObj:MakeClientOnly( )
 	self.LoadOnServer = false
 end
 
--- Not yet supported, please do not use this method.
-function BaseClassObj:NetSend( Function ) -- function( obj Value )
-	self.SendToClient = Function
-end
+--[[ Probably not getting supported now =(
+	-- Not yet supported, please do not use this method.
+	function BaseClassObj:NetSend( Function ) -- function( obj Value )
+		self.SendToClient = Function
+	end
 
--- Not yet supported, please do not use this method.
-function BaseClassObj:NetReceive( Function ) -- function( obj Value )
-	self.ReceiveFromServer = Function
-end
+	-- Not yet supported, please do not use this method.
+	function BaseClassObj:NetReceive( Function ) -- function( obj Value )
+		self.ReceiveFromServer = Function
+	end
+]]
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Class framework

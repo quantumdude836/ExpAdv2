@@ -124,6 +124,7 @@ function EXPADV.LoadOperators( )
 				continue
 			end
 
+			Operator.Return = Class.Short
 		end
 
 		-- Second we check the input types, and build our signatures!
@@ -321,6 +322,7 @@ function EXPADV.LoadFunctions( )
 				continue
 			end
 
+			Operator.Return = Class.Short
 		end
 
 		-- Second we check the input types, and build our signatures!

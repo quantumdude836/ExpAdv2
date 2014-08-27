@@ -24,7 +24,7 @@ vnet.Watch( "expadv.cl_loaded", function( Package )
 
 	EXPADV.CallHook( "ClientLoaded", Ent, Ply )
 
-	Ent:OnClientLoaded( Ent, Ply )
+	Ent:OnClientLoaded( Ply )
 end )
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------

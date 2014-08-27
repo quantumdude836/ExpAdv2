@@ -165,7 +165,6 @@ EXPADV.AddPreparedOperator( nil, "call", "f,s,...", "_vr", [[
 end]], "@Return" )
 
 EXPADV.AddPreparedOperator( nil, "=", "f,n", "", [[
-	@define value = Context.Memory[@value 2]
 	Context.Memory[@value 2] = @value 1
 ]] )
 
@@ -180,7 +179,6 @@ EXPADV.AddException( nil, "invoke" )
 local DelgateClass = EXPADV.AddClass( nil, "delegate", "d" )
 
 EXPADV.AddPreparedOperator( nil, "=", "d,n", "", [[
-	@define value = Context.Memory[@value 2]
 	Context.Memory[@value 2] = @value 1
 ]] )
 
@@ -212,6 +210,9 @@ EXPADV.SharedEvents( )
 	
 EXPADV.AddEvent( nil, "tick", "", "" )
 EXPADV.AddEvent( nil, "think", "", "" )
+
+EXPADV.ServerEvents( )
+EXPADV.AddEvent( nil, "clientLoaded", "ply", "" )
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 @: Shared Hooks

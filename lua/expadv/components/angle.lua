@@ -94,7 +94,7 @@ Component:AddInlineFunction( "getYaw", "a:", "n", "@value 1.y" )
 Component:AddFunctionHelper( "getYaw", "a:", "Gets the yaw value of an angle" )
 
 Component:AddInlineFunction( "getRoll", "a:", "n", "@value 1.r" )
-Component:AddInlineFunction( "getRoll", "a:", "Gets the roll value of an angle" )
+Component:AddFunctionHelper( "getRoll", "a:", "Gets the roll value of an angle" )
 
 --SETTERS
 Component:AddPreparedFunction( "setPitch", "a:n", "", "@value 1.p = @value 2" )
