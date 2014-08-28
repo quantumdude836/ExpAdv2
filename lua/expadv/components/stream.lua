@@ -20,6 +20,7 @@ StreamObject:DefaultAsLua( { V = { }, T = { }, R = 0, W = 0 } )
    --- */
 
 Component:AddInlineFunction( "stream", "", "st", "{ V = { }, T = { }, R = 0, W = 0 }" )
+Component:AddFunctionHelper( "stream", "", "Creates an empty stream object." )
 
 Component:AddPreparedOperator( "=", "st,n", "", "Context.Memory[@value 2] = @value 1" )
 
@@ -79,6 +80,15 @@ Component:AddVMFunction( "writeColor", "st:c", "", function( Context, Trace, Str
 	Stream.V[Stream.W] = Color( Obj[1], Obj[2], Obj[3], Obj[4] )
 	Stream.T[Stream.W] = "c"
 end )
+
+
+Component:AddFunctionHelper( "writeNumber", "st:n", "Appends a number to the stream object." )
+Component:AddFunctionHelper( "writeString", "st:s", "Appends a string to the stream object." )
+Component:AddFunctionHelper( "writeEntity", "st:e", "Appends an entity to the stream object." )
+Component:AddFunctionHelper( "writePlayer", "st:ply", "Appends a player to the stream object." )
+Component:AddFunctionHelper( "writeVector", "st:v", "Appends a vector to the stream object." )
+Component:AddFunctionHelper( "writeAngle", "st:a", "Appends an angle to the stream object." )
+Component:AddFunctionHelper( "writeColor", "st:c", "Appends a color to the stream object." )
 
 /* --- --------------------------------------------------------------------------------
 	@: Read Methods
@@ -176,6 +186,14 @@ Component:AddVMFunction( "readColor", "st:", "c", function( Context, Trace, Stre
 	return { Value.r, Value.g, Value.b, Value.a }
 end )
 
+Component:AddFunctionHelper( "readNumber", "st:", "Reads a number from the stream object." )
+Component:AddFunctionHelper( "readString", "st:", "Reads a string from the stream object." )
+Component:AddFunctionHelper( "readEntity", "st:", "Reads an entity from the stream object." )
+Component:AddFunctionHelper( "readPlayer", "st:", "Reads a player from the stream object." )
+Component:AddFunctionHelper( "readVector", "st:", "Reads a vector from the stream object." )
+Component:AddFunctionHelper( "readAngle", "st:", "Reads an angle from the stream object." )
+Component:AddFunctionHelper( "readColor", "st:", "Reads a color from the stream object." )
+
 /* --- --------------------------------------------------------------------------------
 	@: Net Stream Object
    --- */
@@ -204,6 +222,17 @@ Component:AddVMFunction( "netBroadcast", "nst:s", "", function( Context, Trace, 
 	HasQueued = true
 end )
 
+Component:AddVMFunction( "netBroadcast", "nst:ply,s", "", function( Context, Trace, Stream, Player, Name )
+	if !IsValid( Player ) or !Player:IsPlayer( ) then return end
+
+	table.insert( NetQueue, { Context.entity, Name, Stream, { Player } } ) -- Slow but meh!
+	HasQueued = true
+end )
+
+
+Component:AddFunctionHelper( "netBroadcast", "nst:s", "Sends a stream to clientside code on all clients." )
+Component:AddFunctionHelper( "netBroadcast", "nst:ply,s", "Sends a stream to clientside code to client." )
+
 /* --- --------------------------------------------------------------------------------
 	@: Receiving
    --- */
@@ -211,6 +240,7 @@ end )
 EXPADV.ClientOperators( )
 
 Component:AddPreparedFunction( "netReceive", "s,d", "", "Context.Data['net_' .. @value 1] = @value 2" )
+Component:AddFunctionHelper( "netReceive", "s,d", "Calls the function (delegate) when the stream with the matching name is received." )
 
 /* --- --------------------------------------------------------------------------------
 	@: Sending
@@ -223,7 +253,7 @@ if SERVER then
 		if !HasQueued then return end
 
 		for _, Msg in pairs( NetQueue ) do
-			local E, N, S = Msg[1], Msg[2], Msg[3]
+			local E, N, S, P = Msg[1], Msg[2], Msg[3], Msg[4]
 
 			if IsValid( E ) and E:IsRunning( ) then
 			
@@ -232,7 +262,7 @@ if SERVER then
 					net.WriteString( N )
 					net.WriteTable( S.T )
 					net.WriteTable( S.V )
-				net.Broadcast( )
+				if !P then net.Broadcast( ) else net.Send( P ) end
 			end
 		end
 
