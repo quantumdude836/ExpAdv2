@@ -202,6 +202,15 @@ EXPADV.SharedOperators()
 Component:AddInlineFunction( "mass", "e:", "e", "((@value 1:IsValid() && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType == MOVETYPE_VPHYSICS) and @value 1:GetPhysicsObject():GetMass() or 0)")
 Component:AddFunctionHelper( "mass", "e:", "Returns the mass of the given entity.")
 
+Component:AddInlineFunction( "massCenter", "e:", "v", "((@value 1:IsValid() && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType == MOVETYPE_VPHYSICS) and @value 1:LocalToWorld(@value 1:GetPhysicsObject():GetMassCenter()) or Vector(0,0,0))")
+Component:AddFunctionHelper( "massCenter", "e:", "Returns the center of mass of the given entity.")
+
+Component:AddInlineFunction( "massCenterL", "e:", "v", "((@value 1:IsValid() && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType == MOVETYPE_VPHYSICS) and @value 1:GetPhysicsObject():GetMassCenter() or Vector(0,0,0))")
+Component:AddFunctionHelper( "massCenterL", "e:", "Returns the local center of mass of the given entity.")
+
+Component:AddInlineFunction( "volume", "e:", "n", "((@value 1:IsValid() && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType == MOVETYPE_VPHYSICS) and @value 1:GetPhysicsObject():GetVolume() or 0)")
+Component:AddFunctionHelper( "volume", "e:", "Returns the volume of the given entity.")
+
 Component:AddInlineFunction( "isfrozen", "e:", "b", "((@value 1:IsValid() && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType == MOVETYPE_VPHYSICS) and (@value 1:GetPhysicsObject():IsMoveable() == false) or false)")
 Component:AddFunctionHelper( "isfrozen", "e:", "Returns if the given entity is frozen.")
 
@@ -224,6 +233,9 @@ Component:AddFunctionHelper( "angVel", "e:", "Returns the angular velocity of th
 
 Component:AddInlineFunction( "angVelVector", "e:", "a","((@value 1:IsValid() && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType == MOVETYPE_VPHYSICS) and @value 1:GetPhysicsObject():GetAngleVelocity() or Vector(0,0,0))")
 Component:AddFunctionHelper( "angVelVector", "e:", "Returns the angular velocity of the given entity as a vector.")
+
+Component:AddInlineFunction( "radius", "e:", "n","(@value 1:IsValid() and @value 1:BoundingRadius() or 0)")
+Component:AddFunctionHelper( "radius", "e:", "Returns the bounding radius of the given entity.")
 
 /* --- --------------------------------------------------------------------------------
 	@: Physics Seters
@@ -288,7 +300,6 @@ end
 ]])
 
 Component:AddFunctionHelper( "applyAngForce", "e:a", "Applies torque to the given entity depending on the given angle")
-
 /* --- --------------------------------------------------------------------------------
 	@: Misc
    --- */
@@ -303,6 +314,34 @@ Component:AddFunctionHelper( "isOnFire", "e:", "Returns if the entity is on fire
 
 Component:AddInlineFunction( "isWeapon", "e:", "b", "(@value 1:IsValid() and @value 1:IsWeapon() or false)")
 Component:AddFunctionHelper( "isWeapon", "e:", "Returns if the entity is a weapon.")
+
+Component:AddInlineFunction( "health", "e:", "n", "(@value 1:IsValid() and @value 1:Health() or 0)")
+Component:AddFunctionHelper( "health", "e:", "Returns the health of the entity.")
+
+Component:AddInlineFunction( "elevation", "e:v", "n", [[
+	if(!IsValid(@value 1)) then return 0 end
+	@define pos = this:WorldToLocal(@value 2)
+	return (180 / math.pi) * math.asin(@pos.z / @pos:Length())
+]]
+Component:AddFunctionHelper( "elevation", "e:v", "Returns the elevation between the two given points")
+
+Component:AddInlineFunction( "bearing", "e:v", "n", [[
+	if(!IsValid(@value 1)) then return 0 end
+	@define pos = this:WorldToLocal(@value 2)
+	return (180 / math.pi) * -math.atan2(@pos.y, @pos.x)
+]]
+Component:AddFunctionHelper( "bearing", "e:v", "Returns the bearing between the two given points")
+
+Component:AddInlineFunction( "heading", "e:v", "a", [[
+	if(!IsValid(@value 1)) then return 0 end
+	@define pos = this:WorldToLocal(@value 2)
+	
+	@define bearing = (180 / math.pi) * -math.atan2(@pos.y, @pos.x)
+	@define elevation = (180 / math.pi) * math.asin(@pos.z / @pos:Length())
+	
+	return Angle(@elevation, @bearing, 0)
+]]
+Component:AddFunctionHelper( "heading", "e:v", "Returns the heading angle between the two given points")
 
 /* --- --------------------------------------------------------------------------------
 	@: Entity Events
