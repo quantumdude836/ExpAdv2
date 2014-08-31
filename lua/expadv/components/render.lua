@@ -52,13 +52,13 @@ Component:AddPreparedFunction( "textSize", "s,s", "v2", [[
 ]], "@Size" )
 Component:AddFunctionHelper( "getTextSize", "s,s", "Gets the render size of a string, where first argument is the font and the second is the string." )
 
-Component:AddPreparedFunction( "drawTextCentered", "v2,c,s,s", "", "$draw.SimpleText( @value 4, @value 3, @value 1.x, @vlue 1.y, @value 2, $TEXT_ALIGN_CENTER, $TEXT_ALIGN_CENTER)" )
+Component:AddPreparedFunction( "drawTextCentered", "v2,c,s,s", "", "$draw.SimpleText( @value 4, @value 3, @value 1.x, @value 1.y, @value 2, $TEXT_ALIGN_CENTER, $TEXT_ALIGN_CENTER)" )
 Component:AddFunctionHelper( "drawTextCentered", "v2,c,s,s", "Draws a string centered to its position (Position, Color, font, Text)." )
 
-Component:AddPreparedFunction( "drawTextAlignedLeft", "v2,c,s,s", "", "$draw.SimpleText( @value 4, @value 3, @value 1.x, @vlue 1.y, @value 2, $TEXT_ALIGN_LEFT, $TEXT_ALIGN_CENTER)" )
+Component:AddPreparedFunction( "drawTextAlignedLeft", "v2,c,s,s", "", "$draw.SimpleText( @value 4, @value 3, @value 1.x, @value 1.y, @value 2, $TEXT_ALIGN_LEFT, $TEXT_ALIGN_CENTER)" )
 Component:AddFunctionHelper( "drawTextAlignedLeft", "v2,c,s,s", "Draws a string alighed left of its position (Position, Color, font, Text)." )
 
-Component:AddPreparedFunction( "drawTextAlignedRight", "v2,c,s,s", "", "$draw.SimpleText( @value 4, @value 3, @value 1.x, @vlue 1.y, @value 2, $TEXT_ALIGN_RIGHT, $TEXT_ALIGN_CENTER)" )
+Component:AddPreparedFunction( "drawTextAlignedRight", "v2,c,s,s", "", "$draw.SimpleText( @value 4, @value 3, @value 1.x, @value 1.y, @value 2, $TEXT_ALIGN_RIGHT, $TEXT_ALIGN_CENTER)" )
 Component:AddFunctionHelper( "drawTextAlignedRight", "v2,c,s,s", "Draws a string alighed right of its position (Position, Color, font, Text)." )
 
 /* -----------------------------------------------------------------------------------
