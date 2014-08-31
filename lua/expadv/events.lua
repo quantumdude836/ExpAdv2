@@ -51,7 +51,7 @@ function EXPADV.LoadEvents( )
 		if Event.Component and !Event.Component.Enabled then continue end
 
 		-- First of all, Check the return type!
-		if Event.Return and Event.Return == "" then
+		if !Event.Return or Event.Return == "" then
 			Event.Return = nil
 		elseif Event.Return and Event.Return == "..." then
 			MsgN( string.format( "Skipped event %s, can not return var arg.", Event.Name ) )
@@ -72,6 +72,7 @@ function EXPADV.LoadEvents( )
 				continue
 			end
 
+			Event.Return = Class.Short
 		end
 
 		-- Second we check the input types, and build our signatures!

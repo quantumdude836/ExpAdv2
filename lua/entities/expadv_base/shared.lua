@@ -11,6 +11,16 @@ ENT.Contact         = "WM/FacePunch"
 ENT.ExpAdv 			= true
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: IsExpAdv2
+   --- */
+
+local meta = FindMetaTable( "Entity" )
+
+function meta:IsExpAdv( ) return false end
+
+function ENT:IsExpAdv( ) return true end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: VNET
    --- */
 
@@ -225,3 +235,32 @@ function ENT:GetCompilePer( )
 
 	return self.Compiler:PercentCompiled( )
 end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Context Menu
+   --- */
+local function Filter( self, Entity, Player )
+	if !(IsValid( Entity ) and Entity.ExpAdv) then return false end
+	if CLIENT then return true end
+	
+	if !gamemode.Call( "CanProperty", Player, "expadv", Entity ) then
+		return false -- Somthing denied access!
+	end
+
+	return true
+end
+
+local function MenuOpen( ContextMenu, Option, Entity, Trace )
+	local SubMenu = Option:AddSubMenu( )
+	EXPADV.CallHook( "OpenContextMenu", Entity, SubMenu, Trace, Option )
+end
+
+properties.Add( "expadv", {
+	MenuLabel = "Expression Advanced",
+	MenuIcon  = "fugue/gear.png",
+	Order = 999,
+	Filter = Filter,
+	MenuOpen = MenuOpen,
+	Action = function( ) end,
+} ) -- We wont use recieve here, Send it yourself :D
+

@@ -703,7 +703,7 @@ function Compiler:Compile_EVENT( Trace, Name, Params, UseVarg, Sequence, Memory 
 			self:TraceError( Trace, "Invalid argument #%i, %s can not be used as event argument", I, self:NiceClass( Type ) )
 		end
 
-		PreSequence[ #PreSequence + 1 ] = Operator.Compile( self, Trace, Quick( Inputs[I] .. "[1]", Type ), Quick( Param[3], "n" ) )
+		PreSequence[ #PreSequence + 1 ] = Operator.Compile( self, Trace, Quick( Inputs[I], Type ), Quick( Param[3], "n" ) )
 				
 		self:Yield( )
 	end
