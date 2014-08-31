@@ -36,8 +36,8 @@ Component:AddFunctionHelper( "owner", "", "Returns the owner of the gate.")
 
 EXPADV.ClientOperators( )
 
-Component:AddInlineFunction( "client", "", "ply", "$LocalPlayer()")
-Component:AddFunctionHelper( "client", "", "Returns the clientside player.")
+Component:AddInlineFunction( "localPlayer", "", "ply", "$LocalPlayer()")
+Component:AddFunctionHelper( "localPlayer", "", "Returns the clientside player.")
 
 /* --- --------------------------------------------------------------------------------
 	@: Player Events
