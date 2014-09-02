@@ -18,10 +18,15 @@ AngObject:DefaultAsLua( Angle(0,0,0) )
 
 EXPADV.SharedOperators( )
 
-Component:AddPreparedOperator( "=", "a,n", "", [[
-	@define value = Context.Memory[@value 2]
-	Context.Memory[@value 2] = @value 1
-]] )
+AngObject:AddVMOperator( "=", "n,a", "", function( Context, Trace, MemRef, Value )
+	local Prev = Context.Memory[MemRef] or Angle( 0, 0, 0 )
+	
+	Context.Memory[MemRef] = Value
+	Context.Delta[MemRef] = Prev - Value
+	Context.Trigger[MemRef] = Context.Trigger[MemRef] or ( Prev ~= Value )
+end )
+
+AngObject:AddInlineOperator( "$", "n", "a", "(Context.Delta[@value 1] or Angle(0,0,0))" )
 
 /* --- --------------------------------------------------------------------------------
 	@: Logical and Comparison

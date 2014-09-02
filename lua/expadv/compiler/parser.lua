@@ -1189,7 +1189,7 @@ function Compiler:Statement_6( Trace )
 			local Short = Class.Short
 
 			if !Assigment then -- Default assigment!
-				Sequence[I] = self:Compile_ASS( Trace, Variable, self:Compile_DEFAULT( Trace, Short ) )
+				Sequence[I] = self:Compile_ASS( Trace, Variable, self:Compile_DEFAULT( Trace, Short ), Defined and Class or nil, Modifier )
 				GetExpression = self:AcceptToken( "com" )
 				continue
 			end

@@ -9,7 +9,6 @@ local MathComponent = EXPADV.AddComponent( "math" , true )
    --- */
 
 local Number = MathComponent:AddClass( "number" , "n" )
-
 Number:StringBuilder( function( Obj ) return tostring( Obj ) end )
 Number:DefaultAsLua( 0 )
 Number:AddAlias( "int" )
@@ -66,41 +65,55 @@ MathComponent:AddInlineOperator( "<<", "n,n", "n", "bit.lshift(@value 1 , @value
 @: Assigment
    --- */
 
-MathComponent:AddPreparedOperator( "=", "n,n", "", [[
-@define value = Context.Memory[@value 2]
-Context.Memory[@value 2] = @value 1
-Context.Delta[@value 2] = @value
-]] )
+Number:AddVMOperator( "=", "n,n", "", function( Context, Trace, MemRef, Value )
+   local Prev = Context.Memory[MemRef] or 0
 
-MathComponent:AddInlineOperator( "$", "n", "n", "((Context.Memory[@value 1] or 0) - (Context.Delta[@value 1] or 0))" )
+   Context.Memory[MemRef] = Value
+   Context.Delta[MemRef] = Prev - Value
+   Context.Trigger[MemRef] = Context.Trigger[MemRef] or ( Prev ~= Value )
+end )
 
-local Increment_Prepare = [[
-@define value = Context.Memory[@value 1]
-Context.Trigger = Context.Delta[@value 1] ~= @value
-Context.Memory[@value 1] = @value + 1
-Context.Delta[@value 1] = @value
-]]
+Number:AddInlineOperator( "$", "n", "n", "(Context.Delta[@value 1] or 0)" )
 
-MathComponent:AddPreparedOperator( "n++", "n", "n", Increment_Prepare, "@value " )
+Number:AddVMOperator( "i++", "n", "n", function( Context, Trace, MemRef )
+   local Value = Context.Memory[MemRef] or 0
 
-MathComponent:AddPreparedOperator( "++n", "n", "n", Increment_Prepare, "(@value + 1)" )
+   Context.Memory[MemRef] = Value + 1
+   Context.Delta[MemRef] = 1
+   Context.Trigger[MemRef] = Context.Trigger[MemRef] or true
 
-local Decrement_Prepare = [[
-@define value = Context.Memory[@value 1]
-Context.Trigger = Context.Delta[@value 1] ~= @value
-Context.Memory[@value 1] = @value - 1
-Context.Delta[@value 1] = @value
-]]
+   return Value
+end )
 
-MathComponent:AddPreparedOperator( "n--", "n", "n", Decrement_Prepare, "@value " )
+Number:AddVMOperator( "++i", "n", "n", function( Context, Trace, MemRef )
+   local Value = Context.Memory[MemRef] or 0
 
-MathComponent:AddPreparedOperator( "--n", "n", "n", Decrement_Prepare, "(@value - 1)" )
+   Context.Memory[MemRef] = Value + 1
+   Context.Delta[MemRef] = 1
+   Context.Trigger[MemRef] = Context.Trigger[MemRef] or true
 
-MathComponent:AddPreparedOperator( "~n", "n", "b", [[
-@define value = Context.Memory[@value 1]
-@define changed = (Context.Click[@value 1] == nil) or (Context.Click[@value 1] ~= @value)
-Context.Click[@value 1] = @value
-]], "@Changed" )
+   return Value + 1
+end )
+
+Number:AddVMOperator( "i--", "n", "n", function( Context, Trace, MemRef )
+   local Value = Context.Memory[MemRef] or 0
+
+   Context.Memory[MemRef] = Value - 1
+   Context.Delta[MemRef] = -1
+   Context.Trigger[MemRef] = Context.Trigger[MemRef] or true
+
+   return Value
+end )
+
+Number:AddVMOperator( "--i", "n", "n", function( Context, Trace, MemRef )
+   local Value = Context.Memory[MemRef] or 0
+
+   Context.Memory[MemRef] = Value - 1
+   Context.Delta[MemRef] = -1
+   Context.Trigger[MemRef] = Context.Trigger[MemRef] or true
+
+   return Value - 1
+end )
 
 /* --- --------------------------------------------------------------------------------
 @: Casting

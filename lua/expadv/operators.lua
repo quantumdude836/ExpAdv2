@@ -38,7 +38,7 @@ EXPADV.BaseClassObj.LoadOnClient = true
 local Temp_Operators = { }
 
 function EXPADV.AddInlineOperator( Component, Name, Input, Return, Inline )
-	Temp_Operators[ #Temp_Operators + 1 ] = { 
+	local Operator = { 
 		LoadOnClient = LoadOnClient,
 		LoadOnServer = LoadOnServer,
 
@@ -49,10 +49,13 @@ function EXPADV.AddInlineOperator( Component, Name, Input, Return, Inline )
 		Inline = Inline,
 		FLAG = EXPADV_INLINE
 	}
+
+	Temp_Operators[ #Temp_Operators + 1 ] = Operator
+	return Operator
 end
 
 function EXPADV.AddPreparedOperator( Component, Name, Input, Return, Prepare, Inline )
-	Temp_Operators[ #Temp_Operators + 1 ] = { 
+	local Operator = { 
 		LoadOnClient = LoadOnClient,
 		LoadOnServer = LoadOnServer,
 		 
@@ -64,10 +67,13 @@ function EXPADV.AddPreparedOperator( Component, Name, Input, Return, Prepare, In
 		Inline = Inline,
 		FLAG = Inline and EXPADV_INLINEPREPARE or EXPADV_PREPARE
 	}
+
+	Temp_Operators[ #Temp_Operators + 1 ] = Operator
+	return Operator
 end
 
 function EXPADV.AddVMOperator( Component, Name, Input, Return, Function )
-	Temp_Operators[ #Temp_Operators + 1 ] = { 
+	local Operator = { 
 		LoadOnClient = LoadOnClient,
 		LoadOnServer = LoadOnServer,
 		 
@@ -78,6 +84,9 @@ function EXPADV.AddVMOperator( Component, Name, Input, Return, Function )
 		Function = Function,
 		FLAG = EXPADV_FUNCTION
 	}
+
+	Temp_Operators[ #Temp_Operators + 1 ] = Operator
+	return Operator
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -86,6 +95,7 @@ end
 
 function EXPADV.LoadOperators( )
 	EXPADV.Operators = { }
+	EXPADV.Class_Operators = { }
 
 	EXPADV.CallHook( "PreLoadOperators" )
 
@@ -94,6 +104,18 @@ function EXPADV.LoadOperators( )
 
 		-- Checks if the operator requires an enabled component.
 		if Operator.Component and !Operator.Component.Enabled then continue end
+
+		-- 
+		if Operator.AttachedClass and Operator.AttachedClass ~= "" then
+			local Class = EXPADV.GetClass( Operator.AttachedClass, false, true )
+
+			if !Class then
+				MsgN( string.format( "Skipped operator: %s(%s), Attached to invalid class %q.", Operator.Name, Operator.Input, Operator.AttachedClass ) )
+				continue
+			end
+
+			Operator.AttachedClass = Class.Short
+		end
 
 		-- First of all, Check the return type!
 		if Operator.Return and Operator.Return == "" then
@@ -194,7 +216,18 @@ function EXPADV.LoadOperators( )
 		-- Lets build this operator.
 		EXPADV.BuildLuaOperator( Operator )
 
-		EXPADV.Operators[ Operator.Signature ] = Operator
+		if !Operator.AttachedClass then
+			EXPADV.Operators[ Operator.Signature ] = Operator
+		else
+			local ClassOperators = EXPADV.Class_Operators[Operator.AttachedClass]
+
+			if !ClassOperators then
+				ClassOperators = { }
+				EXPADV.Class_Operators[Operator.AttachedClass] = ClassOperators
+			end
+
+			ClassOperators[ Operator.Signature ] = Operator
+		end
 	end
 
 	EXPADV.CallHook( "PostLoadOperators" )

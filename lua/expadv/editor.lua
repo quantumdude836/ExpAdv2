@@ -106,6 +106,9 @@ local HomeScreen = [[
     The github repository can be found here:
         https://github.com/Rusketh/ExpAdv2
 	
+	For a list of components and Classes:
+		https://github.com/Rusketh/ExpAdv2/wiki/Components
+		
     The bug tracker can be found here:
         https://github.com/Rusketh/ExpAdv2/issues
  

@@ -61,6 +61,12 @@ function Compiler:Compile_NEG( Trace, Expresion1 )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Some logic operators, must only be executed in a specific order.
+	@: We need to prevent preperation, from execution when it shouldn't.
+	@: This will be done by our boolean class!
+   --- */
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Logical Operators
    --- */
 
@@ -277,7 +283,7 @@ function Compiler:Compile_INC( Trace, bVarFirst, Variable )
 
 	local Class = self.Cells[ MemRef ].Return
 
-	local Operator = self:LookUpOperator( string.format( bVarFirst and "%s++" or "%s++", Class ) )
+	local Operator = self:LookUpClassOperator( Class, bVarFirst and "i++" or "++i", "n" )
 
 	if !Operator then
 		if bVarFirst then
@@ -287,7 +293,7 @@ function Compiler:Compile_INC( Trace, bVarFirst, Variable )
 		end
 	end
 
-	return Operator.Compile( self, Trace, MemRef )
+	return Operator.Compile( self, Trace, Quick( MemRef, "n" ) )
 end
 
 function Compiler:Compile_DEC( Trace, bVarFirst, Variable )
@@ -296,7 +302,7 @@ function Compiler:Compile_DEC( Trace, bVarFirst, Variable )
 
 	local Class = self.Cells[ MemRef ].Return
 
-	local Operator = self:LookUpOperator( string.format( bVarFirst and "%s--" or "%s--", Class ) )
+	local Operator = self:LookUpClassOperator( Class, bVarFirst and "i--" or "--i", "n" )
 
 	if !Operator then
 		if bVarFirst then
@@ -306,7 +312,7 @@ function Compiler:Compile_DEC( Trace, bVarFirst, Variable )
 		end
 	end
 
-	return Operator.Compile( self, Trace, MemRef )
+	return Operator.Compile( self, Trace, Quick( MemRef, "n" ) )
 end
 
 function Compiler:Compile_VAR( Trace, Variable )
@@ -317,6 +323,19 @@ function Compiler:Compile_VAR( Trace, Variable )
 	return { Trace = Trace, Inline = string.format( "Context.Memory[%i]", MemRef ), Return = Class, FLAG = EXPADV_INLINE, IsRaw = true, Variable = Variable, Scope = MemScope, MemRef = MemRef }
 end
 
+function Compiler:Compile_DELTA( Trace, Variable )
+	local MemRef, MemScope = self:FindCell( Trace, Variable, true )
+
+	local Class = self.Cells[ MemRef ].Return
+
+	local Operator = self:LookUpClassOperator( Class, "$", "n" )
+	
+	if !Operator then
+		self:TraceError( Trace, "Delta operator ($) does not support '$%s'", self:NiceClass( Class ) )
+	end
+
+	return Operator.Compile( self, Trace, Quick( MemRef, "n" ) )
+end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Type Operators
@@ -522,19 +541,18 @@ function Compiler:Compile_ASS( Trace, Variable, Expression, DefinedClass, Modifi
 	local Cell = self.Cells[MemRef]
 
 	if Cell and Cell.Return ~= Expression.Return then
-		MsgN( Cell.Return, Expression.Return )
 		Expression = self:Compile_CAST( Trace, self:NiceClass( Cell.Return ), Expression )
 	end -- We cast automatically, to allow us to assign numbers to strings and so forth.
 
 	self:TestCell( Trace, MemRef, Expression.Return, Variable )
 
-	local Operator = self:LookUpOperator( "=", Expression.Return, "n" )
+	local Operator = self:LookUpClassOperator( Expression.Return, "=", "n", Expression.Return ) -- self:LookUpOperator( "=", Expression.Return, "n" )
 	
 	if !Operator then
 		self:TraceError( Trace, "Assigment operator (=) does not support 'var = %s'", self:NiceClass( Expression.Return ) )
 	end
 
-	return Operator.Compile( self, Trace, Expression, Quick( MemRef, "n" ) )
+	return Operator.Compile( self, Trace, Quick( MemRef, "n" ), Expression )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------

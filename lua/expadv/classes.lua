@@ -23,6 +23,11 @@ function BaseClassObj:DefaultAsLua( Default ) -- Object / function( )
 	self.CreateNew = Default
 end
 
+function BaseClassObj:AddDescription( Desc )
+	if SERVER then return end
+	self.Desciption = Desc
+end
+
 -- Derives this class as well as its operators and methods from another class.
 function BaseClassObj:ExtendClass( ExtendClass ) -- String
 	self.DeriveFrom = ExtendClass
@@ -41,6 +46,22 @@ end
 -- Overrides the changed check to use 'Obj.HasChanged == true'
 function BaseClassObj:UsesHasChanged( )
 	self.HasUpdateCheck = true
+end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Operator Support
+   --- */
+
+function BaseClassObj:AddInlineOperator( Name, Input, Return, Inline )
+	EXPADV.AddInlineOperator( self.Component, Name, Input, Return, Inline ).AttachedClass = self.Short
+end
+
+function BaseClassObj:AddPreparedOperator( Name, Input, Return, Preperation, Inline )
+	EXPADV.AddPreparedOperator( self.Component, Name, Input, Return, Preperation, Inline ).AttachedClass = self.Short
+end
+
+function BaseClassObj:AddVMOperator( Name, Input, Return, Function )
+	EXPADV.AddVMOperator( self.Component, Name, Input, Return, Function ).AttachedClass = self.Short
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -125,18 +146,6 @@ end
 function BaseClassObj:MakeClientOnly( )
 	self.LoadOnServer = false
 end
-
---[[ Probably not getting supported now =(
-	-- Not yet supported, please do not use this method.
-	function BaseClassObj:NetSend( Function ) -- function( obj Value )
-		self.SendToClient = Function
-	end
-
-	-- Not yet supported, please do not use this method.
-	function BaseClassObj:NetReceive( Function ) -- function( obj Value )
-		self.ReceiveFromServer = Function
-	end
-]]
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Class framework

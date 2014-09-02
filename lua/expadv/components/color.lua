@@ -54,10 +54,15 @@ ColorComponent:AddInlineOperator( "color", "s", "c", "string.ToColor(@value 1)" 
 	@: Assignment
    --- */
 
-ColorComponent:AddPreparedOperator( "=", "c,n", "", [[
-	@define value = Context.Memory[@value 2]
-	Context.Memory[@value 2] = @value 1
-]] )
+ColorObj:AddVMOperator( "=", "n,c", "", function( Context, Trace, MemRef, Value )
+	local Prev = Context.Memory[MemRef] or Color( 0, 0 , 0, 0 )
+
+	Context.Memory[MemRef] = Value
+	Context.Delta[MemRef] = Color( Prev.r - Value.r, Prev.g - Value.g, Prev.b - Value.b, Prev.a - Value.a )
+	Context.Trigger[MemRef] = Context.Trigger[MemRef] or ( Prev ~= Value )
+end )
+
+ColorObj:AddInlineOperator( "$", "n", "c", "(Context.Delta[@value 1] or Color(0,0,0,0))" )
 
 /* --- --------------------------------------------------------------------------------
 	@: Constructor

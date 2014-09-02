@@ -43,15 +43,17 @@ StringComponent:AddInlineOperator("<=","s,s", "b", "(@value 1 <= @value 2)" )
 	@: Assignment
    --- */
 
-StringComponent:AddPreparedOperator( "=", "s,s", "", [[
-    Context.Memory[@value 2] = @value 1
-]] )
+String:AddVMOperator( "=", "n,s", "", function( Context, Trace, MemRef, Value )
+   local Prev = Context.Memory[MemRef]
+   Context.Memory[MemRef] = Value
+   Context.Trigger[MemRef] = Context.Trigger[MemRef] or ( Prev ~= Value )
+end )
 
-StringComponent:AddPreparedOperator( "~", "n", "b", [[
-	@define value = Context.Memory[@value 1]
-	@define changed = Context.Changed[@value 1] ~= @value
-	Context.Changed[@value 1] = @value
-]], "@changed" )
+-- StringComponent:AddPreparedOperator( "~", "n", "b", [[
+-- 	@define value = Context.Memory[@value 1]
+-- 	@define changed = Context.Changed[@value 1] ~= @value
+-- 	Context.Changed[@value 1] = @value
+-- ]], "@changed" )
 
 
 /* --- --------------------------------------------------------------------------------

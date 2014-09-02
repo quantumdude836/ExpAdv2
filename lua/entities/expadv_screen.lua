@@ -67,22 +67,22 @@ EXPADV.ScreenTexture = CreateMaterial( "ExpAdv.RT", "UnlitGeneric", {
 	["$nolod"] = 1,
 } )
 
-local RT_ID = 0
-local RT_Cache = { }
+EXPADV.RT_ID = 0
+EXPADV.RT_Cache = { }
 
 function EXPADV.GetRenderTarget( )
-	local RenderTarget = table.remove( RT_Cache )
+	local RenderTarget = table.remove( EXPADV.RT_Cache )
 	if RenderTarget then return RenderTarget end
 
-	RT_ID = RT_ID + 1
-	if RT_ID > 32 then return end
+	EXPADV.RT_ID = EXPADV.RT_ID + 1
+	if EXPADV.RT_ID > 32 then return end
 
-	return GetRenderTarget( "expadv.rt_" .. RT_ID, 512, 512 ) 
+	return GetRenderTarget( "expadv.rt_" .. EXPADV.RT_ID, 512, 512 ) 
 end
 
 function EXPADV.CacheRenderTarget( RenderTarget )
-	if RenderTarget and !table.HasValue( RT_Cache, RenderTarget ) then
-		table.insert( RT_Cache, RenderTarget )
+	if RenderTarget and !table.HasValue( EXPADV.RT_Cache, RenderTarget ) then
+		table.insert( EXPADV.RT_Cache, RenderTarget )
 	end
 end
 
@@ -98,6 +98,10 @@ function ENT:Draw( )
 
 	self:DrawModel( )
 	self:DrawScreen( )
+
+	if self:BeingLookedAtByLocalPlayer( ) then
+		self:DrawOverlay( self:GetPos( ) + Vector( 0, 0, self:OBBMaxs( ).z + 10 ) )
+	end
 end
 
 function ENT:DrawScreen( )
@@ -123,7 +127,6 @@ function ENT:DrawScreen( )
 		end
 
 	cam.End3D2D( )
-
 end
 
 function ENT:RenderScreen( )

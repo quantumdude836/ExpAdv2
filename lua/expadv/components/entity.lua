@@ -43,14 +43,16 @@ Component:AddInlineOperator( "not", "e", "b", "(@value 1 == Entity(0))" )
    --- */
 
 Component:AddInlineOperator( "string", "e", "s", "string.format( \"Entity[&i][&i]\", @value 1:EntIndex(), @value 1:GetClass())" )
+
 /* --- --------------------------------------------------------------------------------
 	@: Assignment
    --- */
 
-Component:AddPreparedOperator( "=", "e,n", "", [[
-	@define value = Context.Memory[@value 2]
-	Context.Memory[@value 2] = @value 1
-]] )
+EntObject:AddVMOperator( "=", "n,e", "", function( Context, Trace, MemRef, Value )
+	local Prev = Context.Memory[MemRef]
+	Context.Memory[MemRef] = Value
+	Context.Trigger[MemRef] = Context.Trigger[MemRef] or ( Prev ~= Value )
+end )
 
 
 /* --- --------------------------------------------------------------------------------

@@ -105,21 +105,38 @@ if WireLib then
 	end )
 end
 
+Boolean:AddVMOperator( "=", "n,b", "", function( Context, Trace, MemRef, Value )
+	local Prev = Context.Memory[MemRef]
+	Context.Memory[MemRef] = Value
+
+	Context.Trigger[MemRef] = Context.Trigger[MemRef] or ( Prev ~= Value )
+end )
+
 EXPADV.AddInlineOperator( nil, "==", "b,b", "b", "(@value 1 == @value 2)" )
 EXPADV.AddInlineOperator( nil, "!=", "b,b", "b", "(@value 1 != @value 2)" )
 
 EXPADV.AddInlineOperator( nil, "is", "b", "b", "@value 1" )
 EXPADV.AddInlineOperator( nil, "not", "b", "b", "!@value 1" )
 
-EXPADV.AddInlineOperator( nil, "||", "b,b", "b", "(@value 1 or @value 2)" )
-EXPADV.AddInlineOperator( nil, "&&", "b,b", "b", "(@value 1 and @value 2)" )
+EXPADV.AddPreparedOperator( nil, "||", "b,b", "b", [[
+	@prepare 1
+	@define Result = @value 1
+	
+	if !@Result then
+		@prepare 2
+		@Result = @value 2
+	end
+]], "@Result" )
 
-EXPADV.AddPreparedOperator( nil, "=", "b,n", "", [[
-	@define value = Context.Memory[@value 1]
-	Context.Memory[@value 1] = @value 2
-]] )
-
-EXPADV.AddInlineOperator( nil, "=b", "n", "b", "Context.Memory[@value 1]" )
+EXPADV.AddPreparedOperator( nil, "&&", "b,b", "b", [[
+	@prepare 1
+	@define Result = @value 1
+	
+	if @Result then
+		@prepare 2
+		@Result = @value 2
+	end
+]], "@Result" )
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Register variant class!
@@ -128,6 +145,8 @@ EXPADV.AddInlineOperator( nil, "=b", "n", "b", "Context.Memory[@value 1]" )
 local Variant = EXPADV.AddClass( nil, "variant", "vr" )
 		
 	  Variant:DefaultAsLua( { false, "b" } )
+
+Variant:AddInlineOperator( "=", "n,vr", "", "Context.Memory[@Value 1] = @value 2" )
 
 hook.Add( "Expadv.PostRegisterClass", "expad.variant", function( Name, Class )
 	if !Class.LoadOnClient then
@@ -141,12 +160,7 @@ hook.Add( "Expadv.PostRegisterClass", "expad.variant", function( Name, Class )
 	EXPADV.AddInlineOperator( nil, Name, "vr", Class.Short, string.format( "( @value 1[2] == %q and @value 1[1] or Context:Throw(@trace, %q, \"Attempt to cast value \" .. EXPADV.TypeName(@value 1[2]) .. \" to %s \") )", Class.Short, "cast", Name ) )
 end )	
 
-EXPADV.AddPreparedOperator( nil, "=", "vr,n", "", [[
-	@define value = Context.Memory[@value 2]
-	Context.Memory[@value 2] = @value 1
-]] )
 
-EXPADV.AddInlineOperator( nil, "=_vr", "n", "vr", "Context.Memory[@value 1]" )
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Define function class
@@ -156,19 +170,15 @@ EXPADV.SharedOperators( )
 
 local FunctionClass = EXPADV.AddClass( nil, "function", "f" )
 	  
-	 FunctionClass:DefaultAsLua( "function( ) end" )
+FunctionClass:DefaultAsLua( "function( ) end" )
+
+FunctionClass:AddPreparedOperator( "=", "n,f", "", "Context.Memory[@Value 1] = @value 2" )
 
 EXPADV.AddPreparedOperator( nil, "call", "f,s,...", "_vr", [[
 	@define Return, Type = @value 1(@...)
 	if @value 2 and @Type ~= @value 2 then
 		Context:Throw( @trace, "invoke", string.format( "Invalid return value, %s expected got %s", @value 2, @Type ) )
 end]], "@Return" )
-
-EXPADV.AddPreparedOperator( nil, "=", "f,n", "", [[
-	Context.Memory[@value 2] = @value 1
-]] )
-
-EXPADV.AddInlineOperator( nil, "=f", "n", "f", "Context.Memory[@value 1]" )
 
 EXPADV.AddException( nil, "invoke" )
 
@@ -178,11 +188,7 @@ EXPADV.AddException( nil, "invoke" )
 
 local DelgateClass = EXPADV.AddClass( nil, "delegate", "d" )
 
-EXPADV.AddPreparedOperator( nil, "=", "d,n", "", [[
-	Context.Memory[@value 2] = @value 1
-]] )
-
-EXPADV.AddInlineOperator( nil, "=d", "n", "d", "Context.Memory[@value 1]" )
+DelgateClass:AddPreparedOperator( "=", "n,d", "", "Context.Memory[@Value 1] = @value 2" )
 
 EXPADV.AddInlineOperator( nil, "delegate", "f", "d", "@value 1" )
 
@@ -194,7 +200,7 @@ EXPADV.AddInlineOperator( nil, "function", "d", "f", "@value 1" )
 
 local Class_Exception = EXPADV.AddClass( nil, "exception", "ex" )
 
--- TODO
+Class_Exception:AddInlineOperator( "=", "n,ex", "", "Context.Memory[@Value 1] = @value 2" )
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 @: Exceptions

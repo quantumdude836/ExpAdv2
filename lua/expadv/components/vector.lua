@@ -76,11 +76,15 @@ VectorComponent:AddInlineOperator( "string", "v", "s", "string.format( \"Vec( %i
 	@: Assignment
    --- */
 
-VectorComponent:AddPreparedOperator( "=", "v,n", "", [[
-	@define value = Context.Memory[@value 2]
-	Context.Memory[@value 2] = @value 1
-	Context.Delta[@value 2] = @value
-]] )
+VectorObj:AddVMOperator( "=", "n,v", "", function( Context, Trace, MemRef, Value )
+   local Prev = Context.Memory[MemRef] or Vector( 0, 0, 0 )
+
+   Context.Memory[MemRef] = Value
+   Context.Delta[MemRef] = Prev - Value
+   Context.Trigger[MemRef] = Context.Trigger[MemRef] or ( Prev ~= Value )
+end )
+
+VectorObj:AddInlineOperator( "$", "n", "v", "(Context.Delta[@value 1] or Vector(0,0,0))" )
 
 /* -----------------------------------------------------------------------------------
 	@: Constructor
@@ -201,11 +205,15 @@ VectorComponent:AddInlineOperator( "string", "v2", "s", "string.format( \"Vec2( 
 	@: Assignment
    --- */
 
-VectorComponent:AddPreparedOperator( "=", "v2,n", "", [[
-	@define value = Context.Memory[@value 2]
-	Context.Memory[@value 2] = @value 1
-	Context.Delta[@value 2] = @value
-]] )
+Vector2Obj:AddVMOperator( "=", "n,v2", "", function( Context, Trace, MemRef, Value )
+   local Prev = Context.Memory[MemRef] or Vector2( 0, 0 )
+   
+   Context.Memory[MemRef] = Value
+   Context.Delta[MemRef] = Prev - Value
+   Context.Trigger[MemRef] = Context.Trigger[MemRef] or ( Prev ~= Value )
+end )
+
+Vector2Obj:AddInlineOperator( "$", "n", "v2", "(Context.Delta[@value 1] or Vector2(0,0))" )
 
 /* -----------------------------------------------------------------------------------
 	@: Constructor

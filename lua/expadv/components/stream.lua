@@ -18,11 +18,10 @@ StreamObject:DefaultAsLua( { V = { }, T = { }, R = 0, W = 0 } )
 /* --- --------------------------------------------------------------------------------
 	@: Operators
    --- */
+StreamObject:AddPreparedOperator( "=", "n,st", "", "Context.Memory[@value 1] = @value 2" )
 
 Component:AddInlineFunction( "stream", "", "st", "{ V = { }, T = { }, R = 0, W = 0 }" )
 Component:AddFunctionHelper( "stream", "", "Creates an empty stream object." )
-
-Component:AddPreparedOperator( "=", "st,n", "", "Context.Memory[@value 2] = @value 1" )
 
 Component:AddInlineOperator( "#", "st", "n", "(@value 1.Write - @value 1.R)")
 
