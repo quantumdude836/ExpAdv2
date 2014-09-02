@@ -60,7 +60,7 @@ function ENT:ResetStatus( ) end
    --- */
 
 function ENT:UpdateTransmitState( )	
-	return self.cl_root and TRANSMIT_ALWAYS or TRANSMIT_PVS
+	return  TRANSMIT_ALWAYS
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -237,8 +237,74 @@ function ENT:GetCompilePer( )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Peripher Connections
+   --- */
+
+if SERVER then util.AddNetworkString( "expadv.peripheral" ) end
+
+function ENT:AddPeripheral( Entity )
+	if !(IsValid( Entity ) and Entity.IsPeripheral ) then return end
+
+	self.Peripherals = self.Peripherals or { }
+
+	if table.HasValue( self.Peripherals, Entity ) then return end
+
+	local Slot = #self.Peripherals + 1
+	self.Peripherals[Slot] = Entity
+
+	if SERVER then
+		Entity:SetExpAdv( self )
+		Entity:SetPeripheralSlot( Slot )
+
+		net.Start( "expadv.peripheral" )
+			net.WriteEntity( self )
+			net.WriteUInt( Slot, 16 )
+			net.WriteEntity( Entity )
+		net.Broadcast( )
+	end
+
+	if self:IsRunning( ) then
+		self.Context.Peripherals = self.Peripherals
+		
+		if self.Context.event_addPeripheral then
+			Context:Execute( "Event addPeripheral", Context.event_addPeripheral, Entity, Slot )
+		end
+	end
+end
+
+function ENT:RemovePeripheral( Entity )
+	if !(IsValid( Entity ) and Entity.IsPeripheral ) then return end
+	if !self.Peripherals or !table.HasValue( self.Peripherals ) then return end
+
+	local Slot = Entity:PeripheralSlot( )
+	table.Remove( self.Peripherals, Slot )
+
+	for I = Slot, #self.Peripherals do
+		local Peripheral = self.Peripherals[I]
+
+		if IsValid( Peripheral ) then
+			Peripheral:SetPeripheralSlot( I )
+		end -- We update the slot ID's :D
+	end
+end
+
+if CLIENT then
+	net.Receive( "expadv.peripheral", function( )
+		local ExpAdv = net.ReadEntity( )
+		local Slot = net.ReadUInt( 16 )
+		local Peripheral = net.ReadEntity( )
+
+		if !(IsValid( ExpAdv ) and ExpAdv.ExpAdv) then return end
+		if !IsValid( Peripheral ) and Peripheral.IsPeripheral then return end
+
+		ExpAdv:AddPeripheral( Peripheral )
+	end )
+end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Context Menu
    --- */
+
 local function Filter( self, Entity, Player )
 	if !(IsValid( Entity ) and Entity.ExpAdv) then return false end
 	if CLIENT then return true end

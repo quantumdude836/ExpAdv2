@@ -322,14 +322,14 @@ Component:AddInlineFunction( "elevation", "e:v", "n", [[
 	if(!IsValid(@value 1)) then return 0 end
 	@define pos = this:WorldToLocal(@value 2)
 	return (180 / math.pi) * math.asin(@pos.z / @pos:Length())
-]]
-Component:AddFunctionHelper( "elevation", "e:v", "Returns the elevation between the two given points")
+]] )
+Component:AddFunctionHelper( "elevation", "e:v", "Returns the elevation between the two given points" )
 
 Component:AddInlineFunction( "bearing", "e:v", "n", [[
 	if(!IsValid(@value 1)) then return 0 end
 	@define pos = this:WorldToLocal(@value 2)
 	return (180 / math.pi) * -math.atan2(@pos.y, @pos.x)
-]]
+]] )
 Component:AddFunctionHelper( "bearing", "e:v", "Returns the bearing between the two given points")
 
 Component:AddInlineFunction( "heading", "e:v", "a", [[
@@ -340,7 +340,7 @@ Component:AddInlineFunction( "heading", "e:v", "a", [[
 	@define elevation = (180 / math.pi) * math.asin(@pos.z / @pos:Length())
 	
 	return Angle(@elevation, @bearing, 0)
-]]
+]] )
 Component:AddFunctionHelper( "heading", "e:v", "Returns the heading angle between the two given points")
 
 /* --- --------------------------------------------------------------------------------

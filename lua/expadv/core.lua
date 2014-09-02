@@ -169,6 +169,7 @@ function EXPADV.LoadCore( )
 	EXPADV.AddComponentFile( "motionsensor" )
 	EXPADV.AddComponentFile( "stream" )
 	EXPADV.AddComponentFile( "render" )
+	EXPADV.AddComponentFile( "peripheral" )
 
 	EXPADV.LoadComponents( )
 

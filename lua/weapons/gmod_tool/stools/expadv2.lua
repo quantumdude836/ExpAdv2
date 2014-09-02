@@ -75,6 +75,7 @@ end -- TODO: Use somthing other then base class comparason.
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Make the entity
    --- */
+
 local function MakeExpadv( Player, Position, Angle, Model )
 	if Player:GetCount( "expadv" ) > EXPADV.ReadSetting( "sboxmax_expadv", 20 ) then
 		LimitHit( language.GetPhrase("limit_expadv" ) )
@@ -147,7 +148,7 @@ function TOOL:LeftClick( Trace )
 	undo.SetPlayer( self:GetOwner( ) ) 
 
 	if self:GetClientNumber( "weld" ) >= 1 then
-		if !IsValid( Trace.Entity ) or WeldWorld then
+		if !IsValid( Trace.Entity ) and WeldWorld then
 			undo.AddEntity( constraint.Weld( ExpAdv, Trace.Entity, 0, Trace.PhysicsBone, 0, 0, WeldWorld ) )
 		end 
 	end
@@ -170,7 +171,7 @@ end
 
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
-	@: Left Click
+	@: Tool Panel
    --- */
 if CLIENT then
 	function TOOL.BuildCPanel( CPanel )
