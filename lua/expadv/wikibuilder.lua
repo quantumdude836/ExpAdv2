@@ -37,7 +37,7 @@ function Avalibility( Server, Client )
 	return "Unkown"
 end
 
-function NamePerams( Perams, Start )
+function NamePerams( Perams, Start, Varg )
 	local Names = { }
 
 	for I = Start or 1, #Perams do
@@ -46,27 +46,29 @@ function NamePerams( Perams, Start )
 	
 	if Start then table.remove( Names, 1 ) end
 	
+	if Varg then table.insert( Names, "..." ) end
+
 	return table.concat( Names, ", " )
 end
 
 -----------------------------------------------------------------------------------
 
-function AddFunction( Component, Name, Perams, Return, Desc, Server, Client )
+function AddFunction( Component, Name, Perams, Varg, Return, Desc, Server, Client )
 	local Component = GetComponent( Component )
 	if !Component.Functions then Component.Functions = { } end
 
-	local Line = string.format( "| %s(%s) || %s || %s || %s \n", Name, NamePerams( Perams ), EXPADV.TypeName( Return ) or "Void", Avalibility( Server, Client ), Desc or "No description."  )
+	local Line = string.format( "| %s(%s) || %s || %s || %s \n", Name, NamePerams( Perams, 1, Varg ), EXPADV.TypeName( Return ) or "Void", Avalibility( Server, Client ), Desc or "No description."  )
 	table.insert( Component.Functions, Line )
 end
 
 -----------------------------------------------------------------------------------
 
-function AddMethod( Component, Class, Name, Perams, Return, Desc, Server, Client )
+function AddMethod( Component, Class, Name, Perams, Varg, Return, Desc, Server, Client )
 	local ClassName = EXPADV.TypeName( Class )
 	local Class = GetClass( Component, ClassName )
 	if !Class.Methods then Class.Methods = { } end
 
-	local Line = string.format( "| %s:%s(%s) || %s || %s || %s \n", ClassName, Name, NamePerams( Perams, 2 ), EXPADV.TypeName( Return ) or "Void", Avalibility( Server, Client ), Desc or "No description."  )
+	local Line = string.format( "| %s:%s(%s) || %s || %s || %s \n", ClassName, Name, NamePerams( Perams, 2, Varg ), EXPADV.TypeName( Return ) or "Void", Avalibility( Server, Client ), Desc or "No description."  )
 	table.insert( Class.Methods, Line )
 end
 
@@ -85,9 +87,9 @@ end
 for _, Operator in pairs( EXPADV.Functions ) do
 	if Operator.Method then
 		local Perams = table.Copy( Operator.Input )
-		AddMethod( Operator.Component, table.remove( Perams, 1 ), Operator.Name, Perams, Operator.Return or "VOID", Operator.Description, Operator.LoadOnServer, Operator.LoadOnClient )
+		AddMethod( Operator.Component, table.remove( Perams, 1 ), Operator.Name, Perams, Operator.UsesVarg, Operator.Return or "VOID", Operator.Description, Operator.LoadOnServer, Operator.LoadOnClient )
 	else
-		AddFunction( Operator.Component, Operator.Name, Operator.Input, Operator.Return or "VOID", Operator.Description, Operator.LoadOnServer, Operator.LoadOnClient )
+		AddFunction( Operator.Component, Operator.Name, Operator.Input, Operator.UsesVarg, Operator.Return or "VOID", Operator.Description, Operator.LoadOnServer, Operator.LoadOnClient )
 	end
 end
 
