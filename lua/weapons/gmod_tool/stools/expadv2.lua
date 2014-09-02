@@ -34,9 +34,10 @@ end
 	@: Cvars
    --- */
 
-TOOL.ClientConVar.Model 		= "models/lemongate/lemongate.mdl"
-TOOL.ClientConVar.Weldworld 	= 0
-TOOL.ClientConVar.Frozen		= 0
+TOOL.ClientConVar.model 		= "models/lemongate/lemongate.mdl"
+TOOL.ClientConVar.weld		 	= 0
+TOOL.ClientConVar.weldworld 	= 0
+TOOL.ClientConVar.frozen		= 0
 
 hook.Add( "Expadv.PostLoadConfig", "Expadv.Tool", function( )
 	EXPADV.CreateSetting( "sboxmax_expadv", 20 )
@@ -45,16 +46,17 @@ end )
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Model List
    --- */
+local GateModels = { }
 
-list.Set( "expadv2.models", "models/lemongate/lemongate.mdl", { } )
+table.insert( GateModels, "models/lemongate/lemongate.mdl" )
 
 if WireLib then
-	list.Set( "expadv2.models", "models/bull/gates/processor.mdl", { } )
-	list.Set( "expadv2.models", "models/expression 2/cpu_controller.mdl", { } )
-	list.Set( "expadv2.models", "models/expression 2/cpu_expression.mdl", { } )
-	list.Set( "expadv2.models", "models/expression 2/cpu_interface.mdl", { } )
-	list.Set( "expadv2.models", "models/expression 2/cpu_microchip.mdl", { } )
-	list.Set( "expadv2.models", "models/expression 2/cpu_processor.mdl", { } )
+	table.insert( GateModels, "models/bull/gates/processor.mdl" )
+	table.insert( GateModels, "models/expression 2/cpu_controller.mdl" )
+	table.insert( GateModels, "models/expression 2/cpu_expression.mdl" )
+	table.insert( GateModels, "models/expression 2/cpu_interface.mdl" )
+	table.insert( GateModels, "models/expression 2/cpu_microchip.mdl" )
+	table.insert( GateModels, "models/expression 2/cpu_processor.mdl" )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -73,7 +75,7 @@ local function IsExpAdv( Entity )
 end -- TODO: Use somthing other then base class comparason.
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
-	@: Make the entity
+	@: Make Gate Entity
    --- */
 
 local function MakeExpadv( Player, Position, Angle, Model )
@@ -98,7 +100,35 @@ local function MakeExpadv( Player, Position, Angle, Model )
 	return ExpAdv
 end
 
-duplicator.RegisterEntityClass( "expadv2", MakeExpadv, "Pos", "Ang", "Model" )
+duplicator.RegisterEntityClass( "expadv_gate", MakeExpadv, "Pos", "Ang", "Model" )
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Make Screen Entity
+   --- */
+
+local function MakeExpadvScreen( Player, Position, Angle, Model )
+	if Player:GetCount( "expadv" ) > EXPADV.ReadSetting( "sboxmax_expadv", 20 ) then
+		LimitHit( language.GetPhrase("limit_expadv" ) )
+		return nil
+	end
+	
+	local ExpAdv = ents.Create( "expadv_screen" )
+	if !IsValid( ExpAdv ) then return end
+
+	ExpAdv:SetPos( Position )
+	ExpAdv:SetAngles( Angle )
+	ExpAdv:SetModel( Model )
+	ExpAdv:Activate( )
+	ExpAdv:Spawn( )
+
+	Player:AddCount( "expadv", ExpAdv )
+	ExpAdv:SetPlayer( Player )
+	ExpAdv.player = Player
+
+	return ExpAdv
+end
+
+duplicator.RegisterEntityClass( "expadv_screen", MakeExpadvScreen, "Pos", "Ang", "Model" )
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Right Click
@@ -134,8 +164,14 @@ function TOOL:LeftClick( Trace )
 		return true
 	end
 
+	local Model, ExpAdv = self:GetClientInfo( "model" )
 	local Ang = Trace.HitNormal:Angle( ) + Angle( 90, 0, 0 )
-	local ExpAdv = MakeExpadv( self:GetOwner( ), Trace.HitPos, Ang, self:GetClientInfo( "Model" ) )
+
+	if EXPADV.GetMonitor( Model ) then
+		ExpAdv = MakeExpadvScreen( self:GetOwner( ), Trace.HitPos, Ang, Model )
+	else
+		ExpAdv = MakeExpadv( self:GetOwner( ), Trace.HitPos, Ang, Model )
+	end
 
 	if !IsValid( ExpAdv ) then return false end
 
@@ -175,8 +211,36 @@ end
    --- */
 if CLIENT then
 	function TOOL.BuildCPanel( CPanel )
-		CPanel:AddControl( "PropSelect", { Label = "Select Model:", ConVar = "expadv2_model", Models = list.Get( "expadv2.models" ), Height = 1 } )
-		CPanel:AddControl( "Checkbox", { Label = "Weld to world.", Command = "expadv2_weldworld" } )
-		CPanel:AddControl( "Checkbox", { Label = "Place frozen.", Command = "expadv2_frozen" } )
+		local CheckScreen = CPanel:CheckBox( "Create screen" )
+		
+		local Props = vgui.Create( "PropSelect" )
+		Props:SetConVar( "expadv2_model" )
+		CPanel:AddItem( Props )
+
+		local CheckWeld = CPanel:CheckBox( "Create welded", "expadv2_weld" )
+		local CheckWorld = CPanel:CheckBox( "Weld to world", "expadv2_weldworld" )
+		local CheckFroze = CPanel:CheckBox( "Create frozen", "expadv2_frozen" )
+
+		local function ShowGateModels( )
+			DScrollPanel.Clear( Props.List )
+
+			for _, Mdl in pairs( GateModels ) do
+				Props:AddModel( Mdl )
+			end
+		end
+
+		local function ShowScreenModels( )
+			DScrollPanel.Clear( Props.List )
+
+			for Mdl, _ in pairs( EXPADV.GetMonitors( ) ) do
+				Props:AddModel( Mdl )
+			end
+		end
+
+		function CheckScreen:OnChange( Val )
+			if !Val then ShowGateModels( ) else ShowScreenModels( ) end
+		end
+
+		ShowGateModels( )
 	end
 end

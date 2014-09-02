@@ -85,8 +85,9 @@ end
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Think
    --- */
+
 function ENT:Think( )
-	self.BaseClass.Think( self )
+	--self.BaseClass.Think( self ) Base class doesnt think!
 	self:NextThink( CurTime( ) + 0.030303 )
 
 	if self:IsRunning( ) then

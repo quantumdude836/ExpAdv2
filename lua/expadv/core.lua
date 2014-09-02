@@ -169,7 +169,8 @@ function EXPADV.LoadCore( )
 	EXPADV.AddComponentFile( "motionsensor" )
 	EXPADV.AddComponentFile( "stream" )
 	EXPADV.AddComponentFile( "render" )
-	EXPADV.AddComponentFile( "peripheral" )
+
+	EXPADV.CallHook( "AddComponents" )
 
 	EXPADV.LoadComponents( )
 
@@ -276,6 +277,7 @@ end
    -- BuildHologramModels( Table )								| Void | Called when the hologram model look up is made.
    -- GetDataStream( DataTable )								| Void | Called clientside when data needs to be sent.
    -- OpenContextMenu( Entity, ContextMenu, Trace, Option )		| Void | Called when an ExpAdv2 context menu is created.
+   -- AddComponents( )											| Void | Called when its time to add custom components.
 
    --  function Component:OnPostLoadAliases( ) end
    --  hook.Add( "Expadv.PostLoadAliases", ... )

@@ -67,6 +67,7 @@ Component:AddFunctionHelper( "drawTextAlignedRight", "v2,c,s,s", "Draws a string
 
 EXPADV.ClientEvents( )
 
+Component:AddEvent( "drawScreen", "n,n", "" )
 Component:AddEvent( "drawHUD", "n,n", "" )
 
 hook.Add( "HUDPaint", "expadv.hudpaint", function( )
