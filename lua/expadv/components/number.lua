@@ -50,7 +50,7 @@ MathComponent:AddInlineOperator( "^", "n,n", "n", "(@value 1 ^ @value 2)" )
 
 MathComponent:AddInlineOperator( "is", "n", "b", "(@value 1 >= 1)" )
 MathComponent:AddInlineOperator( "not", "n", "b", "(@value 1 < 1)" )
-MathComponent:AddInlineOperator( "-", "n", "b", "(-@value 1)" )
+MathComponent:AddInlineOperator( "-", "n", "n", "(-@value 1)" )
 
 /* --- --------------------------------------------------------------------------------
 @: Bitwise

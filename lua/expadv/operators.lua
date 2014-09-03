@@ -29,8 +29,6 @@ function EXPADV.SharedOperators( )
 	LoadOnServer = true
 end
 
-EXPADV.BaseClassObj.LoadOnClient = true
-
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Register our operators!
    --- */
@@ -228,6 +226,10 @@ function EXPADV.LoadOperators( )
 
 			ClassOperators[ Operator.Signature ] = Operator
 		end
+
+		if CLIENT and !Operator.Description then
+			EXPADV.GenerateOperatorDescription( Operator )
+		end --TODO: add user descriptions!
 	end
 
 	EXPADV.CallHook( "PostLoadOperators" )
@@ -869,4 +871,155 @@ function EXPADV.BuildLuaOperator( Operator )
 
 		return Compiler:NewLuaInstruction( Trace, Operator, PreperedLines, OpInline )
 	end
+end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Surly this file is finished by now.
+	@: Nope - Lets auto generate operator discriptions.
+--- */
+
+function EXPADV.GenerateOperatorDescription( Operator )
+	local Name, Input, Return = Operator.Name, Operator.Input, Operator.Return
+
+	if Operator.AttachedClass then
+			local ClassName = EXPADV.TypeName( Operator.AttachedClass )
+
+			    if Name == "=" then
+					Operator.Description = string.format( "Creates/Assigns a value to a %s variable.", ClassName )
+					Operator.Example = string.format( "%s var = value", ClassName )
+					Operator.Type = "assigment"
+			
+			elseif Name == "$" then
+					Operator.Description = "Returns the delta of change between a variables last and current value."
+					Operator.Example = "$value"
+					Operator.Type = "assigment"
+			
+			elseif Name == "i++" then
+					Operator.Description = "Returns value of variable then increments variable by 1." 
+					Operator.Example = "var++"
+					Operator.Type = "assigment"
+			
+			elseif Name == "++i" then
+					Operator.Description = "Increments variable by 1 then returns value of variable." 
+					Operator.Example = "++var"
+					Operator.Type = "assigment"
+
+			elseif Name == "i--" then
+					Operator.Description = "Returns value of variable then decrements variable by 1." 
+					Operator.Example = "var--"
+					Operator.Type = "assigment"
+			
+			elseif Name == "--i" then
+					Operator.Description = "Decrements variable by 1 then returns value of variable." 
+					Operator.Example = "--var"
+					Operator.Type = "assigment"
+			end
+			
+			-- TODO: ~Changed
+
+	elseif #Input == 1 then
+		local InputName = EXPADV.TypeName( Input[1] ) 
+
+		    if Name == "#" then
+				Operator.Description = string.format( "Returns the lengh/size of the %s", InputName )
+				Operator.Example = string.format( "#%s", InputName )
+				Operator.Type = "general"
+
+		elseif Name == "-" then
+				Operator.Description = string.format( "Negates a %s", InputName )
+				Operator.Example = string.format( "-%s", InputName )
+				Operator.Type = "general"
+
+		elseif EXPADV.GetClass( Name, true ) then
+				Operator.Description = string.format( "Casts a %s to a %s", InputName, Name )
+				Operator.Example = string.format( "(%s) %s", Name, InputName )
+				Operator.Type = "casting"
+
+		end
+
+	elseif #Input == 2 then
+		local A = EXPADV.TypeName( Input[1] ) 
+		local B = EXPADV.TypeName( Input[2] ) 
+
+		    if Name == "+" then
+				Operator.Description = string.format( "Adds %s to %s", B, A )
+				Operator.Example = string.format( "%s + %s", A, B )
+				Operator.Type = "arithmatic"
+
+			elseif Name == "-" then
+				Operator.Description = string.format( "Subtracts %s from %s", B, A )
+				Operator.Example = string.format( "%s - %s", A, B )
+				Operator.Type = "arithmatic"
+
+			elseif Name == "*" then
+				Operator.Description = string.format( "Multiplys %s with %s", A, B )
+				Operator.Example = string.format( "%s * %s", A, B )
+				Operator.Type = "arithmatic"
+
+			elseif Name == "/" then
+				Operator.Description = string.format( "Divides %s by %s", A, B )
+				Operator.Example = string.format( "%s / %s", A, B )
+				Operator.Type = "arithmatic"
+
+			elseif Name == "%" then
+				Operator.Description = string.format( "Returns the remainder of %s divided by %s", A, B )
+				Operator.Example = string.format( "%s %% %s", A, B )
+				Operator.Type = "arithmatic"
+
+			elseif Name == "^" then
+				Operator.Description = string.format( "Returns %s to the power of %s", A, B )
+				Operator.Example = string.format( "%s ^ %s", A, B )
+				Operator.Type = "arithmatic"
+
+			elseif Name == "==" then
+				Operator.Description = string.format( "Returns true if %s is equal to %s", A, B )
+				Operator.Example = string.format( "%s == %s", A, B )
+				Operator.Type = "comparason"
+
+			elseif Name == "!=" then
+				Operator.Description = string.format( "Returns true if %s is not equal to %s", A, B )
+				Operator.Example = string.format( "%s != %s", A, B )
+				Operator.Type = "comparason"
+
+			elseif Name == ">" then
+				Operator.Description = string.format( "Returns true if %s is greater than %s", A, B )
+				Operator.Example = string.format( "%s > %s", A, B )
+				Operator.Type = "comparason"
+
+			elseif Name == "<" then
+				Operator.Description = string.format( "Returns true if %s is less than %s", A, B )
+				Operator.Example = string.format( "%s < %s", A, B )
+				Operator.Type = "comparason"
+
+			elseif Name == ">=" then
+				Operator.Description = string.format( "Returns true if %s is greater-than or equal to %s", A, B )
+				Operator.Example = string.format( "%s >= %s", A, B )
+				Operator.Type = "comparason"
+
+			elseif Name == "<=" then
+				Operator.Description = string.format( "Returns true if %s is less-than or equal to %s", A, B )
+				Operator.Example = string.format( "%s <= %s", A, B )
+				Operator.Type = "comparason"
+
+			elseif Name == "&&" then
+				Operator.Description = "Logic AND" 
+				Operator.Example = string.format( "%s && %s", A, B )
+				Operator.Type = "logic"
+
+			elseif Name == "||" then
+				Operator.Description = "Logic OR" 
+				Operator.Example = string.format( "%s || %s", A, B )
+				Operator.Type = "logic"
+
+			end
+		
+	end
+
+	--[[
+		if Operator.Description then
+			MsgN( Operator.Signature )
+			MsgN( Operator.Description )
+			MsgN( Operator.Example )
+		end
+	]]
 end

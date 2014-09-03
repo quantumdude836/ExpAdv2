@@ -1,8 +1,13 @@
 include( "expadv/core.lua" )
 
-if CLIENT then return end
+
+if CLIENT then
+	include( "expadv/wikibuilder.lua" )
+	return
+end
 
 AddCSLuaFile( )
+AddCSLuaFile( "expadv/wikibuilder.lua" )
 
 AddCSLuaFile( "expadv/context.lua" )
 AddCSLuaFile( "expadv/core.lua" )
@@ -96,4 +101,6 @@ resource.AddFile( "materials/oskar/arrow-left.png" )
 resource.AddFile( "materials/oskar/arrow-right.png" )
 resource.AddFile( "materials/oskar/minus.png" )
 resource.AddFile( "materials/oskar/plus.png" )
+
+
 
