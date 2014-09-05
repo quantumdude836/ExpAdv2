@@ -80,7 +80,7 @@ Number:AddVMOperator( "i++", "n", "n", function( Context, Trace, MemRef )
 
    Context.Memory[MemRef] = Value + 1
    Context.Delta[MemRef] = 1
-   Context.Trigger[MemRef] = Context.Trigger[MemRef] or true
+   Context.Trigger[MemRef] = true
 
    return Value
 end )
@@ -90,7 +90,7 @@ Number:AddVMOperator( "++i", "n", "n", function( Context, Trace, MemRef )
 
    Context.Memory[MemRef] = Value + 1
    Context.Delta[MemRef] = 1
-   Context.Trigger[MemRef] = Context.Trigger[MemRef] or true
+   Context.Trigger[MemRef] = true
 
    return Value + 1
 end )

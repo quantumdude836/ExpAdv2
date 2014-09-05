@@ -67,6 +67,7 @@ function EXPADV.RootContext:Push( Trace, Cells ) -- Table, Table
 		Data = self.Data,
 		Deph = self.Deph + 1,
 
+		Trigger = self.Trigger,
 		Definitions = self.Definitions,
 		Cells = self.Cells,
 		Strings = self.Strings,

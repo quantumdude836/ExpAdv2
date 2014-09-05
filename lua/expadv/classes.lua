@@ -14,13 +14,15 @@ local BaseClassObj = EXPADV.BaseClassObj
 
 -- Builds a VM operator, to return the default zero value object of a class.
 function BaseClassObj:DefaultAsLua( Default ) -- Object / function( )
+	local DefaultObject = Default
+	
 	if istable( Default ) then
-		Default = function( ) return setmetatable( table.Copy( Default ), getmetatable( Default ) ) end
+		DefaultObject = function( ) return setmetatable( table.Copy( Default ), getmetatable( Default ) ) end
 	elseif !isfunction( Default ) then
-		Default = function( ) return Default end
+		DefaultObject = function( ) return Default end
 	end
 
-	self.CreateNew = Default
+	self.CreateNew = DefaultObject
 end
 
 function BaseClassObj:AddDescription( Desc )
@@ -296,7 +298,9 @@ function EXPADV.LoadClasses( )
 	 	end
 
 		if Class.CreateNew then
- 			EXPADV.AddVMOperator( Class.Component, "default", Class.Short , Class.Short, Class.CreateNew )
+ 			local Op = EXPADV.AddVMOperator( Class.Component, "default", Class.Short , Class.Short, Class.CreateNew )
+ 			Op.LoadOnClient = Class.LoadOnClient
+ 			Op.LoadOnServer = Class.LoadOnServer
  		end
 
  		if DeriveClass and !Class.DeriveGeneric and !Class.ToString then

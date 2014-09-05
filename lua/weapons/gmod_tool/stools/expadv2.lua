@@ -224,6 +224,8 @@ if CLIENT then
 		local function ShowGateModels( )
 			DScrollPanel.Clear( Props.List )
 
+			RunConsoleCommand( "expadv2_model", "models/lemongate/lemongate.mdl" )
+
 			for _, Mdl in pairs( GateModels ) do
 				Props:AddModel( Mdl )
 			end
@@ -231,6 +233,8 @@ if CLIENT then
 
 		local function ShowScreenModels( )
 			DScrollPanel.Clear( Props.List )
+
+			RunConsoleCommand( "expadv2_model", "models/hunter/plates/plate1x1.mdl" )
 
 			for Mdl, _ in pairs( EXPADV.GetMonitors( ) ) do
 				Props:AddModel( Mdl )
