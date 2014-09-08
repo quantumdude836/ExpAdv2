@@ -80,7 +80,7 @@ StringComponent:AddInlineOperator( "not", "s", "b", "(@value 1 == \"\")" )
 	@: Indexing
    --- */
 
-StringComponent:AddInlineOperator( "[]", "s,n", "s", "string.sub(@value 1, @value 2, @value 2)" )
+--StringComponent:AddInlineOperator( "[]", "s,n", "s", "string.sub(@value 1, @value 2, @value 2)" )
 
 /* --- --------------------------------------------------------------------------------
 	@: Casting
@@ -161,6 +161,6 @@ StringComponent:AddInlineFunction( "remove", "s:n,n", "s", "(string.sub( @Value 
 StringComponent:AddFunctionHelper( "remove", "s:n,n", "Removes nth Char from string." )
 		  EXPADV.AddFunctionAlias( "remove", "s:n" )
 
-StringComponent:AddInlineFunction( "Insert", "s:s,n,n", "s", "(string.sub( @value 1, 1, @value 3 ) .. @value 2 .. string.sub( @value 1, @value 4 or (@value 3 + 1) ))" )
-StringComponent:AddFunctionHelper( "Insert", "s:s,n,n", "Inserts into string after nth char." )
-		  EXPADV.AddFunctionAlias( "Insert", "s:s,n" )
+StringComponent:AddInlineFunction( "insert", "s:s,n,n", "s", "(string.sub( @value 1, 1, @value 3 ) .. @value 2 .. string.sub( @value 1, @value 4 or (@value 3 + 1) ))" )
+StringComponent:AddFunctionHelper( "insert", "s:s,n,n", "Inserts into string after nth char." )
+		  EXPADV.AddFunctionAlias( "insert", "s:s,n" )

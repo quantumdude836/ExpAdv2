@@ -118,25 +118,9 @@ EXPADV.AddInlineOperator( nil, "!=", "b,b", "b", "(@value 1 != @value 2)" )
 EXPADV.AddInlineOperator( nil, "is", "b", "b", "@value 1" )
 EXPADV.AddInlineOperator( nil, "not", "b", "b", "!@value 1" )
 
-EXPADV.AddPreparedOperator( nil, "||", "b,b", "b", [[
-	@prepare 1
-	@define Result = @value 1
-	
-	if !@Result then
-		@prepare 2
-		@Result = @value 2
-	end
-]], "@Result" )
+EXPADV.AddInlineOperator( nil, "||", "b,b", "b", "(@value 1 or @value 2)" )
 
-EXPADV.AddPreparedOperator( nil, "&&", "b,b", "b", [[
-	@prepare 1
-	@define Result = @value 1
-	
-	if @Result then
-		@prepare 2
-		@Result = @value 2
-	end
-]], "@Result" )
+EXPADV.AddInlineOperator( nil, "&&", "b,b", "b", "(@value 1 and @value 2)" )
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Register variant class!

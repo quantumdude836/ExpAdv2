@@ -22,6 +22,32 @@ function Compiler:Compile_STR( Trace, String )
 	return { Trace = Trace, Inline = "Context.Strings[" .. ID .. "]", Return = "s", FLAG = EXPADV_INLINE, IsRaw = true }
 end
 
+--[[ Can't really do this yet :(
+		function Compiler:Compile_Array( Trace, Expressions )
+		if !Expressions then
+			return { Trace = Trace, Inline = "{}", Return = "ar", FLAG = EXPADV_INLINE, IsRaw = true }
+		end
+
+		local TestType = Expressions[1].Return
+		local Prepare, Inline = { }, { }
+
+		for I = 1, #Expressions do
+			local Exp = Expressions[I]
+
+			if Exp.Return == TestType then
+				local Casted = Compile_CAST( Trace, TestType, Exp, true )
+				if !Casted then self:TraceError( Trace, "Array %s[] can not accept %s", self:NiceClass( TestType, Exp.Return ) ) end
+				Exp = Casted
+			end
+
+			Prepare[#Prepare+1] = Exp.Prepare
+			Inline[#Inline+1] = Exp.Inline				
+		end
+
+		return { Trace = Trace, Inline = table.concat( Inline, "\n" ), Prepare = table.concat( Prepare, "\n" ), Return = "ar", ArryClass = TestType, FLAG = EXPADV_PREPARE, IsRaw = true }
+	end
+]]
+
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Operators
    --- */
@@ -318,9 +344,10 @@ end
 function Compiler:Compile_VAR( Trace, Variable )
 	local MemRef, MemScope = self:FindCell( Trace, Variable, true )
 
-	local Class = self.Cells[ MemRef ].Return
+	local Cell = self.Cells[ MemRef ]
+	local Class,ArryClass = Cell.Return, Cell.ArryClass
 
-	return { Trace = Trace, Inline = string.format( "Context.Memory[%i]", MemRef ), Return = Class, FLAG = EXPADV_INLINE, IsRaw = true, Variable = Variable, Scope = MemScope, MemRef = MemRef }
+	return { Trace = Trace, Inline = string.format( "Context.Memory[%i]", MemRef ), Return = Class, ArryClass = ArryClass, FLAG = EXPADV_INLINE, IsRaw = true, Variable = Variable, Scope = MemScope, MemRef = MemRef }
 end
 
 function Compiler:Compile_DELTA( Trace, Variable )
@@ -399,6 +426,11 @@ function Compiler:Compile_SEQ( Trace, Instructions )
 
 	for I = 1, #Instructions do
 		local Instruction = Instructions[I]
+
+		-- if !istable( Instruction ) then
+		-- 	MsgN(type(Instruction,"----------------"))
+		-- 	debug.Trace()
+		-- end
 
 		local LastLine = Sequence[#Sequence]
 		if LastLine == "break" or LastLine == "continue" or LastLine == "return" then
@@ -715,13 +747,13 @@ function Compiler:Compile_EVENT( Trace, Name, Params, UseVarg, Sequence, Memory 
 
 		Inputs[I] = "IN_" .. I
 
-		local Operator = self:LookUpOperator( "=", Type, "n" )
+		local Operator = self:LookUpClassOperator( Type, "=", "n", Type )
 
 		if !Operator then
 			self:TraceError( Trace, "Invalid argument #%i, %s can not be used as event argument", I, self:NiceClass( Type ) )
 		end
 
-		PreSequence[ #PreSequence + 1 ] = Operator.Compile( self, Trace, Quick( Inputs[I], Type ), Quick( Param[3], "n" ) )
+		PreSequence[ #PreSequence + 1 ] = Operator.Compile( self, Trace, Quick( Param[3], "n" ), Quick( Inputs[I], Type ) )
 				
 		self:Yield( )
 	end
@@ -801,3 +833,7 @@ function Compiler:Compile_FOR( Trace, Class, AssInstr, Memory, Start, End, Step,
 	local NewSequence = { Trace = Trace, Prepare = Lua, Return = "", FLAG = EXPADV_PREPARE }
 	return Operator.Compile( self, Trace, Start, End, Step, NewSequence )
 end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Get / Set Operators
+   --- */
