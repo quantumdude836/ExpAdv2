@@ -10,19 +10,15 @@ ENT.ExpAdv 			= true
 	@: Net Vars
    --- */
 
+AccessorFunc( ENT, "TickQuotaCL", "TickQuotaCL", FORCE_NUMBER )
+AccessorFunc( ENT, "StopWatchCL", "StopWatchCL", FORCE_NUMBER )
+AccessorFunc( ENT, "Average", "AverageCL", FORCE_NUMBER )
+
 function ENT:SetupDataTables( )
 
-	self:NetworkVar( "Bool", 0, "Online" )
-	self:NetworkVar( "Bool", 1, "Crashed" )
-	self:NetworkVar( "Bool", 2, "Sparking" )
-	self:NetworkVar( "Bool", 3, "Ignited" )
-
-	self:NetworkVar( "String", 0, "Title" )
-	self:NetworkVar( "String", 1, "CrashMsg" )
-
 	self:NetworkVar( "Float", 0, "TickQuota" )
-	self:NetworkVar( "Float", 1, "SoftQuota" )
-	self:NetworkVar( "Float", 2, "AvgeQuota" )
+	self:NetworkVar( "Float", 1, "StopWatch" )
+	self:NetworkVar( "Float", 1, "Average" )
 
 end
 
@@ -32,20 +28,13 @@ end
 
 function ENT:ResetStatus( )
 	if SERVER then
-		self:SetOnline( false )
-		self:SetCrashed( false )
-		self:SetSparking( false )
-		self:SetIgnited( false )
-		
 		self:SetTickQuota( 0 )
-		self:SetSoftQuota( 0 )
-		self:SetAvgeQuota( 0 )
+		self:SetStopWatch( 0 )
 	end
 
 	if CLIENT then
-		self.cl_TickQuota = 0
-		self.cl_SoftQuota = 0
-		self.cl_AvgeQuota = 0
+		self:SetTickQuotaCL( 0 )
+		self:SetStopWatchCL( 0 )
 	end
 end
 
@@ -62,24 +51,7 @@ function ENT:OnUpdate( Context )
 end
 
 function ENT:UpdateOverlay( )
-	local Context = self.Context
-
-	if !Context then
-		return self:ResetStatus( )
-	end
-
-	if SERVER then
-		self:SetOnline( Context.Online )
-		self:SetTickQuota( Context.Status.TickQuota )
-		self:SetSoftQuota( Context.Status.QuotaCount )
-		self:SetAvgeQuota( Context.Status.AverageQuota )
-	end
-
-	if CLIENT then
-		self.cl_TickQuota = Context.Status.TickQuota
-		self.cl_SoftQuota = Context.Status.QuotaCount
-		self.cl_AvgeQuota = Context.Status.AverageQuota
-	end
+	
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -88,22 +60,30 @@ end
 
 function ENT:Think( )
 	--self.BaseClass.Think( self ) Base class doesnt think!
-	self:NextThink( CurTime( ) + 0.030303 )
+	
+	if self:IsRunning( ) and (self.NextRefresh or 0) < CurTime( ) then
+		self.NextRefresh = CurTime( ) + 1
 
-	if self:IsRunning( ) then
-		local Status = self.Context.Status
-
-		Status.QuotaCount = Status.QuotaCount + Status.TickQuota - expadv_softquota
+		local Context = self.Context
+		local Counter = Context.Status.Counter or 0
+		local StopWatch = Context.Status.StopWatch or 0
 		
-		Status.AverageQuota = Status.AverageQuota * 0.95 + Status.TickQuota * 0.05
+		-- local Average = ((SERVER and self:GetAverage() or self:GetAverageCL()) * 0.95) + (Counter * 0.5)
 
-		Status.TickQuota = 0
+		if SERVER then
+			self:SetTickQuota( Counter )
+			self:SetStopWatch( StopWatch )
+			self:SetAverage( Average )
+		end
 
-		if Status.QuotaCount < 0 then Status.QuotaCount = 0 end
+		if CLIENT then
+			self:SetTickQuotaCL( Counter )
+			self:SetStopWatchCL( StopWatch )
+			self:SetAverageCL( Average )
+		end
 	end
 
-	self:UpdateOverlay( )
-
+	self:NextThink( CurTime( ) + 0.030303 )
 	return true
 end
 
@@ -116,26 +96,12 @@ function ENT:OnStartUp( )
 end
 
 function ENT:OnHitQuota( )
-	if SERVER then
-		self:SetSparking( false )
-		self:SetIgnited( false )
-		self:SetCrashed( true )
-	end
-	
 	self:OnScriptError( self.Context, "Tick Quota Exceeded." )
-
 	self.Context:ShutDown( )
 end
 
 function ENT:OnHitHardQuota( )
-	if SERVER then
-		self:SetSparking( false )
-		self:SetIgnited( true )
-		self:SetCrashed( true )
-	end
-	
 	self:OnScriptError( self.Context, "Hard Quota Exceeded." )
-
 	self.Context:ShutDown( )
 	EXPADV.UnregisterContext( self.Context )
 end

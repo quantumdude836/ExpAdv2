@@ -83,7 +83,7 @@ function PANEL:Init( )
 	
 	function self.btnUploadPaste:DoClick( ) 
 		local Code, Path = self:GetParent( ):GetParent( ):GetCode( )
-		Pastebin.CreatePaste( Code, "Lemongate script", nil, CreatePasteSuccess ) 
+		Pastebin.CreatePaste( Code, "ExpAdv2 Script", nil, CreatePasteSuccess ) 
 	end
 	
 	function self.btnOptions:DoClick( ) 

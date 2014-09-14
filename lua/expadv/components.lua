@@ -83,8 +83,26 @@ function BaseComponent:AddEvent( Name, Input, Return ) -- String, String, String
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Directives Support
+   --- */
+
+-- Registers a new Directive:
+function BaseComponent:AddServerDirective( Name, Function ) -- String, String
+	EXPADV.ServerDirective( self, Name, Function )
+end
+
+function BaseComponent:AddClientDirective( Name, Function ) -- String, String
+	EXPADV.ClientDirective( self, Name, Function )
+end
+
+function BaseComponent:AddDirective( Name, Function ) -- String, String
+	EXPADV.AddDirective( self, Name, Function )
+end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Component Settings
    --- */
+
 function BaseComponent:CreateSetting( Name, Default ) -- String, Obj
 	local Config = EXPADV.Config.Components[self.Name] or { }
 	

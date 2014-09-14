@@ -1,8 +1,8 @@
 /* --- --------------------------------------------------------------------------------
-	@: Entity Component
+	@: Stream Component
    --- */
 
-local Component = EXPADV.AddComponent( "net", true )
+local Component = EXPADV.AddComponent( "stream", true )
 
 /* --- --------------------------------------------------------------------------------
 	@: Base Stream Object
@@ -194,101 +194,181 @@ Component:AddFunctionHelper( "readAngle", "st:", "Reads an angle from the stream
 Component:AddFunctionHelper( "readColor", "st:", "Reads a color from the stream object." )
 
 /* --- --------------------------------------------------------------------------------
-	@: Net Stream Object
-   --- */
-
-local NetObject = Component:AddClass( "netstream", "nst" )
-
-NetObject:ExtendClass( "st" )
-
-/* --- --------------------------------------------------------------------------------
-	@: net Stream Operators
-	@: All we really need here is a way to cast, this object from the stream() functions result.
-   --- */
-
-Component:AddInlineOperator( "netstream", "st", "nst", "@value 1")
-
-/* --- --------------------------------------------------------------------------------
-	@: Queuing Streams
+	@: Entity to Entity transmittion
    --- */
 
 local HasQueued, NetQueue = false, { }
 
-EXPADV.ServerOperators( )
-
-Component:AddVMFunction( "netBroadcast", "nst:s", "", function( Context, Trace, Stream, Name )
-	table.insert( NetQueue, { Context.entity, Name, Stream } ) -- Slow but meh!
-	HasQueued = true
-end )
-
-Component:AddVMFunction( "netBroadcast", "nst:ply,s", "", function( Context, Trace, Stream, Player, Name )
+Component:AddVMFunction( "transmit", "nst:e,s", "", function( Context, Trace, Stream, Target, Name )
 	if !IsValid( Player ) or !Player:IsPlayer( ) then return end
 
-	table.insert( NetQueue, { Context.entity, Name, Stream, { Player } } ) -- Slow but meh!
+	table.insert( NetQueue, { Context.entity, Name, Stream, Target } ) -- Slow but meh!
 	HasQueued = true
 end )
 
-
-Component:AddFunctionHelper( "netBroadcast", "nst:s", "Sends a stream to clientside code on all clients." )
-Component:AddFunctionHelper( "netBroadcast", "nst:ply,s", "Sends a stream to clientside code to client." )
+Component:AddFunctionHelper( "transmit", "nst:e,s", "Sends a stream to another entity and calls the delegate defined using hookStream(string, delegate)." )
 
 /* --- --------------------------------------------------------------------------------
 	@: Receiving
    --- */
 
-EXPADV.ClientOperators( )
-
-Component:AddPreparedFunction( "netReceive", "s,d", "", "Context.Data['net_' .. @value 1] = @value 2" )
-Component:AddFunctionHelper( "netReceive", "s,d", "Calls the function (delegate) when the stream with the matching name is received." )
+Component:AddPreparedFunction( "hookStream", "s,d", "", "Context.Data['str_' .. @value 1] = @value 2" )
+Component:AddFunctionHelper( "hookStream", "s,d", "Calls the function (delegate) when the stream with the matching name is received from another entity." )
 
 /* --- --------------------------------------------------------------------------------
-	@: Sending
-   --- */
+		@: Sending
+	   --- */
 
-if SERVER then
-	util.AddNetworkString( "expadv.netstream" )
+	if SERVER then
+		util.AddNetworkString( "expadv.netstream" )
 
-	function Component:OnThink( )
-		if !HasQueued then return end
+		function Component:OnThink( )
+			if !HasQueued then return end
 
-		for _, Msg in pairs( NetQueue ) do
-			local E, N, S, P = Msg[1], Msg[2], Msg[3], Msg[4]
+			for _, Msg in pairs( NetQueue ) do
+				local E, N, S, T = Msg[1], Msg[2], Msg[3], Msg[4]
+
+				if IsValid( E ) and E:IsRunning( ) then
+					if IsValid( T ) and T.ExpAdv and T:IsRunning( ) then
+				
+					local H = T.Context.Data["str_" .. N]
+
+					if !H then return end
+					
+					E.Context:Execute( "Receive Stream " .. N, H, { E, "e" }, { { V = V, T = T, R = 0, W = #V } , "_st" } )
+			end
+					
+				end
+			end
+
+			HasQueued, NetQueue = false, { }
+		end
+
+	/* --- --------------------------------------------------------------------------------
+		@: Receiving from Server
+	   --- */
+
+		net.Receive( "expadv.netstream", function( )
+			local E = net.ReadEntity( )
+			local N = net.ReadString( )
+			local T, V = net.ReadTable( ), net.ReadTable( )
 
 			if IsValid( E ) and E:IsRunning( ) then
-			
-				net.Start( "expadv.netstream" )
-					net.WriteEntity( E )
-					net.WriteString( N )
-					net.WriteTable( S.T )
-					net.WriteTable( S.V )
-				if !P then net.Broadcast( ) else net.Send( P ) end
+				
+				local H = E.Context.Data["net_" .. N]
+
+				if !H then return end
+				
+				E.Context:Execute( "Net Receive " .. N, H, { { V = V, T = T, R = 0, W = #V } , "_nst" } )
 			end
-		end
-
-		HasQueued, NetQueue = false, { }
+		end )
 	end
-end
 
-/* --- --------------------------------------------------------------------------------
-	@: Receiving
-   --- */
+/* --- ------------------------------------------------------------------------------------ --- */
+do --- Net component: used to sync from server to client :D
 
-if CLIENT then
+	local Component = EXPADV.AddComponent( "net", true )
 
-	net.Receive( "expadv.netstream", function( )
-		local E = net.ReadEntity( )
-		local N = net.ReadString( )
-		local T, V = net.ReadTable( ), net.ReadTable( )
+	/* --- --------------------------------------------------------------------------------
+		@: Net Stream Object
+	   --- */
 
-		if IsValid( E ) and E:IsRunning( ) then
-			
-			local H = E.Context.Data["net_" .. N]
-			MsgN( "-->", E, " - ", N, " - ", E:IsRunning( ), " - ", H )
+	local NetObject = Component:AddClass( "netstream", "nst" )
 
-			if !H then return end
-			
-			E.Context:Execute( "Net Receive " .. N, H, { { V = V, T = T, R = 0, W = #V } , "_nst" } )
-		end
+	NetObject:ExtendClass( "st" )
+
+	/* --- --------------------------------------------------------------------------------
+		@: net Stream Operators
+		@: All we really need here is a way to cast, this object from the stream() functions result.
+	   --- */
+
+	Component:AddInlineOperator( "netstream", "st", "nst", "@value 1")
+
+	/* --- --------------------------------------------------------------------------------
+		@: Queuing Streams
+	   --- */
+
+	local HasQueued, NetQueue = false, { }
+
+	EXPADV.ServerOperators( )
+
+	Component:AddVMFunction( "netBroadcast", "nst:s", "", function( Context, Trace, Stream, Name )
+		table.insert( NetQueue, { Context.entity, Name, Stream } ) -- Slow but meh!
+		HasQueued = true
 	end )
-end
 
+	Component:AddVMFunction( "netBroadcast", "nst:ply,s", "", function( Context, Trace, Stream, Player, Name )
+		if !IsValid( Player ) or !Player:IsPlayer( ) then return end
+
+		table.insert( NetQueue, { Context.entity, Name, Stream, { Player } } ) -- Slow but meh!
+		HasQueued = true
+	end )
+
+
+	Component:AddFunctionHelper( "netBroadcast", "nst:s", "Sends a stream to clientside code on all clients." )
+	Component:AddFunctionHelper( "netBroadcast", "nst:ply,s", "Sends a stream to clientside code to client." )
+
+	/* --- --------------------------------------------------------------------------------
+		@: Receiving
+	   --- */
+
+	EXPADV.ClientOperators( )
+
+	Component:AddPreparedFunction( "netReceive", "s,d", "", "Context.Data['net_' .. @value 1] = @value 2" )
+	Component:AddFunctionHelper( "netReceive", "s,d", "Calls the function (delegate) when the stream with the matching name is received from the serverside code." )
+
+	/* --- --------------------------------------------------------------------------------
+		@: Sending
+	   --- */
+
+	if SERVER then
+		util.AddNetworkString( "expadv.netstream" )
+
+		function Component:OnThink( )
+			if !HasQueued then return end
+
+			for _, Msg in pairs( NetQueue ) do
+				local E, N, S, P = Msg[1], Msg[2], Msg[3], Msg[4]
+
+				if IsValid( E ) and E:IsRunning( ) then
+				
+					net.Start( "expadv.netstream" )
+						net.WriteEntity( E )
+						net.WriteString( N )
+						net.WriteTable( S.T )
+						net.WriteTable( S.V )
+					if !P then net.Broadcast( ) else net.Send( P ) end
+				end
+			end
+
+			HasQueued, NetQueue = false, { }
+		end
+	end
+
+	/* --- --------------------------------------------------------------------------------
+		@: Receiving from Server
+	   --- */
+
+	if CLIENT then
+
+		net.Receive( "expadv.netstream", function( )
+			local E = net.ReadEntity( )
+			local N = net.ReadString( )
+			local T, V = net.ReadTable( ), net.ReadTable( )
+
+			if IsValid( E ) and E:IsRunning( ) then
+				
+				local H = E.Context.Data["net_" .. N]
+
+				if !H then return end
+				
+				E.Context:Execute( "Net Receive " .. N, H, { { V = V, T = T, R = 0, W = #V } , "_nst" } )
+			end
+		end )
+	end
+
+
+	/* --- --------------------------------------------------------------------------------
+		@: Receiving from Server
+	   --- */
+end

@@ -34,12 +34,12 @@ function EXPADV.BuildNewContext( Instance, Player, Entity ) -- Table, Player, En
 	Context.Strings = Instance.Strings or { }
 	Context.Instructions = Instance.VMInstructions or { }
 	Context.Enviroment = Instance.Enviroment or error( "No safe guard.", 0 )
-	
-	Context.Status = { }
-	Context.Status.Bench = 0
-	Context.Status.TickQuota = 0
-	Context.Status.QuotaCount = 0
-	Context.Status.AverageQuota = 0
+
+	Context.Status = {
+		Perf = 0,
+		Counter = 0,
+		StopWatch = 0,
+	}
 
 	return Context
 end
@@ -73,86 +73,68 @@ function EXPADV.RootContext:Push( Trace, Cells ) -- Table, Table
 		Strings = self.Strings,
 		Instructions = self.Instructions,
 		Enviroment = self.Enviroment,
-		Status = self.Status,
 
 		Memory = setmetatable( Memory, Memory ),
 		Delta = setmetatable( Delta, Delta ),
 		Changed = setmetatable( Changed, Changed ),
+
+		Status = Status,
 
 		player = self.player,
 		entity = self.entity,
 	}, EXPADV.RootContext )
 end
 
-local SysTime = SysTime
-
-local function debug_hook( )
-	local Time = SysTime( )
-
-	if !EXPADV.EXECUTOR then
-		return debug.sethook( )
-	else
-		local Context = EXPADV.EXECUTOR
-		local TickQuota = Context.Status.TickQuota + (Time - Context.Status.Bench)
-		Context.Status.TickQuota = TickQuota
-
-		if TickQuota > expadv_tickquota then
-			debug.sethook( )
-			error( { Trace = {0,0}, Quota = true, Msg = Message, Context = Context }, 0 )
-		end
-
-		Context.Status.Bench = SysTime( )
-	end
-	
-end
-
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Executeion
    --- */
 
-local cv_expadv_luahook   = CreateConVar( "expadv_quota_hook", "500", {FCVAR_REPLICATED} )
-   
 EXPADV.Updates = { }
 
 -- Should be called before executing.
 function EXPADV.RootContext:PreExecute( )
-	EXPADV.EXECUTOR = self
-	self.Status.Bench = SysTime( )
-
-	debug.sethook( debug_hook, "l", cv_expadv_luahook:GetInt( ) )
+	--EXPADV.EXECUTOR = self
 end
 
 -- Should be called after executing.
 function EXPADV.RootContext:PostExecute( )
-	debug.sethook( )
-	
-	EXPADV.EXECUTOR = nil
-	self.Definitions = { }
+	-- EXPADV.EXECUTOR = nil
 end
 
 -- Safely execute a function on this context.
 function EXPADV.RootContext:Execute( Location, Operation, ... ) -- String, Function, ...
-	self:PreExecute( )
+	local Status = self.Status
+
+	Status.Perf = 0
+	Status.BenchMark = SysTime( )
+
+	debug.sethook( function( )
+		Status.Perf = Status.Perf + expadv_luahook
+
+		if Status.Perf > expadv_tickquota then
+			debug.sethook( )
+			error( { Trace = {0,0}, Quota = true, Msg = Message, Context = self }, 0 )
+		end
+	end, "", expadv_luahook )
+
+	-- self:PreExecute( )
 
 	local Ok, Result = pcall( Operation, ... )
 
-	local TimeMrk = SysTime( )
+	debug.sethook( )
 
-	self:PostExecute( )
+	-- self:PostExecute( )
+	
+	Status.StopWatch = Status.StopWatch + (SysTime( ) - Status.BenchMark)
+	Status.Counter = Status.Counter + (Status.Perf - expadv_softquota)
 	
 	if !Ok and isstring( Result ) then
 		return self:Handel( "LuaError", Result )
 
 	elseif Ok or Result.Exit then
 
-		local TickQuota = self.Status.TickQuota + (TimeMrk - self.Status.Bench)
-		
-		self.Status.TickQuota = TickQuota
-
-		if TickQuota > expadv_tickquota then
+		if Status.Counter < expadv_hardquota then
 			return self:Handel( "HitQuota", Result )
-		elseif self.Status.QuotaCount + TickQuota - expadv_softquota > expadv_hardquota then
-			return self:Handel( "HitHardQuota", Result )
 		end
 
 		EXPADV.Updates[self] = true

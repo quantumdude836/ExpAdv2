@@ -166,7 +166,7 @@ function Compiler:ExpressionError( Trace )
 	self:ExcludeToken( "cth", "Catch keyword (catch) must be part of an try-statement" )
 	self:ExcludeToken( "fnl", "Final keyword (final) must be part of an try-statement" )
 
-	--self:ExcludeToken( "pred", "predictive operator (@) must not appear inside an equation" )
+	self:ExcludeToken( "dir", "directive operator (@) must not appear inside an equation" )
 
 	self:TokenError( "Unexpected symbol found (%s)", self.PrepTokenName )
 end
@@ -588,7 +588,9 @@ function Compiler:Expression_Variable( Trace )
 
 					return self:Compile_FUNC( Trace, Variable, Expressions )
 		else
-			return self:Compile_VAR( Trace, Variable )
+			local Instr = self:FindDefinedInstruction( Variable )
+
+			return Instr or self:Compile_VAR( Trace, Variable )
 		end
 	end
 end
@@ -1308,6 +1310,8 @@ function Compiler:Statement_9( Trace )
 
 	if !self:HasTokens( ) then
 		return
+	elseif self:AcceptToken( "dir" ) then
+		return self:GetDirective( Trace )
 	end
 
 	local Expression = self:Expression_Value( Trace )
@@ -1345,18 +1349,25 @@ function Compiler:Util_Perams( Trace )
 	
 	if self:CheckToken( "var", "func" ) then
 
+		-- local Class
+
 		while true do
 
 			self:ExcludeToken( "com", "Parameter separator (,) must not appear here" )
 			
 			self:ExcludeToken( "func", "functions may not be passed as an argument, cast to a delegate first." )
-			
-			self:RequireToken( "var", "Variable type expected for function parameter." )
-				
-			local Class = self:GetClass( Trace, self.TokenData )
+			-- TODO: Add Autocasting :D
 
-			self:RequireToken( "var", "Variable expected for parameter." )
+			self:RequireToken( "var", "Variable type expected for parameter." )
 			
+			--if self:CheckToken( "var" ) then
+				local Class = self:GetClass( Trace, self.TokenData )
+			--end
+
+			--if !Class then
+				self:RequireToken( "var", "Variable expected for parameter." )
+			--end
+
 			if Used[ self.TokenData ] then
 				self:TokenError( "Parameter %s may not appear twice", self.TokenData )
 			end
@@ -1379,4 +1390,30 @@ function Compiler:Util_Perams( Trace )
 	end
 	
 	return Params, UseVarg
+end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Directives
+   --- */
+
+function Compiler:GetDirective( Trace )
+
+	self:RequireToken( "var", "directive name expected after (@) '@<name>:'" )
+
+	local DirectiveName = self.TokenData
+	local Directive = EXPADV.Directives[DirectiveName]
+
+	self:RequireToken( "col", "directive name expected after (@) '@<name>:'" )
+
+	if !Directive then
+		self:TraceError( Trace, "No such directive %s", DirectiveName )
+	elseif self.IsServerScript and !Directive.LoadOnServer then
+		self:TraceError( Trace, "Directive %s is clientside only can not appear in serverside code", DirectiveName )
+	elseif self.IsClientScript and !Directive.LoadOnClient then
+		self:TraceError( Trace, "Directive %s is serverside only can not appear in clientside code", DirectiveName )
+	end
+
+	local Instr = Directive.Compile( self, Trace )
+
+	return Instr or { Trace = Trace, Inline = "", Return = "", FLAG = EXPADV_PREPARE, IsRaw = true }
 end

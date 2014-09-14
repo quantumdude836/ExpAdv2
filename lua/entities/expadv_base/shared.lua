@@ -40,6 +40,7 @@ function ENT:Initialize( )
 		self:SetUseType( SIMPLE_USE )
 
 		if WireLib then
+			print( "Initalised wire connectivity" )
 			self.Inputs = WireLib.CreateInputs( self, { } )
 			self.Outputs = WireLib.CreateOutputs( self, { } )
 		end
@@ -209,6 +210,7 @@ function ENT:BuildInstance( Instance, Instruction )
 	self.Cells = Instance.Cells 
 
 	if WireLib and SERVER then
+		print( "Build wire ports", self )
 		self:BuildInputs( self.Cells, Instance.InPorts )
 		self:BuildOutputs( self.Cells, Instance.OutPorts )
 		self:LoadFromInputs( )

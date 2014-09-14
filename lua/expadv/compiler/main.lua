@@ -78,7 +78,7 @@ Compiler.RawTokens = {
 
 	-- MISC:
 
-		{ '@', "pred", "predictive operator" },
+		{ '@', "dir", "directive operator" },
 		{ "...", "varg", "varargs" },
 }
 
@@ -250,6 +250,7 @@ function Compiler:BuildScopes( )
 	self.Global, self.Scope = { }, { }
 	self.Scopes = { [0] = self.Global, self.Scope }
 	self.KnownReturnTypes = { [0] = { }, { } }
+	self.InstructionMemory = { [0] = { }, { } }
 	self.MemoryRef = 0
 end
 
@@ -258,11 +259,13 @@ function Compiler:PushScope( )
 	self.ScopeID = self.ScopeID + 1
 	self.Scopes[ self.ScopeID ] = self.Scope
 	self.KnownReturnTypes[ self.ScopeID ] = { }
+	self.InstructionMemory[ self.ScopeID ] = { }
 end
 
 function Compiler:PopScope( )
 	self.Scopes[ self.ScopeID ] = nil
 	self.KnownReturnTypes[ self.ScopeID ] = nil
+	self.InstructionMemory[ self.ScopeID ] = nil
 
 	self.ScopeID = self.ScopeID - 1
 	self.Scope = self.Scopes[ self.ScopeID ]
@@ -473,8 +476,8 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier, Comparator )
 			else
 				MemRef = self:NextMemoryRef( )
 
-				self.InPorts[ MemRef ] = { Variable = Variable, Memory = MemRef, Scope = 0, Return = ClassObj.Short, ClassObj = ClassObj, Modifier = "input", Server = true, Client = false }
-				self.Cells[ MemRef ] = self.InPorts[ MemRef ]
+				self.Cells[ MemRef ] = { Variable = Variable, Memory = MemRef, Scope = 0, Return = ClassObj.Short, ClassObj = ClassObj, Modifier = "input", Server = true, Client = false }
+				self.InPorts[ Variable ] = MemRef
 			end
 
 			if self.Scope[ Variable ] then
@@ -483,7 +486,7 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier, Comparator )
 
 			self.Scope[ Variable ] = MemRef
 
-			return self.InPorts[ MemRef ]
+			return self.Cells[ MemRef ]
 		end
 
 		if Modifier == "output" then
@@ -498,8 +501,8 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier, Comparator )
 			else
 				MemRef = self:NextMemoryRef( )
 
-				self.OutPorts[ MemRef ] = { Variable = Variable, Memory = MemRef, Scope = 0, Return = ClassObj.Short, ClassObj = ClassObj, Modifier = "output", Server = true, Client = false }
-				self.Cells[ MemRef ] = self.OutPorts[ MemRef ]
+				self.Cells[ MemRef ] = { Variable = Variable, Memory = MemRef, Scope = 0, Return = ClassObj.Short, ClassObj = ClassObj, Modifier = "output", Server = true, Client = false }
+				self.OutPorts[ Variable ] = MemRef
 			end
 
 			if self.Scope[ Variable ] then
@@ -508,7 +511,7 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier, Comparator )
 
 			self.Scope[ Variable ] = MemRef
 
-			return self.OutPorts[ MemRef ]
+			return self.Cells[ MemRef ]
 		end
 
 	end
@@ -524,6 +527,16 @@ function Compiler:IsOutput( Trace, MemRef )
 	return self.OutPorts[MemRef] ~= nil
 end
 
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: InstructionMemory - like define but cooler :D
+   --- */
+
+function Compiler:FindDefinedInstruction( Instruction )
+	for Scope = self.ScopeID, 0, -1 do
+		local Instr = self.InstructionMemory[ Scope ][ Instruction ]
+		if Instr then return table.Copy( Instr ) end
+	end
+end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Operator Look Up

@@ -10,7 +10,7 @@ function PANEL:Init( )
 	self:ShowCloseButton( true )
 	self:DockPadding( 0, 26, 0, 0 )
 	
-	self.CurrentPath = cookie.GetNumber( "eafilebrowser_cpath", "lemongate" )
+	self.CurrentPath = cookie.GetNumber( "eafilebrowser_cpath", "expadv2" )
 	
 	self.RightPanel = vgui.Create( "DPanel" )
 	self:BuildPathBar( self.RightPanel )
@@ -59,11 +59,11 @@ end
 function PANEL:RefreshBrowser( )
 	self.Browser:Clear( )
 	
-	self.BrowserNode = self.Browser:AddNode( "LemonGate" )
+	self.BrowserNode = self.Browser:AddNode( "Expression Advanced" )
 	
-	self:AddFolderToBrowser( self.BrowserNode, "lemongate" )
+	self:AddFolderToBrowser( self.BrowserNode, "expadv2" )
 	
-	self:SetUpBrowserNode( self.BrowserNode, "lemongate" )
+	self:SetUpBrowserNode( self.BrowserNode, "expadv2" )
 	
 	self:ExpandAll( true )
 end
@@ -219,7 +219,7 @@ function PANEL:BuildFileList( Parent )
 		self:InvalidateLayout()
 	end
 	
-	self:OpenFolder( "lemongate" )
+	self:OpenFolder( "expadv2" )
 	
 	return self.FileList
 end
@@ -383,7 +383,7 @@ function PANEL:BuildPathBar( Parent )
 			Path = Path:sub( 1, #Path - 1 )
 		end
 		
-		if Path:Left( 9 ) == "lemongate" then
+		if Path:Left( 9 ) == "expadv2" then
 			if file.IsDir( Path, "DATA" ) then
 				self:OpenFolder( Path )
 			end

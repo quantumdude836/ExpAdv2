@@ -15,6 +15,7 @@ AddCSLuaFile( "expadv/components.lua" )
 AddCSLuaFile( "expadv/classes.lua" )
 AddCSLuaFile( "expadv/operators.lua" )
 AddCSLuaFile( "expadv/events.lua" )
+AddCSLuaFile( "expadv/directives.lua" )
 AddCSLuaFile( "expadv/cppi.lua" )
 AddCSLuaFile( "expadv/context.lua" )
 
