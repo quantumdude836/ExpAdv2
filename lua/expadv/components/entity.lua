@@ -320,29 +320,32 @@ Component:AddFunctionHelper( "isWeapon", "e:", "Returns if the entity is a weapo
 Component:AddInlineFunction( "health", "e:", "n", "(@value 1:IsValid() and @value 1:Health() or 0)")
 Component:AddFunctionHelper( "health", "e:", "Returns the health of the entity.")
 
-Component:AddInlineFunction( "elevation", "e:v", "n", [[
-	if(!IsValid(@value 1)) then return 0 end
-	@define pos = this:WorldToLocal(@value 2)
-	return (180 / math.pi) * math.asin(@pos.z / @pos:Length())
-]] )
+Component:AddPreparedFunction( "elevation", "e:v", "n", [[
+	if(IsValid(@value 1)) then
+		@define pos = this:WorldToLocal(@value 2)
+		@pos = (180 / math.pi) * math.asin(@pos.z / @pos:Length())
+	end
+]], "(@pos or 0)" )
 Component:AddFunctionHelper( "elevation", "e:v", "Returns the elevation between the two given points" )
 
-Component:AddInlineFunction( "bearing", "e:v", "n", [[
-	if(!IsValid(@value 1)) then return 0 end
-	@define pos = this:WorldToLocal(@value 2)
-	return (180 / math.pi) * -math.atan2(@pos.y, @pos.x)
-]] )
+Component:AddPreparedFunction( "bearing", "e:v", "n", [[
+	if(IsValid(@value 1)) then
+		@define pos = this:WorldToLocal(@value 2)
+		@pos = (180 / math.pi) * -math.atan2(@pos.y, @pos.x)
+	end
+]], "(@pos or 0)" )
 Component:AddFunctionHelper( "bearing", "e:v", "Returns the bearing between the two given points")
 
-Component:AddInlineFunction( "heading", "e:v", "a", [[
-	if(!IsValid(@value 1)) then return 0 end
-	@define pos = this:WorldToLocal(@value 2)
+Component:AddPreparedFunction( "heading", "e:v", "a", [[
+	if(IsValid(@value 1)) then
+		@define pos = this:WorldToLocal(@value 2)
 	
-	@define bearing = (180 / math.pi) * -math.atan2(@pos.y, @pos.x)
-	@define elevation = (180 / math.pi) * math.asin(@pos.z / @pos:Length())
+		@define bearing = (180 / math.pi) * -math.atan2(@pos.y, @pos.x)
+		@define elevation = (180 / math.pi) * math.asin(@pos.z / @pos:Length())
 	
-	return Angle(@elevation, @bearing, 0)
-]] )
+		@define ang = Angle(@elevation, @bearing, 0)
+	end
+]], "(@ang or Angle(0,0,0))" )
 Component:AddFunctionHelper( "heading", "e:v", "Returns the heading angle between the two given points")
 
 /* --- --------------------------------------------------------------------------------

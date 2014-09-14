@@ -65,8 +65,8 @@ local HomeScreen = [[
         return a + b;
     }
  
-//Method operator is now period (.):
-    "colon".replace( "colon", "period" );
+//Method operator is now period (.) not colon (:):
+    entity().pos();
  
 //For loops are now inbeded:
     for ( number i = 1; 100; 2 ) {

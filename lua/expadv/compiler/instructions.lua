@@ -752,9 +752,9 @@ function Compiler:Compile_EVENT( Trace, Name, Params, UseVarg, Sequence, Memory 
 		if !Operator then
 			self:TraceError( Trace, "Invalid argument #%i, %s can not be used as event argument", I, self:NiceClass( Type ) )
 		end
-
+		
 		PreSequence[ #PreSequence + 1 ] = Operator.Compile( self, Trace, Quick( Param[3], "n" ), Quick( Inputs[I], Type ) )
-				
+
 		self:Yield( )
 	end
 	
@@ -779,10 +779,10 @@ function Compiler:Build_Function( Trace, Params, UseVarg, Sequence, Memory )
 
 		Inputs[I] = "IN_" .. I
 
-		local Operator = self:LookUpOperator( "=", Type, "n" )
+		local Operator = self:LookUpClassOperator( Type, "=", "n", Type )
 
 		if !Operator then
-			self:TraceError( Trace, "Invalid argument #%i, %s can not be used as event argument", I, self:NiceClass( Type ) )
+			self:TraceError( Trace, "Invalid argument #%i, %s can not be used as function argument", I, self:NiceClass( Type ) )
 		end
 		
 		local Lua = string.format( [[
@@ -800,7 +800,7 @@ function Compiler:Build_Function( Trace, Params, UseVarg, Sequence, Memory )
 		Lua = Lua .. "end"
 		
 		PreSequence[ #PreSequence + 1 ] = { Trace = Trace, Return = "", Prepare = Lua, FLAG = EXPADV_PREPARE }
-		PreSequence[ #PreSequence + 1 ] = Operator.Compile( self, Trace, Quick( Inputs[I] .. "[1]", Type ), Quick( Param[3], "n" ) )
+		PreSequence[ #PreSequence + 1 ] = Operator.Compile( self, Trace, Quick( Param[3], "n" ), Quick( Inputs[I], Type ) )
 
 		self:Yield( )
 	end
