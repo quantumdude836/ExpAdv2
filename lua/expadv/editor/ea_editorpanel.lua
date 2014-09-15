@@ -226,6 +226,12 @@ function PANEL:GetFileCode( Path )
 	end 
 end
 
+function PANEL:GetSession( Tab )
+	Tab = Tab or self.TabHolder:GetActiveTab( )
+	if !Tab then return end
+	return Tab:GetPanel( ):GetSession( ), Tab.FilePath
+end
+
 function PANEL:SetCaret( Pos, Tab )
 	Tab = Tab or self.TabHolder:GetActiveTab( )
 	Tab:GetPanel( ):SetCaret( Pos )

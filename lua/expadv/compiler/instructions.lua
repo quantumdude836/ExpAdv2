@@ -79,7 +79,7 @@ function Compiler:Compile_LEN( Trace, Expresion1 )
 end
 
 function Compiler:Compile_NEG( Trace, Expresion1 )
-	local Operator = self:LookUpOperator( "neg", Expresion1.Return )
+	local Operator = self:LookUpOperator( "-", Expresion1.Return )
 
 	if !Operator then self:TraceError( Trace, "Negation operator does not support '-%s'", self:NiceClass( Expresion1.Return ) ) end
 

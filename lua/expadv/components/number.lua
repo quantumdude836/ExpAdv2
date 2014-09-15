@@ -18,8 +18,8 @@ Number:AddAlias( "int" )
    --- */
 
 if WireLib then
-   Number:WireInput( "NUMBER" )
-   Number:WireOutput( "NUMBER" )
+   Number:WireInput( "NORMAL" )
+   Number:WireOutput( "NORMAL" )
 end
 
 /* --- --------------------------------------------------------------------------------

@@ -139,12 +139,13 @@ function EXPADV.CallEvent( Name, ... )
 	if !EXPADV.IsLoaded then return end
 
 	for _, Context in pairs( EXPADV.CONTEXT_REGISTERY ) do
+
 		if !Context.Online then continue end
 		
 		local Event = Context["event_" .. Name]
-		
+
 		if !Event then continue end
-		
+
 		local Ok, Value, Type = Context:Execute( "Event " .. Name, Event, ... )
 		
 		if !Result and Ok and Value ~= nil then Result, ResultType = Value, Type end

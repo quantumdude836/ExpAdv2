@@ -179,12 +179,13 @@ function ENT:BuildInstance( Instance, Instruction )
 	
 	self.Cells = Instance.Cells 
 
-	if WireLib and SERVER then
-		print( "Build wire ports", self )
-		self:BuildInputs( self.Cells, Instance.InPorts )
-		self:BuildOutputs( self.Cells, Instance.OutPorts )
-		self:LoadFromInputs( )
-	end
+	pcall( function( )
+		if WireLib and SERVER then
+			self:BuildInputs( self.Cells, Instance.InPorts )
+			self:BuildOutputs( self.Cells, Instance.OutPorts )
+			self:LoadFromInputs( )
+		end
+	end )
 
 	Context:StartUp( Compiled( ) )
 

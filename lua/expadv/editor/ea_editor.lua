@@ -1586,6 +1586,11 @@ function PANEL:GetCode( )
 	return code 
 end
 
+function PANEL:GetSession( )
+	if !self.SharedSession then return end
+	return self.SharedSession, self.SharedSession.ID
+end
+
 function PANEL:OnTextChanged( )
 	// Override 
 end

@@ -221,6 +221,7 @@ function PANEL:Build( Context, Root, stdOut, stdErr )
 
 	EXPADV.RegisterContext( Context )
 
+	/* This will no longer work :(
 	Context.OnStartUp = function( self )
 		stdOut:WriteLine( "Executed code root." )
 	end
@@ -247,7 +248,7 @@ function PANEL:Build( Context, Root, stdOut, stdErr )
 
 	Context.Print = function( Trace, Msg )
 		stdOut:WriteLine( string.format( "[%i,%i] - %s", Trace[1], Trace[2], Msg ) )
-	end
+	end */
 
 	self.Context = Context
 

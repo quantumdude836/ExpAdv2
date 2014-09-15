@@ -177,6 +177,12 @@ function Editor.GetCode( )
 	end 
 end
 
+function Editor.GetSession( )
+	if Editor.Instance then 
+		return Editor.Instance:GetSession( ) 
+	end 
+end
+
 function Editor.GetInstance( )
 	Editor.Create( )
 	return Editor.Instance

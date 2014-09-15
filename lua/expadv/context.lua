@@ -93,6 +93,7 @@ EXPADV.Updates = { }
 
 -- Safely execute a function on this context.
 function EXPADV.RootContext:Execute( Location, Operation, ... ) -- String, Function, ...
+	
 	local Status = self.Status
 
 	Status.BenchMark = SysTime( )
@@ -109,7 +110,7 @@ function EXPADV.RootContext:Execute( Location, Operation, ... ) -- String, Funct
 	local Ok, Result = pcall( Operation, ... )
 
 	debug.sethook( )
-	
+
 	Status.StopWatch = Status.StopWatch + (SysTime( ) - Status.BenchMark)
 
 	if !Ok and isstring( Result ) then
@@ -228,16 +229,12 @@ function EXPADV.RegisterContext( Context )
 	Registery[Context] = Context
 
 	EXPADV.CallHook( "RegisterContext", Context )
-
-	MsgN( "Registered Context: ", Context )
 end
 
 function EXPADV.UnregisterContext( Context )
 	Registery[Context] = nil
 
 	EXPADV.CallHook( "UnregisterContext", Context )
-
-	MsgN( "Unregistered Context: ", Context )
 
 	debug.Trace( )
 end

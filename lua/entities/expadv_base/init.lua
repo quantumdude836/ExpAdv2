@@ -31,10 +31,10 @@ end )
 	@: Receive Code
    --- */
 
-function ENT:ReceivePackage( Package )
-	self.root = Package:String( )
+function ENT:LoadCodeFromPackage( Root, Files )
+	self.root = Root
 
-	self.files = Package:Table( ) or { }
+	self.files = Files
 
 	if self.root == "" then return end
 	
@@ -45,6 +45,10 @@ function ENT:ReceivePackage( Package )
 	hook.Add( "PlayerConnect", self, function( self, Ply )
 		self:SendClientPackage( Ply, self.root, self.files )
 	end )
+end
+
+function ENT:ReceivePackage( Package )
+	self:LoadCodeFromPackage( Package:String( ),  Package:Table( ) or { } )
 end
 
 function ENT:SendClientPackage( Player, Root, Files )

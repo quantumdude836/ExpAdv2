@@ -12,6 +12,8 @@ if SERVER then
 	util.AddNetworkString( "lemon.shared.joined" )
 	util.AddNetworkString( "lemon.shared.left" )
 	util.AddNetworkString( "lemon.shared.kicked" )
+	util.AddNetworkString( "expadv.shared.upload" )
+	util.AddNetworkString( "expadv.shared.entity" )
 
 	local function GetSession( ID )
 		return SharedSessions[ tonumber( ID ) ]
@@ -221,6 +223,49 @@ if SERVER then
 	end
 
 	net.Receive( "lemon_editor_relay", RetransmitSession )
+
+	local function InviteEntity( Player, ID, entity )
+		local Session = GetSession( ID )
+		if !Session or !Session.Users[ Player ] then return end
+
+		if Session.Entitys[ entity ] then
+			return -- Player already in session.
+		end
+
+		Session.Entitys[ entity ] = entity
+
+		net.Start( "lemon.shared.entity" )
+			net.WriteUInt( Session.ID, 16 )
+			net.WriteString( entity:EntIndex( ) )
+		net.Send( Session.Users )
+	end
+
+	net.Receive( "expadv.shared.upload", function( Len, Player )
+		local ID = net.ReadUInt( 16 )
+		local Ply = net.ReadEntity( )
+		local Session = net.ReadUInt( 16 )
+		local ExpAdv = Entity( ID )
+
+		if IsValid( ExpAdv ) and ExpAdv.ExpAdv then
+			InviteEntity( Player, Session, ExpAdv )
+		end
+	end )
+
+	local function RefresEntitys( Player, ID )
+		local Session = GetSession( ID )
+		if !Session or !Session.Users[ Player ] then return end
+
+		for _, ExpAdv in pairs( ) do
+			if IsValid( ExpAdv ) and ExpAdv.ExpAdv then
+				-- ExpAdv:LoadCodeFromPackage( Root, Files )
+				-- ikd, how i'm gona work with this yet :D
+			end
+		end
+	end
+
+	concommand.Add( "lemon_editor_refresh_entitys", function( Player, Cmd, Args )
+		RefresEntitys( Player, Args[1] )
+	end ) -- Remove a user from this session.
 
 	return -- END OF IF SERVER!
 end
@@ -492,4 +537,14 @@ net.Receive( "lemon.shared.kicked", function( )
 	if !IsValid( Editor ) then return end
 
 	Editor:MakeNonShared( )
+end )
+
+net.Receive( "lemon.shared.entity", function( )
+	local Session = GetSession( net.ReadUInt( 16 ) )
+	if !Session then return end
+	
+	local ExpAdv = Entity( net.ReadUInt( 16 ) )
+	if !IsValid( ExpAdv ) then return end
+
+	Session.Entitys[ExpAdv] = ExpAdv
 end )

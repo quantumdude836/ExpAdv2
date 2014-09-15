@@ -453,9 +453,19 @@ end
 
 net.Receive( "expadv.request", function( )
 	local ID = net.ReadUInt( 16 )
-	local Root = EXPADV.Editor.GetCode( )
-	if !Root or Root == "" then return end
-	EXPADV.SendCode( ID, Root, { } )
+	local Session = EXPADV.Editor.GetSession( )
+	
+	if !Session then
+		local Root = EXPADV.Editor.GetCode( )
+		if !Root or Root == "" then return end
+		EXPADV.SendCode( ID, Root, { } )
+	else
+		net.Start( "expadv.shared" )
+			net.WriteUInt( ID, 16 )
+			net.WriteEntity( LocalPlayer( ) )
+			net.WriteUInt( Session.ID, 16 )
+		net.SendToServer( )
+	end
 end )
 
 vnet.Watch( "expadv.upload", function( Package )

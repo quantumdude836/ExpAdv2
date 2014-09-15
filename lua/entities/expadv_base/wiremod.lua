@@ -73,6 +73,7 @@ function ENT:BuildOutputs( Cells, Ports )
 	self.OutPorts = Ports
 	self.OutClick = OutClick
 	self.DupeOutPorts = { Names, Types }
+
 	self.Outputs = WireLib.AdjustSpecialOutputs( self, Names, Types )
 end
 
@@ -123,7 +124,6 @@ function ENT:TriggerOutputs( )
 
 		if Context.Trigger[ Reference ] then
 			local Value = Class.Wire_Out_Util( Context, Reference )
-
 			WireLib.TriggerOutput( self, Name, Value )
 		elseif self.OutClick[ Reference ] then
 			local Val = Context.Memory[ Reference ]
