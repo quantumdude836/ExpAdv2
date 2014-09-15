@@ -473,17 +473,16 @@ end, vnet.OPTION_WATCH_OVERRIDE )
 	@: Quota Managment
    --- */
 local cv_expadv_luahook   = CreateConVar( "expadv_quota_hook", "500", {FCVAR_REPLICATED} )
-local cv_expadv_tickquota = CreateConVar( "expadv_tick_quota", "16000", {FCVAR_REPLICATED} )
-local cv_expadv_softquota = CreateConVar( "expadv_soft_quota", "4000", {FCVAR_REPLICATED} )
-local cv_expadv_hardquota = CreateConVar( "expadv_hard_quota", "50000", {FCVAR_REPLICATED} )
+local cv_expadv_tickquota = CreateConVar( "expadv_tick_quota", "25000", {FCVAR_REPLICATED} )
+local cv_expadv_softquota = CreateConVar( "expadv_soft_quota", "10000", {FCVAR_REPLICATED} )
+local cv_expadv_hardquota = CreateConVar( "expadv_hard_quota", "100000", {FCVAR_REPLICATED} )
 
 timer.Create( "expadv.quota", 1, 0, function( )
-	-- expadv_tickmult  = ( engine.TickInterval( )/0.0303030303 ) / 1000000
 	expadv_luahook   = cv_expadv_luahook:GetInt( )
-	expadv_tickquota = cv_expadv_tickquota:GetInt( ) -- * expadv_tickmult
-	expadv_softquota = cv_expadv_softquota:GetInt( ) -- * expadv_tickmult
-	expadv_hardquota = cv_expadv_hardquota:GetInt( ) -- * expadv_tickmult
-end)
+	expadv_tickquota = cv_expadv_tickquota:GetInt( )
+	expadv_softquota = cv_expadv_softquota:GetInt( )
+	expadv_hardquota = cv_expadv_hardquota:GetInt( )
+end )
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: API.

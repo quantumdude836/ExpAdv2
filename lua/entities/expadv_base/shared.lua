@@ -40,7 +40,6 @@ function ENT:Initialize( )
 		self:SetUseType( SIMPLE_USE )
 
 		if WireLib then
-			print( "Initalised wire connectivity" )
 			self.Inputs = WireLib.CreateInputs( self, { } )
 			self.Outputs = WireLib.CreateOutputs( self, { } )
 		end
@@ -86,24 +85,14 @@ end
 	@: Context Callbacks
    --- */
 
-function ENT:OnStartUp( Context ) end
-
-function ENT:OnShutDown( Context ) end
-
-function ENT:OnLuaError( Context, Msg ) end
-
-function ENT:OnScriptError( Context, Msg ) end
-
-function ENT:OnUncatchedException( Context, Exception ) end --OnException
-
-function ENT:OnUpdate( Context )
-	if WireLib then self:TriggerOutputs( ) end
-end
-
-function ENT:OnHitQuota( Context )
-	Context:ShutDown( )
-	EXPADV.UnregisterContext( self.Context )
-end
+function ENT:StartUp( ) end
+function ENT:ShutDown( ) end
+function ENT:HitQuota( ) end
+function ENT:HitHardQuota( ) end
+function ENT:LuaError( Msg ) end
+function ENT:ScriptError( Msg ) end
+function ENT:Exception( Exception ) end
+function ENT:UpdateTick( ) if WireLib and SERVER then self:TriggerOutputs( ) end end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Context
@@ -121,26 +110,9 @@ end
 function ENT:CreateContext( Instance, Player )
 	local Context = EXPADV.BuildNewContext( Instance, Player, self )
 
-	if !self:OnContextCreated( Context ) then
-
-		Context.OnStartUp = function( ctx ) return self:OnStartUp( ctx ) end
-
-		Context.OnShutDown = function( ctx ) return self:OnShutDown( ctx ) end
-
-		Context.OnLuaError = function( ctx, msg ) MsgN( "LUA ERROR: ", msg ) end -- return self:OnLuaError( ctx, msg ) end
-
-		Context.OnScriptError = function( ctx ) return self:OnScriptError( ctx, msg ) end
-
-		Context.OnException = function( ctx, exc ) return self:OnUncatchedException( ctx, exc ) end
-		
-		Context.OnUpdate = function( ctx ) return self:OnUpdate( ctx ) end
-		
-		Context.OnHitQuota = function( ctx ) return self:OnHitQuota( ctx ) end
-	end
+	self:OnContextCreated( Context )
 
 	ContextFromEntID[ self:EntIndex( ) ] = Context
-
-	EXPADV.RegisterContext( Context )
 
 	self.Context = Context
 
@@ -148,11 +120,9 @@ function ENT:CreateContext( Instance, Player )
 end
 
 function ENT:OnRemove( )
-	if !self:IsRunning( ) then return end
-
-	self.Context:ShutDown( )
-
-	EXPADV.UnregisterContext( self.Context )
+	if self:IsRunning( ) then
+		self.Context:ShutDown( )
+	end
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------

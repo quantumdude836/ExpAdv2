@@ -91,21 +91,10 @@ end
 
 EXPADV.Updates = { }
 
--- Should be called before executing.
-function EXPADV.RootContext:PreExecute( )
-	--EXPADV.EXECUTOR = self
-end
-
--- Should be called after executing.
-function EXPADV.RootContext:PostExecute( )
-	-- EXPADV.EXECUTOR = nil
-end
-
 -- Safely execute a function on this context.
 function EXPADV.RootContext:Execute( Location, Operation, ... ) -- String, Function, ...
 	local Status = self.Status
 
-	Status.Perf = 0
 	Status.BenchMark = SysTime( )
 
 	debug.sethook( function( )
@@ -117,36 +106,45 @@ function EXPADV.RootContext:Execute( Location, Operation, ... ) -- String, Funct
 		end
 	end, "", expadv_luahook )
 
-	-- self:PreExecute( )
-
 	local Ok, Result = pcall( Operation, ... )
 
 	debug.sethook( )
-
-	-- self:PostExecute( )
 	
 	Status.StopWatch = Status.StopWatch + (SysTime( ) - Status.BenchMark)
-	Status.Counter = Status.Counter + (Status.Perf - expadv_softquota)
-	
-	if !Ok and isstring( Result ) then
-		return self:Handel( "LuaError", Result )
 
+	if !Ok and isstring( Result ) then
+		if IsValid( self.entity ) then self.entity:ScriptError( Result ) end
+		
+		self:ShutDown( )
+
+		return false
 	elseif Ok or Result.Exit then
 
-		if Status.Counter < expadv_hardquota then
-			return self:Handel( "HitQuota", Result )
+		if (Status.Counter + Status.Perf - expadv_softquota) < expadv_hardquota then
+			if IsValid( self.entity ) then self.entity:HitHardQuota( ) end
+			
+			self:ShutDown( )
+
+			return false
 		end
 
 		EXPADV.Updates[self] = true
 
 		return true, Result
 
-	elseif Result.Quota then
-		return self:Handel( "HitQuota", Result )
-	elseif Result.Script then
-		return self:Handel( "ScriptError", Result )
-	elseif Result.Exception then
-		return self:Handel( "Exception", Result )
+	else
+
+		if !IsValid( self.entity ) then
+			-- Do nothing :P
+		elseif Result.Quota then
+			self.entity:HitTickQuota( )
+		elseif Result.Script then
+			self.entity:ScriptError( Result )
+		elseif Result.Exception then
+			self.entity:Exception( Result )
+		end
+
+		self:ShutDown( )
 	end
 
 	return false
@@ -177,9 +175,15 @@ end
 
 -- Runs the root execution of the code.
 function EXPADV.RootContext:StartUp( Execution ) -- Function
-	self:Handel( "StartUp" )
 	self.Online = true
-	return self:Execute( "root", Execution, self )
+
+	EXPADV.RegisterContext( self )
+
+	EXPADV.CallHook( "StartUp", self )
+
+	if IsValid( self.entity ) then self.entity:StartUp( ) end
+
+	return self:Execute( "Root", Execution, self )
 end
 
 -- Shuts down the context and execution.
@@ -187,7 +191,12 @@ function EXPADV.RootContext:ShutDown( )
 	if !self.Online then return end
 
 	self.Online = false
-	self:Handel( "ShutDown" )
+
+	EXPADV.UnregisterContext( self )
+
+	EXPADV.CallHook( "ShutDown", self )
+
+	if IsValid( self.entity ) then self.entity:ShutDown( ) end
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -195,6 +204,7 @@ end
    --- */
 
 -- Calls A context based hook, with passthrough to main hook system.
+-- DEPRICATED, Will be removed!
 function EXPADV.RootContext:Handel( Name, ... )
 	local Hook = self["On" .. Name]
 		
@@ -216,37 +226,39 @@ EXPADV.CONTEXT_REGISTERY = Registery
 
 function EXPADV.RegisterContext( Context )
 	Registery[Context] = Context
-	Context:Handel( "RegisterContext" )
+
+	EXPADV.CallHook( "RegisterContext", Context )
+
+	MsgN( "Registered Context: ", Context )
 end
 
 function EXPADV.UnregisterContext( Context )
 	Registery[Context] = nil
-	Context:Handel( "UnregisterContext" )
+
+	EXPADV.CallHook( "UnregisterContext", Context )
+
+	MsgN( "Unregistered Context: ", Context )
+
+	debug.Trace( )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Context Updating.
 --- */
 
-local LastUpdated -- Means we dont need a zillion pcalls
-
-local function CheckUpdates( )
-	for Context, _ in pairs( EXPADV.Updates ) do
-		LastUpdated = Context
-		Context:Handel( "Update" )
-	end
-	
-	EXPADV.Updates = { }
-end
-
 hook.Add( "Tick", "ExpAdv2.Update", function( )
-	local Ok, Msg = pcall( CheckUpdates )
-	
-	if !Ok and LastUpdated then
-		LastUpdated:Handel( "LuaError", Msg )
+	for Context, _ in pairs( EXPADV.Updates ) do
+		if !IsValid( Context.entity ) then continue end
+
+		local Ok, Msg = pcall( Context.entity.UpdateTick, Context.entity )
+		
+		if !Ok then
+			Context.entity:LuaError( Msg )
+			Context:ShutDown( )
+		end
 	end
-	
-	LastUpdated = nil
+
+	EXPADV.Updates = { }
 end )
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
