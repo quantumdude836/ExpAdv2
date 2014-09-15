@@ -87,7 +87,7 @@ end
 
 function ENT:StartUp( ) end
 function ENT:ShutDown( ) end
-function ENT:HitQuota( ) end
+function ENT:HitTickQuota( ) end
 function ENT:HitHardQuota( ) end
 function ENT:LuaError( Msg ) end
 function ENT:ScriptError( Msg ) end

@@ -100,7 +100,7 @@ function ENT:StartUp( )
 	self:ResetStatus( )
 end
 
-function ENT:HitQuota( )
+function ENT:HitTickQuota( )
 	self:ScriptError( "Tick Quota Exceeded." )
 end
 
