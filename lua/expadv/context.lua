@@ -120,7 +120,7 @@ function EXPADV.RootContext:Execute( Location, Operation, ... ) -- String, Funct
 		return false
 	elseif Ok or Result.Exit then
 
-		if (Status.Counter + Status.Perf - expadv_softquota) < expadv_hardquota then
+		if (Status.Counter + Status.Perf - expadv_softquota) > expadv_hardquota then
 			if IsValid( self.entity ) then self.entity:HitHardQuota( ) end
 			
 			self:ShutDown( )
