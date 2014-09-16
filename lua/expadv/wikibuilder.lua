@@ -73,7 +73,7 @@ concommand.Add( "expadv_build_wiki", function( )
 		local Class = GetClass( Component, ClassName )
 		if !Class.Methods then Class.Methods = { } end
 
-		local Line = string.format( "| %s:%s(%s) || %s || %s || %s \n", ClassName, Name, NamePerams( Perams, 2, Varg ), EXPADV.TypeName( Return ) or "Void", Avalibility( Server, Client ), Escape( Desc or "No description." )  )
+		local Line = string.format( "| %s.%s(%s) || %s || %s || %s \n", ClassName, Name, NamePerams( Perams, 2, Varg ), EXPADV.TypeName( Return ) or "Void", Avalibility( Server, Client ), Escape( Desc or "No description." )  )
 		table.insert( Class.Methods, Line )
 	end
 

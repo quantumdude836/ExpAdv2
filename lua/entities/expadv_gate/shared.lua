@@ -174,7 +174,12 @@ function ENT:LuaError( Msg )
 	self:SetState( EXPADV_STATE_CRASHED )
 
 	if SERVER then
+		self:NotifiOwner( "Expression Advanced 2 - Suffered a serverside Lua error:", 1, 5 )
+		self:NotifiOwner( Msg, 1, 3 )
 	else
+		self:NotifiOwner( "Expression Advanced 2 - Suffered a clientside Lua error:", 1, 5 )
+		self:NotifiOwner( LocalPlayer():Name( ) .. ": " .. Msg, 1, 3 )
+
 		chat.AddText( Color( 150, 150, 0 ), "[" .. self.player:Name( ) .. "] ", Color( 255, 0, 0 ), "Expresion Advanced - Error: ", Color( 255, 255, 255 ), Msg )
 	end
 end
@@ -183,7 +188,12 @@ function ENT:ScriptError( Msg )
 	self:SetState( EXPADV_STATE_CRASHED )
 
 	if SERVER then
+		self:NotifiOwner( "Expression Advanced 2 - Suffered a serverside Script error:", 1, 5 )
+		self:NotifiOwner( Msg, 1, 3 )
 	else
+		self:NotifiOwner( "Expression Advanced 2 - Suffered a clientside Script error:", 1, 5 )
+		self:NotifiOwner( LocalPlayer():Name( ) .. ": " .. Msg, 1, 3 )
+
 		chat.AddText( Color( 150, 150, 0 ), "[" .. self.player:Name( ) .. "] ", Color( 255, 0, 0 ), "Expresion Advanced - Script Error: ", Color( 255, 255, 255 ), Msg )
 	end
 end
@@ -191,8 +201,15 @@ end
 function ENT:Exception( Exception )
 	self:SetState( EXPADV_STATE_CRASHED )
 
+	local Msg = string.format( "%s - %s", Exception.Exception, Exception.Message )
+
 	if SERVER then
+		self:NotifiOwner( "Expression Advanced 2 - Uncatched Exception (serverside):", 1, 5 )
+		self:NotifiOwner( Msg, 1, 3 )
 	else
+		self:NotifiOwner( "Expression Advanced 2 - Uncatched Exception (clientside):", 1, 5 )
+		self:NotifiOwner( LocalPlayer():Name( ) .. ": " .. Msg, 1, 3 )
+		
 		chat.AddText( Color( 150, 150, 0 ), "[" .. self.player:Name( ) .. "] ", Color( 255, 0, 0 ), "Expresion Advanced - Uncatched exception: ", Color( 255, 255, 255 ), Exception.Exception, " -> ", Exception.Msg )
 	end
 end
@@ -201,7 +218,12 @@ function ENT:OnCompileError( ErMsg, Compiler )
 	self:SetState( EXPADV_STATE_CRASHED )
 
 	if SERVER then
+		self:NotifiOwner( "Expression Advanced 2 - Failed to compile serverside:", 1, 5 )
+		self:NotifiOwner( ErMsg, 1, 3 )
 	else
+		self:NotifiOwner( "Expression Advanced 2 - Failed to compile clientside:", 1, 5 )
+		self:NotifiOwner( LocalPlayer():Name( ) .. ": " .. ErMsg, 1, 3 )
+		
 		chat.AddText( Color( 150, 150, 0 ), "[" .. self.player:Name( ) .. "] ", Color( 255, 0, 0 ), "Expresion Advanced - Validate Error: ", Color( 255, 255, 255 ), ErMsg )
 	end
 end
@@ -209,6 +231,14 @@ end
 function ENT:ShutDown( )
 	if SERVER then
 	else
-		chat.AddText( Color( 255, 0, 0 ), "Expresion Advanced - ShutDown: ", Color( 255, 255, 255 ), tostring( self ) )
+		-- chat.AddText( Color( 255, 0, 0 ), "Expresion Advanced - ShutDown: ", Color( 255, 255, 255 ), tostring( self ) )
 	end
+end
+
+function ENT:NotifiOwner( Message, Type, Duration )
+	local Owner = self.player
+
+	if !IsValid( self.player ) and self.Context then Owner = self.Context.player end
+
+	EXPADV.Notifi( Owner, Message, Type, Duration )
 end

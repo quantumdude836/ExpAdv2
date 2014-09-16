@@ -235,9 +235,13 @@ local function SetID( Context, Trace, Entity, ID )
 	Entity.ID = ID
 end
 
-HoloComponent:AddVMFunction( "setID", SetID )
+HoloComponent:AddVMFunction( "setID", "h:n", "", SetID )
 HoloComponent:AddInlineFunction( "getID", "h:", "n", "(@value 1.ID or -1)" )
 HoloComponent:AddInlineFunction( "hologram", "n", "h", "(Context.Data.Holograms[ @value 1] or $Entity(0))" )
+
+HoloComponent:AddFunctionHelper( "setID", "h:n", "Sets the id of a hologram for use with hologram(N), the ID is specific to the Gate." )
+HoloComponent:AddFunctionHelper( "getID", "h:", "Returns the current ID of hologram H." )
+HoloComponent:AddFunctionHelper( "hologram", "n", "Returns the hologram with the id set to N." )
 
 /*==============================================================================================
     Section: Creation
@@ -268,9 +272,9 @@ local function NewHolo( Context, Trace, Model, Position, Angle )
 	
 	if CPPI then Entity:CPPISetOwner( Context.player ) end
 
-	HolosByEntity[ Context.Entity ] = HolosByEntity[ Context.entity ] or { }
+	HolosByEntity[ Context.entity ] = HolosByEntity[ Context.entity ] or { }
 
-	HolosByEntity[ Context.Entity ][ Entity ] = Entity
+	HolosByEntity[ Context.entity ][ Entity ] = Entity
 
 	HolosByPlayer[ UID ] = HolosByPlayer[ UID ] or { }
 
@@ -287,13 +291,13 @@ local function NewHolo( Context, Trace, Model, Position, Angle )
 	SetModel( Context, Trace, Entity, Model or "sphere" )
 
 	if !Position then
-		Entity:SetPos( Context.Entity:GetPos( ) )
+		Entity:SetPos( Context.entity:GetPos( ) )
 	else
 		Entity:SetPos( Position )
 	end
 
 	if !Angle then
-		Entity:SetAngles( Context.Entity:GetAngles( ) )
+		Entity:SetAngles( Context.entity:GetAngles( ) )
 	else
 		Entity:SetAngles( Angle )
 	end
@@ -302,12 +306,16 @@ local function NewHolo( Context, Trace, Model, Position, Angle )
 end
 
 HoloComponent:AddVMFunction( "hologram", "", "h", NewHolo )
+HoloComponent:AddFunctionHelper( "hologram", "", "Creates a hologram." )
 
 HoloComponent:AddVMFunction( "hologram", "s", "h", NewHolo )
+HoloComponent:AddFunctionHelper( "hologram", "s", "Creates a hologram with (string model)." )
 
 HoloComponent:AddVMFunction( "hologram", "s,v", "h", NewHolo )
+HoloComponent:AddFunctionHelper( "hologram", "s,v", "Creates a hologram with (string model) at (vector position)." )
 
 HoloComponent:AddVMFunction( "hologram", "s,v,a", "h", NewHolo )
+HoloComponent:AddFunctionHelper( "hologram", "s,v,a", "Creates a hologram with (string model) at (vector position) with (angle rotation)." )
 
 /*==============================================================================================
     Section: Can Hologram
@@ -368,6 +376,10 @@ if $IsValid( @value 1 ) and @value 1.Player == Context.player then
 	@value 1:StopRotate( )
 end]] )
 
+HoloComponent:AddFunctionHelper( "setAng", "h:a", "Sets the angle of a hologram." )
+HoloComponent:AddFunctionHelper( "rotateTo", "h:a,n", "Animates a hologram to move to rotation A, N is speed." )
+HoloComponent:AddFunctionHelper( "stopRotate", "h:", "Stops the rotation animation of a hologram." )
+
 /*==============================================================================================
     Scale
 ==============================================================================================*/
@@ -407,6 +419,14 @@ if $IsValid( @value 1 ) and @value 1.GetScale then
 	@pos = @value 1:GetScaleUnits( )
 end]], "( @pos or Vector( 0, 0, 0 ) )" )
 
+HoloComponent:AddFunctionHelper( "stopRotate", "h:", "Stops the rotation animation of a hologram." )
+HoloComponent:AddFunctionHelper("setScale", "h:v", "Sets the scale of a hologram." )
+HoloComponent:AddFunctionHelper("setScaleUnits", "h:v", "Sets the scale of a hologram in units." )
+HoloComponent:AddFunctionHelper("scaleTo", "h:v,n", "Animates a hologram to rescale to size V, N is speed." )
+HoloComponent:AddFunctionHelper("scaleToUnits", "h:v,n", "Animates a hologram to rescale to size V in units, N is speed." )
+HoloComponent:AddFunctionHelper("stopScale", "h:", "Stops the rescale animation of a hologram." )
+HoloComponent:AddFunctionHelper("getScale", "h:", "Returns the scale of a hologram." )
+HoloComponent:AddFunctionHelper("getScaleUnits", "h:", "Returns the scale of a hologram in units." )
 
 /*==============================================================================================
     Visible and Shading
@@ -429,6 +449,12 @@ end]] )
 HoloComponent:AddInlineFunction("isVisible", "h:", "b", "($IsValid( @value 1 ) and @value 1.INFO.VISIBLE or false )" )
 
 HoloComponent:AddInlineFunction("hasShading", "h:", "b", "($IsValid( @value 1 ) and @value 1.INFO.SHADING or false )" )
+
+HoloComponent:AddFunctionHelper("shading", "h:b", "Enables or disables shading of a hologram." )
+HoloComponent:AddFunctionHelper("shadow", "h:b", "Set to true to make a hologram cast a shadow." )
+HoloComponent:AddFunctionHelper("visible", "h:b", "Enables or disables visibility of a hologram." )
+HoloComponent:AddFunctionHelper("isVisible", "h:", "Returns true of the hologram is visible." )
+HoloComponent:AddFunctionHelper("hasShading", "h:", "Returns true if a hologram has shading enabled." )
 
 /*==============================================================================================
     Section: Clipping
@@ -460,6 +486,12 @@ if $IsValid( @value 1 ) and @value 1.Player == Context.player then
 	@value 1:SetClipNormal( @value 2, @value 3 )
 end]] )
 
+HoloComponent:AddFunctionHelper( "pushClip", "h:n,v,v", "Clip a hologram, (number clip index) at (vector position) across (vector axis)." )
+HoloComponent:AddFunctionHelper( "removeClip", "h:n", "Removes a clip from the hologram." )
+HoloComponent:AddFunctionHelper( "enableClip", "h:n,b", "Enables clip (number) on the hologram if (boolean) is true." )
+HoloComponent:AddFunctionHelper( "setClipOrigin", "h:n,v", "Set the origin of clip N on hologram." )
+HoloComponent:AddFunctionHelper( "setClipNormal", "h:n,v", "Set the normal of clip N on hologram." )
+
 /*==============================================================================================
     Section: Color
 ==============================================================================================*/
@@ -473,6 +505,10 @@ HoloComponent:AddPreparedFunction("getColor", "h:", "c", [[
 if $IsValid( @value 1 ) then
 	@define val = @value 1:GetColor( )
 end]], "(@val or Color(0, 0, 0))" )
+
+
+HoloComponent:AddFunctionHelper( "setColor", "h:c", "Sets the color of a hologram." )
+HoloComponent:AddFunctionHelper( "getColor", "h:", "Returns the color RGBA of hologram." )
 
 /*==============================================================================================
 	Section: Material / Skin / Bodygroup
@@ -506,6 +542,14 @@ HoloComponent:AddPreparedFunction( "setBodygroup", "h:n,n", "", [[
 if $IsValid( @value 1 ) and @value 1.Player == Context.player then
 	@value 1:SetBodygroup(@value 2, @value 3)
 end]] )
+
+
+HoloComponent:AddFunctionHelper( "setMaterial", "h:s", "Sets the material of a hologram." )
+HoloComponent:AddFunctionHelper( "getMaterial", "h:", "Returns the material of a hologram." )
+HoloComponent:AddFunctionHelper( "getSkin", "h:", "Returns the current skin number of hologram." )
+HoloComponent:AddFunctionHelper( "getSkinCount", "h:", "Returns the amount of skins a hologram has." )
+HoloComponent:AddFunctionHelper( "setSkin", "h:n", "Sets the skin of a hologram." )
+HoloComponent:AddFunctionHelper( "setBodygroup", "h:n,n", "Sets the bodygroup of a hologram (number groupID) (number subID)." )
 
 /*==============================================================================================
     Section: Parent
@@ -552,6 +596,13 @@ if $IsValid( @value 1 ) then
 	end
 end]], "(@val or $Entity(0))" )
 
+HoloComponent:AddFunctionHelper( "parent", "h:e", "Sets the parent entity of a hologram." )
+HoloComponent:AddFunctionHelper( "parent", "h:h", "Sets the parent hologram of a hologram." )
+HoloComponent:AddFunctionHelper( "parent", "h:p", "Sets the parent physics object of a hologram." )
+HoloComponent:AddFunctionHelper( "unParent", "h:", "Unparents H from its parent." )
+HoloComponent:AddFunctionHelper( "getParentHolo", "h:", "Returns the parent hologram of a hologram." )
+HoloComponent:AddFunctionHelper( "getParent", "h:", "Returns the parent entity of a hologram." )
+
 /*==============================================================================================
     Section: Bones
 ==============================================================================================*/
@@ -594,6 +645,15 @@ HoloComponent:AddPreparedFunction( "boneCount", "h:", "n", [[
 if $IsValid( @value 1 ) then
 	@define val = @value 1:GetBoneCount( )
 end]], "( @val or 0 )" )
+
+HoloComponent:AddFunctionHelper( "setBonePos", "h:n,v", "Sets the position of bone N on the hologram." )
+HoloComponent:AddFunctionHelper( "setBoneAngle", "h:n,a", "Sets the angle of bone N on the hologram." )
+HoloComponent:AddFunctionHelper( "setBoneScale", "h:n,v", "Sets the scale of bone N on the hologram." )
+HoloComponent:AddFunctionHelper( "jiggleBone", "h:n,b", "Makes the bone N on the hologram jiggle about when B is true." )
+HoloComponent:AddFunctionHelper( "getBonePos", "h:n", "Gets the position of bone N on hologram." )
+HoloComponent:AddFunctionHelper( "getBoneAng", "h:n", "Gets the angle of bone N on hologram." )
+HoloComponent:AddFunctionHelper( "getBoneScale", "h:n", "Gets the scale of bone N on hologram." )
+HoloComponent:AddFunctionHelper( "boneCount", "h:", "Returns the ammount of bones of a hologram." )
 
 /*==============================================================================================
     Section: Animation
@@ -638,6 +698,16 @@ if $IsValid( @value 1 ) and @value 1.Player == Context.player then
 	@value 1:SetPlaybackRate(@value 2)
 end]] )
 
+HoloComponent:AddFunctionHelper( "setAnimation", "h:n,n,n", "Sets the animation of a hologram." )
+HoloComponent:AddFunctionHelper( "setAnimation", "h:s,n,n", "Sets the animation of a hologram." )
+HoloComponent:AddFunctionHelper( "animationLength", "h:", "Gets the lengh of the animation running on H." )
+HoloComponent:AddFunctionHelper( "setPose", "h:s,n", "Sets the pose of a hologram." )
+HoloComponent:AddFunctionHelper( "getPose", "h:s", "Gets the pose of a hologram." )
+HoloComponent:AddFunctionHelper( "animation", "h:s", "Gets lookup number of an animation." )
+HoloComponent:AddFunctionHelper( "getAnimation", "h:", "Returns the current animation of a hologram." )
+HoloComponent:AddFunctionHelper( "getAnimationName", "h:n", "Returns the name of the current animation of a hologram." )
+HoloComponent:AddFunctionHelper( "setAnimationRate", "h:n", "Sets the animation rate of a hologram." )
+
 /*==============================================================================================
     Section: Remove
 ==============================================================================================*/
@@ -645,6 +715,8 @@ HoloComponent:AddPreparedFunction( "remove", "h:", "", [[
 if $IsValid( @value 1 ) and @value 1.Player == Context.player then
 	@value 1:Remove( )
 end]] )
+
+HoloComponent:AddFunctionHelper( "remove", "h:", "Removes the hologram." )
 
 /*==============================================================================================
     Section: Player Blocking, Does not work on the entity.
@@ -669,3 +741,7 @@ if $IsValid( @value 1 ) and @value 1.Player == Context.player then
 		@define val = @value 1:IsBlocked( @value 2 )
 	end
 end]], "(@val or false)" )
+
+HoloComponent:AddFunctionHelper( "blockPlayer", "h:e", "Blocks a player from seeing the hologram." )
+HoloComponent:AddFunctionHelper( "unblockPlayer", "h:e", "Unblocks a player from seeing the hologram, allow them to see it again." )
+HoloComponent:AddFunctionHelper( "isBlocked", "h:e", "Returns true is a player is blocked from seeing the hologram." )

@@ -482,6 +482,7 @@ end, vnet.OPTION_WATCH_OVERRIDE )
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Quota Managment
    --- */
+
 local cv_expadv_luahook   = CreateConVar( "expadv_quota_hook", "500", {FCVAR_REPLICATED} )
 local cv_expadv_tickquota = CreateConVar( "expadv_tick_quota", "25000", {FCVAR_REPLICATED} )
 local cv_expadv_softquota = CreateConVar( "expadv_soft_quota", "10000", {FCVAR_REPLICATED} )
@@ -493,6 +494,51 @@ timer.Create( "expadv.quota", 1, 0, function( )
 	expadv_softquota = cv_expadv_softquota:GetInt( )
 	expadv_hardquota = cv_expadv_hardquota:GetInt( )
 end )
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Transmit Notice.
+   --- */
+
+if SERVER then
+	util.AddNetworkString( "expadv.notify" )
+
+	function EXPADV.Notifi( Player, Message, Type, Duration )
+		net.Start("expadv.notify")
+			net.WriteString( Message )
+			net.WriteUInt( Type or 0, 8 )
+			net.WriteFloat( Duration )
+		if Player then net.Send( Player ) else net.Broadcast( ) end
+	end
+
+	net.Receive( "expadv.notify", function(  )
+		local Player = net.ReadEntity( )
+		if !IsValid( Player ) then return end
+
+		EXPADV.Notifi( Player ,net.ReadString( ), net.ReadUInt( 8 ), net.ReadFloat( ) )
+	end)
+
+end
+
+if CLIENT then
+	net.Receive( "expadv.notify", function( )
+		GAMEMODE:AddNotify( net.ReadString( ), net.ReadUInt( 8 ), net.ReadFloat( ) )
+	end)
+
+	function EXPADV.Notifi( Player, Message, Type, Duration )
+		if !IsValid( Player ) then return end
+
+		if Player == LocalPlayer( ) then
+			return GAMEMODE:AddNotify( Message, Type, Duration )
+		end
+
+		net.Start("expadv.notify")
+			net.WriteEntity( Player )
+			net.WriteString( Message )
+			net.WriteUInt( Type or 0, 8 )
+			net.WriteFloat( Duration )
+		net.SendToServer( )
+	end
+end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: API.

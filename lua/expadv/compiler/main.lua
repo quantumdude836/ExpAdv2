@@ -556,9 +556,8 @@ function Compiler:LookUpOperator( Name, First, ... )
 	return self:LookUpOperator( Name, Class.DerivedClass.Short, ... )
 end
 
+function Compiler:LookUpClassOperator( Short, Name, First, Second, ... )
 
-
-function Compiler:LookUpClassOperator( Short, Name, First, ... )
 	local Operators = EXPADV.Class_Operators[Short]
 
 	if Operators then
@@ -567,7 +566,7 @@ function Compiler:LookUpClassOperator( Short, Name, First, ... )
 		if !First then
 			Op = Operators[Name .. "()"]
 		else
-			Op = Operators[ string.format( "%s(%s)", Name, table.concat( { First, ... }, "" ) ) ]
+			Op = Operators[ string.format( "%s(%s)", Name, table.concat( { First, Second, ... }, "" ) ) ]
 		end
 
 		if Op then return Op end
@@ -576,11 +575,21 @@ function Compiler:LookUpClassOperator( Short, Name, First, ... )
 	local Class = EXPADV.GetClass( Short )
 	if !Class or !Class.DerivedClass then return end
 
-	return self:LookUpOperator( Class.DerivedClass.Short, Name, First, ... )
+	local Derive = Class.DerivedClass.Short
+
+	local Op = self:LookUpClassOperator( Derive, Name, First, Second, ... )
+	if Op then return Op end
+
+	if First and First == Short then
+		local Op = self:LookUpClassOperator( Derive, Name, Derive, Second, ... )
+		if Op then return Op end
+	end
+
+	if Second and Second == Short then
+		local Op = self:LookUpClassOperator( Derive, Name, First, Derive, ... )
+		if Op then return Op end
+	end
 end
-
-
-
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Anti colishion variables (@define)

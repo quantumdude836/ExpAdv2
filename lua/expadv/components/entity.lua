@@ -60,7 +60,7 @@ end )
    --- */
 
 Component:AddInlineFunction( "entity", "", "e", "Context.entity" )
-Component:AddInlineFunction( "entity", ":n", "e", "Entity(@value 1)" )
+Component:AddInlineFunction( "entity", "n", "e", "Entity(@value 1)" )
 
 Component:AddFunctionHelper( "entity", "", "Returns the chip the code is executing in." )
 Component:AddFunctionHelper( "entity", ":n", "Returns the entity of the given index." )
