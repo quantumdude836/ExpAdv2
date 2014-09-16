@@ -64,7 +64,7 @@ VectorComponent:AddInlineOperator( "/", "n,v", "v", "(Vector(@value 1, @value 1,
 
 VectorComponent:AddInlineOperator( "is", "v", "b", "(@value 1 ~= Vector(0, 0, 0))" )
 VectorComponent:AddInlineOperator( "not", "v", "b", "(@value 1 == Vector(0, 0, 0))" )
-VectorComponent:AddInlineOperator( "-", "v2", "b", "(-@value 1)" )
+VectorComponent:AddInlineOperator( "-", "v", "v", "(-@value 1)" )
 
 /* -----------------------------------------------------------------------------------
 	@: Casting
@@ -193,7 +193,7 @@ VectorComponent:AddInlineOperator( "/", "n,v2", "v2", "(Vector2(@value 1, @value
 
 VectorComponent:AddInlineOperator( "is", "v2", "b", "(@value 1 ~= Vector2(0, 0))" )
 VectorComponent:AddInlineOperator( "not", "v2", "b", "(@value 1 == Vector2(0, 0))" )
-VectorComponent:AddInlineOperator( "-", "v2", "b", "(-@value 1)" )
+VectorComponent:AddInlineOperator( "-", "v2", "v2", "(-@value 1)" )
 
 /* -----------------------------------------------------------------------------------
 	@: Casting

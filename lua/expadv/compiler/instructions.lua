@@ -83,6 +83,9 @@ function Compiler:Compile_NEG( Trace, Expresion1 )
 
 	if !Operator then self:TraceError( Trace, "Negation operator does not support '-%s'", self:NiceClass( Expresion1.Return ) ) end
 
+	MsgN( "Neg Operator" )
+	PrintTable( Operator )
+
 	return Operator.Compile( self, Trace, Expresion1 )
 end
 

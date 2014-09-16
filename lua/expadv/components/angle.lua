@@ -70,7 +70,7 @@ Component:AddInlineOperator( "/", "n,a", "a", "(Angle(@value 1, @value 1, @value
 
 Component:AddInlineOperator( "is", "a", "b", "(@value 1 ~= Angle(0, 0, 0))" )
 Component:AddInlineOperator( "not", "a", "b", "(@value 1 == Angle(0, 0, 0))" )
-Component:AddInlineOperator( "-", "n", "b", "(-@value 1)" )
+Component:AddInlineOperator( "-", "a", "a", "(-@value 1)" )
 
 /* -----------------------------------------------------------------------------------
 	@: Constructor
