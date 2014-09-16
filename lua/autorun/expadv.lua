@@ -97,6 +97,11 @@ resource.AddFile( "materials/fugue/toggle-small.png" )
 
 resource.AddFile( "materials/omicron/_ea2_overlay_bg.png" )
 resource.AddFile( "materials/omicron/ea2_overlay_bg.png" )
+resource.AddFile( "materials/omicron/ea2_overlay_bg.png" )
+resource.AddFile( "materials/omicron/overlay_serverred.png" )
+resource.AddFile( "materials/omicron/overlay_servergreen.png" )
+resource.AddFile( "materials/omicron/overlay_clientred.png" )
+resource.AddFile( "materials/omicron/overlay_clientgreen.png" )
 
 resource.AddFile( "materials/oskar/arrow-left.png" )
 resource.AddFile( "materials/oskar/arrow-right.png" )

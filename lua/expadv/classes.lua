@@ -66,6 +66,10 @@ function BaseClassObj:AddVMOperator( Name, Input, Return, Function )
 	EXPADV.AddVMOperator( self.Component, Name, Input, Return, Function ).AttachedClass = self.Short
 end
 
+function BaseClassObj:AddGeneratedOperator( Name, Input, Return, Function )
+	EXPADV.AddGeneratedOperator( self.Component, Name, Input, Return, Function ).AttachedClass = self.Short
+end
+
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Wire Support
    --- */

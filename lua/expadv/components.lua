@@ -36,6 +36,11 @@ function BaseComponent:AddVMOperator( Name, Input, Return, Function ) -- String,
 	return EXPADV.AddVMOperator( self, Name, Input, Return, Function )
 end
 
+-- Creates a new generated operator (on the component).
+function BaseComponent:AddGeneratedOperator( Name, Input, Return, Function ) -- String, String, String, function( Context, Trace, ... )
+	return EXPADV.AddGeneratedOperator( self, Name, Input, Return, Function )
+end
+
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Function Support
    --- */

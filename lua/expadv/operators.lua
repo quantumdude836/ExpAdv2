@@ -2,6 +2,7 @@ EXPADV_INLINE = 1
 EXPADV_PREPARE = 2
 EXPADV_INLINEPREPARE = 3
 EXPADV_FUNCTION = 4
+EXPADV_GENERATED = 5
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Server -> Client control.
@@ -81,6 +82,23 @@ function EXPADV.AddVMOperator( Component, Name, Input, Return, Function )
 		Return = Return,
 		Function = Function,
 		FLAG = EXPADV_FUNCTION
+	}
+
+	Temp_Operators[ #Temp_Operators + 1 ] = Operator
+	return Operator
+end
+
+function EXPADV.AddGeneratedOperator( Component, Name, Input, Return, Function )
+	local Operator = { 
+		LoadOnClient = LoadOnClient,
+		LoadOnServer = LoadOnServer,
+		 
+		Component = Component,
+		Name = Name,
+		Input = Input,
+		Return = Return,
+		Function = Function,
+		FLAG = EXPADV_GENERATED
 	}
 
 	Temp_Operators[ #Temp_Operators + 1 ] = Operator
@@ -871,6 +889,14 @@ function EXPADV.BuildLuaOperator( Operator )
 
 		return Compiler:NewLuaInstruction( Trace, Operator, PreperedLines, OpInline )
 	end
+
+	if Operator.FLAG == EXPADV_FUNCTION then
+		Operator.Build = Operator.Compile
+		Operator.Compiler = function( Compiler, Trace, ... )
+			return Operator.Function( Operator, Compiler, Trace, ... )
+		end
+	end
+
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------

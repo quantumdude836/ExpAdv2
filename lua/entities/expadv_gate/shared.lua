@@ -2,9 +2,28 @@
 	@: Shared!
    --- */
 
-ENT.Type 			= "anim"
-ENT.Base 			= "expadv_base"
-ENT.ExpAdv 			= true
+ENT.Type 					= "anim"
+ENT.Base 					= "expadv_base"
+ENT.ExpAdv 					= true
+ENT.AutomaticFrameAdvance  	= true
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: States
+   --- */
+
+   EXPADV_STATE_OFFLINE = 0
+   EXPADV_STATE_ONLINE = 1
+   EXPADV_STATE_ALERT = 2
+   EXPADV_STATE_CRASHED = 3
+   EXPADV_STATE_BURNED = 4
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Effects
+   --- */
+
+-- if CLIENT then game.AddParticles( "particles/fire_01.pcf" ) end
+-- PrecacheParticleSystem( "fire_verysmall_01" )
+
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Net Vars
@@ -13,30 +32,42 @@ ENT.ExpAdv 			= true
 AccessorFunc( ENT, "TickQuotaCL", "TickQuotaCL", FORCE_NUMBER )
 AccessorFunc( ENT, "StopWatchCL", "StopWatchCL", FORCE_NUMBER )
 AccessorFunc( ENT, "AverageCL", "AverageCL", FORCE_NUMBER )
+AccessorFunc( ENT, "StateCL", "StateCL", FORCE_NUMBER )
 
 function ENT:SetupDataTables( )
 
 	self:NetworkVar( "Float", 0, "TickQuota" )
 	self:NetworkVar( "Float", 1, "StopWatch" )
 	self:NetworkVar( "Float", 2, "Average" )
+	self:NetworkVar( "Float", 3, "StateSV" )
 
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
-	@: Reset Status
+	@: Reset State
    --- */
 
-function ENT:ResetStatus( )
+function ENT:ResetState( State )
 	if SERVER then
 		self:SetTickQuota( 0 )
 		self:SetStopWatch( 0 )
 		self:SetAverage( 0 )
+		self:SetStateSV( State or EXPADV_STATE_OFFLINE )
 	end
 
 	if CLIENT then
 		self:SetTickQuotaCL( 0 )
 		self:SetStopWatchCL( 0 )
 		self:SetAverageCL( 0 )
+		self:SetStateCL( State or EXPADV_STATE_OFFLINE )
+	end
+end
+
+function ENT:SetState( State )
+	if SERVER then
+		self:SetStateSV( State )
+	elseif CLIENT then
+		self:SetStateCL( State )
 	end
 end
 
@@ -83,9 +114,20 @@ function ENT:Think( )
 		Counter = Counter + Perf - expadv_softquota
 		if Counter < 0 then Counter = 0 end
 
+		local State = self:GetStateSV( ) or 0
+		if Counter > expadv_hardquota * 0.5 then
+			self:SetStateSV( EXPADV_STATE_ALERT )
+		elseif (self:GetStateSV( ) or 0) == EXPADV_STATE_ALERT then
+			self:SetStateSV( EXPADV_STATE_ONLINE )
+		end
+
 		Context.Status.Perf = 0
 		Context.Status.StopWatch = 0
 		Context.Status.Counter = Counter
+	end
+
+	if CLIENT then
+		self:DoStateEffects( )
 	end
 
 	self:NextThink( CurTime( ) + 0.030303 )
@@ -97,14 +139,16 @@ end
    --- */
 
 function ENT:StartUp( )
-	self:ResetStatus( )
+	self:ResetState( EXPADV_STATE_ONLINE )
 end
 
 function ENT:HitTickQuota( )
+	self:SetState( EXPADV_STATE_BURNED )
 	self:ScriptError( "Tick Quota Exceeded." )
 end
 
 function ENT:HitHardQuota( )
+	self:SetState( EXPADV_STATE_BURNED )
 	self:ScriptError( "Hard Quota Exceeded." )
 end
 
@@ -113,6 +157,8 @@ end
    --- */
 
 function ENT:LuaError( Msg )
+	self:SetState( EXPADV_STATE_CRASHED )
+
 	if SERVER then
 	else
 		chat.AddText( Color( 150, 150, 0 ), "[" .. self.player:Name( ) .. "] ", Color( 255, 0, 0 ), "Expresion Advanced - Error: ", Color( 255, 255, 255 ), Msg )
@@ -120,6 +166,8 @@ function ENT:LuaError( Msg )
 end
 
 function ENT:ScriptError( Msg )
+	self:SetState( EXPADV_STATE_CRASHED )
+
 	if SERVER then
 	else
 		chat.AddText( Color( 150, 150, 0 ), "[" .. self.player:Name( ) .. "] ", Color( 255, 0, 0 ), "Expresion Advanced - Script Error: ", Color( 255, 255, 255 ), Msg )
@@ -127,6 +175,8 @@ function ENT:ScriptError( Msg )
 end
 
 function ENT:Exception( Exception )
+	self:SetState( EXPADV_STATE_CRASHED )
+
 	if SERVER then
 	else
 		chat.AddText( Color( 150, 150, 0 ), "[" .. self.player:Name( ) .. "] ", Color( 255, 0, 0 ), "Expresion Advanced - Uncatched exception: ", Color( 255, 255, 255 ), Exception.Exception, " -> ", Exception.Msg )
@@ -134,6 +184,8 @@ function ENT:Exception( Exception )
 end
 
 function ENT:OnCompileError( ErMsg, Compiler )
+	self:SetState( EXPADV_STATE_CRASHED )
+
 	if SERVER then
 	else
 		chat.AddText( Color( 150, 150, 0 ), "[" .. self.player:Name( ) .. "] ", Color( 255, 0, 0 ), "Expresion Advanced - Validate Error: ", Color( 255, 255, 255 ), ErMsg )
