@@ -235,8 +235,6 @@ function EXPADV.UnregisterContext( Context )
 	Registery[Context] = nil
 
 	EXPADV.CallHook( "UnregisterContext", Context )
-
-	debug.Trace( )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------

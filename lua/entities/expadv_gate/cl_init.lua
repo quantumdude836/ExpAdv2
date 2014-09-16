@@ -42,12 +42,12 @@ function ENT:DrawOverlay( Pos )
                         surface.DrawTexturedRect( 0, 0, 200 * mul, 100 * mul )
                 
                 -- Client Panel
-                        local ClState = self:GetStateCL( ) or 0
+                        local CLState = self:GetStateCL( ) or 0
 
                         if CLState == EXPADV_STATE_ONLINE then
                             surface.SetMaterial( Overlay_ClientGreen )
                             surface.DrawTexturedRect( 0, 0, 200 * mul, 100 * mul )
-                        elseif ClState >= EXPADV_STATE_CRASHED then
+                        elseif CLState >= EXPADV_STATE_CRASHED then
                             surface.SetMaterial( Overlay_ClientRed )
                             surface.DrawTexturedRect( 0, 0, 200 * mul, 100 * mul )
                         end
@@ -101,35 +101,20 @@ end
    --- */
 
 -- Does not work Sad Face :(
-function ENT:DoStateEffects( )
-    if self:GetModel( ) ~= "models/lemongate/lemongate.mdl" then return end
-    local Attachment = self:LookupAttachment("fan_attch")
 
-    local State = self:GetStateSV( ) or 0
-    local Counter = self:GetAverage( ) or 0
-    local Percent = (Counter / expadv_hardquota) * 100
-    
-    local SpinSpeed = self.SpinSpeed or 0
-    if State >= EXPADV_STATE_CRASHED then SpinSpeed = 0 end
-    
-    self.SpinSpeed = SpinSpeed + math.Clamp( Percent - SpinSpeed, -0.1, 0.1 )
-    self:SetPlaybackRate( self.SpinSpeed )
-    self:ResetSequence( self:LookupSequence( self.SpinSpeed <= 0 and "idle" or "spin" ) )
+    --[[
+        if State == EXPADV_STATE_ALERT then
+            local Pos = Attachment.Pos
 
-    -- print( "Spin Speed:", self.SpinSpeed )
-
-    if State == EXPADV_STATE_ALERT then
-        local Pos = Attachment.Pos
-
-        if !self.NextSpark or self.NextSpark < CurTime() then
-            local fx_dat = EffectData()
-            fx_dat:SetMagnitude(math.random(0.1,0.3))
-            fx_dat:SetScale(math.random(0.5,1.5))
-            fx_dat:SetRadius(2)
-            fx_dat:SetOrigin(Pos)
-            util.Effect("sparks",fx_dat)
-            self.NextSpark = CurTime() + math.Rand(0.2,1)
+            if !self.NextSpark or self.NextSpark < CurTime() then
+                local fx_dat = EffectData()
+                fx_dat:SetMagnitude(math.random(0.1,0.3))
+                fx_dat:SetScale(math.random(0.5,1.5))
+                fx_dat:SetRadius(2)
+                fx_dat:SetOrigin(Pos)
+                util.Effect("sparks",fx_dat)
+                self.NextSpark = CurTime() + math.Rand(0.2,1)
+            end
         end
-    end
-end
+    ]]
 

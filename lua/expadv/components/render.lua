@@ -62,6 +62,30 @@ Component:AddPreparedFunction( "drawTextAlignedRight", "v2,c,s,s", "", "$draw.Si
 Component:AddFunctionHelper( "drawTextAlignedRight", "v2,c,s,s", "Draws a string alighed right of its position (Position, Color, font, Text)." )
 
 /* -----------------------------------------------------------------------------------
+	@: Screen
+   --- */
+
+Component:AddPreparedFunction( "pauseNextFrame", "b", "", [[
+if IsValid( Context.entity ) and Context.entity.Screen then
+	Context.entity:SetRenderingPaused( @value 1 )
+end]] )
+
+Component:AddFunctionHelper( "pauseNextFrame", "b", "While set to true the screen will not draw the next frame." )
+
+Component:AddInlineFunction( "nextFramePaused", "", "b", "((IsValid( Context.entity ) and Context.entity.Screen) and Context.entity:GetRenderingPaused( ) or false)" )
+Component:AddFunctionHelper( "pauseNextFrame", "b", "returns true, if the screens next frame is paused." )
+
+Component:AddPreparedFunction( "noFrameReresh", "b", "", [[
+if IsValid( Context.entity ) and Context.entity.Screen then
+	Context.entity:SetNoClearFrame( @value 1 )
+end]] )
+
+Component:AddFunctionHelper( "noFrameReresh", "b", "While set to true the screen will not draw the next frame." )
+
+Component:AddInlineFunction( "frameResheshDisabled", "", "b", "((IsValid( Context.entity ) and Context.entity.Screen) and Context.entity:GetNoClearFrame( ) or false)" )
+Component:AddFunctionHelper( "frameResheshDisabled", "b", "returns true, if the screens is set not to clear the screen each frame." )
+
+/* -----------------------------------------------------------------------------------
 	@: Hud Event
    --- */
 

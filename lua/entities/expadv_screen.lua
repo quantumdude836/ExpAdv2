@@ -6,6 +6,7 @@ AddCSLuaFile( )
 ENT.Type 			= "anim"
 ENT.Base 			= "expadv_gate"
 ENT.ExpAdv 			= true
+ENT.Screen 			= true
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Monitor Models List
@@ -90,10 +91,15 @@ end
 	@: Render Montior
    --- */
 
+AccessorFunc( ENT, "_pauseRender", "RenderingPaused", FORCE_BOOL )
+AccessorFunc( ENT, "_noClear", "NoClearFrame", FORCE_BOOL )
+
 function ENT:Draw( )
-	if !self.NextRender or self.NextRender <= SysTime( ) then
-		self:RenderScreen( )
-		self.NextRender = SysTime( ) + (1/24)
+	if !self:GetRenderingPaused( ) then
+			if !self.NextRender or self.NextRender <= SysTime( ) then
+			self:RenderScreen( )
+			self.NextRender = SysTime( ) + (1/24)
+		end
 	end
 
 	self:DrawModel( )
@@ -144,8 +150,12 @@ function ENT:RenderScreen( )
 	local PreviousRT = render.GetRenderTarget( )
 	render.SetRenderTarget( self.RenderTarget )
 	render.SetViewPort( 0, 0, 512, 512 )
-	render.Clear( 0, 0, 0, 255 )
+	
 
+	if !self:GetNoClearFrame( ) then
+		render.Clear( 0, 0, 0, 255 )
+	end
+	
 	cam.Start2D( )
 		Context:Execute( "Event drawScreen", Event, 512, 512 )
 	cam.End2D( )

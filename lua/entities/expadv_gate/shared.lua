@@ -126,8 +126,22 @@ function ENT:Think( )
 		Context.Status.Counter = Counter
 	end
 
-	if CLIENT then
-		self:DoStateEffects( )
+	if SERVER then
+		if self:GetModel( ) ~= "models/lemongate/lemongate.mdl" then return end
+	    local Attachment = self:LookupAttachment("fan_attch")
+
+	    local State = self:GetStateSV( ) or 0
+	    local Counter = self:GetAverage( ) or 0
+	    local Percent = (Counter / expadv_hardquota) * 100
+	    
+	    local SpinSpeed = self.SpinSpeed or 0
+	    if State >= EXPADV_STATE_CRASHED then SpinSpeed = 0 end
+	    
+	    self.SpinSpeed = SpinSpeed + math.Clamp( Percent - SpinSpeed, -0.1, 0.1 )
+	    self:SetPlaybackRate( self.SpinSpeed )
+	    self:ResetSequence( self:LookupSequence( self.SpinSpeed <= 0 and "idle" or "spin" ) )
+
+	    -- print( "Spin Speed:", self.SpinSpeed, "vs", Percent, " - ", Counter, " / ", expadv_hardquota )
 	end
 
 	self:NextThink( CurTime( ) + 0.030303 )
