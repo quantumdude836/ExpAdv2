@@ -55,35 +55,82 @@ if WireLib then -- But Wiremods monitors do :D
 	end
 end
 
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: GetCursor
+   --- */
+
+require( "vector2" )
+
+function ENT:GetCursor( Player )
+	local Monitor = EXPADV.GetMonitor( self:GetModel( ) )
+	if !Monitor or !IsValid( Player ) then return Vector2( 0, 0 ) end
+
+	local Start, Dir = Player:GetShootPos( ),Player:GetAimVector( )
+	
+	local Ang = self:LocalToWorldAngles( Monitor.Rot )
+	local Pos = self:LocalToWorld( Monitor.Off )
+	
+	local A = Ang:Up( ):Dot( Dir )
+	if (A == 0 or A > 0) then return Vector2( 0, 0 ) end
+
+	local B = Ang:Up( ):Dot( Pos - Start ) / A
+
+	local HitPos = WorldToLocal( Start + Dir * B, Angle( ), Pos, Ang )
+	local X = (0.5 + HitPos.x / (Monitor.Res * 512 / Monitor.Ratio)) * 512
+	local Y = (0.5 - HitPos.y / (Monitor.Res * 512)) * 512
+			
+	if (X < 0 or X > 512 or Y < 0 or Y > 512) then return Vector2( 0, 0 ) end
+
+	return Vector2( X, Y )
+end
+
+function ENT:ScreenToLocalVector( Vec2 )
+	local Monitor = EXPADV.GetMonitor( self:GetModel( ) )
+	if !Monitor then return Vector( 0, 0, 0) end
+
+	Vec2 = (Vec2 - Vector2( 256, 256 )) * Vector2( Monitor.Res / Monitor.Ratio, Monitor.Res )
+
+	local Vec = Vector( Vec2.x, -Vec2.y, 0 )
+
+	Vec:Rotate( Monitor.Rot )
+
+	return Vec + Monitor.Off
+end
+
+function ENT:ScreenToWorld( Vec2 )
+	return self:LocalToWorld( self:ScreenToLocalVector( Vec2 ) )
+end
+
 if SERVER then return end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: We need the Material and an RT
    --- */
 
-EXPADV.ScreenTexture = CreateMaterial( "ExpAdv.RT", "UnlitGeneric", {
-	["$vertexcolor"] = 1,
-	["$vertexalpha"] = 1,
-	["$ignorez"] = 1,
-	["$nolod"] = 1,
-} )
+function EXPADV.CacheRenderTarget( RenderTarget )
+	if RenderTarget and !table.HasValue( EXPADV.RT_Cache, RenderTarget ) then
+		table.insert( EXPADV.RT_Cache, RenderTarget )
+	end
+end
 
 EXPADV.RT_ID = 0
 EXPADV.RT_Cache = { }
+EXPADV.RT_Mat_Cache = { }
 
 function EXPADV.GetRenderTarget( )
 	local RenderTarget = table.remove( EXPADV.RT_Cache )
-	if RenderTarget then return RenderTarget end
+	if RenderTarget then return RenderTarget, table.remove( EXPADV.RT_Mat_Cache ) end
 
 	EXPADV.RT_ID = EXPADV.RT_ID + 1
 	if EXPADV.RT_ID > 32 then return end
 
-	return GetRenderTarget( "expadv.rt_" .. EXPADV.RT_ID, 512, 512 ) 
+	return GetRenderTarget( "expadv.rt_" .. EXPADV.RT_ID, 512, 512 ), CreateMaterial( "expadv.rt_" .. EXPADV.RT_ID, "UnlitGeneric", { ["$vertexcolor"] = 1, ["$vertexalpha"] = 1, ["$ignorez"] = 1, ["$nolod"] = 1, } )
 end
 
-function EXPADV.CacheRenderTarget( RenderTarget )
+function EXPADV.CacheRenderTarget( RenderTarget, Material )
 	if RenderTarget and !table.HasValue( EXPADV.RT_Cache, RenderTarget ) then
 		table.insert( EXPADV.RT_Cache, RenderTarget )
+		table.insert( EXPADV.RT_Mat_Cache, Material )
 	end
 end
 
@@ -106,7 +153,16 @@ function ENT:Draw( )
 	self:DrawScreen( )
 
 	if self:BeingLookedAtByLocalPlayer( ) then
-		self:DrawOverlay( self:GetPos( ) + Vector( 0, 0, self:OBBMaxs( ).z + 10 ) )
+		local Monitor = EXPADV.GetMonitor( self:GetModel( ) )
+		local Position, Angles = Vector(-6,-2, 2 )
+
+		if Monitor then
+			Position = self:ScreenToLocalVector( Vector2( 0, 0 ) )
+			Angles = Monitor.Rot
+		end
+
+		//print( "Rednering Overlay!" )
+		self:DrawOverlay( Position, Angles )
 	end
 end
 
@@ -121,15 +177,15 @@ function ENT:DrawScreen( )
 		surface.SetDrawColor( 0, 0,0 ,255 )
 		surface.DrawRect( -256 * Aspect, -256 * Aspect, 512 * Aspect, 512 * Aspect )
 
-		if self.RenderTarget then
-			local Previous = EXPADV.ScreenTexture:GetTexture( "$basetexture" )
-			EXPADV.ScreenTexture:SetTexture( "$basetexture", self.RenderTarget )
+		if self.RenderTarget and self.RenderMat then
+			local Previous = self.RenderMat:GetTexture( "$basetexture" )
+			self.RenderMat:SetTexture( "$basetexture", self.RenderTarget )
 
 			surface.SetDrawColor( 255, 255, 255, 255 )
-			surface.SetMaterial( EXPADV.ScreenTexture )
+			surface.SetMaterial( self.RenderMat )
 			surface.DrawTexturedRect( -256 * Aspect, -256 * Aspect, 512 * Aspect, 512 * Aspect )
 
-			EXPADV.ScreenTexture:SetTexture( "$basetexture", Previous )
+			self.RenderMat:SetTexture( "$basetexture", Previous )
 		end
 
 	cam.End3D2D( )
@@ -142,9 +198,12 @@ function ENT:RenderScreen( )
 		
 	local Event = Context.event_drawScreen
 	if !Event then return end -- No event, so why bother?
-		
-	self.RenderTarget = self.RenderTarget or EXPADV.GetRenderTarget( )
-	if !self.RenderTarget then return end -- No free rt, so no point.
+	
+	if !self.RenderTarget or !self.RenderMat then
+		self.ForceClear = true
+		self.RenderTarget, self.RenderMat = EXPADV.GetRenderTarget( )
+		if !self.RenderTarget or !self.RenderMat then return end
+	end --^ No free rt, so no point.
 
 	local _ScrW, _ScrH = ScrW( ), ScrH( )
 	local PreviousRT = render.GetRenderTarget( )
@@ -152,10 +211,11 @@ function ENT:RenderScreen( )
 	render.SetViewPort( 0, 0, 512, 512 )
 	
 
-	if !self:GetNoClearFrame( ) then
+	if !self:GetNoClearFrame( ) or self.ForceClear then
 		render.Clear( 0, 0, 0, 255 )
+		self.ForceClear = nil
 	end
-	
+
 	cam.Start2D( )
 		Context:Execute( "Event drawScreen", Event, 512, 512 )
 	cam.End2D( )
@@ -169,6 +229,6 @@ end
    --- */
 
 function ENT:OnRemove( )
-	EXPADV.CacheRenderTarget( self.RenderTarget )
+	EXPADV.CacheRenderTarget( self.RenderTarget, self.RenderMat )
 	return self.BaseClass.OnRemove( self )
 end

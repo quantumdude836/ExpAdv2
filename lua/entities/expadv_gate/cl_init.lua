@@ -33,8 +33,8 @@ surface.CreateFont( "ExpAdv_OverlayFont", {
         outline = false,
 } )
  
-function ENT:DrawOverlay( Pos )
-        cam.Start3D2D( self:LocalToWorld( Pos ), self:LocalToWorldAngles( Angle(0.1,90,0.1) ), 0.05 / mul )
+function ENT:DrawOverlay( Pos, Ang )
+        cam.Start3D2D( self:LocalToWorld( Pos ), self:LocalToWorldAngles( Ang or Angle(0.1,90,0.1) ), 0.05 / mul )
  
                 -- BackGround
                         surface.SetMaterial( Overlay_BG )

@@ -85,6 +85,35 @@ Component:AddFunctionHelper( "noFrameReresh", "b", "While set to true the screen
 Component:AddInlineFunction( "frameResheshDisabled", "", "b", "((IsValid( Context.entity ) and Context.entity.Screen) and Context.entity:GetNoClearFrame( ) or false)" )
 Component:AddFunctionHelper( "frameResheshDisabled", "b", "returns true, if the screens is set not to clear the screen each frame." )
 
+EXPADV.SharedOperators( )
+
+Component:AddPreparedFunction( "getScreenCursor", "ply:", "v2", [[
+if IsValid( Context.entity ) and Context.entity.Screen then
+	@define value = Context.entity:GetCursor( @value 1 )
+else
+	@value = Vector2(0,0)
+end]], "@value" )
+
+Component:AddFunctionHelper( "getScreenCursor", "ply:", "Returns the cursor psotion of a player, for a screen." )
+
+Component:AddPreparedFunction( "screenToLocal", "v2", "v", [[
+if IsValid( Context.entity ) and Context.entity.Screen then
+	@define value = Context.entity:ScreenToLocalVector( @value 1 )
+else
+	@value = Vector(0,0,0)
+end]], "@value" )
+
+Component:AddFunctionHelper( "screenToLocal", "v2", "Returns the position on screen as a local vector." )
+
+Component:AddPreparedFunction( "screenToWorld", "v2", "v", [[
+if IsValid( Context.entity ) and Context.entity.Screen then
+	@define value = Context.entity:LocalToWorld( Context.entity:ScreenToLocalVector( @value 1 ) )
+else
+	@value = Vector(0,0,0)
+end]], "@value" )
+
+Component:AddFunctionHelper( "screenToWorld", "v2", "Returns the position on screen as a world vector." )
+
 /* -----------------------------------------------------------------------------------
 	@: Hud Event
    --- */
