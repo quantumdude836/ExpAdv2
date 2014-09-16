@@ -124,7 +124,7 @@ function EXPADV.GetRenderTarget( )
 	EXPADV.RT_ID = EXPADV.RT_ID + 1
 	if EXPADV.RT_ID > 32 then return end
 
-	return GetRenderTarget( "expadv.rt_" .. EXPADV.RT_ID, 512, 512 ), CreateMaterial( "expadv.rt_" .. EXPADV.RT_ID, "UnlitGeneric", { ["$vertexcolor"] = 1, ["$vertexalpha"] = 1, ["$ignorez"] = 1, ["$nolod"] = 1, } )
+	return GetRenderTarget( "expadv_rt_" .. EXPADV.RT_ID, 512, 512 ), CreateMaterial( "expadv_rt_" .. EXPADV.RT_ID, "UnlitGeneric", { ["$vertexcolor"] = 1, ["$vertexalpha"] = 1, ["$ignorez"] = 1, ["$nolod"] = 1, } )
 end
 
 function EXPADV.CacheRenderTarget( RenderTarget, Material )
