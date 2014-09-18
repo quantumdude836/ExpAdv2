@@ -1,35 +1,160 @@
 /* -----------------------------------------------------------------------------------
-	@: Render Component
+	@: Newer Better Render Library
    --- */
 
 local Component = EXPADV.AddComponent( "render", true )
 
-/* -----------------------------------------------------------------------------------
-	@: Draw Functions
-   --- */
+require( "Vector2" )
 
 EXPADV.ClientOperators( )
 
-Component:AddPreparedFunction( "drawLine", "v2,v2,c", "", [[
-	$surface.SetDrawColor( @value 3 )
+/* -----------------------------------------------------------------------------------
+	@: Fonts
+   --- */
+
+Component.ValidFonts = {
+	["DebugFixed"] = true,
+	["DebugFixedSmall"] = true,
+	["Default"] = true,
+	["Marlett"] = true,
+	["Trebuchet18"] = true,
+	["Trebuchet24"] = true,
+	["HudHintTextLarge"] = true,
+	["HudHintTextSmall"] = true,
+	["CenterPrintText"] = true,
+	["HudSelectionText"] = true,
+	["CloseCaption_Normal"] = true,
+	["CloseCaption_Bold"] = true,
+	["CloseCaption_BoldItalic"] = true,
+	["ChatFont"] = true,
+	["TargetID"] = true,
+	["TargetIDSmall"] = true,
+	["HL2MPTypeDeath"] = true,
+	["BudgetLabel"] = true
+}
+
+Component.CreatedFonts = { }
+
+function Component.CreateFont( Base, Size )
+	local FontName = string.format( "expadv_%s_%i", Base, Size )
+	if Component.CreatedFonts[FontName] then return FontName end
+	
+	if !Component.ValidFonts[BaseFont] then
+		BaseFont = "default"
+		FontName = string.format( "expadv_default_%i", Size )
+		if Component.CreatedFonts[FontName] then return FontName end
+	end
+
+	Component.CreatedFonts[FontName] = true
+
+	surface.CreateFont( FontName, {
+		font = BaseFont,
+		size = Size,
+		weight = 500,
+		antialias = true,
+		additive = true,
+	} )
+
+	return FontName
+end
+
+Component:AddVMFunction( "setFont", "s,n", "s",
+	function( Context, Trace, Base, Size )
+		surface.SetFont( Component.CreateFont( Base, Size ) )
+	end )
+
+Component:AddVMFunction( "setFont", "s,n,c", "s",
+	function( Context, Trace, Base, Size, Color )
+		surface.SetFont( Component.CreateFont( Base, Size ) )
+		surface.SetTextColor( Color )
+	end )
+
+Component:AddVMFunction( "setFontColor", "c", "","$surface.SetTextColor( @value 1 )" )
+
+Component:AddInlineFunction( "getTextWidth", "s", "n", "$surface.GetTextSize( @value 1 )" )
+
+Component:AddPreparedFunction( "getTextHeight", "s", "n", "@define _, tall = $surface.GetTextSize( @value 1 )", "@tall" )
+
+Component:AddFunctionHelper( "setFont", "s,n", "Sets the current font and fontsize." )
+Component:AddFunctionHelper( "setFont", "s,n,c", "Sets the current font, fontsize and font color." )
+Component:AddFunctionHelper(  "setFontColor", "c", "Sets the current font color." )
+Component:AddFunctionHelper(  "getTextWidth", "s", "Returns the width of drawing string using the current font." )
+Component:AddFunctionHelper(  "getTextHeight", "s", "Returns the width of drawing string using the current font." )
+
+/* -----------------------------------------------------------------------------------
+	@: Text
+   --- */
+
+Component:AddPreparedFunction( "drawText", "v2,s", "",
+	[[$surface.SetTextPos( @value 1.x, @value 1.y )
+	$surface.DrawText( @value 2 )
+]])
+
+Component:AddPreparedFunction( "drawTextCentered", "v2,s", "",
+	[[@define x = @value 1.x - ($surface.GetTextSize( @value 2 ) * 0.5)
+	surface.SetTextPos( @x, @value 1.y )
+	surface.DrawText( @value 2 )
+]])
+
+Component:AddPreparedFunction( "drawTextAlignedRight", "v2,s", "",
+	[[@define x = @value 1.x - $surface.GetTextSize( @value 2 )
+	surface.SetTextPos( @x, @value 1.y )
+	surface.DrawText( @value 2 )
+]])
+
+Component:AddFunctionHelper( "drawText", "v,s", "Draws a line of text aligned left of position." )
+Component:AddFunctionHelper( "drawTextCentered", "v,s", "Draws a line of text aligned center of position." )
+Component:AddFunctionHelper( "drawTextAlignedRight", "v,s", "Draws a line of text aligned right of position." )
+
+/* -----------------------------------------------------------------------------------
+	@: Color / Material
+   --- */
+
+Component:AddPreparedFunction( "getTextureSize", "s", "n", "$surface.GetTextureSize( $surface.GetTextureID( @value 1 ) )" )
+Component:AddPreparedFunction( "setDrawTexture", "s", "", "$surface.SetTexture( $surface.GetTextureID( @value 1 ) )" )
+Component:AddPreparedFunction( "setDrawColor", "n,n,n,n", "", "$surface.SetDrawColor( @value 1, @value 2, @value 3, @value 4 )" )
+EXPADV.AddFunctionAlias( "setDrawColor", "n,n,n" )
+EXPADV.AddFunctionAlias( "setDrawColor", "c" )
+
+Component:AddFunctionHelper( "getTextureSize", "s", "Returns the size of a texture" )
+Component:AddFunctionHelper( "setDrawTexture", "s", "Sets the texture used for rendering polys and boxs" )
+Component:AddFunctionHelper( "setDrawColor", "n,n,n,n", "Sets the color used for next draw operations" )
+
+/* -----------------------------------------------------------------------------------
+	@: Objects Line
+   --- */
+
+Component:AddPreparedFunction( "drawLine", "v2,v2", "", [[
 	$surface.DrawLine( @value 1.x, @value 1.y, @value 2.x, @value 2.y )
 ]] )
-Component:AddFunctionHelper( "drawLine", "v2,v2,c", "Draws a line between 2 points." )
 
-Component:AddPreparedFunction( "drawBox", "v2,v2,c", "", [[
-	$surface.SetDrawColor( @value 3 )
-	$surface.DrawRect( @value 1.x, @value 1.y, @value 2.x, @value 2.y )
-]] )
-Component:AddFunctionHelper( "drawBox", "v2,v2,c", "Draws a box ( Position, Size )." )
+Component:AddFunctionHelper( "drawLine", "v2,v2", "Draws a line between 2 points" )
 
-Component:AddPreparedFunction( "drawTriangle", "v2,v2,v2,c", "", [[
-	$surface.SetDrawColor( @value 4 )
-	$surface.DrawPoly( {@value 1, @value 2, @value 3} )
-]] )
-Component:AddFunctionHelper( "drawTriangle", "v2,v2,v2,c", "Draws a traingle from 3 points." )
+/* -----------------------------------------------------------------------------------
+	@: Rectangles
+   --- */
+
+Component:AddPreparedFunction( "drawBox", "v2,v2", "", "$surface.DrawRect( @value 1.x, @value 1.y, @value 2.x, @value 2.y )" )
+
+Component:AddPreparedFunction( "drawTexturedBox", "v2,v2", "", "$surface.DrawTexturedRect( @value 1.x, @value 1.y, @value 2.x, @value 2.y )" )
+
+Component:AddPreparedFunction( "drawTexturedBox", "v2,v2,n", "", "$surface.DrawTexturedRectRotated( @value 1.x, @value 1.y, @value 2.x, @value 2.y, @value 3 )" )
+
+Component:AddPreparedFunction( "drawTexturedBox", "v2,v2,n,n,n,n", "", "$surface.DrawTexturedRectUV( @value 1.x, @value 1.y, @value 2.x, @value 2.y, @value 3, @value 4, @value 5, @value 6 )" )
+
+
+Component:AddFunctionHelper( "drawBox", "v2,v2", "Draws a box ( Position, Size )." )
+Component:AddFunctionHelper( "drawTexturedBox", "v2,v2", "Draws a textured box ( Position, Size )." )
+Component:AddFunctionHelper( "drawTexturedBox", "v2,v2,n", "Draws a rotated textured box ( Position, Size, Angle )." )
+Component:AddFunctionHelper( "drawTexturedBox", "v2,v2,n,n,n,n", "Draws a textured box with uv co-ordinates ( Position, Size, U1, V1, U2, V2 )." )
+
+/* -----------------------------------------------------------------------------------
+	@: Polys
+   --- */
+
+Component:AddPreparedFunction( "drawTriangle", "v2,v2,v2", "", "$surface.DrawPoly( {@value 1, @value 2, @value 3} )" )
 
 Component:AddPreparedFunction( "drawPoly", "c,...", "", [[
-	$surface.SetDrawColor( @value 4 )
 	@define polygon = { }
 
 	for _, Variant in pairs( { @... } ) do
@@ -40,26 +165,10 @@ Component:AddPreparedFunction( "drawPoly", "c,...", "", [[
 
 	$surface.DrawPoly( @polygon )
 ]] )
+
+
+Component:AddFunctionHelper( "drawTriangle", "v2,v2,v2", "Draws a traingle from 3 points." )
 Component:AddFunctionHelper( "drawPoly", "c,...", "Draws a polygon using 2d vectors." )
-
-/* -----------------------------------------------------------------------------------
-	@: Text
-   --- */
-
-Component:AddPreparedFunction( "textSize", "s,s", "v2", [[
-	$surface.SetFont( @value 1 )
-	@define Size = Vector2( $surface.GetTextSize( @value 2 ) )
-]], "@Size" )
-Component:AddFunctionHelper( "getTextSize", "s,s", "Gets the render size of a string, where first argument is the font and the second is the string." )
-
-Component:AddPreparedFunction( "drawTextCentered", "v2,c,s,s", "", "$draw.SimpleText( @value 4, @value 3, @value 1.x, @value 1.y, @value 2, $TEXT_ALIGN_CENTER, $TEXT_ALIGN_CENTER)" )
-Component:AddFunctionHelper( "drawTextCentered", "v2,c,s,s", "Draws a string centered to its position (Position, Color, font, Text)." )
-
-Component:AddPreparedFunction( "drawTextAlignedLeft", "v2,c,s,s", "", "$draw.SimpleText( @value 4, @value 3, @value 1.x, @value 1.y, @value 2, $TEXT_ALIGN_LEFT, $TEXT_ALIGN_CENTER)" )
-Component:AddFunctionHelper( "drawTextAlignedLeft", "v2,c,s,s", "Draws a string alighed left of its position (Position, Color, font, Text)." )
-
-Component:AddPreparedFunction( "drawTextAlignedRight", "v2,c,s,s", "", "$draw.SimpleText( @value 4, @value 3, @value 1.x, @value 1.y, @value 2, $TEXT_ALIGN_RIGHT, $TEXT_ALIGN_CENTER)" )
-Component:AddFunctionHelper( "drawTextAlignedRight", "v2,c,s,s", "Draws a string alighed right of its position (Position, Color, font, Text)." )
 
 /* -----------------------------------------------------------------------------------
 	@: Screen
@@ -113,6 +222,7 @@ else
 end]], "@value" )
 
 Component:AddFunctionHelper( "screenToWorld", "v2", "Returns the position on screen as a world vector." )
+
 
 /* -----------------------------------------------------------------------------------
 	@: Hud Event
