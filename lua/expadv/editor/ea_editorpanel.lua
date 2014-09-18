@@ -44,7 +44,7 @@ function PANEL:Init( )
 	self.TabHolder:SetFadeTime( 0 )
 	timer.Simple( 0.1, function( )
 		if self:OpenOldTabs( ) then return end 
-		-- self:NewTab( ) 
+		self:NewTab( ) 
 	end )
 	
 	function self.TabHolder:CloseTab( tab, bRemovePanelToo )
@@ -127,10 +127,10 @@ function PANEL:Init( )
 	end
 	
 	hook.Add( "ShutDown", "EA_Shutdown", function(  )
+		self:SaveTabs( )
 		local Code = self:GetCode( )
 		if Code == "" then return end
 		file.Write( "expadv2/_shutdown_.txt", Code )
-		self:SaveTabs( )
 	end )
 	
 	file.CreateDir( "expadv2" )
@@ -160,7 +160,7 @@ end
 function PANEL:OnValidateError( ErrMsg, GoTo )
 	if Goto then
 		local Row, Col = ErrMsg:match( "at line ([0-9]+), char ([0-9]+)$" )
-		if !Row then Row, Col = ErrMsg:match( "at line ([0-9]+)$" ), 1 end
+		if not Row then Row, Col = ErrMsg:match( "at line ([0-9]+)$" ), 1 end
 
 		if Row then
 			Row, Col = tonumber( Row ), tonumber( Col )
@@ -184,7 +184,7 @@ function PANEL:OnValidateSucess( Instance, Istr )
 end
 
 function PANEL:DoValidationStep( )
-	if !self.ValidationInstance then return end
+	if not self.ValidationInstance then return end
 
 	coroutine.resume( self.ValidationInstance.CoRoutine )
 
@@ -194,7 +194,6 @@ function PANEL:DoValidationStep( )
 	end
 end
 
-
 function PANEL:SetCode( Code, Tab )
 	Tab = Tab or self.TabHolder:GetActiveTab( )
 	Tab:GetPanel( ):SetCode( Code )
@@ -202,13 +201,13 @@ end
 
 function PANEL:GetCode( Tab )
 	Tab = Tab or self.TabHolder:GetActiveTab( )
-	if !Tab then return end
+	if not Tab then return end
 	return Tab:GetPanel( ):GetCode( ), Tab.FilePath
 end
 
 function PANEL:GetName( Tab )
 	Tab = Tab or self.TabHolder:GetActiveTab( )
-	if !Tab then return end
+	if not Tab then return end
 	return Tab:GetText( )
 end
 
@@ -217,7 +216,7 @@ function PANEL:GetFileCode( Path )
 	if not string.StartWith( Path, "expadv2/" ) then Path = "expadv2/" .. Path end
 	if self.FileTabs[Path] then 
 		return self:GetCode( self.FileTabs[Path] )
-	elseif !Path or file.IsDir( Path, "DATA" ) then
+	elseif not Path or file.IsDir( Path, "DATA" ) then
 		return
 	else
 		local Data = file.Read( Path )
@@ -228,7 +227,7 @@ end
 
 function PANEL:GetSession( Tab )
 	Tab = Tab or self.TabHolder:GetActiveTab( )
-	if !Tab then return end
+	if not Tab then return end
 	return Tab:GetPanel( ):GetSession( ), Tab.FilePath
 end
 
@@ -254,7 +253,7 @@ function PANEL:SaveFile( Path, SaveAs, Tab, bNoSound )
 		FileMenu:SetSaveFile( Tab:GetText( ) )
 		
 		function FileMenu.DoSaveFile( _, Path, FileName )
-			if !FileName:EndsWith( ".txt" ) then
+			if not string.EndsWith( FileName, ".txt" ) then
 				FileName = FileName .. ".txt"
 			end
 			
@@ -279,14 +278,14 @@ function PANEL:SaveFile( Path, SaveAs, Tab, bNoSound )
 	
 	if not bNoSound then
 		surface.PlaySound( "ambient/water/drip3.wav" )
-		self.ValidateButton:SetText( "Saved as " .. Path )
+		self.ValidateButton:SetText( "Saved as " .. Path ) 
 	end
-	if not Tab.FilePath or Tab.FilePath:lower( ) ~= Path:sub( 11 ):lower( ) then
+	if not Tab.FilePath or string.lower( Tab.FilePath ) ~= string.lower( string.sub( Path, 9 ) ) then
 		if self.FileTabs[Tab.FilePath] then 
 			self.FileTabs[Tab.FilePath] = nil 
 		end 
-		Tab.FilePath = Path:sub( 11 )
-		self.FileTabs[Path:sub( 11 )] = Tab
+		Tab.FilePath = string.sub( Path, 9 )
+		self.FileTabs[Tab.FilePath] = Tab
 	end
 end
 
@@ -295,7 +294,7 @@ function PANEL:ShowOpenFile( )
 	FileMenu:SetLoadFile( )
 	
 	function FileMenu.DoLoadFile( _, Path, FileName )
-		if !FileName:EndsWith( ".txt" ) then
+		if not FileName:EndsWith( ".txt" ) then
 			FileName = FileName .. ".txt"
 		end
 			
@@ -308,14 +307,14 @@ function PANEL:ShowOpenFile( )
 end
 
 function PANEL:LoadFile( Path )
-	if !Path or file.IsDir( Path, "DATA" ) then return end
+	if not Path or file.IsDir( Path, "DATA" ) then return end
 	local Data = file.Read( Path )
 	
-	if !Data then return end
+	if not Data then return end
 	
 	self:AutoSave( )
 	local Title, Code = string.match( Data, "(.+)(.+)" )
-	self:NewTab( Code or Data, Path:sub( 11 ), Title )
+	self:NewTab( Code or Data, string.sub( Path, 9 ), Title )
 end
 
 function PANEL:SetSyntaxColorLine( func )
@@ -367,7 +366,7 @@ function PANEL:NewTab( Code, Path, Name )
 	end
 	
 	local TabName = Name
-	if !TabName and Path then
+	if not TabName and Path then
 		TabName = string.sub( Path, 0, #Path - 4 )
 	end
 	
@@ -468,19 +467,28 @@ function PANEL:CloseAllBut( pTab )
 	end
 end
 
+function PANEL:SaveTempFile( Tab )
+	if not ValidPanel( Tab ) then return end
+	local Code = Tab:GetPanel( ):GetCode( )
+	local Path = "expadv2_temp/" .. util.CRC( Code ) .. ".txt"
+	MakeFolders( Path )
+	file.Write( Path, "" .. Tab:GetText( ) .. "" .. Code .. "" )
+	return util.CRC( Code ) .. ".txt"
+end
+
 function PANEL:SaveTabs( )
-	local strtabs = ""
+	local strtabs = { }
 	for i = 1, #self.TabHolder.Items do 
 		if self.TabHolder.Items[i].Tab.Panel.Global then continue end 
 		local FilePath = self.TabHolder.Items[i].Tab.FilePath
-		if FilePath and FilePath != "" then
-			strtabs = strtabs .. FilePath .. ";"
+		if not FilePath or FilePath == "" then
+			// TODO: Complete this
+			FilePath = self:SaveTempFile( self.TabHolder.Items[i].Tab )
 		end
+		strtabs[#strtabs+1] = FilePath 
 	end
-
-	strtabs = strtabs:sub( 1, -2 )
-
-	file.Write( "expadv2/_tabs_.txt", strtabs )
+	
+	file.Write( "expadv2/_tabs_.txt", table.concat( strtabs, ";" ) ) 
 end
 
 function PANEL:AutoSave( Tab )
@@ -490,22 +498,44 @@ function PANEL:AutoSave( Tab )
 	file.Write( "expadv2/_autosave_.txt", code )
 end
 
+-- function PANEL:OpenTempTabs( )
+-- 	if not file.Exists( "expadv2_temp", "DATA" ) then return end 
+-- 	local List = file.Find( "expadv2_temp/*.txt", "DATA", "dateasc" )
+-- 	if #List <= 0 then return end 
+	
+-- 	for i = 1, #List do
+-- 		local Data = file.Read( "expadv2_temp/" .. List[i] )
+-- 		local Title, Code = string.match( Data, "(.+)(.+)" )
+-- 		self:NewTab( Code or Data, nil, Title ) 
+-- 		file.Delete( "expadv2_temp/" .. List[i] )
+-- 	end
+-- end
+
+function PANEL:LoadTempFile( sPath )
+	if not file.Exists( sPath, "DATA" ) then return false end 
+	local Data = file.Read( sPath ) 
+	local Name, Code = string.match( Data, "(.+)(.+)" )
+	self:NewTab( Code or Data, nil, Name ) 
+	return true 
+end
+
 function PANEL:OpenOldTabs( )
-	if !file.Exists( "expadv2/_tabs_.txt", "DATA" ) then return end 
+	if not file.Exists( "expadv2/_tabs_.txt", "DATA" ) then return false end 
 	
 	local tabs = file.Read( "expadv2/_tabs_.txt" )
-	if !tabs or tabs == "" then return end
+	if not tabs or tabs == "" then return false end
 	
 	tabs = string.Explode( ";", tabs )
-	if !tabs or #tabs == 0 then return end
+	if not tabs or #tabs == 0 then return false end
 	
 	local opentabs = false
 	for k, v in pairs( tabs ) do
-		v = "expadv2/" .. v
 		if v and v != "" then
-			if file.Exists( v, "DATA" ) then
+			if file.Exists( "expadv2/" .. v, "DATA" ) then
 				self:LoadFile( v, true )
 				opentabs = true
+			elseif string.StartWith( v, "expadv2_temp" ) then
+				if self:LoadTempFile( v ) then opentabs = true end 
 			end
 		end
 	end
@@ -666,21 +696,20 @@ local MicMaterial = Material( "fugue/microphone.png" )
 local function DrawMic( self, Pnl, Delta )
 	self.__nMicAlpha = math.Clamp( self.__nMicAlpha + Delta, 0, 1 )
 	local Alpha = self.__nMicAlpha
-
+	
 	if Alpha == 0 then return end
 	draw.RoundedBox( 4, Pnl:GetWide( ) - 55, 0, 55, 16, Color( 0, 0, 0, Alpha * 100 ) )
-			
+		
 	surface.SetDrawColor( 255, 255, 255, Alpha * 255 )
 	surface.SetMaterial( MicMaterial )
 	surface.DrawTexturedRect( Pnl:GetWide( ) - 15, 0, 16, 16 )
-
+	
 	draw.SimpleText( "Talking", "default", Pnl:GetWide( ) - 35, 8, Color( 0, 0, 0, Alpha * 255 ), 1, 1 )
 end
 
 function PANEL:ToggleVoice( )
-
-	self.__bVoice = !self.__bVoice
-
+	self.__bVoice = not self.__bVoice
+	
 	if self.__bVoice then
 		RunConsoleCommand( "+voicerecord" )
 		function self.TabHolder.tabScroller.Paint( Pnl )
@@ -700,27 +729,27 @@ end
 function PANEL:AddSharedInvite( ID, Host, Name )
 	self.SharedInviteCount = (self.SharedInviteCount or 0) + 1
 	local List = self.ToolBar.pnlSharedList
-
+	
 	local Pnl = vgui.Create( "DPanel" )
 	Pnl:SetTall( 20 )
-
+	
 	local Avt = Pnl:Add( "AvatarImage" )
 	Avt:SetSize( 16, 16 )
 	Avt:SetPos( 3, 3 )
 	Avt:SetPlayer( Host, 16 )
-
+	
 	local Lbl = Pnl:Add( "DLabel" )
 	Lbl:SetPos( 25, 3 )
 	Lbl:SetText( Name )
 	Lbl:SetTextColor( Color( 0, 0, 0, 255 ) )
 	Lbl:SizeToContents( )
-
+	
 	local Accept = Pnl:Add( "EA_ImageButton" )
 	Accept:SetPos( 160, 3 )
 	Accept:DrawButton( false )
 	Accept:SetTooltip( "Join Session" ) 
 	Accept:SetMaterial( Material( "fugue/hand-shake.png") )
-
+	
 	local Reject = Pnl:Add( "EA_ImageButton" )
 	Reject:SetPos( 180, 3 )
 	Reject:DrawButton( false )
@@ -732,10 +761,10 @@ function PANEL:AddSharedInvite( ID, Host, Name )
 		self.ToolBar.pnlSharedView:PerformLayout( )
 		self.ToolBar.pnlSharedView:SetVisible( false )
 		self.SharedInviteCount = self.SharedInviteCount - 1
-
+		
 		RunConsoleCommand( "lemon_editor_join", ID )
 	end
-
+	
 	function Reject.DoClick( Btn )
 		List:RemoveItem( Pnl )
 		self.ToolBar.pnlSharedView:PerformLayout( )
@@ -743,7 +772,7 @@ function PANEL:AddSharedInvite( ID, Host, Name )
 
 		RunConsoleCommand( "lemon_editor_decline", ID )
 	end
-
+	
 	List:InsertAtTop( Pnl, "ownline" )
 	self.ToolBar.pnlSharedView:InvalidateLayout()
 end

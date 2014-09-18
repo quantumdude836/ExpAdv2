@@ -10,7 +10,7 @@ function PANEL:Init( )
 	self:ShowCloseButton( true )
 	self:DockPadding( 0, 26, 0, 0 )
 	
-	self.CurrentPath = cookie.GetNumber( "eafilebrowser_cpath", "expadv2" )
+	self.CurrentPath = cookie.GetString( "eafilebrowser_cpath", "expadv2" )
 	
 	self.RightPanel = vgui.Create( "DPanel" )
 	self:BuildPathBar( self.RightPanel )
