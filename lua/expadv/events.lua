@@ -54,21 +54,21 @@ function EXPADV.LoadEvents( )
 		if !Event.Return or Event.Return == "" then
 			Event.Return = nil
 		elseif Event.Return and Event.Return == "..." then
-			MsgN( string.format( "Skipped event %s, can not return var arg.", Event.Name ) )
+			EXPADV.Msg( string.format( "Skipped event %s, can not return var arg.", Event.Name ) )
 			continue
 		else
 			local Class = EXPADV.GetClass( Event.Return, false, true )
 			
 			if !Class then 
-				MsgN( string.format( "Skipped event: %s(%s), Invalid return class %s.", Event.Name, Event.Input, Event.Return ) )
+				EXPADV.Msg( string.format( "Skipped event: %s(%s), Invalid return class %s.", Event.Name, Event.Input, Event.Return ) )
 				continue
 			end
 
 			if !Class.LoadOnServer and Event.LoadOnServer then
-				MsgN( string.format( "Skipped event: %s(%s), return class %s is not avalible on server.", Event.Name, Event.Input, Event.Return ) )
+				EXPADV.Msg( string.format( "Skipped event: %s(%s), return class %s is not avalible on server.", Event.Name, Event.Input, Event.Return ) )
 				continue
 			elseif !Class.LoadOnClient and Event.LoadOnClient then
-				MsgN( string.format( "Skipped event: %s(%s), return class %s is not avalible on clients.", Event.Name, Event.Input, Event.Return ) )
+				EXPADV.Msg( string.format( "Skipped event: %s(%s), return class %s is not avalible on clients.", Event.Name, Event.Input, Event.Return ) )
 				continue
 			end
 
@@ -85,7 +85,7 @@ function EXPADV.LoadEvents( )
 
 				-- First lets check for varargs.
 				if Input == "..." then
-					MsgN( string.format( "Skipped event: %s(%s), vararg (...) must not appear inside event parameters.", Operator.Name, Operator.Input ) )
+					EXPADV.Msg( string.format( "Skipped event: %s(%s), vararg (...) must not appear inside event parameters.", Operator.Name, Operator.Input ) )
 					break
 				end
 
@@ -93,17 +93,17 @@ function EXPADV.LoadEvents( )
 				local Class = EXPADV.GetClass( Input, false, true )
 				
 				if !Class then 
-					MsgN( string.format( "Skipped event: %s(%s), Invalid class for parameter #%i %s.", Event.Name, Event.Input, I, Input ) )
+					EXPADV.Msg( string.format( "Skipped event: %s(%s), Invalid class for parameter #%i %s.", Event.Name, Event.Input, I, Input ) )
 					ShouldNotLoad = true
 					break
 				end
 
 				if !Class.LoadOnServer and Event.LoadOnServer then
-					MsgN( string.format( "Skipped event: %s(%s), parameter #%i %s is not avalible on server.", Event.Name, Event.Input, I, Class.Name ) )
+					EXPADV.Msg( string.format( "Skipped event: %s(%s), parameter #%i %s is not avalible on server.", Event.Name, Event.Input, I, Class.Name ) )
 					ShouldNotLoad = true
 					break
 				elseif !Class.LoadOnClient and Event.LoadOnClient then
-					MsgN( string.format( "Skipped event: %s(%s), parameter #%i %s is not avalible on clients.", Event.Name, Event.Input, I, Class.Name ) )
+					EXPADV.Msg( string.format( "Skipped event: %s(%s), parameter #%i %s is not avalible on clients.", Event.Name, Event.Input, I, Class.Name ) )
 					ShouldNotLoad = true
 					break
 				end
@@ -123,7 +123,7 @@ function EXPADV.LoadEvents( )
 		-- Do we still need to load this?
 		if ShouldNotLoad then continue end
 
-		MsgN( "Registered Event: " .. Event.Signature )
+		EXPADV.Msg( "Registered Event: " .. Event.Signature )
 
 		EXPADV.Events[ Event.Name ] = Event
 	end

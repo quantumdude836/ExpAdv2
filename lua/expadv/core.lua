@@ -5,6 +5,17 @@
 EXPADV = { }
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Debugging Stuff
+   --- */
+
+local DebugMsg = CreateConVar( "expadv_debug", "0", {FCVAR_REPLICATED} )
+
+function EXPADV.Msg( ... )
+	if DebugMsg:GetInt( ) <= 0 then return end
+	MsgN( ... )
+end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Sometimes We might need to convert objects into native.
    --- */
 
@@ -82,7 +93,7 @@ function EXPADV.LoadConfig( )
 
 	Config.Settings = Config.Settings or { }
 
-	MsgN( "ExpAdv: Loaded config file, sucessfully." )
+	EXPADV.Msg( "ExpAdv: Loaded config file, sucessfully." )
 
 	EXPADV.Config = Config
 
@@ -140,7 +151,7 @@ end
 
 function EXPADV.AddComponentFile( FileName )
 	EXPADV.SharedOperators( )
-	MsgN( "Loading Component: " .. FileName )
+	EXPADV.Msg( "Loading Component: " .. FileName )
 	include( "expadv/components/" .. FileName .. ".lua" )
 
 	if CLIENT then return end
@@ -392,7 +403,7 @@ if SERVER then
 		local Ok, Msg = pcall( EXPADV.SendDataStream )
 		
 		if !Ok then
-			MsgN( "ExpAdv2 - Error in main Data stream: ", Msg )
+			EXPADV.Msg( "ExpAdv2 - Error in main Data stream: ", Msg )
 		end
 	end )
 
@@ -421,7 +432,7 @@ hook.Add( "Think", "expadv.Hook", function( )
 	local Ok, Msg = pcall( EXPADV.CallHook, "Think" )
 	
 	if !Ok then
-		MsgN( "ExpAdv2 - Error in main Think hook: ", Msg )
+		EXPADV.Msg( "ExpAdv2 - Error in main Think hook: ", Msg )
 	end
 end )
 

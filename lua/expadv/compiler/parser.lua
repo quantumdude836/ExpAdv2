@@ -955,9 +955,9 @@ function Compiler:Statement_4( Trace )
 			local Test = Event.Input[I]
 			 
 			if !Test then
-				self:TraceError( Trace, "Invalid perameter #%i to event %s, no perameter expected", I, Name )
+				self:TraceError( Trace, "Invalid perameter #%i to event %s, for perameter expected", I, Name )
 			elseif Test ~= Peram[2] then
-				self:TraceError( Trace, "Invalid perameter #%i to event %s, %s expected", I, Name, self:NiceClass( Peram[2] ) )
+				self:TraceError( Trace, "Invalid perameter #%i for event %s, %s expected got %s", I, Name, self:NiceClass( Test ) ,self:NiceClass( Peram[2] ) )
 			end
 		end
 

@@ -348,7 +348,7 @@ MathComponent:AddFunctionHelper( "mix", "n,n,n", "Returns a linear interpolation
 @: Loop
    --- */
 
-MathComponent:AddPreparedOperator( "for=n", "n,n,n,?", "", [[
+Number:AddPreparedOperator( "for", "n,n,n,?", "", [[
    for i = @value 1, @value 2, @value 3 do
       @prepare 4
    end

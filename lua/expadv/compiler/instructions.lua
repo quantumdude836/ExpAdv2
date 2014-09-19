@@ -822,7 +822,7 @@ end
    --- */
 
 function Compiler:Compile_FOR( Trace, Class, AssInstr, Memory, Start, End, Step, Sequence )
-	local Operator = self:LookUpOperator( "for=" .. Class.Short, Start.Return, End.Return, Step.Return )
+	local Operator = self:LookUpClassOperator( Class.Short, "for", Start.Return, End.Return, Step.Return )
 
 	if !Operator then
 		self:TraceError( Trace, "No such loop 'for(%s = %s, %s, %s)'", self:NiceClass( Class.Short, Start.Return, End.Return, Step.Return ) )

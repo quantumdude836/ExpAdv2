@@ -250,7 +250,7 @@ function EXPADV.LoadClasses( )
  		Index = Index + 1
 
  		if Class.Component and !Class.Component.Enabled then
- 			MsgN( "Skipping class " .. Class.Name .. " (component disabled)." )
+ 			EXPADV.Msg( "Skipping class " .. Class.Name .. " (component disabled)." )
  			continue
  		end
 
@@ -273,7 +273,7 @@ function EXPADV.LoadClasses( )
 
  			EXPADV.ClassShorts[ Class.Short ] = nil
 
- 			MsgN( "Skipping class " .. Class.Name .. " (extends invalid class '" .. (Class.DeriveFrom or "void") .. "')." )
+ 			EXPADV.Msg( "Skipping class " .. Class.Name .. " (extends invalid class '" .. (Class.DeriveFrom or "void") .. "')." )
  			
  			continue
  		end
@@ -288,7 +288,7 @@ function EXPADV.LoadClasses( )
  			EXPADV.ClassAliases[ Alias ] = Class
  		end
 
- 		MsgN( "Registered Class: " .. Class.Name .. " - " .. Class.Short )
+ 		EXPADV.Msg( "Registered Class: " .. Class.Name .. " - " .. Class.Short )
  	end -- ^ Derive classes!
 
  	----------------------------------------------------------

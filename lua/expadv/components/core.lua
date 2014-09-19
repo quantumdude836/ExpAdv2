@@ -156,7 +156,7 @@ local FunctionClass = EXPADV.AddClass( nil, "function", "f" )
 	  
 FunctionClass:DefaultAsLua( "function( ) end" )
 
-FunctionClass:AddPreparedOperator( "=", "n,f", "", "Context.Memory[@Value 1] = @value 2" )
+FunctionClass:AddPreparedOperator( "=", "n,f", "", "Context.Memory[@value 1] = @value 2" )
 
 EXPADV.AddPreparedOperator( nil, "call", "f,s,...", "_vr", [[
 	@define Return, Type = @value 1(@...)
@@ -172,7 +172,7 @@ EXPADV.AddException( nil, "invoke" )
 
 local DelgateClass = EXPADV.AddClass( nil, "delegate", "d" )
 
-DelgateClass:AddPreparedOperator( "=", "n,d", "", "Context.Memory[@Value 1] = @value 2" )
+DelgateClass:AddPreparedOperator( "=", "n,d", "", "Context.Memory[@value 1] = @value 2" )
 
 EXPADV.AddInlineOperator( nil, "delegate", "f", "d", "@value 1" )
 
@@ -184,7 +184,7 @@ EXPADV.AddInlineOperator( nil, "function", "d", "f", "@value 1" )
 
 local Class_Exception = EXPADV.AddClass( nil, "exception", "ex" )
 
-Class_Exception:AddInlineOperator( "=", "n,ex", "", "Context.Memory[@Value 1] = @value 2" )
+Class_Exception:AddInlineOperator( "=", "n,ex", "", "Context.Memory[@value 1] = @value 2" )
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 @: Exceptions

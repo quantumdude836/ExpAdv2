@@ -17,6 +17,21 @@ PlayerClass:DefaultAsLua( Entity(0) )
 PlayerClass:ExtendClass( "e" )
 
 /* --- --------------------------------------------------------------------------------
+	@: Logical and Comparison
+   --- */
+
+EXPADV.SharedOperators( )
+
+Component:AddInlineOperator( "==", "ply,ply", "b", "(@value 1 == @value 2)" )
+Component:AddInlineOperator( "!=", "ply,ply", "b", "(@value 1 ~= @value 2)" )
+
+Component:AddInlineOperator( "==", "ply,e", "b", "(@value 1 == @value 2)" )
+Component:AddInlineOperator( "!=", "ply,e", "b", "(@value 1 ~= @value 2)" )
+
+Component:AddInlineOperator( "==", "e,ply", "b", "(@value 1 == @value 2)" )
+Component:AddInlineOperator( "!=", "e,ply", "b", "(@value 1 ~= @value 2)" )
+
+/* --- --------------------------------------------------------------------------------
 	@: Casting
    --- */
 
