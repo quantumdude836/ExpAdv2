@@ -529,6 +529,30 @@ function Compiler:Expression_Value( Trace )
 		return self:Compile_STR( self:GetTokenTrace( Trace ), self.TokenData )
 	--elseif self:CheckToken( "lsb" ) then
 	--	return self:Expression_Array( Trace )
+	elseif self:AcceptToken( "func" ) then
+		self:RequireToken( "lpa", "Left parenthesis ( () missing, to open delegated function arguments" )
+		
+		self:PushScope( )
+		self:PushLambdaDeph( )
+		self:PushReturnDeph( ReturnClass, false )
+
+		local Perams, UseVarg = self:Util_Perams( Trace )
+		
+		self:RequireToken( "rpa", "Right parenthesis () ) missing, to close delegated function arguments" )
+		
+		self:RequireToken( "lcb", "Left curly bracket ({) missing, to open delegated function" )
+
+		local Sequence = self:Sequence( Trace, "rcb" )
+
+		local Memory = self:PopLambdaDeph( )
+		self:PopReturnDeph( )
+		self:PopScope( )
+
+		self:RequireToken( "rcb", "Right curly bracket (}) missing, to close delegated function" )
+
+		local Instr = self:Build_Function( Trace, Perams, UseVarg, Sequence, Memory )
+		Instr.Return = "d"
+		return Instr
 	end
 end
 
@@ -1168,7 +1192,7 @@ function Compiler:Statement_6( Trace )
 		if self:AcceptToken( "ass" ) then
 			Function = self:Expression( Trace )
 		else
-			self:RequireToken( "lpa", "Left parenthesis ( () missing, after function name" )
+			self:RequireToken( "lpa", "Left parenthesis ( () missing, to open function arguments" )
 		
 			self:PushScope( )
 			self:PushLambdaDeph( )
@@ -1176,9 +1200,9 @@ function Compiler:Statement_6( Trace )
 
 			local Perams, UseVarg = self:Util_Perams( Trace )
 			
-			self:RequireToken( "rpa", "Right parenthesis () ) missing, to open function" )
+			self:RequireToken( "rpa", "Right parenthesis () ) missing, to close function arguments" )
 			
-			self:RequireToken( "lcb", "Left curly bracket ({) missing, to open fnction" )
+			self:RequireToken( "lcb", "Left curly bracket ({) missing, to open function" )
 	
 			local Sequence = self:Sequence( Trace, "rcb" )
 	
@@ -1284,20 +1308,27 @@ function Compiler:Statement_8( Trace )
 
 			self:RequireToken( "rpa", "Right parenthesis ( )) missing, after for loop step" )
 
-			--[[
-				self:RequireToken( "lcb", "Left curly bracket ({) missing, to open loop" )
-	
-				local Sequence = self:Sequence( Trace, "rcb" )
-				
-				self:RequireToken( "rcb", "Right curly bracket (}) mis sing, to close loop" )
-			]]
-
 			local Sequence = self:GetBlock( Trace, "to close for loop" )
 
 		local Memory = self:PopLoopDeph( )
 		self:PopScope( )
 		
 		return self:Compile_FOR( Trace, Class, AssInstr, Memory, Start, End, Step, Sequence )
+
+	elseif self:AcceptToken( "whl" ) then
+		local Trace = self:GetTokenTrace( Trace )
+
+		self:PushScope( )
+		self:PushLoopDeph( )
+
+			local Exp = self:GetCondition( Trace, "to open while loop condition.", "to close while loop condition." )
+
+			local Sequence = self:GetBlock( Trace, "to close while loop" )
+
+		local Memory = self:PopLoopDeph( )
+		self:PopScope( )
+		
+		return self:Compile_WHILE( Trace, Exp, Sequence )
 	end
 
 	return self:Statement_9( Trace )

@@ -19,7 +19,7 @@ setmetatable = setmetatable
 
 -- Builds a new context from a compilers instance.
 function EXPADV.BuildNewContext( Instance, Player, Entity ) -- Table, Player, Entity
-	local Context = setmetatable( { player = Player, entity = Entity, Deph = 0, Online = false }, EXPADV.RootContext )
+	local Context = setmetatable( { player = Player, entity = Entity, Online = false }, EXPADV.RootContext )
 
 	Context.Trigger = { }
 	Context.Changed = { }
@@ -41,48 +41,14 @@ function EXPADV.BuildNewContext( Instance, Player, Entity ) -- Table, Player, En
 		StopWatch = 0,
 	}
 
+	Context.Monitor = {
+		Perf = 0,
+		Usage = 0,
+		StopWatch = 0,
+		State = 0,
+	}
+
 	return Context
-end
-
--- Pushes the contexts memory upwards.
-function EXPADV.RootContext:Push( Trace, Cells ) -- Table, Table
-	if self.Deph > 50 then self:Throw( Trace, "stack", "stack overflow" ) end
-
-	local Memory = {
-		__index = self.Memory, -- function( Table, Key ) return Cells[Key] and rawget( Table, Key ) or self.Memory[Key] end,
-		__newindex = function( Table, Key, Value ) if Cells[Key] then rawset( Table, Key, Value ) else rawset(self.Memory, Key, Value )  end end,
-	}
-
-	local Delta = {
-		__index = self.Delta, -- function( Table, Key ) return Cells[Key] and rawget( Table, Key ) or self.Memory[Key] end,
-		__newindex = function( Table, Key, Value ) if Cells[Key] then rawset( Table, Key, Value ) else rawset(self.Delta, Key, Value )  end end,
-	}
-
-	local Changed = {
-		__index = self.Changed, -- function( Table, Key ) return Cells[Key] and rawget( Table, Key ) or self.Memory[Key] end,
-		__newindex = function( Table, Key, Value ) if Cells[Key] then rawset( Table, Key, Value ) else rawset(self.Changed, Key, Value ) end end,
-	}
-
-	return setmetatable( {
-		Data = self.Data,
-		Deph = self.Deph + 1,
-
-		Trigger = self.Trigger,
-		Definitions = self.Definitions,
-		Cells = self.Cells,
-		Strings = self.Strings,
-		Instructions = self.Instructions,
-		Enviroment = self.Enviroment,
-
-		Memory = setmetatable( Memory, Memory ),
-		Delta = setmetatable( Delta, Delta ),
-		Changed = setmetatable( Changed, Changed ),
-
-		Status = Status,
-
-		player = self.player,
-		entity = self.entity,
-	}, EXPADV.RootContext )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -91,27 +57,46 @@ end
 
 EXPADV.Updates = { }
 
+local SysTime = SysTime
+local debug_sethook = debug.sethook
+
 -- Safely execute a function on this context.
 function EXPADV.RootContext:Execute( Location, Operation, ... ) -- String, Function, ...
 	
-	local Status = self.Status
+	local Status, Instance = self.Status
 
-	Status.BenchMark = SysTime( )
+	-- Memory Instaces
 
-	debug.sethook( function( )
-		Status.Perf = Status.Perf + expadv_luahook
-
-		if Status.Perf > expadv_tickquota then
-			debug.sethook( )
-			error( { Trace = {0,0}, Quota = true, Msg = Message, Context = self }, 0 )
+		if Location ~= "Root" then
+			Instance = EXPADV.CloneContext( self )
 		end
-	end, "", expadv_luahook )
 
-	local Ok, Result = pcall( Operation, ... )
+	-- Ops monitoring:
 
-	debug.sethook( )
+		local function op_counter( )
+			Status.Perf = Status.Perf + expadv_luahook
 
-	Status.StopWatch = Status.StopWatch + (SysTime( ) - Status.BenchMark)
+			if Status.Perf > expadv_tickquota then
+				debug.sethook( )
+				MsgN( "Quota Exceeded: ", Status.Perf, " / ", expadv_tickquota )
+				error( { Trace = {0,0}, Quota = true, Msg = Message, Context = Context }, 0 )
+			end
+		end
+
+		Status.BenchMark = SysTime( )
+
+		debug_sethook( op_counter, "", expadv_luahook )
+
+	-- Execuiton:
+
+		local Ok, Result = pcall( Operation, Instance or self, ... )
+
+	-- Reset Ops Monitor
+		debug.sethook( )
+
+		Status.StopWatch = Status.StopWatch + (SysTime( ) - Status.BenchMark)
+
+
 
 	if !Ok and isstring( Result ) then
 		if IsValid( self.entity ) then self.entity:ScriptError( Result ) end
@@ -122,11 +107,16 @@ function EXPADV.RootContext:Execute( Location, Operation, ... ) -- String, Funct
 	elseif Ok or Result.Exit then
 
 		if (Status.Counter + Status.Perf - expadv_softquota) > expadv_hardquota then
+
 			if IsValid( self.entity ) then self.entity:HitHardQuota( ) end
 			
 			self:ShutDown( )
 
 			return false
+		end
+
+		if Instance then
+			EXPADV.ObsorbContext( self, Instance )
 		end
 
 		EXPADV.Updates[self] = true
@@ -171,7 +161,7 @@ function EXPADV.RootContext:ScriptError( Trace, Message ) -- Table, String
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
-	@: Context registery.
+	@: Staring / Stopping
    --- */
 
 -- Runs the root execution of the code.
@@ -201,23 +191,6 @@ function EXPADV.RootContext:ShutDown( )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
-	@: Context Events.
-   --- */
-
--- Calls A context based hook, with passthrough to main hook system.
--- DEPRICATED, Will be removed!
-function EXPADV.RootContext:Handel( Name, ... )
-	local Hook = self["On" .. Name]
-		
-	if Hook then
-		local Results = { Hook( self, ... ) }
-		if Results[1] ~= nil then return unpack( ... ) end
-	end
-
-	return EXPADV.CallHook( Name, self, ... )
-end
-
-/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Context registery.
 --- */
    
@@ -238,6 +211,50 @@ function EXPADV.UnregisterContext( Context )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Context Clone Loading.
+--- */
+
+function EXPADV.CloneContext( C )
+	local Clone = setmetatable( {
+		player = C.player,
+		entity = C.entity,
+		Status = C.Status,
+		Trigger = C.Trigger,
+		Online = C.Online,
+
+		Data = C.Data,
+		Definitions = C.Definitions,
+
+		Cells = C.Cells,
+		Strings = C.Strings,
+		Instructions = C.Instructions,
+		Enviroment = C.Enviroment,
+
+		Changed = { },
+		Memory = { },
+		Delta = { },
+	}, EXPADV.RootContext )
+
+	for K, _ in pairs( C.Memory ) do
+		Clone.Memory[K] = C.Memory[K]
+		Clone.Delta[K] = C.Delta[K]
+		Clone.Trigger[K] = C.Trigger[K]
+		Clone.Changed[K] = C.Changed[K]
+	end
+
+	return Clone, C
+end
+
+function EXPADV.ObsorbContext( C, With )
+	for K, _ in pairs( C.Memory ) do
+		C.Memory[K] = With.Memory[K]
+		C.Delta[K] = With.Delta[K]
+		C.Trigger[K] = With.Trigger[K]
+		C.Changed[K] = With.Changed[K]
+	end
+end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Context Updating.
 --- */
 
@@ -246,7 +263,7 @@ hook.Add( "Tick", "ExpAdv2.Update", function( )
 		if !IsValid( Context.entity ) then continue end
 
 		local Ok, Msg = pcall( Context.entity.UpdateTick, Context.entity )
-		
+
 		if !Ok then
 			Context.entity:LuaError( Msg )
 			Context:ShutDown( )
@@ -254,6 +271,42 @@ hook.Add( "Tick", "ExpAdv2.Update", function( )
 	end
 
 	EXPADV.Updates = { }
+end )
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Context Monitoring.
+--- */
+
+EXPADV_STATE_OFFLINE = 0
+EXPADV_STATE_ONLINE = 1
+EXPADV_STATE_ALERT = 2
+EXPADV_STATE_CRASHED = 3
+EXPADV_STATE_BURNED = 4
+
+hook.Add( "Tick", "ExpAdv2.Performance", function( )
+	for Context, _ in pairs( EXPADV.CONTEXT_REGISTERY ) do
+		if !Context.Online then continue end
+
+		local Status, Monitor = Context.Status, Context.Monitor
+
+		Monitor.Perf = Status.Perf
+		Monitor.Usage = Monitor.Usage * 0.95 + (Status.Perf * 0.05)
+		Monitor.StopWatch = Monitor.StopWatch * 0.95 + ( Status.StopWatch * 50000 )
+
+		local Counter = Status.Counter or 0
+		Counter = Counter + Status.Perf - expadv_softquota
+		if Counter < 0 then Counter = 0 end
+
+		Status.Perf = 0
+		Status.StopWatch = 0
+		Status.Counter = Counter
+
+		if Counter > expadv_hardquota * 0.5 then
+			Monitor.State = EXPADV_STATE_ALERT
+		else
+			Monitor.State = EXPADV_STATE_ONLINE
+		end
+	end
 end )
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------

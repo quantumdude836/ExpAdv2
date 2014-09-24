@@ -92,7 +92,14 @@ function ENT:HitHardQuota( ) end
 function ENT:LuaError( Msg ) end
 function ENT:ScriptError( Msg ) end
 function ENT:Exception( Exception ) end
-function ENT:UpdateTick( ) if WireLib and SERVER then self:TriggerOutputs( ) end end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: WirePort Trigger
+   --- */
+
+function ENT:UpdateTick( )
+	if WireLib and SERVER then self:TriggerOutputs( ) end
+end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Context
@@ -103,6 +110,11 @@ function ENT:GetContext( )
 end
 
 function ENT:OnContextCreated( Context )
+	-- For usage of derived classes only!
+	-- Return true to disable context callbacks.
+end
+
+function ENT:PostStartUp( )
 	-- For usage of derived classes only!
 	-- Return true to disable context callbacks.
 end
@@ -162,13 +174,16 @@ function ENT:OnCompileError( ErMsg, Compiler ) end
 function ENT:BuildInstance( Instance, Instruction )
 	
 	local Native = table.concat( {
-		"return function( Context )",
-		"setfenv( 1, Context.Enviroment )",
-		Instruction.Prepare or "",
-		Instruction.Inline or "",
+		"return function( RootContext )",
+		"setfenv( 1, RootContext.Enviroment )",
+		"local Context = RootContext",
+			Instruction.Prepare or "",
+			Instruction.Inline or "",
 		"end"
 	}, "\n" )
-
+	
+	file.Write( "expadv_compile.txt", Native )
+	
 	local Compiled = CompileString( Native, "EXPADV2", false )
 
 	if isstring( Compiled ) then
@@ -179,15 +194,21 @@ function ENT:BuildInstance( Instance, Instruction )
 	
 	self.Cells = Instance.Cells 
 
-	pcall( function( )
+	local Ok, Error = pcall( function( )
 		if WireLib and SERVER then
 			self:BuildInputs( self.Cells, Instance.InPorts )
 			self:BuildOutputs( self.Cells, Instance.OutPorts )
 			self:LoadFromInputs( )
 		end
+
+		Context:StartUp( Compiled( ) )
+
+		self:PostStartUp( Context )
 	end )
 
-	Context:StartUp( Compiled( ) )
+	if !Ok then
+		return self:OnCompileError( Error, Instance )
+	end
 
 	if CLIENT then
 		local Package = vnet.CreatePacket( "expadv.cl_loaded" )

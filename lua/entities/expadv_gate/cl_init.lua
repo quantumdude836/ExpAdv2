@@ -42,24 +42,24 @@ function ENT:DrawOverlay( Pos, Ang )
                         surface.DrawTexturedRect( 0, 0, 200 * mul, 100 * mul )
                 
                 -- Client Panel
-                        local CLState = self:GetStateCL( ) or 0
+                        local CLState = self:GetClientState( ) or 0
 
-                        if CLState == EXPADV_STATE_ONLINE then
-                            surface.SetMaterial( Overlay_ClientGreen )
-                            surface.DrawTexturedRect( 0, 0, 200 * mul, 100 * mul )
-                        elseif CLState >= EXPADV_STATE_CRASHED then
+                        if CLState >= EXPADV_STATE_CRASHED then
                             surface.SetMaterial( Overlay_ClientRed )
+                            surface.DrawTexturedRect( 0, 0, 200 * mul, 100 * mul )
+                        elseif CLState >= EXPADV_STATE_ONLINE then
+                            surface.SetMaterial( Overlay_ClientGreen )
                             surface.DrawTexturedRect( 0, 0, 200 * mul, 100 * mul )
                         end
 
                 -- Server Panel
-                        local SVState = self:GetStateSV( ) or 0
+                        local SVState = self:GetServerState( ) or 0
 
-                        if SVState == EXPADV_STATE_ONLINE then
-                            surface.SetMaterial( Overlay_ServerGreen )
-                            surface.DrawTexturedRect( 0, 0, 200 * mul, 100 * mul )
-                        elseif SVState >= EXPADV_STATE_CRASHED then
+                        if SVState >= EXPADV_STATE_CRASHED then
                             surface.SetMaterial( Overlay_ServerRed )
+                            surface.DrawTexturedRect( 0, 0, 200 * mul, 100 * mul )
+                        elseif SVState >= EXPADV_STATE_ONLINE then
+                            surface.SetMaterial( Overlay_ServerGreen )
                             surface.DrawTexturedRect( 0, 0, 200 * mul, 100 * mul )
                         end
 
@@ -69,16 +69,16 @@ function ENT:DrawOverlay( Pos, Ang )
                 -- Client Display
                         draw.SimpleText( "Client:", "ExpAdv_OverlayFont", 50 * mul, 30 * mul, Color( 255, 255, 255, 255 ), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
                         
-                        local Counter = self:GetTickQuotaCL( ) or 0
+                        local Counter = self.ClientTickQuota or 0
                         local Line = string.format( "Quota: %i, %i%%", Counter, (Counter / expadv_hardquota) * 100 )
                         draw.SimpleText( Line, "ExpAdv_OverlayFont", 50 * mul, 40 * mul, Color( 255, 255, 255, 255 ), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
                            
-                        local Line2 = string.format( "Usage: %i",  self:GetAverageCL( ) or 0 )
+                        local Line2 = string.format( "Usage: %i",  self.ClientAverage or 0 )
                         draw.SimpleText( Line2, "ExpAdv_OverlayFont", 50 * mul, 50 * mul, Color( 255, 255, 255, 255 ), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
                             
-                        local Line3 = string.format( "CPU: %i us",  self:GetStopWatchCL( ) or 0 )
+                        local Line3 = string.format( "CPU: %i us",  self.ClientStopWatch or 0 )
                         draw.SimpleText( Line3, "ExpAdv_OverlayFont", 50 * mul, 60 * mul, Color( 255, 255, 255, 255 ), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
-
+                        
 
                 -- Server Display
                         draw.SimpleText( "Server:", "ExpAdv_OverlayFont", 150 * mul, 30 * mul, Color( 255, 255, 255, 255 ), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
@@ -93,7 +93,7 @@ function ENT:DrawOverlay( Pos, Ang )
                         local Line3 = string.format( "CPU: %i us",  self:GetStopWatch( ) or 0 )
                         draw.SimpleText( Line3, "ExpAdv_OverlayFont", 150 * mul, 60 * mul, Color( 255, 255, 255, 255 ), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
 
-         cam.End3D2D()
+         cam.End3D2D( )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------

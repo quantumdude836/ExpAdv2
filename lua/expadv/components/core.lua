@@ -144,8 +144,6 @@ hook.Add( "Expadv.PostRegisterClass", "expad.variant", function( Name, Class )
 	EXPADV.AddInlineOperator( nil, Name, "vr", Class.Short, string.format( "( @value 1[2] == %q and @value 1[1] or Context:Throw(@trace, %q, \"Attempt to cast value \" .. EXPADV.TypeName(@value 1[2]) .. \" to %s \") )", Class.Short, "cast", Name ) )
 end )	
 
-
-
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Define function class
    --- */
@@ -159,10 +157,11 @@ FunctionClass:DefaultAsLua( "function( ) end" )
 FunctionClass:AddPreparedOperator( "=", "n,f", "", "Context.Memory[@value 1] = @value 2" )
 
 EXPADV.AddPreparedOperator( nil, "call", "f,s,...", "_vr", [[
-	@define Return, Type = @value 1(@...)
-	if @value 2 and @Type ~= @value 2 then
+	@define Return, Type = @value 1( Context, @...)
+	if @value 2 and @Type ~= @value 2 and !(@value 2 == "void" and !@Return) then
 		Context:Throw( @trace, "invoke", string.format( "Invalid return value, %s expected got %s", @value 2, @Type ) )
-end]], "@Return" )
+	end
+]], "@Return" )
 
 EXPADV.AddException( nil, "invoke" )
 
@@ -191,6 +190,17 @@ Class_Exception:AddInlineOperator( "=", "n,ex", "", "Context.Memory[@value 1] = 
 --- */
 
 EXPADV.AddException( nil, "cast" )
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Loops
+   --- */
+
+EXPADV.AddPreparedOperator( nil, "while", "b,?", "", [[
+	while( @value 1 ) do
+		@prepare 2
+		@value 2
+	end
+]] )
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 @: Events

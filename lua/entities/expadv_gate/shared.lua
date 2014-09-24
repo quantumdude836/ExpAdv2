@@ -8,16 +8,6 @@ ENT.ExpAdv 					= true
 ENT.AutomaticFrameAdvance  	= true
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
-	@: States
-   --- */
-
-   EXPADV_STATE_OFFLINE = 0
-   EXPADV_STATE_ONLINE = 1
-   EXPADV_STATE_ALERT = 2
-   EXPADV_STATE_CRASHED = 3
-   EXPADV_STATE_BURNED = 4
-
-/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Effects
    --- */
 
@@ -29,18 +19,14 @@ ENT.AutomaticFrameAdvance  	= true
 	@: Net Vars
    --- */
 
-AccessorFunc( ENT, "TickQuotaCL", "TickQuotaCL", FORCE_NUMBER )
-AccessorFunc( ENT, "StopWatchCL", "StopWatchCL", FORCE_NUMBER )
-AccessorFunc( ENT, "AverageCL", "AverageCL", FORCE_NUMBER )
-AccessorFunc( ENT, "StateCL", "StateCL", FORCE_NUMBER )
+AccessorFunc( ENT, "ClientState", "ClientState", FORCE_NUMBER )
 
 function ENT:SetupDataTables( )
-
 	self:NetworkVar( "Float", 0, "TickQuota" )
 	self:NetworkVar( "Float", 1, "StopWatch" )
 	self:NetworkVar( "Float", 2, "Average" )
-	self:NetworkVar( "Float", 3, "StateSV" )
-
+	self:NetworkVar( "Float", 3, "ServerState" )
+	-- self:NetworkVar( "String", 0, "GateName" )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -52,39 +38,27 @@ function ENT:ResetState( State )
 		self:SetTickQuota( 0 )
 		self:SetStopWatch( 0 )
 		self:SetAverage( 0 )
-		self:SetStateSV( State or EXPADV_STATE_OFFLINE )
+		self:SetServerState( State or EXPADV_STATE_OFFLINE )
 	end
 
 	if CLIENT then
-		self:SetTickQuotaCL( 0 )
-		self:SetStopWatchCL( 0 )
-		self:SetAverageCL( 0 )
-		self:SetStateCL( State or EXPADV_STATE_OFFLINE )
+		self.ClientTickQuota = 0
+		self.ClientStopWatch = 0
+		self.ClientAverage = 0
+		self:SetClientState( State or EXPADV_STATE_OFFLINE )
 	end
 end
 
 function ENT:SetState( State )
 	if SERVER then
-		self:SetStateSV( State )
+		self:SetServerState( State )
 	elseif CLIENT then
-		self:SetStateCL( State )
+		self:SetClientState( State )
 	end
 end
 
-/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
-	@: Update Info
-   --- */
-
-function ENT:OnUpdate( Context )
-	if !Context then return end
-
-	if SERVER and WireLib then
-		self:TriggerOutputs( )
-	end
-end
-
-function ENT:UpdateOverlay( )
-	
+function ENT:PostStartUp( )
+	self:SetState( EXPADV_STATE_ONLINE )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -92,61 +66,47 @@ end
    --- */
 
 function ENT:Think( )
+	if self.NextThinkTime and self.NextThinkTime > CurTime( ) then return end
+	self.NextThinkTime = CurTime( ) + 1
+
 	if self:IsRunning( ) then
-
-		local Context = self.Context
-		local Perf = Context.Status.Perf or 0
-		local Counter = Context.Status.Counter or 0
-		local StopWatch = Context.Status.StopWatch or 0
-
+		local Monitor = self.Context.Monitor
+		
 		if SERVER then
-			self:SetTickQuota( Perf )
-			self:SetAverage( self:GetAverage( ) * 0.95 + (Perf * 0.05) )
-			self:SetStopWatch( self:GetStopWatch( ) * 0.95 + ( StopWatch * 50000 ) )
+			self:SetTickQuota( Monitor.Perf )
+			self:SetStopWatch( Monitor.StopWatch )
+			self:SetAverage( Monitor.Usage )
+			self:SetServerState( Monitor.State or EXPADV_STATE_OFFLINE )
+		elseif CLIENT then
+			self.ClientTickQuota = Monitor.Perf
+			self.ClientStopWatch = Monitor.StopWatch
+			self.ClientAverage = Monitor.Usage
+			self:SetClientState( Monitor.State or EXPADV_STATE_OFFLINE )
 		end
-
-		if CLIENT then
-			self:SetTickQuotaCL( Perf )
-			self:SetAverageCL( self:GetAverageCL( ) * 0.95 + (Perf * 0.05) )
-			self:SetStopWatchCL( self:GetStopWatchCL( ) * 0.95 + ( StopWatch * 50000 ) )
-		end
-
-		Counter = Counter + Perf - expadv_softquota
-		if Counter < 0 then Counter = 0 end
-
-		local State = self:GetStateSV( ) or 0
-		if Counter > expadv_hardquota * 0.5 then
-			self:SetStateSV( EXPADV_STATE_ALERT )
-		elseif (self:GetStateSV( ) or 0) == EXPADV_STATE_ALERT then
-			self:SetStateSV( EXPADV_STATE_ONLINE )
-		end
-
-		Context.Status.Perf = 0
-		Context.Status.StopWatch = 0
-		Context.Status.Counter = Counter
 	end
 
-	if SERVER then
-		if self:GetModel( ) ~= "models/lemongate/lemongate.mdl" then return end
-	    local Attachment = self:LookupAttachment("fan_attch")
+	if SERVER and self:GetModel( ) == "models/lemongate/lemongate.mdl" then
+		local Context = self.Context
 
-	    local State = self:GetStateSV( ) or 0
-	    local Counter = self:GetAverage( ) or 0
-	    local Percent = (Counter / expadv_hardquota) * 100
+		local State = Context and Context.Monitor.State or 0
+		local Usage = Context and Context.Monitor.Usage or 0
+
+		local Attachment = self:LookupAttachment("fan_attch")
+
+	    local Percent = (Usage / expadv_hardquota) * 100
 	    
 	    local SpinSpeed = self.SpinSpeed or 0
+
 	    if State >= EXPADV_STATE_CRASHED then SpinSpeed = 0 end
 	    
 	    self.SpinSpeed = SpinSpeed + math.Clamp( Percent - SpinSpeed, -0.1, 0.1 )
+
 	    self:SetPlaybackRate( self.SpinSpeed )
+
 	    self:ResetSequence( self:LookupSequence( self.SpinSpeed <= 0 and "idle" or "spin" ) )
-
-	    -- print( "Spin Speed:", self.SpinSpeed, "vs", Percent, " - ", Counter, " / ", expadv_hardquota )
 	end
-
-	self:NextThink( CurTime( ) + 0.030303 )
-	return true
 end
+
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Quota Stuffs
@@ -158,12 +118,12 @@ end
 
 function ENT:HitTickQuota( )
 	self:SetState( EXPADV_STATE_BURNED )
-	self:ScriptError( "Tick Quota Exceeded." )
+	self:NotifiOwner( "Tick Quota Exceeded.", 1, 5 )
 end
 
 function ENT:HitHardQuota( )
 	self:SetState( EXPADV_STATE_BURNED )
-	self:ScriptError( "Hard Quota Exceeded." )
+	self:NotifiOwner( "Hard Quota Exceeded.", 1, 5 )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -172,15 +132,15 @@ end
 
 function ENT:LuaError( Msg )
 	self:SetState( EXPADV_STATE_CRASHED )
-
+	
 	if SERVER then
 		self:NotifiOwner( "Expression Advanced 2 - Suffered a serverside Lua error:", 1, 5 )
 		self:NotifiOwner( Msg, 1, 3 )
-	else
-		self:NotifiOwner( "Expression Advanced 2 - Suffered a clientside Lua error:", 1, 5 )
-		self:NotifiOwner( LocalPlayer():Name( ) .. ": " .. Msg, 1, 3 )
-
-		chat.AddText( Color( 150, 150, 0 ), "[" .. self.player:Name( ) .. "] ", Color( 255, 0, 0 ), "Expresion Advanced - Error: ", Color( 255, 255, 255 ), Msg )
+	--else
+	--	self:NotifiOwner( "Expression Advanced 2 - Suffered a clientside Lua error:", 1, 5 )
+	--	self:NotifiOwner( LocalPlayer():Name( ) .. ": " .. Msg, 1, 3 )
+	--
+	--	chat.AddText( Color( 150, 150, 0 ), "[" .. self.player:Name( ) .. "] ", Color( 255, 0, 0 ), "Expresion Advanced - Error: ", Color( 255, 255, 255 ), Msg )
 	end
 end
 
@@ -190,27 +150,27 @@ function ENT:ScriptError( Msg )
 	if SERVER then
 		self:NotifiOwner( "Expression Advanced 2 - Suffered a serverside Script error:", 1, 5 )
 		self:NotifiOwner( Msg, 1, 3 )
-	else
-		self:NotifiOwner( "Expression Advanced 2 - Suffered a clientside Script error:", 1, 5 )
-		self:NotifiOwner( LocalPlayer():Name( ) .. ": " .. Msg, 1, 3 )
-
-		chat.AddText( Color( 150, 150, 0 ), "[" .. self.player:Name( ) .. "] ", Color( 255, 0, 0 ), "Expresion Advanced - Script Error: ", Color( 255, 255, 255 ), Msg )
+	--else
+	--	self:NotifiOwner( "Expression Advanced 2 - Suffered a clientside Script error:", 1, 5 )
+	--	self:NotifiOwner( LocalPlayer():Name( ) .. ": " .. Msg, 1, 3 )
+	--
+	--	chat.AddText( Color( 150, 150, 0 ), "[" .. self.player:Name( ) .. "] ", Color( 255, 0, 0 ), "Expresion Advanced - Script Error: ", Color( 255, 255, 255 ), Msg )
 	end
 end
 
 function ENT:Exception( Exception )
 	self:SetState( EXPADV_STATE_CRASHED )
 
-	local Msg = string.format( "%s - %s", Exception.Exception, Exception.Message )
+	local Msg = string.format( "%s - %s", Exception.Exception, Exception.Msg )
 
 	if SERVER then
 		self:NotifiOwner( "Expression Advanced 2 - Uncatched Exception (serverside):", 1, 5 )
 		self:NotifiOwner( Msg, 1, 3 )
-	else
-		self:NotifiOwner( "Expression Advanced 2 - Uncatched Exception (clientside):", 1, 5 )
-		self:NotifiOwner( LocalPlayer():Name( ) .. ": " .. Msg, 1, 3 )
-		
-		chat.AddText( Color( 150, 150, 0 ), "[" .. self.player:Name( ) .. "] ", Color( 255, 0, 0 ), "Expresion Advanced - Uncatched exception: ", Color( 255, 255, 255 ), Exception.Exception, " -> ", Exception.Msg )
+	--else
+	--	self:NotifiOwner( "Expression Advanced 2 - Uncatched Exception (clientside):", 1, 5 )
+	--	self:NotifiOwner( LocalPlayer():Name( ) .. ": " .. Msg, 1, 3 )
+	--	
+	--	chat.AddText( Color( 150, 150, 0 ), "[" .. self.player:Name( ) .. "] ", Color( 255, 0, 0 ), "Expresion Advanced - Uncatched exception: ", Color( 255, 255, 255 ), Exception.Exception, " -> ", Exception.Msg )
 	end
 end
 
@@ -220,11 +180,11 @@ function ENT:OnCompileError( ErMsg, Compiler )
 	if SERVER then
 		self:NotifiOwner( "Expression Advanced 2 - Failed to compile serverside:", 1, 5 )
 		self:NotifiOwner( ErMsg, 1, 3 )
-	else
-		self:NotifiOwner( "Expression Advanced 2 - Failed to compile clientside:", 1, 5 )
-		self:NotifiOwner( LocalPlayer():Name( ) .. ": " .. ErMsg, 1, 3 )
-		
-		chat.AddText( Color( 150, 150, 0 ), "[" .. self.player:Name( ) .. "] ", Color( 255, 0, 0 ), "Expresion Advanced - Validate Error: ", Color( 255, 255, 255 ), ErMsg )
+	--else
+	--	self:NotifiOwner( "Expression Advanced 2 - Failed to compile clientside:", 1, 5 )
+	--	self:NotifiOwner( LocalPlayer():Name( ) .. ": " .. ErMsg, 1, 3 )
+	--	
+	--	chat.AddText( Color( 150, 150, 0 ), "[" .. self.player:Name( ) .. "] ", Color( 255, 0, 0 ), "Expresion Advanced - Validate Error: ", Color( 255, 255, 255 ), ErMsg )
 	end
 end
 

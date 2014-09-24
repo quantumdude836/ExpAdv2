@@ -803,6 +803,14 @@ function EXPADV.BuildLuaOperator( Operator )
 				end
 
 			end
+		else
+			if Operator.FLAG == EXPADV_PREPARE or Operator.FLAG == EXPADV_INLINEPREPARE then
+				OpPrepare = string.gsub( OpPrepare, "(@%.%.%.)", "nil" )
+			end
+
+			if Operator.FLAG == EXPADV_INLINE or Operator.FLAG == EXPADV_INLINEPREPARE then
+				OpInline = string.gsub( OpInline, "(@%.%.%.)", "nil" )
+			end
 		end
 
 		-- Now lets check cpu time, note we will let the trace system below, insert our traces.

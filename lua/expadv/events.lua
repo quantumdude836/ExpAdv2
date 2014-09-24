@@ -143,7 +143,7 @@ function EXPADV.CallEvent( Name, ... )
 		if !Context.Online then continue end
 		
 		local Event = Context["event_" .. Name]
-
+		
 		if !Event then continue end
 
 		local Ok, Value, Type = Context:Execute( "Event " .. Name, Event, ... )
@@ -165,7 +165,7 @@ function EXPADV.CallPlayerEvent( Player, Name, ... )
 		if Context.player ~= Player then continue end
 		
 		local Event = Context["event_" .. Name]
-		
+
 		if !Event then continue end
 		
 		local Ok, Value, Type = Context:Execute( "Event " .. Name, Event, ... )

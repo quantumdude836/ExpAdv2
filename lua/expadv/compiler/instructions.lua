@@ -688,7 +688,7 @@ function Compiler:Compile_METHOD( Trace, Expression, Method, Expressions, bNoErr
 			self:Yield( )
 		end
 
-		MsgN( "Looking for: ", string.format( "%s(%s)", Method, Signature ) )
+		-- MsgN( "Looking for: ", string.format( "%s(%s)", Method, Signature ) )
 
 		local Operator = EXPADV.Functions[ string.format( "%s(%s)", Method, Signature ) ] or BestMatch
 		
@@ -763,9 +763,11 @@ function Compiler:Compile_EVENT( Trace, Name, Params, UseVarg, Sequence, Memory 
 	
 	if UseVarg then Inputs[#Inputs + 1] = "..." end
 
+	table.insert( Inputs, 1, "Context" )
+
 	local Sequence = self:Compile_SEQ( Trace, { self:Compile_SEQ( Trace, PreSequence ), Sequence } )
 
-	local Lua = string.format( "Context.event_%s = function( %s )\n%s\n%s\n%send", Name, table.concat( Inputs, "," ), self:FlushMemory( Trace, Memory ), Sequence.Prepare or "", Sequence.Inline or "" )
+	local Lua = string.format( "RootContext.event_%s = function( %s )\nContext = Context or RootContext\n%s\n%send", Name, table.concat( Inputs, "," ), Sequence.Prepare or "", Sequence.Inline or "" )
 
 	return { Trace = Trace, Prepare = Lua, FLAG = EXPADV_PREPARE }
 end
@@ -803,16 +805,18 @@ function Compiler:Build_Function( Trace, Params, UseVarg, Sequence, Memory )
 		Lua = Lua .. "end"
 		
 		PreSequence[ #PreSequence + 1 ] = { Trace = Trace, Return = "", Prepare = Lua, FLAG = EXPADV_PREPARE }
-		PreSequence[ #PreSequence + 1 ] = Operator.Compile( self, Trace, Quick( Param[3], "n" ), Quick( Inputs[I], Type ) )
+		PreSequence[ #PreSequence + 1 ] = Operator.Compile( self, Trace, Quick( Param[3], "n" ), Quick( Inputs[I] .. (Param[2] ~= "_vr" and "[1]" or ""), Type ) )
 
 		self:Yield( )
 	end
 	
 	if UseVarg then Inputs[#Inputs + 1] = "..." end
 
+	table.insert( Inputs, 1, "Context" )
+
 	local Sequence = self:Compile_SEQ( Trace, { self:Compile_SEQ( Trace, PreSequence ), Sequence } )
 
-	local Lua = string.format( "function( %s )\n%s\n%s\n%send", table.concat( Inputs, "," ), self:FlushMemory( Trace, Memory ), Sequence.Prepare or "", Sequence.Inline or "" )
+	local Lua = string.format( "function( %s )\nContext = Context or RootContext\n%s\n%send", table.concat( Inputs, "," ), Sequence.Prepare or "", Sequence.Inline or "" )
 
 	return { Trace = Trace, Inline = Lua, Return = "f", FLAG = EXPADV_INLINE }
 end
@@ -828,13 +832,18 @@ function Compiler:Compile_FOR( Trace, Class, AssInstr, Memory, Start, End, Step,
 		self:TraceError( Trace, "No such loop 'for(%s = %s, %s, %s)'", self:NiceClass( Class.Short, Start.Return, End.Return, Step.Return ) )
 	end
 
-	local Lua = string.format( "%s\n%s\n%s\n%s\n%s",
-		self:FlushMemory( Trace, Memory ),
-		AssInstr.Prepare or "", AssInstr.Inline or "",
-		Sequence.Prepare or "", Sequence.Inline or "" )
+	local Lua = string.format( "%s\n%s\n%s\n%s", AssInstr.Prepare or "", AssInstr.Inline or "", Sequence.Prepare or "", Sequence.Inline or "" )
 	
 	local NewSequence = { Trace = Trace, Prepare = Lua, Return = "", FLAG = EXPADV_PREPARE }
 	return Operator.Compile( self, Trace, Start, End, Step, NewSequence )
+end
+
+function Compiler:Compile_WHILE( Trace, Exp, Sequence )
+	Exp = self:MakeVirtual( self:Compile_IS( Trace, Exp ) )
+
+	local Operator = self:LookUpOperator( "while", "b" )
+
+	return Operator.Compile( self, Trace, Exp, Sequence )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------

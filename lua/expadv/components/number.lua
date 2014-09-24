@@ -350,6 +350,10 @@ MathComponent:AddFunctionHelper( "mix", "n,n,n", "Returns a linear interpolation
 
 Number:AddPreparedOperator( "for", "n,n,n,?", "", [[
    for i = @value 1, @value 2, @value 3 do
-      @prepare 4
+      --local Context, Prev = EXPADV.CloneContext( Context )
+
+         @prepare 4
+      
+      --EXPADV.ObsorbContext( Context, Prev )
    end
-]] ) 
+]] ) -- Need to make it pause the op counter, before running context instance loops!

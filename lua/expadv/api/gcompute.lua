@@ -24,7 +24,7 @@ Tokenizer:AddPatternSymbol( GCompute.Lexing.TokenType.Whitespace, "[ \t]+" )
 Tokenizer:AddPlainSymbol( GCompute.Lexing.TokenType.Comment, "//[^\n\r]*" )
 Tokenizer:AddCustomSymbol( GCompute.Lexing.TokenType.Comment, "/*", function( Code, Offset )
 	local endOffset = string.find( Code, "*/", Offset + 2, true )
-	if endOffset then return string.sub( Code, offset, endOffset + 1), endOffset - Offset + 2 end
+	if endOffset then return string.sub( Code, Offset, endOffset + 1), endOffset - Offset + 2 end
 	return string.sub( Code, Offset ), string.len( Code ) - Offset + 1
 end )
 
@@ -220,35 +220,6 @@ end
 function PANEL:Build( Context, Root, stdOut, stdErr )
 
 	EXPADV.RegisterContext( Context )
-
-	/* This will no longer work :(
-	Context.OnStartUp = function( self )
-		stdOut:WriteLine( "Executed code root." )
-	end
-
-	Context.OnShutDown = function( self )
-		stdOut:WriteLine( "Context shut down." )
-	end
-
-	Context.OnLuaError = function( self, Msg )
-		stdErr:WriteLine( "Lua Error: " .. Msg )
-	end
-
-	Context.OnScriptError = function( self, Msg )
-		stdErr:WriteLine( "Script Error: " .. Msg )
-	end
-
-	Context.OnException = function( self, Exception )
-		stdErr:WriteLine( "Uncatched exception: " .. table.concat( Exception, " " ) )
-	end
-
-	Context.OnUpdate = function( )
-		if IsValid( self ) then self:Update( ) end
-	end
-
-	Context.Print = function( Trace, Msg )
-		stdOut:WriteLine( string.format( "[%i,%i] - %s", Trace[1], Trace[2], Msg ) )
-	end */
 
 	self.Context = Context
 
