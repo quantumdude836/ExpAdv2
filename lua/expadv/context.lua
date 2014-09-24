@@ -61,7 +61,7 @@ local SysTime = SysTime
 local debug_sethook = debug.sethook
 
 -- Safely execute a function on this context.
-function EXPADV.RootContext:Execute( Location, Operation, ... ) -- String, Function, ...
+function EXPADV.RootContext:Execute( Location, Operation, Ctx, ... ) -- String, Function, ...
 	
 	local Status, Instance = self.Status
 
@@ -69,6 +69,7 @@ function EXPADV.RootContext:Execute( Location, Operation, ... ) -- String, Funct
 
 		if Location ~= "Root" then
 			Instance = EXPADV.CloneContext( self )
+			if Ctx == self then Ctx = Instance end
 		end
 
 	-- Ops monitoring:
@@ -89,7 +90,7 @@ function EXPADV.RootContext:Execute( Location, Operation, ... ) -- String, Funct
 
 	-- Execuiton:
 
-		local Ok, Result = pcall( Operation, Instance or self, ... )
+		local Ok, Result = pcall( Operation, Instance or self, Ctx, ... )
 
 	-- Reset Ops Monitor
 		debug.sethook( )
