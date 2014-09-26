@@ -212,6 +212,7 @@ EXPADV.AddEvent( nil, "tick", "", "" )
 EXPADV.AddEvent( nil, "think", "", "" )
 
 EXPADV.ServerEvents( )
+EXPADV.AddEvent( nil, "trigger", "s,s", "" )
 EXPADV.AddEvent( nil, "clientLoaded", "ply", "" )
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------

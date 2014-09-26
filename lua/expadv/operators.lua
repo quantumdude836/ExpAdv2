@@ -723,6 +723,7 @@ function EXPADV.BuildLuaOperator( Operator )
 					error( "Compiler is yet to support virtuals" )
 				elseif Input.FLAG == EXPADV_INLINE then
 					InputInline = Input.Inline
+					InputPrepare = ""
 					InputReturn = Input.Return
 				elseif Input.FLAG == EXPADV_PREPARE then
 					InputInline = "nil"
@@ -738,6 +739,7 @@ function EXPADV.BuildLuaOperator( Operator )
 				if Uses >= 2 and !Input.IsRaw and !string.StartWith( InputInline, "Context.Definitions" ) then
 					local Defined = Compiler:DefineVariable( )
 					InputPrepare = string.format( "%s\n%s = %s", InputPrepare, Defined, InputInline )
+					MsgN( "Defined: ", Defined, InputInline )
 					InputInline = Defined
 				end
 			end
@@ -753,9 +755,23 @@ function EXPADV.BuildLuaOperator( Operator )
 				OpInline = string.gsub( OpInline, "@type " .. I, Format( "%q", InputReturn or Operator.Input[I] ) )
 			end
 
-			-- Now we handel preperation.
-			if Operator.FLAG == EXPADV_PREPARE or Operator.FLAG == EXPADV_INLINEPREPARE then
+			if InputPrepare ~= "" then
 
+				if Operator.FLAG == EXPADV_PREPARE or Operator.FLAG == EXPADV_INLINEPREPARE then
+					if string.find( OpPrepare, "@prepare " .. I ) then
+						OpPrepare = string.gsub( OpPrepare, "@prepare " .. I, InputPrepare )
+					else
+						table.insert( Preperation, 1, InputPrepare )
+					end
+				else
+					table.insert( Preperation, 1, InputPrepare )
+				end
+			end
+
+
+
+			-- Now we handel preperation.
+			/*if Operator.FLAG == EXPADV_PREPARE or Operator.FLAG == EXPADV_INLINEPREPARE  then
 				-- First check for manual prepare
 				if string.find( OpPrepare, "@prepare " .. I ) then
 					OpPrepare = string.gsub( OpPrepare, "@prepare " .. I, InputPrepare )
@@ -763,8 +779,10 @@ function EXPADV.BuildLuaOperator( Operator )
 					-- Ok, now prepare this ourself.
 					table.insert( Preperation, 1, InputPrepare )
 				end
-
-			end
+			elseif Operator.FLAG == EXPADV_INLINE then
+				OpPrepare = string.gsub( OpPrepare, "@prepare " .. I, "" )
+				if InputPrepare ~= "" then table.insert( Preperation, 1, InputPrepare ) end
+			end*/
 		end
 
 		-- Now we handel any varargs!

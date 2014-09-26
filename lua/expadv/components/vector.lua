@@ -40,7 +40,7 @@ VectorComponent:AddInlineOperator( "<=", "v,v", "b", "(@value 1 <= @value 2)" )
 VectorComponent:AddInlineOperator( "+", "v,v", "v", "(@value 1 + @value 2)" )
 VectorComponent:AddInlineOperator( "-", "v,v", "v", "(@value 1 - @value 2)" )
 VectorComponent:AddInlineOperator( "*", "v,v", "v", "(@value 1 * @value 2)" )
-VectorComponent:AddInlineOperator( "/", "v,v", "v", "(@value 1 / @value 2)" )
+VectorComponent:AddInlineOperator( "/", "v,v", "v", "Vector(@value 1.x / @value 2.x, @value 1.y / @value 2.y, @value 1.z / @value 2.z)" )
 
 /* -----------------------------------------------------------------------------------
 	@: Number Arithmetic
@@ -55,8 +55,8 @@ VectorComponent:AddInlineOperator( "-", "n,v", "v", "(Vector(@value 1, @value 1,
 VectorComponent:AddInlineOperator( "*", "v,n", "v", "(@value 1 * Vector(@value 2, @value 2, @value 2))")
 VectorComponent:AddInlineOperator( "*", "n,v", "v", "(Vector(@value 1, @value 1, @value 1) * @value 2)")
 
-VectorComponent:AddInlineOperator( "/", "v,n", "v", "(@value 1 / Vector(@value 2, @value 2, @value 2))")
-VectorComponent:AddInlineOperator( "/", "n,v", "v", "(Vector(@value 1, @value 1, @value 1) / @value 2)")
+VectorComponent:AddInlineOperator( "/", "v,n", "v", "Vector(@value 1.x / @value 2, @value 1.y / @value 2, @value 1.x / @value 2)")
+VectorComponent:AddInlineOperator( "/", "n,v", "v", "Vector(@value 1 / @value 2.x, @value 1 / @value 2.y, @value 1 / @value 2.z)")
 
 /* -----------------------------------------------------------------------------------
 	@: Operators

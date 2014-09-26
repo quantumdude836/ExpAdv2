@@ -230,6 +230,19 @@ function ENT:GetCompilePer( )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Call Event
+   --- */
+
+function ENT:CallEvent( Name, ... )	
+	if !self:IsRunning( ) then return false, nil end
+
+	local Event = self.Context[ "event_" .. Name ]
+	if !Name then return end
+
+	return Context:Execute( "Event " .. Name, Event, ... )
+end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Context Menu
    --- */
 

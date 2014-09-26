@@ -105,12 +105,11 @@ function ENT:TriggerInput( Key, Value )
 	if !Cell then return end
 
 	Cell.ClassObj.Wire_In_Util( self.Context, Reference, Value )
-	Context.Click[ Reference ] = true
+	Context.Trigger[ Reference ] = true
 
-	--TODO: Use a new event
-	-- self:CallEvent( "trigger", Key, Cell.Class.Name )
+	self:CallEvent( "trigger", Key, Cell.Class.Name )
 
-	Context.Click[ Reference ] = false
+	Context.Trigger[ Reference ] = false
 end
 
 function ENT:TriggerOutputs( )
