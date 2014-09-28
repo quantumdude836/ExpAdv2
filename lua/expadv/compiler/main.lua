@@ -653,6 +653,7 @@ local function SoftCompile( self, Script, Files, OnError, OnSucess )
 		self.DefineID = 0
 		self.Strings = { }
 		self.VMInstructions = { }
+		self.VMLookUp = { }
 		self.NativeLog = { }
 
 	-- Enviroment

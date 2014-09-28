@@ -42,6 +42,9 @@ Component:AddInlineOperator( "#","t","n", "@value 1.Count" )
 	@: Basic functions
    ---	*/
 
+Component:AddInlineFunction( "table", "", "t", "{ Data = { }, Types = { }, Look = { }, Size = 0, Count = 0, HasChanged = false }" )
+Component:AddFunctionHelper( "table", "", "Creates a new table." )
+
 Component:AddInlineFunction( "size", "t:", "n", "@value 1.Size" )
 Component:AddInlineFunction( "count", "t:", "n", "@value 1.Count" )
 
@@ -63,7 +66,7 @@ Component:AddFunctionHelper( "type", "t:e", "Returns the type of obect stored in
 	local Get = function( Context, Trace, Table, Index, _ )
 			local Object = Table.Data[Index]
 			
-			if Object ~= nil then
+			if Object == nil then
 				Context:Throw( Trace, "table", string.format( "Attempt reach %s at index %s of table, result reached void.", Name, Index ) )
 			else
 				return { Object, Table.Types[Index] }
@@ -224,7 +227,7 @@ function Component:OnPostRegisterClass( Name, Class )
 		local Get = function( Context, Trace, Table, Index, _ )
 				local Object = Table.Data[Index]
 				
-				if Object ~= nil then
+				if Object == nil then
 					if Class.CreateNew then return Class.CreateNew( ) end
 					Context:Throw( Trace, "table", string.format( "Attempt reach %s at index %s of table, result reached void.", Name, Index ) )
 				
@@ -341,3 +344,35 @@ end
 		end )
 
 	Component:AddFunctionHelper( "sort", "t:d", "Takes a table and sorts it, the returned table will be sorted by the provided delegate and all indexs will be numberic. The delegate will be called with 2 variants that are values on the table, return true if the first is bigger then the second this delegate must return a boolean." )
+
+/* ---	--------------------------------------------------------------------------------
+	@: Now for a way to build a filled table
+	---	*/
+
+	Component:AddGeneratedFunction( "table", "...", "t", function( Operator, Compiler, Trace, ... )
+		local Inputs = { ... }
+		local Preperation = { }
+		local Values, Types, Look = { }, { }, { }
+		
+		for I = 1, #Inputs, 1 do
+			local Input = Inputs[I]
+
+			if Input.FLAG == EXPADV_PREPARE or Input.FLAG == EXPADV_INLINEPREPARE then
+				Preperation[#Preperation + 1] = Input.Prepare
+			end
+
+			if Input.FLAG == EXPADV_INLINE or Input.FLAG == EXPADV_INLINEPREPARE then
+				Values[I] = Input.Inline
+			end
+
+			Types[I] = string.format( "%q", Input.Return )
+
+			Look[I] = I
+		end
+
+		local LuaInline = "{ Data = { %s }, Types = { %s }, Look = { %s }, Size = %i, Count = %i, HasChanged = false }"
+
+		LuaInline = string.format( LuaInline, table.concat( Values, "," ), table.concat( Types, "," ), table.concat( Look, "," ), #Values, #Values )
+
+		return { Trace = Trace, Inline = LuaInline, Prepare = table.concat( Preperation, "\n" ), Return = "t", FLAG = EXPADV_INLINEPREPARE }
+	end )

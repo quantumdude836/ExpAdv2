@@ -22,32 +22,6 @@ function Compiler:Compile_STR( Trace, String )
 	return { Trace = Trace, Inline = "Context.Strings[" .. ID .. "]", Return = "s", FLAG = EXPADV_INLINE, IsRaw = true }
 end
 
---[[ Can't really do this yet :(
-		function Compiler:Compile_Array( Trace, Expressions )
-		if !Expressions then
-			return { Trace = Trace, Inline = "{}", Return = "ar", FLAG = EXPADV_INLINE, IsRaw = true }
-		end
-
-		local TestType = Expressions[1].Return
-		local Prepare, Inline = { }, { }
-
-		for I = 1, #Expressions do
-			local Exp = Expressions[I]
-
-			if Exp.Return == TestType then
-				local Casted = Compile_CAST( Trace, TestType, Exp, true )
-				if !Casted then self:TraceError( Trace, "Array %s[] can not accept %s", self:NiceClass( TestType, Exp.Return ) ) end
-				Exp = Casted
-			end
-
-			Prepare[#Prepare+1] = Exp.Prepare
-			Inline[#Inline+1] = Exp.Inline				
-		end
-
-		return { Trace = Trace, Inline = table.concat( Inline, "\n" ), Prepare = table.concat( Prepare, "\n" ), Return = "ar", ArryClass = TestType, FLAG = EXPADV_PREPARE, IsRaw = true }
-	end
-]]
-
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Operators
    --- */
@@ -82,9 +56,6 @@ function Compiler:Compile_NEG( Trace, Expresion1 )
 	local Operator = self:LookUpOperator( "-", Expresion1.Return )
 
 	if !Operator then self:TraceError( Trace, "Negation operator does not support '-%s'", self:NiceClass( Expresion1.Return ) ) end
-
-	MsgN( "Neg Operator" )
-	PrintTable( Operator )
 
 	return Operator.Compile( self, Trace, Expresion1 )
 end
@@ -252,8 +223,6 @@ end
    --- */
 
 function Compiler:Compile_ADD( Trace, Expresion1, Expression2 )
-	print( "Add Operator ", Expresion1.Return, Expression2.Return )
-
 	local Operator = self:LookUpOperator( "+", Expresion1.Return, Expression2.Return )
 
 	if !Operator then self:TraceError( Trace, "Arithmatic operator (add) does not support '%s + %s'", self:NiceClass( Expresion1.Return, Expression2.Return ) ) end
@@ -850,7 +819,7 @@ end
 	@: Get / Set Operators
    --- */
 
-function Compiler:Comile_GET( Trace, Expression1, Expression2, ClassShort )
+function Compiler:Compile_GET( Trace, Expression1, Expression2, ClassShort )
 	local Operator = self:LookUpClassOperator( Expression1.Return, "get", Expression1.Return, Expression2.Return, ClassShort or "_vr" )
 
 	if !Operator and ClassShort then
@@ -862,19 +831,18 @@ function Compiler:Comile_GET( Trace, Expression1, Expression2, ClassShort )
 	return Operator.Compile( self, Trace, Expression1, Expression2, ClassShort )
 end
 
-function Compiler:Comile_SET( Trace, Expression1, Expression2, ClassShort )
-
-	if Short and Expression2.Return ~= ClassShort then
-		Expression2 = self:Compile_CAST( Trace, ClassShort, Expression2, true )
+function Compiler:Compile_SET( Trace, Expression1, Expression2, Expression3, ClassShort )
+	if Short and Expression3.Return ~= ClassShort then
+		Expression2 = self:Compile_CAST( Trace, ClassShort, Expression3, true )
 	end
 
-	local Operator = self:LookUpClassOperator( Expression1.Return, "set", Expression1.Return, Expression2.Return, ClassShort or "_vr" )
+	local Operator = self:LookUpClassOperator( Expression1.Return, "set", Expression1.Return, Expression2.Return, Expression3.Return )
 
 	if !Operator and ClassShort then
-		self:TraceError( Trace, "Set operator (%s[%s,%s]=) does not support %s", self:NiceClass( Expression1.Return, Expression2.Return, Expression1.Return ) )
+		self:TraceError( Trace, "Set operator (%s[%s,%s]=) does not support %s", self:NiceClass( Expression1.Return, Expression2.Return, Expression3.Return ) )
 	elseif !Operator then
-		self:TraceError( Trace, "Get operator (%s[%s]=) does not support %s", self:NiceClass( Expression1.Return, Expression2.Return, Expression1.Return ) )
+		self:TraceError( Trace, "Get operator (%s[%s]=) does not support %s", self:NiceClass( Expression1.Return, Expression2.Return, Expression3.Return ) )
 	end
 
-	return Operator.Compile( self, Trace, Expression1, Expression2, ClassShort )
+	return Operator.Compile( self, Trace, Expression1, Expression2, Expression3 )
 end

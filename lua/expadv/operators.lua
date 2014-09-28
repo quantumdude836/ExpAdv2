@@ -312,6 +312,23 @@ function EXPADV.AddVMFunction( Component, Name, Input, Return, Function )
 	}
 end
 
+function EXPADV.AddGeneratedFunction( Component, Name, Input, Return, Function )
+	Func_Alias = { }
+
+	Temp_Functions[ #Temp_Functions + 1 ] = { 
+		LoadOnClient = LoadOnClient,
+		LoadOnServer = LoadOnServer,
+		 
+		Component = Component,
+		Name = Name,
+		Input = Input,
+		Return = Return,
+		Function = Function,
+		Aliases = Func_Alias,
+		FLAG = EXPADV_GENERATED
+	}
+end
+
 function EXPADV.AddFunctionAlias( Name, Input )
 	Func_Alias[ #Func_Alias + 1 ] = { Name = Name, Input = Input }
 end
@@ -660,9 +677,13 @@ function EXPADV.BuildVMOperator( Operator )
 
 		end
 
-		local ID = #Compiler.VMInstructions + 1
+		local ID = Compiler.VMLookUp[Operator.Function] 
 		
-		Compiler.VMInstructions[ID] = Operator.Function
+		if !ID then
+			ID = #Compiler.VMInstructions + 1
+			Compiler.VMLookUp[Operator.Function] = ID
+			Compiler.VMInstructions[ID] = Operator.Function
+		end
 		
 		local InlineArgs = #Arguments >= 1 and table.concat( Arguments, "," ) or "nil"
 
@@ -679,6 +700,10 @@ end
 function EXPADV.BuildLuaOperator( Operator )
 	if Operator.FLAG == EXPADV_FUNCTION then
 		return EXPADV.BuildVMOperator( Operator )
+	elseif Operator.FLAG == EXPADV_GENERATED then
+		Operator.Compile = function( Compiler, Trace, ... )
+			return Operator.Function( Operator, Compiler, Trace, ... )
+		end; return
 	end
 
 	Operator.Compile = function( Compiler, Trace, ... )
@@ -739,7 +764,6 @@ function EXPADV.BuildLuaOperator( Operator )
 				if Uses >= 2 and !Input.IsRaw and !string.StartWith( InputInline, "Context.Definitions" ) then
 					local Defined = Compiler:DefineVariable( )
 					InputPrepare = string.format( "%s\n%s = %s", InputPrepare, Defined, InputInline )
-					MsgN( "Defined: ", Defined, InputInline )
 					InputInline = Defined
 				end
 			end
@@ -767,22 +791,6 @@ function EXPADV.BuildLuaOperator( Operator )
 					table.insert( Preperation, 1, InputPrepare )
 				end
 			end
-
-
-
-			-- Now we handel preperation.
-			/*if Operator.FLAG == EXPADV_PREPARE or Operator.FLAG == EXPADV_INLINEPREPARE  then
-				-- First check for manual prepare
-				if string.find( OpPrepare, "@prepare " .. I ) then
-					OpPrepare = string.gsub( OpPrepare, "@prepare " .. I, InputPrepare )
-				elseif InputPrepare ~= "" then
-					-- Ok, now prepare this ourself.
-					table.insert( Preperation, 1, InputPrepare )
-				end
-			elseif Operator.FLAG == EXPADV_INLINE then
-				OpPrepare = string.gsub( OpPrepare, "@prepare " .. I, "" )
-				if InputPrepare ~= "" then table.insert( Preperation, 1, InputPrepare ) end
-			end*/
 		end
 
 		-- Now we handel any varargs!
@@ -914,13 +922,6 @@ function EXPADV.BuildLuaOperator( Operator )
 		local PreperedLines = #Preperation >= 1 and table.concat( Preperation, "\n" ) or nil
 
 		return Compiler:NewLuaInstruction( Trace, Operator, PreperedLines, OpInline )
-	end
-
-	if Operator.FLAG == EXPADV_FUNCTION then
-		Operator.Build = Operator.Compile
-		Operator.Compiler = function( Compiler, Trace, ... )
-			return Operator.Function( Operator, Compiler, Trace, ... )
-		end
 	end
 
 end

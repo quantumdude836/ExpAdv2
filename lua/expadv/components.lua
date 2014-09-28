@@ -60,6 +60,11 @@ function BaseComponent:AddVMFunction( Name, Input, Return, Function ) -- String,
 	return EXPADV.AddVMFunction( self, Name, Input, Return, Function )
 end
 
+-- Creates a new generated function (on the component).
+function BaseComponent:AddGeneratedFunction( Name, Input, Return, Function ) -- String, String, String, function( Context, Trace, ... )
+	return EXPADV.AddGeneratedFunction( self, Name, Input, Return, Function )
+end
+
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Function Helper Data
    --- */
