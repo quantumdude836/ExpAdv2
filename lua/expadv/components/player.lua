@@ -49,6 +49,23 @@ Component:AddFunctionHelper( "isPlayer", "e:", "Returns true if the entity is a 
 Component:AddInlineFunction( "owner", "", "ply", "Context.player")
 Component:AddFunctionHelper( "owner", "", "Returns the owner of the gate.")
 
+Component:AddVMFunction( "players", "", "t", 
+	function( Context, Trace )
+		local Data, Types, Look, I = { }, { }, { }, 0
+
+		for _, Player in pairs( player.GetAll( ) ) do
+			I = I + 1
+
+			Data[I] = Player
+			Types[I] = "_ply"
+			Look[I] = I
+		end
+
+		return { Data = Data, Types = Types, Look = Look, Size = #Data, Count = #Data, HasChanged = false }
+	end )
+
+Component:AddFunctionHelper( "players", "", "Returns a table of players.")
+
 EXPADV.ClientOperators( )
 
 Component:AddInlineFunction( "localPlayer", "", "ply", "$LocalPlayer()")

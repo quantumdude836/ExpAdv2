@@ -849,3 +849,32 @@ end
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Get / Set Operators
    --- */
+
+function Compiler:Comile_GET( Trace, Expression1, Expression2, ClassShort )
+	local Operator = self:LookUpClassOperator( Expression1.Return, "get", Expression1.Return, Expression2.Return, ClassShort or "_vr" )
+
+	if !Operator and ClassShort then
+		self:TraceError( Trace, "Get operator (%s[%s,%s]) does not support %s", self:NiceClass( Expression1.Return, Expression2.Return, ClassShort, Expression1.Return ) )
+	elseif !Operator then
+		self:TraceError( Trace, "Get operator (%s[%s]) does not support %s", self:NiceClass( Expression1.Return, Expression2.Return, Expression1.Return ) )
+	end
+
+	return Operator.Compile( self, Trace, Expression1, Expression2, ClassShort )
+end
+
+function Compiler:Comile_SET( Trace, Expression1, Expression2, ClassShort )
+
+	if Short and Expression2.Return ~= ClassShort then
+		Expression2 = self:Compile_CAST( Trace, ClassShort, Expression2, true )
+	end
+
+	local Operator = self:LookUpClassOperator( Expression1.Return, "set", Expression1.Return, Expression2.Return, ClassShort or "_vr" )
+
+	if !Operator and ClassShort then
+		self:TraceError( Trace, "Set operator (%s[%s,%s]=) does not support %s", self:NiceClass( Expression1.Return, Expression2.Return, Expression1.Return ) )
+	elseif !Operator then
+		self:TraceError( Trace, "Get operator (%s[%s]=) does not support %s", self:NiceClass( Expression1.Return, Expression2.Return, Expression1.Return ) )
+	end
+
+	return Operator.Compile( self, Trace, Expression1, Expression2, ClassShort )
+end

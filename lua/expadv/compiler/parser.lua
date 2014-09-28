@@ -620,7 +620,7 @@ function Compiler:Expression_Variable( Trace )
 end
 
 -- Stage 17: Indexing, Calling
-function Compiler:Expression_17( Trace, Expression )
+function Compiler:Expression_17( Trace, Expression, Statment )
 	-- MsgN( "Compiler -> Expression 17" )
 
 	while self:CheckToken( "prd", "lsb", "lpa" ) do
@@ -662,8 +662,14 @@ function Compiler:Expression_17( Trace, Expression )
 				if !self:AcceptToken( "com" ) then
 					self:RequireToken( "rsb", "Right square bracket (]) missing, to close indexing operator [Index]" )
 
-					Expression = self:Compile_GET( Trace, Expression, Index )
-				
+					if !self:AcceptToken( "ass" ) then
+						Expression = self:Compile_GET( Trace, Expression, Index )
+					elseif Statment then
+						return self:Compile_SET( Trace, Expression, Index, self:Expression( Trace ) )
+					else
+						self:TraceError( Trace, "Set operator (%s[%s]=) must not appear inside an equation", self:NiceClass( Expression, Index ) )
+					end
+
 				elseif !self:AcceptToken( "var", "func" ) then
 					self:TraceError( Trace, "Right square bracket (]) expected, to close indexing operator [Index]" )
 				else
@@ -671,7 +677,13 @@ function Compiler:Expression_17( Trace, Expression )
 
 					self:RequireToken( "rsb", "Right square bracket (]) missing, to close indexing operator [Index]" )
 
-					Expression = self:Compile_GET( Trace, Expression, Index, Class.Short )
+					if !self:AcceptToken( "ass" ) then
+						Expression = self:Compile_GET( Trace, Expression, Index, Class.Short )
+					elseif Statment then
+						return self:Compile_SET( Trace, Expression, Index, self:Expression( Trace ), Class.Short )
+					else
+						self:TraceError( Trace, "Set operator (%s[%s,%s]=) must not appear inside an equation", self:NiceClass( Expression, Index, Class.Short ) )
+					end
 				end
 
 			end
@@ -1347,17 +1359,17 @@ function Compiler:Statement_9( Trace )
 
 	local Expression = self:Expression_Value( Trace )
 
-	if Expression and !self:CheckToken( "prd", "lpa" ) then
+	if Expression and !self:CheckToken( "prd", "lpa", "lsb" ) then
 		self:TraceError( Trace, "Unexpected value" )
 	elseif Expression then
-		return self:Expression_17( Trace, Expression )
+		return self:Expression_17( Trace, Expression, true )
 	end
 
 	self:ExcludeToken( "dlt", "Memory operator (delta), must be part of expression or equation." )
 	self:ExcludeToken( "cng", "Memory operator (changed), must be part of expression or equation." )
 
 	if self:AcceptToken( "var" ) then
-		if !self:CheckToken( "prd", "lpa", "inc", "dec" ) then
+		if !self:CheckToken( "prd", "lpa", "inc", "dec", "lsb" ) then
 			self:TraceError( Trace, "Unexpected variable" )
 		end
 
@@ -1367,7 +1379,7 @@ function Compiler:Statement_9( Trace )
 	Expression = self:Expression_Variable( Trace )
 
 	if Expression then
-		return self:Expression_17( Trace, Expression )
+		return self:Expression_17( Trace, Expression, true )
 	end
 end
 
