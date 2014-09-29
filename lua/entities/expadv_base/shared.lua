@@ -20,6 +20,8 @@ function meta:IsExpAdv( ) return false end
 
 function ENT:IsExpAdv( ) return true end
 
+AccessorFunc( ENT, "GateName", "GateName", FORCE_STRING )
+
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: VNET
    --- */

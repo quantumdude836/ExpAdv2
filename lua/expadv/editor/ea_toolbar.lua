@@ -48,7 +48,8 @@ function PANEL:Init( )
 	
 	self.btnOptions = self:SetupButton( "Options", Material( "fugue/gear.png" ), RIGHT )
 	self.btnHelp = self:SetupButton( "Open helper", Material( "fugue/question.png" ), RIGHT )
-	
+	self.btnWiki = self:SetupButton( "Visit the wiki", Material( "fugue/home.png" ), RIGHT )
+
 	self:AddInviteMenu( )
 	
 	self.btnFontPlus = self:SetupButton( "Increase font size.", Material( "fugue/edit-size-up.png" ), RIGHT )
@@ -94,6 +95,10 @@ function PANEL:Init( )
 		self:GetParent( ):OpenHelper( ) 
 	end 
 	
+	function self.btnWiki:DoClick( )
+		gui.OpenURL( "https://github.com/Rusketh/ExpAdv2/wiki" )
+	end
+
 	function self.btnFontPlus:DoClick( )
 		self:GetParent( ):GetParent( ):IncreaseFontSize( 1 )
 	end

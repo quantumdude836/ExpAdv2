@@ -14,6 +14,16 @@ Component:AddException( "table" )
 local DEFAULT_TABLE = { Data = { }, Types = { }, Look = { }, Size = 0, Count = 0, HasChanged = false }
 
 /* ---	--------------------------------------------------------------------------------
+	@: Result Tables
+   ---	*/
+
+function EXPADV.ResultTable( Type, Data )
+	local Types, Look = { }, { }
+	for I = 1, #Data do Types[I] = Type; Look[I] = I; end
+	return { Data = { }, Types = Types, Look = Look, Size = #Data, Count = #Data, HasChanged = false }
+end
+
+/* ---	--------------------------------------------------------------------------------
 	@: Table Class
    ---	*/
 
@@ -51,13 +61,57 @@ Component:AddInlineFunction( "count", "t:", "n", "@value 1.Count" )
 Component:AddFunctionHelper( "size", "t:", "Returns the amount of entries in a table." )
 Component:AddFunctionHelper( "count", "t:", "Returns the lengh of the tables array element." )
 
-Component:AddInlineFunction( "type", "t:n", "s", "EXPADV.TypeName(value @1.Types[value %2])" )
-Component:AddInlineFunction( "type", "t:s", "s", "EXPADV.TypeName(value @1.Types[value %2])" )
-Component:AddInlineFunction( "type", "t:e", "s", "EXPADV.TypeName(value @1.Types[value %2])" )
+Component:AddInlineFunction( "type", "t:n", "s", "EXPADV.TypeName(value @1.Types[@value 2])" )
+Component:AddInlineFunction( "type", "t:s", "s", "EXPADV.TypeName(value @1.Types[@value 2])" )
+Component:AddInlineFunction( "type", "t:e", "s", "EXPADV.TypeName(value @1.Types[@value 2])" )
 
 Component:AddFunctionHelper( "type", "t:n", "Returns the type of obect stored in table at index." )
 Component:AddFunctionHelper( "type", "t:s", "Returns the type of obect stored in table at index." )
 Component:AddFunctionHelper( "type", "t:e", "Returns the type of obect stored in table at index." )
+
+Component:AddInlineFunction( "exists", "t:n", "b", "(value @1.Types[@value 2] ~= nil)" )
+Component:AddInlineFunction( "exists", "t:s", "b", "(value @1.Types[@value 2] ~= nil)" )
+Component:AddInlineFunction( "exists", "t:e", "b", "(value @1.Types[@value 2] ~= nil)" )
+
+Component:AddFunctionHelper( "exists", "t:n", "Returns true if obect stored in table at index is not void." )
+Component:AddFunctionHelper( "exists", "t:s", "Returns true if obect stored in table at index is not void." )
+Component:AddFunctionHelper( "exists", "t:e", "Returns true if obect stored in table at index is not void." )
+
+/* ---	--------------------------------------------------------------------------------
+	@: Unpack to vararg
+   ---	*/
+
+local Unpack
+
+function Unpack( Context, Trace, Table, Index )
+	local Object = Table.Data[Index or 1]
+
+	if Object ~= nil then return end
+	
+	return { Object, Table.Types[Index] }, Unpack( Context, Trace, Table, (Index or 1) + 1 )
+end
+
+
+Component:AddVMFunction( "unpack", "t", "...", Unpack )
+Component:AddVMFunction( "unpack", "t,n", "...", Unpack )
+
+Component:AddFunctionHelper( "unpack", "t", "Unpacks the array element of a table to a vararg." )
+Component:AddFunctionHelper( "unpack", "t,n", "Unpacks the array element of a table to a vararg, staring at index N." )
+
+/* ---	--------------------------------------------------------------------------------
+	@: Concat
+   ---	*/
+
+Component:AddVMFunction( "concat", "t,s", "s",
+	function( Context, Trace, Table, Sep )
+		local Result = {}
+
+		for I = 1, #Table.Data do Result[I] = EXPADV.ToString( Table.Types[I], Table.Data[I] ) end
+
+		return string.Implode( Sep, Result )
+	end )
+
+Component:AddFunctionHelper( "concat", "t,s", "concatinates the array element of a table to a string using a seperator." )
 
 /* ---	--------------------------------------------------------------------------------
 	@: Variant Get Operators

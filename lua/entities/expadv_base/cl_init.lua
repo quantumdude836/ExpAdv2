@@ -16,6 +16,8 @@ function ENT:ReceivePackage( Package )
 	self.files = Package:Table( )
 
 	self:CompileScript( self.root, self.files )
+
+	-- self:SetGateName( Package:String( ) )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -47,6 +49,6 @@ vnet.Watch( "expadv.cl_script", function( Package )
 	if !IsValid( ExpAdv ) then return end
 
 	ExpAdv:ReceivePackage( Package )
-end )
+end, vnet.OPTION_WATCH_OVERRIDE )
 
 

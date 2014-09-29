@@ -617,11 +617,12 @@ EXPADV.BaseEnv = {
 }
 
 require( "vector2" )
+require( "quaternion" )
 
 local function CreateEnviroment( )
 	return {
 		EXPADV = EXPADV, SERVER = SERVER, CLIENT = CLIENT,
-		Vector = Vector, Vector2 = Vector2, Angle = Angle, Color = Color,
+		Vector = Vector, Vector2 = Vector2, Angle = Angle, Color = Color, Quaternion = Quaternion,
 		pairs = pairs, ipairs = ipairs,
 		pcall = pcall, error = error, unpack = unpack,
 		print = print, MsgN = MsgN, tostring = tostring, tonumber = tonumber,

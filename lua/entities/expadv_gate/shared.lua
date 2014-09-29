@@ -26,7 +26,7 @@ function ENT:SetupDataTables( )
 	self:NetworkVar( "Float", 1, "StopWatch" )
 	self:NetworkVar( "Float", 2, "Average" )
 	self:NetworkVar( "Float", 3, "ServerState" )
-	-- self:NetworkVar( "String", 0, "GateName" )
+	self:NetworkVar( "String", 0, "GateName" )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------

@@ -107,7 +107,7 @@ function ENT:TriggerInput( Key, Value )
 	Cell.ClassObj.Wire_In_Util( self.Context, Reference, Value )
 	Context.Trigger[ Reference ] = true
 
-	self:CallEvent( "trigger", Key, Cell.Class.Name )
+	self:CallEvent( "trigger", Key, Cell.ClassObj.Name )
 
 	Context.Trigger[ Reference ] = false
 end

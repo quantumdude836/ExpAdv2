@@ -106,6 +106,9 @@ local HomeScreen = [[
     The github repository can be found here:
         https://github.com/Rusketh/ExpAdv2
 	
+	For a better look at the new syntax:
+		https://github.com/Rusketh/ExpAdv2/wiki/Syntax
+
 	For a list of components and Classes:
 		https://github.com/Rusketh/ExpAdv2/wiki/Components
 		
@@ -173,7 +176,7 @@ end
 
 function Editor.GetCode( )
 	if Editor.Instance then 
-		return Editor.Instance:GetCode( ) 
+		return Editor.Instance:GetCode( )
 	end 
 end
 

@@ -131,21 +131,6 @@ end
 duplicator.RegisterEntityClass( "expadv_screen", MakeExpadvScreen, "Pos", "Ang", "Model" )
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
-	@: Right Click
-   --- */
-
-function TOOL:RightClick( Trace )
-	if CLIENT then return end
-	
-	if !IsValid( Trace.Entity ) then
-		self:GetOwner( ):SendLua( "EXPADV.Editor.Open( )" )
-		return false
-	end
-
-	-- TODO: Request Code
-end
-
-/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Left Click
    --- */
 
@@ -205,6 +190,27 @@ function TOOL:LeftClick( Trace )
 	return true
 end
 
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Right Click
+   --- */
+
+function TOOL:RightClick( Trace )
+	if CLIENT then return false end
+
+	if !IsValid( Trace.Entity ) then -- and EXPADV.IsFriend( Trace.Entity, self:GetOwner( ) ) then
+		self:GetOwner( ):SendLua( "EXPADV.Editor.Open( )" )
+		return false
+	elseif !Trace.Entity.ExpAdv then
+		return false
+	else
+		net.Start( "expadv.download" )
+		net.WriteUInt( Trace.Entity:EntIndex( ), 16 )
+		net.WriteString( Trace.Entity:GetGateName( ) )
+		net.Send( self:GetOwner( ) )
+	end
+
+	return true
+end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Tool Panel

@@ -93,6 +93,10 @@ function ENT:DrawOverlay( Pos, Ang )
                         local Line3 = string.format( "CPU: %i us",  self:GetStopWatch( ) or 0 )
                         draw.SimpleText( Line3, "ExpAdv_OverlayFont", 150 * mul, 60 * mul, Color( 255, 255, 255, 255 ), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
 
+                -- Name
+                    local Name = self:GetGateName( ) or "LemonGate"
+                    draw.SimpleText( "Current Script: " .. Name, "ExpAdv_OverlayFont", 5 * mul, 92 * mul, Color( 255, 255, 255, 255 ), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER )
+
          cam.End3D2D( )
 end
 

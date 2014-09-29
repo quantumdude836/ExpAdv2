@@ -25,7 +25,7 @@ vnet.Watch( "expadv.cl_loaded", function( Package )
 	EXPADV.CallHook( "ClientLoaded", Ent, Ply )
 
 	Ent:OnClientLoaded( Ply )
-end )
+end, vnet.OPTION_WATCH_OVERRIDE )
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Receive Code
@@ -49,6 +49,7 @@ end
 
 function ENT:ReceivePackage( Package )
 	self:LoadCodeFromPackage( Package:String( ),  Package:Table( ) or { } )
+	self:SetGateName( Package:String( ) )
 end
 
 function ENT:SendClientPackage( Player, Root, Files )
@@ -61,6 +62,8 @@ function ENT:SendClientPackage( Player, Root, Files )
 	Package:String( Root )
 
 	Package:Table( Files )
+
+	-- Package:String( self:GetGateName( ) )
 
 	if IsValid(Player) then
 		Package:AddTargets( { Player } ) 

@@ -544,7 +544,7 @@ function PANEL:OpenOldTabs( )
 end
 
 function PANEL:Open( Code, NewTab )
-	RunConsoleCommand( "lemon_editor_open" )
+	RunConsoleCommand( "expadv_editor_open", 1 )
 	
 	if self.OpenHelper then
 		self.OpenHelper = nil
@@ -590,7 +590,8 @@ function PANEL:ReciveDownload( DownloadData )
 end
 
 function PANEL:Close( )
-	RunConsoleCommand( "lemon_editor_close" )
+	RunConsoleCommand( "expadv_editor_open", 0 )
+	
 	timer.Stop( "EA_AutoSave" )
 	self:SaveTabs( )
 	self:AutoSave( )

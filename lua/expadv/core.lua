@@ -180,6 +180,7 @@ function EXPADV.LoadCore( )
 	EXPADV.AddComponentFile( "color" )
 	EXPADV.AddComponentFile( "vector" )
 	EXPADV.AddComponentFile( "angle" )
+	EXPADV.AddComponentFile( "quaternion" )
 	EXPADV.AddComponentFile( "entity" )
 	EXPADV.AddComponentFile( "player" )
 	EXPADV.AddComponentFile( "hologram" )
@@ -290,21 +291,16 @@ end
    -- BuildCompilerTokens( TokenArray )							| Void | Called before the compiler builds it token list.
    -- RegisterContext( Context )*								| Void | Called when a context is registered to the core.
    -- UnregisterContext( Context )*								| Void | Called when a context is unregistered from the core.
-   -- LuaError( Context, Error )*								| Void | Called when an executing context throws a lua error.
-   -- ScriptError( Context, Error )*							| Void | Called when an executing context throws a script error.
-   -- Exception( Context, Exception )*							| Void | Called when an executing context receives an uncatched exception.
    -- StartUp( Context )*										| Void | Called before the initial root execution.
    -- ShutDown( Context )*										| Void | Called after the context has shutdown.
    -- Update( Context )*										| Void | Called every tick, when a context has ran that tick.
    -- ClientLoaded( Entity, Player )							| Void | Called server side once a client confirms an entity has loaded its script.
    -- BuildHologramModels( Table )								| Void | Called when the hologram model look up is made.
-   -- GetDataStream( DataTable )								| Void | Called clientside when data needs to be sent.
    -- OpenContextMenu( Entity, ContextMenu, Trace, Option )		| Void | Called when an ExpAdv2 context menu is created.
    -- AddComponents( )											| Void | Called when its time to add custom components.
 
    --  function Component:OnPostLoadAliases( ) end
    --  hook.Add( "Expadv.PostLoadAliases", ... )
-   -- *Also avaible on Context -> function Context:OnScriptError( Result ) end
    -- @GitHub: Please request hooks, and return behavours via issue page.
 
 function EXPADV.CallHook( Name, ... )
@@ -430,7 +426,7 @@ else
 		end
 
 		EXPADV.CallHook( "GetDataStream", Data )
-	end )
+	end, vnet.OPTION_WATCH_OVERRIDE )
 
 end
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -455,9 +451,11 @@ if SERVER then
 	util.AddNetworkString( "expadv.request" )
 
 	util.AddNetworkString( "expadv.upload" )
+
+	util.AddNetworkString( "expadv.download" )
 end
 
-function EXPADV.SendCode( ID, Root, Files )
+function EXPADV.SendCode( ID, Root, Files, Name )
 	local Package = vnet.CreatePacket( "expadv.upload" )
 
 	Package:Int( ID )
@@ -468,23 +466,50 @@ function EXPADV.SendCode( ID, Root, Files )
 
 	Package:Table( Files )
 
+	Package:String( Name )
+
 	Package:Send( )
 end
 
 net.Receive( "expadv.request", function( )
 	local ID = net.ReadUInt( 16 )
-	local Session = EXPADV.Editor.GetSession( )
-	
-	if !Session then
-		local Root = EXPADV.Editor.GetCode( )
-		if !Root or Root == "" then return end
-		EXPADV.SendCode( ID, Root, { } )
-	else
-		net.Start( "expadv.shared" )
-			net.WriteUInt( ID, 16 )
-			net.WriteEntity( LocalPlayer( ) )
-			net.WriteUInt( Session.ID, 16 )
-		net.SendToServer( )
+
+	local Root = EXPADV.Editor.GetCode( )
+
+	if !Root or Root == "" then return end
+
+	local Name = EXPADV.Editor.GetInstance( ):GetName( )
+
+	EXPADV.SendCode( ID, Root, { }, Name )
+
+	local ExpAdv = Entity( ID )
+
+	if !IsValid( ExpAdv ) or !ExpAdv.ExpAdv then return end
+
+	local Editor = EXPADV.Editor.GetInstance( )
+	Editor.GateTabs[ExpAdv] = Editor.TabHolder:GetActiveTab( )
+end )
+
+net.Receive( "expadv.download", function( )
+	local ExpAdv = Entity( net.ReadUInt( 16 ) )
+	local Title = net.ReadString( )
+
+	if IsValid( ExpAdv ) and ExpAdv.ExpAdv and ExpAdv.root and ExpAdv.root ~= "" then
+		local Editor = EXPADV.Editor.GetInstance( )
+		local Tab = Editor.GateTabs[ExpAdv]
+
+		if !Tab then
+			Editor:NewTab( ExpAdv.root, nil, Title )
+			Tab = Editor.TabHolder:GetActiveTab( )
+			Tab.Entity = ExpAdv
+			Editor.GateTabs[ExpAdv] = Tab
+		else
+			Editor.TabHolder:SetActiveTab( Tab )
+		end
+
+		Editor:SetVisible( true )
+		Editor:MakePopup( )
+		Tab:GetPanel( ):SetCode( ExpAdv.root )
 	end
 end )
 
@@ -558,6 +583,46 @@ if CLIENT then
 			net.WriteFloat( Duration )
 		net.SendToServer( )
 	end
+end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Editor Animation.
+   --- */
+
+CreateConVar( "expadv_editor_open", "0", { FCVAR_USERINFO } )
+
+if CLIENT then
+		local RollDelta = 0
+		local Emitter = ParticleEmitter( vector_origin )
+
+		timer.Create( "expadv.editor.animate", 1, 0, function( )
+			for _, Ply in pairs( player.GetAll( ) ) do
+				if Ply:GetInfoNum( "expadv_editor_open", 0 ) >= 1 and Ply ~= LocalPlayer( ) then
+					local BoneIndx = Ply:LookupBone("ValveBiped.Bip01_Head1") or Ply:LookupBone("ValveBiped.HC_Head_Bone") or 0
+					local BonePos, BoneAng = Ply:GetBonePosition( BoneIndx )
+					
+					for I = 1, math.random( 0, 2 ) do
+						local Particle = Emitter:Add("omicron/lemongear", BonePos + Vector(0, 0, 10) )
+					
+						if Particle then
+							Particle:SetColor( 255, 255, 255 )
+							Particle:SetVelocity( Vector( math.random(-8, 8), math.random(-8, 8), math.random(5, 15) ) )
+
+							Particle:SetDieTime( 3 )
+							Particle:SetLifeTime( 0 )
+
+							Particle:SetStartSize( math.random(1, 3) )
+							Particle:SetEndSize( math.random(2, 10) )
+
+							Particle:SetStartAlpha( 255 )
+							Particle:SetEndAlpha( 0 )
+
+							Particle:SetRollDelta( RollDelta )
+						end
+					end
+				end
+			end
+		end )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------

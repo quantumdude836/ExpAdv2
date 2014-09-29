@@ -223,6 +223,15 @@ end]], "@value" )
 
 Component:AddFunctionHelper( "screenToWorld", "v2", "Returns the position on screen as a world vector." )
 
+/* -----------------------------------------------------------------------------------
+	@: Hud functions
+   --- */
+
+Component:AddPreparedFunction( "toscreen", "v", "v2", "@define T = @value 1:ToScreen( )", "Vector2( @T.x, @t.y )" )
+Component:AddFunctionHelper( "toscreen", "v", "Translates the vectors position into 2D client screen coordinates." )
+
+Component:AddInlineFunction( "isvisible", "v", "b", "@value 1:ToScreen( ).visible" )
+Component:AddFunctionHelper( "isvisible", "v", "Returns true if the vectors position is in clients view." )
 
 /* -----------------------------------------------------------------------------------
 	@: Hud Event

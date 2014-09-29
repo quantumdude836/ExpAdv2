@@ -126,6 +126,119 @@ VectorComponent:AddPreparedFunction( "setZ", "v:n", "", "@value 1.z = @value 2" 
 VectorComponent:AddFunctionHelper( "setZ", "v:n", "Sets the Z value of a vector" )
 
 /* -----------------------------------------------------------------------------------
+   @: Rotate
+   --- */
+
+VectorComponent:AddPreparedFunction( "rotate", "v:a", "v", [[
+   @define New = Vector( @value 1.x, @value 1.y, @value 1.z )
+   @New:Rotate( @value 2 )
+]], "@New" )
+
+VectorComponent:AddFunctionHelper( "rotate", "v:a", "Rotates a vector by the given angle." )
+
+/* -----------------------------------------------------------------------------------
+   @: Angle
+   --- */
+
+VectorComponent:AddInlineFunction( "angle", "v:", "a", "@value 1:Angle( )" )
+VectorComponent:AddInlineFunction( "angleEx", "v:v", "a", "@value 1:AngleEx( @value 2 )" )
+
+VectorComponent:AddFunctionHelper( "angle", "v:", "Returns an angle representing the normal of the vector." )
+VectorComponent:AddFunctionHelper( "angle", "v:v", "Returns the angle between two vectors." )
+
+/* -----------------------------------------------------------------------------------
+   @: Useful
+   --- */
+
+
+VectorComponent:AddInlineFunction( "cross", "v:v", "v", "@value 1:Cross( @value 2 )" )
+VectorComponent:AddFunctionHelper( "cross", "v:v", "Calculates the cross product of the 2 vectors (The vectors that defined the normal created by the 2 vectors). " )
+
+VectorComponent:AddInlineFunction( "distance", "v:v", "v", "@value 1:Distance( @value 2 )" )
+VectorComponent:AddFunctionHelper( "distance", "v:v", "Returns the pythagorean distance between the vector and the other vector." )
+
+VectorComponent:AddInlineFunction( "distanceSqr", "v:v", "v", "@value 1:DistToSqr( @value 2 )" )
+VectorComponent:AddFunctionHelper( "distanceSqr", "v:v", "Returns the squared distance of 2 vectors." )
+
+VectorComponent:AddInlineFunction( "dot", "v:v", "n", "@value 1:Dot( @value 2 )" )
+VectorComponent:AddFunctionHelper( "dot", "v:v", [[The dot product of two vectors is the product of the entries of the two vectors. A dot product returns the cosine of the angle between the two vectors multiplied by the length of both vectors. A dot product returns just the cosine of the angle if both vectors are normalized]] )
+
+VectorComponent:AddInlineFunction( "normal", "v", "v", "@value 1:GetNormalized( @value 2 )" )
+VectorComponent:AddFunctionHelper( "normal", "v", "Returns a normalized version of the vector. Normalized means vector with same direction but with length of 1." )
+
+VectorComponent:AddInlineFunction( "isEqualto", "v:v,n", "b", "@value 1:IsEqualTol( @value 2, @value 3 )" )
+VectorComponent:AddFunctionHelper( "isEqualto", "v:v,n", "Returns if the vector is equal to another vector with the given tolerance." )
+
+VectorComponent:AddInlineFunction( "isZero", "v:", "b", "@value 1:IsZero()" )
+VectorComponent:AddFunctionHelper( "isZero", "v:", "Checks whenever all fields of the vector are 0." )
+
+VectorComponent:AddInlineFunction( "lengh", "v:", "n", "@value 1:Length()" )
+VectorComponent:AddFunctionHelper( "lengh", "v:", "Returns the pythagorean length of the vector." )
+
+VectorComponent:AddInlineFunction( "lengh2D", "v:", "n", "@value 1:Length2D()" )
+VectorComponent:AddFunctionHelper( "lengh2D", "v:", "Returns the length of the vector in two dimensions, without the Z axis." )
+
+VectorComponent:AddInlineFunction( "lengh2DSqr", "v:", "n", "@value 1:Length2DSqr()" )
+VectorComponent:AddFunctionHelper( "lengh2DSqr", "v:", "Returns the squared length of the vectors x and y value." )
+
+VectorComponent:AddInlineFunction( "lenghSqr", "v:", "n", "@value 1:LengthSqr()" )
+VectorComponent:AddFunctionHelper( "lenghSqr", "v:", "Returns the squared length of the vector." )
+
+VectorComponent:AddInlineFunction( "insideAABox", "v:v,v", "b", "@value 1:WithinAABox( @value 2, @value 3 )" )
+VectorComponent:AddFunctionHelper( "insideAABox", "v:v,v", "Returns whenever the given vector is in a box created by the 2 other vectors." )
+
+/* -----------------------------------------------------------------------------------
+   @: Headings
+   --- */
+
+local Rad2Deg = 180 / math.pi
+local ZeroAng = Angle(0,0,0)
+
+
+VectorComponent:AddVMFunction( "Bearing", "v:a,v", "n", function( Context, Trace, self, angle, vector )
+   local v, a = WorldToLocal(vector, ZeroAng, self, angle)
+   return Rad2Deg * -math.atan2( v.y, v.x )
+end )
+
+VectorComponent:AddVMFunction( "Elevation", "v:a,v", "n", function( Context, Trace, self, angle, vector )
+   local v, a = WorldToLocal(vector, ZeroAng, self, angle)
+   return Rad2Deg * math.asin(v.z / v:Length( ))
+end )
+
+VectorComponent:AddVMFunction( "Heading", "v:a,v", "a", function( Context, Trace, self, angle, vector )
+   local v, a = WorldToLocal(vector, ZeroAng, self, angle)
+   return Angle( Rad2Deg * math.asin(v.z / v:Length( )) , Rad2Deg * -math.atan2( v.y, v.x ), 0 )
+end )
+
+VectorComponent:AddFunctionHelper( "Bearing", "v:a,v", "Return the bearing between a vector facing an angle and a target vector." )
+VectorComponent:AddFunctionHelper( "Elevation", "v:a,v", "Return the elevation between a vector facing an angle and a target vector." )
+VectorComponent:AddFunctionHelper( "Heading", "v:a,v", "Return the heading between a vector facing an angle and a target vector." )
+
+/* -----------------------------------------------------------------------------------
+   @: World and Axis
+   --- */
+
+VectorComponent:AddInlineFunction( "toWorld", "e:v", "v", "(IsValid( @value 1 ) and @value 1:LocalToWorld(@value 2) or Vector(0, 0, 0))" )
+VectorComponent:AddInlineFunction( "toWorldAxis", "e:v", "v", "(IsValid( @value 1 ) and @value 1:LocalToWorld(@value 2 ) - @value 1:GetPos() or Vector(0, 0, 0))" )
+VectorComponent:AddInlineFunction( "toLocal", "e:v", "v", "(IsValid( @value 1 ) and @value 1:WorldToLocal(@value 2) or Vector3.Zero:Clone())" )
+VectorComponent:AddInlineFunction( "toLocalAxis", "e:v", "v", "(IsValid( @value 1 ) and @value 1:WorldToLocal(@value 2 + @value 1:GetPos()) or Vector(0, 0, 0))" )
+
+VectorComponent:AddFunctionHelper( "toWorld", "e:v", "Converts a vector to a world vector." )
+VectorComponent:AddFunctionHelper( "toWorldAxis", "e:v", "Converts a local axis to a world axis." )
+VectorComponent:AddFunctionHelper( "toLocal", "e:v", "v", "Converts a world vector to a local vector." )
+VectorComponent:AddFunctionHelper( "toLocalAxis", "e:v", "Converts a world axis to a local axis." )
+
+/* -----------------------------------------------------------------------------------
+   @: Intersect
+   --- */
+
+VectorComponent:AddInlineFunction( "intersectRayWithOBB", "v,v,v,a,v,v", "v", "$util.IntersectRayWithOBB( @value 1, @value 2, @value 3, @value 4, @value 5, @value 6 )")
+VectorComponent:AddInlineFunction( "intersectRayWithPlane", "v,v,v,v", "v", "$util.IntersectRayWithPlane( @value 1, @value 2, @value 3, @value 4 )")
+
+VectorComponent:AddFunctionHelper( "intersectRayWithOBB", "v,v,v,a,v,v", "Performs a ray box intersection and returns position, (vector RayS tart, vector Ray Direction, vector Box Origin, angle BoxAngles, vector BoxMin, vector BoxMax)." )
+VectorComponent:AddFunctionHelper( "intersectRayWithPlane", "v,v,v,v", "Performs a ray plane intersection and returns the hit position, (vector Ray Origin, vector Ray Direction, vector Plane Position, vector Plane Normal)." )
+
+/* -----------------------------------------------------------------------------------
 	@: Vector Object
    --- */
 
