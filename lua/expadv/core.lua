@@ -4,6 +4,8 @@
 
 EXPADV = { }
 
+MsgN( "Expression advanced Two - Installing." )
+
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Debugging Stuff
    --- */
@@ -160,6 +162,9 @@ function EXPADV.AddComponentFile( FileName )
 end
 
 function EXPADV.LoadCore( )
+
+	MsgN( "Expression advanced Two - Loading." )
+
 	if EXPADV.IsLoaded then
 		EXPADV.CallHook( "UnloadCore" )
 		EXPADV.IsLoaded = nil
@@ -227,6 +232,8 @@ function EXPADV.LoadCore( )
 	EXPADV.IsLoaded = true
 
 	EXPADV.CallHook( "PostLoadCore" )
+
+	MsgN( "Expression advanced Two - Loading complete." )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -559,7 +566,7 @@ end
 
 if CLIENT then
 	hook.Add( "GComputeLoaded", "expadv.GCompute", function( )
-		include( "expadv/api/gcompute.lua")
+		--include( "expadv/api/gcompute.lua")
 	end )
 end
 
@@ -576,3 +583,5 @@ if SERVER then
 		EXPADV.LoadCore( )
 	end )
 end
+
+MsgN( "Expression advanced Two - Installing complete." )
