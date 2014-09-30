@@ -480,7 +480,6 @@ if SERVER then
 		for ENT, _ in pairs( BoneQueue ) do Queue[ENT] = true; NeedsUpdate = true end
 
 		if NeedsUpdate then
-			
 			net.Start( "lemon.hologram" )
 			
 			for ID, _ in pairs( RemoveQueue ) do
@@ -1125,18 +1124,11 @@ function ENT:ApplyHoloInfo( )
 
 	if !Info then return end
 
-	local Bones = self:GetBoneCount( )
+	local Bones = self:GetBoneCount( ) or -1
+
 	local Scale = Vector( Info.SCALEX, Info.SCALEY, Info.SCALEZ )
 
-	if Bones == 1 then
-		if string.Left( self:GetModel( ), 17 ) == "models/holograms/" then
-			Scale = Vector( Info.SCALEY, Info.SCALEX, Info.SCALEZ )
-		end
-		
-		for ID = Bones, 0, -1 do self:ManipulateBoneScale( ID, Scale ) end
-
-	elseif Bones > 1 and Info.BONES then 
-
+	if Bones > 1 and Info.BONES then 
 		for ID, Bone in pairs( self.BONES ) do
 			
 			local ID = ID - 1
@@ -1150,13 +1142,22 @@ function ENT:ApplyHoloInfo( )
 			self:ManipulateBoneAngles( ID, Angle( Bone.ANGLEP, Bone.ANGLEY, Bone.ANGLEY ) )
 		end
 
-	elseif self.EnableMatrix then
+		for ID = Bones, 0, -1 do
+			if !self.BONES[ID] then
+				self:ManipulateBoneScale( ID, Scale )
+			end
+		end
 
+	elseif Bones > 1 then
+
+		for ID = Bones, 0, -1 do self:ManipulateBoneScale( ID, Scale ) end
+
+	elseif self.EnableMatrix then
 		local ScaleMatrix = Matrix( )
 
 		ScaleMatrix:Scale( Scale )
 
-		self:EnableMatrix("RenderMultiply", ScaleMatrix )
+		self:EnableMatrix( "RenderMultiply", ScaleMatrix )
 
 	else
 		self:SetModelScale( ( Info.SCALEX + Info.SCALEY + Info.SCALEZ ) / 3, 0)

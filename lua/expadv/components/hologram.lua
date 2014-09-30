@@ -195,7 +195,7 @@ Hologram:AddAlias( "holo" )
    --- */
 
 HoloComponent:AddPreparedOperator( "hologram", "e", "h", [[
-if !$IsValid( @value 1 ) or !@value 1.IsHologram then
+if !IsValid( @value 1 ) or !@value 1.IsHologram then
 	Context:Throw( %trace, "hologram", "casted none hologram from entity.")
 end ]], "@value 1" )
 
@@ -207,13 +207,13 @@ local function SetModel( Context, Trace, Entity, Model )
 	local ValidModel = ModelEmu[ Model or "sphere" ]
 
 	if ValidModel then
-		if Entity.IsHologram and Entity.Player == Context.player then
+		if Entity.IsHologram and Entity.player == Context.player then
 			Entity:SetModel( "models/holograms/" .. ValidModel .. ".mdl" )
 		end
 
 	elseif !HoloComponent:ReadSetting( "model_any", true ) or !util.IsValidModel( Model ) then
 		Context:Throw( Trace, "hologram", "Invalid model set " .. Model )
-	elseif Entity.IsHologram and Entity.Player == Context.player then
+	elseif Entity.IsHologram and Entity.player == Context.player then
 		Entity:SetModel( ValidModel or Model )
 	end
 end
@@ -264,7 +264,7 @@ local function NewHolo( Context, Trace, Model, Position, Angle )
 
 	Context.player:SetNWInt( "lemon.holograms", Context.player:GetNWInt( "lemon.holograms", 0 ) + 1 )
 
-	Entity.Player = Context.player
+	Entity.player = Context.player
 
 	Entity:Spawn( )
 
@@ -339,17 +339,17 @@ HoloComponent:AddFunctionHelper( "canMakeHologram", "", "Returns true if a holog
     Position
 ==============================================================================================*/
 HoloComponent:AddPreparedFunction("setPos", "h:v", "",[[
-if $IsValid( @value 1 ) and @value 1.Player == Context.player then
+if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:SetPos( @value 2 )
 end]] )
 
 HoloComponent:AddPreparedFunction("moveTo", "h:v,n", "",[[
-if $IsValid( @value 1 ) and @value 1.Player == Context.player then
+if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:MoveTo( @value 2, @value 3 )
 end]] )
 
 HoloComponent:AddPreparedFunction("stopMove", "h:", "",[[
-if $IsValid( @value 1 ) and @value 1.Player == Context.player then
+if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:StopMove( )
 end]] )
 
@@ -362,17 +362,17 @@ HoloComponent:AddFunctionHelper( "stopMove", "h:", "If a hologram is being moved
     Angles
 ==============================================================================================*/
 HoloComponent:AddPreparedFunction("setAng", "h:a", "",[[
-if $IsValid( @value 1 ) and @value 1.Player == Context.player then
+if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:SetAngles( @value 2 )
 end]] )
 
 HoloComponent:AddPreparedFunction("rotateTo", "h:a,n", "",[[
-if $IsValid( @value 1 ) and @value 1.Player == Context.player then
+if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:RotateTo( @value 2, @value 3 )
 end]] )
 
 HoloComponent:AddPreparedFunction("stopRotate", "h:", "",[[
-if $IsValid( @value 1 ) and @value 1.Player == Context.player then
+if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:StopRotate( )
 end]] )
 
@@ -384,38 +384,38 @@ HoloComponent:AddFunctionHelper( "stopRotate", "h:", "Stops the rotation animati
     Scale
 ==============================================================================================*/
 HoloComponent:AddPreparedFunction("setScale", "h:v", "",[[
-if $IsValid( @value 1 ) and @value 1.Player == Context.player then
+if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:SetScale( @value 2 )
 end]] )
 
 HoloComponent:AddPreparedFunction("setScaleUnits", "h:v", "",[[
-if $IsValid( @value 1 ) and @value 1.Player == Context.player then
+if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:SetScaleUnits( @value 2 )
 end]] )
 
 HoloComponent:AddPreparedFunction("scaleTo", "h:v,n", "",[[
-if $IsValid( @value 1 ) and @value 1.Player == Context.player then
+if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:ScaleTo( @value 2, @value 3 )
 end]] )
 
 HoloComponent:AddPreparedFunction("scaleToUnits", "h:v,n", "",[[
-if $IsValid( @value 1 ) and @value 1.Player == Context.player then
+if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:ScaleToUnits( @value 2, @value 3 )
 end]] )
 
 HoloComponent:AddPreparedFunction("stopScale", "h:", "",[[
-if $IsValid( @value 1 ) and @value 1.Player == Context.player then
+if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:StopScale( )
 end]] )
 
 HoloComponent:AddPreparedFunction("getScale", "h:", "v",[[
-if $IsValid( @value 1 ) and @value 1.GetScale then
+if IsValid( @value 1 ) and @value 1.GetScale then
 	%util = @value 1:GetScale( )
 end]], "Vector3( %util or Vector( 0, 0, 0 ) )" )
 
 HoloComponent:AddPreparedFunction("getScaleUnits", "h:", "v",[[
 @define pos
-if $IsValid( @value 1 ) and @value 1.GetScale then
+if IsValid( @value 1 ) and @value 1.GetScale then
 	@pos = @value 1:GetScaleUnits( )
 end]], "( @pos or Vector( 0, 0, 0 ) )" )
 
@@ -432,23 +432,23 @@ HoloComponent:AddFunctionHelper("getScaleUnits", "h:", "Returns the scale of a h
     Visible and Shading
 ==============================================================================================*/
 HoloComponent:AddPreparedFunction("shading", "h:b", "", [[
-if $IsValid( @value 1 ) and @value 1.Player == Context.player then
+if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:SetShading(@value 2)
 end]] )
 
 HoloComponent:AddPreparedFunction("shadow", "h:b", "", [[
-if $IsValid( @value 1 ) and @value 1.Player == Context.player then
+if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:DrawShadow(@value 2)
 end]] )
 
 HoloComponent:AddPreparedFunction("visible", "h:b", "", [[
-if $IsValid( @value 1 ) and @value 1.Player == Context.player then
+if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:SetVisible(@value 2)
 end]] )
 
-HoloComponent:AddInlineFunction("isVisible", "h:", "b", "($IsValid( @value 1 ) and @value 1.INFO.VISIBLE or false )" )
+HoloComponent:AddInlineFunction("isVisible", "h:", "b", "(IsValid( @value 1 ) and @value 1.INFO.VISIBLE or false )" )
 
-HoloComponent:AddInlineFunction("hasShading", "h:", "b", "($IsValid( @value 1 ) and @value 1.INFO.SHADING or false )" )
+HoloComponent:AddInlineFunction("hasShading", "h:", "b", "(IsValid( @value 1 ) and @value 1.INFO.SHADING or false )" )
 
 HoloComponent:AddFunctionHelper("shading", "h:b", "Enables or disables shading of a hologram." )
 HoloComponent:AddFunctionHelper("shadow", "h:b", "Set to true to make a hologram cast a shadow." )
@@ -462,27 +462,27 @@ HoloComponent:AddFunctionHelper("hasShading", "h:", "Returns true if a hologram 
 
 
 HoloComponent:AddPreparedFunction("pushClip", "h:n,v,v", "", [[
-if $IsValid( @value 1 ) and @value 1.Player == Context.player then
+if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:PushClip( @value 2, @value 3, value %4 )
 end]] )
 
 /*HoloComponent:AddPreparedFunction("removeClip", "h:n", "", [[
-if $IsValid( @value 1 ) and @value 1.Player == Context.player and @value 1:RemoveClip( @value 2 ) then
+if IsValid( @value 1 ) and @value 1.player == Context.player and @value 1:RemoveClip( @value 2 ) then
 	%HoloLib.QueueHologram( @value 1 )
 end]] ) Not supported yet*/
 
 HoloComponent:AddPreparedFunction("enableClip", "h:n,b", "", [[
-if $IsValid( @value 1 ) and @value 1.Player == Context.player then
+if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:SetClipEnabled( @value 2, @value 3 )
 end]] )
 
 HoloComponent:AddPreparedFunction( "setClipOrigin", "h:n,v", "", [[
-if $IsValid( @value 1 ) and @value 1.Player == Context.player then
+if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:SetClipOrigin( @value 2, @value 3 )
 end]] )
 
 HoloComponent:AddPreparedFunction( "setClipNormal", "h:n,v", "", [[
-if $IsValid( @value 1 ) and @value 1.Player == Context.player then
+if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:SetClipNormal( @value 2, @value 3 )
 end]] )
 
@@ -496,13 +496,13 @@ HoloComponent:AddFunctionHelper( "setClipNormal", "h:n,v", "Set the normal of cl
     Section: Color
 ==============================================================================================*/
 HoloComponent:AddPreparedFunction("setColor", "h:c", "", [[
-if $IsValid( @value 1 ) and @value 1.Player == Context.player then
+if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:SetColor( @value 2 )
 	@value 1:SetRenderMode(@value 2.a == 255 and 0 or 4)
 end]] )
 
 HoloComponent:AddPreparedFunction("getColor", "h:", "c", [[
-if $IsValid( @value 1 ) then
+if IsValid( @value 1 ) then
 	@define val = @value 1:GetColor( )
 end]], "(@val or Color(0, 0, 0))" )
 
@@ -514,32 +514,32 @@ HoloComponent:AddFunctionHelper( "getColor", "h:", "Returns the color RGBA of ho
 	Section: Material / Skin / Bodygroup
 ==============================================================================================*/
 HoloComponent:AddPreparedFunction( "setMaterial", "h:s", "", [[
-if $IsValid( @value 1 ) and @value 1.Player == Context.player then
+if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:SetMaterial(@value 2)
 end]] )
 
 HoloComponent:AddPreparedFunction( "getMaterial", "h:", "s", [[
-if $IsValid( @value 1 ) then
+if IsValid( @value 1 ) then
 	@define val = @value 1:GetMaterial( ) or ""
 end]], "(@val or \"\")" )
 
 HoloComponent:AddPreparedFunction( "getSkin", "h:", "n", [[
-if $IsValid( @value 1 ) then
+if IsValid( @value 1 ) then
 	@define val = @value 1:GetSkin( ) or 0
 end]], "(@val or \"\")" )
 
 HoloComponent:AddPreparedFunction( "getSkinCount", "h:", "n", [[
-if $IsValid( @value 1 ) then
+if IsValid( @value 1 ) then
 	@define val = @value 1:SkinCount( ) or 0
 end]], "(@val or \"\")" )
 
 HoloComponent:AddPreparedFunction( "setSkin", "h:n", "", [[
-if $IsValid( @value 1 ) and @value 1.Player == Context.player then
+if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:SetSkin(@value 2)
 end]] )
 
 HoloComponent:AddPreparedFunction( "setBodygroup", "h:n,n", "", [[
-if $IsValid( @value 1 ) and @value 1.Player == Context.player then
+if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:SetBodygroup(@value 2, @value 3)
 end]] )
 
@@ -557,29 +557,29 @@ HoloComponent:AddFunctionHelper( "setBodygroup", "h:n,n", "Sets the bodygroup of
 
 
 HoloComponent:AddPreparedFunction( "parent", "h:e", "", [[
-if $IsValid( @value 1 ) and @value 1.Player == Context.player and $IsValid( @value 2 )then
+if IsValid( @value 1 ) and @value 1.player == Context.player and IsValid( @value 2 )then
 	@value 1:SetParent(@value 2)
 end]] )
 
 HoloComponent:AddPreparedFunction( "parent", "h:h", "", [[
-if $IsValid( @value 1 ) and @value 1.Player == Context.player and $IsValid( @value 2 )then
+if IsValid( @value 1 ) and @value 1.player == Context.player and IsValid( @value 2 )then
 	@value 1:SetParent(@value 2)
 end]] )
 
 HoloComponent:AddPreparedFunction( "parent", "h:p", "", [[
-if $IsValid( @value 1 ) and @value 1.Player == Context.player and $IsValid( @value 2 )then
+if IsValid( @value 1 ) and @value 1.player == Context.player and IsValid( @value 2 )then
 	@value 1:SetParent(@value 2)
 end]] )
 
 HoloComponent:AddPreparedFunction( "unParent", "h:", "", [[
-if $IsValid( @value 1 ) and @value 1.Player == Context.player then
+if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:SetParent( nil )
 end]] )
 
 HoloComponent:AddPreparedFunction( "getParentHolo", "h:", "h", [[
 @define val = $Entity(0)
 
-if $IsValid( @value 1 ) then
+if IsValid( @value 1 ) then
 	local Parent = @value 1:GetParent( )
 	
 	if Parent and Parent:IsValid( ) and Parent.IsHologram then
@@ -588,7 +588,7 @@ if $IsValid( @value 1 ) then
 end]], "@val" )
 
 HoloComponent:AddPreparedFunction( "getParent", "h:", "e", [[
-if $IsValid( @value 1 ) then
+if IsValid( @value 1 ) then
 	local Parent = @value 1:GetParent( )
 	
 	if Parent and Parent:IsValid( ) then
@@ -607,42 +607,42 @@ HoloComponent:AddFunctionHelper( "getParent", "h:", "Returns the parent entity o
     Section: Bones
 ==============================================================================================*/
 HoloComponent:AddPreparedFunction( "setBonePos", "h:n,v", "", [[
-if $IsValid( @value 1 ) and @value 1.Player == Context.player then
+if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:SetBonePos( @value 2, @value 3 )
 end]] )
 
 HoloComponent:AddPreparedFunction( "setBoneAngle", "h:n,a", "", [[
-if $IsValid( @value 1 ) and @value 1.Player == Context.player then
+if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:SetBoneAng( @value 2, @value 3 )
 end]] )
 
 HoloComponent:AddPreparedFunction( "setBoneScale", "h:n,v", "", [[
-if $IsValid( @value 1 ) and @value 1.Player == Context.player then
+if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:SetBoneScale( @value 2, @value 3 )
 end]] )
 
 HoloComponent:AddPreparedFunction( "jiggleBone", "h:n,b", "", [[
-if $IsValid( @value 1 ) and @value 1.Player == Context.player then
+if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:SetBoneJiggle( @value 2, @value 3 )
 end]] )
 
 HoloComponent:AddPreparedFunction( "getBonePos", "h:n", "v", [[
-if $IsValid( @value 1 ) then
+if IsValid( @value 1 ) then
 	@define val = @value 1:GetBonePos( @value 2 )
 end]], "( @val or Vector( 0, 0, 0 ) )" )
 
 HoloComponent:AddPreparedFunction( "getBoneAng", "h:n", "v", [[
-if $IsValid( @value 1 ) then
+if IsValid( @value 1 ) then
 	@define val = @value 1:GetBoneAngle( @value 2 )
 end]], "( @val or Angle( 0, 0, 0 ) )" )
 
 HoloComponent:AddPreparedFunction( "getBoneScale", "h:n", "v", [[
-if $IsValid( @value 1 ) then
+if IsValid( @value 1 ) then
 	@define val = @value 1:GetBoneScale( @value 2 )
 end]], "( @val or Vector( 0, 0, 0 ) )" )
 
 HoloComponent:AddPreparedFunction( "boneCount", "h:", "n", [[
-if $IsValid( @value 1 ) then
+if IsValid( @value 1 ) then
 	@define val = @value 1:GetBoneCount( )
 end]], "( @val or 0 )" )
 
@@ -660,7 +660,7 @@ HoloComponent:AddFunctionHelper( "boneCount", "h:", "Returns the ammount of bone
 ==============================================================================================*/
 
 HoloComponent:AddPreparedFunction("setAnimation", "h:n,n,n", "", [[
-if $IsValid( @value 1 ) and @value 1.Player == Context.player then
+if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:SetHoloAnimation(@value 2, @value 3, value %4)
 end]] )
 
@@ -668,33 +668,33 @@ EXPADV.AddFunctionAlias( "setAnimation", "h:n,n" )
 EXPADV.AddFunctionAlias( "setAnimation", "h:n" )
 
 HoloComponent:AddPreparedFunction("setAnimation", "h:s,n,n", "", [[
-if $IsValid( @value 1 ) and @value 1.Player == Context.player then
+if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:SetHoloAnimation(@value 1:LookupSequence( @value 2 ), @value 3, value %4)
 end]] )
 
 EXPADV.AddFunctionAlias( "setAnimation", "h:s,n" )
 EXPADV.AddFunctionAlias( "setAnimation", "h:s" )
 
-HoloComponent:AddInlineFunction("animationLength", "h:", "n", "( $IsValid( @value 1 ) and @value 1:SequenceDuration( ) or 0 )" )
+HoloComponent:AddInlineFunction("animationLength", "h:", "n", "( IsValid( @value 1 ) and @value 1:SequenceDuration( ) or 0 )" )
 
 HoloComponent:AddPreparedFunction("setPose", "h:s,n", "", [[
-if $IsValid( @value 1 ) and @value 1.Player == Context.player then
+if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:SetPoseParameter(@value 2, @value 3 )
 end]], "" )
 
-HoloComponent:AddInlineFunction("getPose", "h:s", "n", "( $IsValid( @value 1 ) and @value 1:GetPoseParameter( @value 2 ) or 0 )" )
+HoloComponent:AddInlineFunction("getPose", "h:s", "n", "( IsValid( @value 1 ) and @value 1:GetPoseParameter( @value 2 ) or 0 )" )
 
 HoloComponent:AddPreparedFunction("animation", "h:s", "n", [[
-if $IsValid( @value 1 ) then
+if IsValid( @value 1 ) then
 	@define val = @value 1:LookupSequence(@value 2)
 end]], "(@val or 0)" )
 
-HoloComponent:AddInlineFunction( "getAnimation", "h:", "n", "( $IsValid( @value 1 ) and @value 1:GetSequence( ) or 0 )" )
+HoloComponent:AddInlineFunction( "getAnimation", "h:", "n", "( IsValid( @value 1 ) and @value 1:GetSequence( ) or 0 )" )
 
-HoloComponent:AddInlineFunction( "getAnimationName", "h:n", "s", "( $IsValid( @value 1 ) and @value 1:GetSequenceName( @value 2 ) or \"\" )" )
+HoloComponent:AddInlineFunction( "getAnimationName", "h:n", "s", "( IsValid( @value 1 ) and @value 1:GetSequenceName( @value 2 ) or \"\" )" )
 
 HoloComponent:AddPreparedFunction( "setAnimationRate", "h:n", "", [[
-if $IsValid( @value 1 ) and @value 1.Player == Context.player then
+if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:SetPlaybackRate(@value 2)
 end]] )
 
@@ -712,7 +712,7 @@ HoloComponent:AddFunctionHelper( "setAnimationRate", "h:n", "Sets the animation 
     Section: Remove
 ==============================================================================================*/
 HoloComponent:AddPreparedFunction( "remove", "h:", "", [[
-if $IsValid( @value 1 ) and @value 1.Player == Context.player then
+if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:Remove( )
 end]] )
 
@@ -722,21 +722,21 @@ HoloComponent:AddFunctionHelper( "remove", "h:", "Removes the hologram." )
     Section: Player Blocking, Does not work on the entity.
 ==============================================================================================*/
 HoloComponent:AddPreparedFunction( "blockPlayer", "h:e", "", [[
-if $IsValid( @value 1 ) and @value 1.Player == Context.player then
+if IsValid( @value 1 ) and @value 1.player == Context.player then
 	if IsValid( @value 2 ) and @value 2:IsPlayer( ) then
 		@value 1:BlockPlayer( @value 2 )
 	end
 end]] )
 
 HoloComponent:AddPreparedFunction( "unblockPlayer", "h:e", "", [[
-if $IsValid( @value 1 ) and @value 1.Player == Context.player then
+if IsValid( @value 1 ) and @value 1.player == Context.player then
 	if IsValid( @value 2 ) and @value 2:IsPlayer( ) then
 		@value 1:UnblockPlayer( @value 2 )
 	end
 end]] )
 
 HoloComponent:AddPreparedFunction( "isBlocked", "h:e", "b", [[
-if $IsValid( @value 1 ) and @value 1.Player == Context.player then
+if IsValid( @value 1 ) and @value 1.player == Context.player then
 	if IsValid( @value 2 ) and @value 2:IsPlayer( ) then
 		@define val = @value 1:IsBlocked( @value 2 )
 	end
