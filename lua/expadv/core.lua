@@ -589,7 +589,17 @@ end
 	@: Editor Animation.
    --- */
 
-CreateConVar( "expadv_editor_open", "0", { FCVAR_USERINFO } )
+if SERVER then
+	concommand.Add( "expadv_editor_open", function( Player )
+		if !IsValid( Player ) or !Player:IsPlayer( ) then return end
+		Player:SetNWBool( "expadv_editor_open", true )
+	end )
+
+	concommand.Add( "expadv_editor_close", function( Player )
+		if !IsValid( Player ) or !Player:IsPlayer( ) then return end
+		Player:SetNWBool( "expadv_editor_open", false )
+	end )
+end
 
 if CLIENT then
 		local RollDelta = 0
@@ -597,7 +607,7 @@ if CLIENT then
 
 		timer.Create( "expadv.editor.animate", 1, 0, function( )
 			for _, Ply in pairs( player.GetAll( ) ) do
-				if Ply:GetInfoNum( "expadv_editor_open", 0 ) >= 1 and Ply ~= LocalPlayer( ) then
+				if Ply:GetNWBool( "expadv_editor_open", false ) and Ply ~= LocalPlayer( ) then
 					local BoneIndx = Ply:LookupBone("ValveBiped.Bip01_Head1") or Ply:LookupBone("ValveBiped.HC_Head_Bone") or 0
 					local BonePos, BoneAng = Ply:GetBonePosition( BoneIndx )
 					

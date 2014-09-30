@@ -544,7 +544,7 @@ function PANEL:OpenOldTabs( )
 end
 
 function PANEL:Open( Code, NewTab )
-	RunConsoleCommand( "expadv_editor_open", 1 )
+	RunConsoleCommand( "expadv_editor_open" )
 	
 	if self.OpenHelper then
 		self.OpenHelper = nil
@@ -590,7 +590,7 @@ function PANEL:ReciveDownload( DownloadData )
 end
 
 function PANEL:Close( )
-	RunConsoleCommand( "expadv_editor_open", 0 )
+	RunConsoleCommand( "expadv_editor_close" )
 	
 	timer.Stop( "EA_AutoSave" )
 	self:SaveTabs( )
