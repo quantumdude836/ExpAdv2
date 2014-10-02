@@ -1,11 +1,11 @@
-/* -----------------------------------------------------------------------------------
-	@: Vector Component
+/* --- --------------------------------------------------------------------------------
+	  @: Vector Component
    --- */
 
 local VectorComponent = EXPADV.AddComponent( "vector", true )
 
-/* -----------------------------------------------------------------------------------
-	@: Vector Object
+/* --- --------------------------------------------------------------------------------
+    @: Vector Object
    --- */
 
 local VectorObj = VectorComponent:AddClass( "vector", "v" )
@@ -13,8 +13,8 @@ local VectorObj = VectorComponent:AddClass( "vector", "v" )
 VectorObj:StringBuilder( function( Vector ) return string.format( "Vec( %i, %i, %i )", Vector.x, Vector.y, Vector.z ) end )
 VectorObj:DefaultAsLua( Vector(0, 0, 0) )
 
-/* -----------------------------------------------------------------------------------
-	@: Wire Support
+/* --- --------------------------------------------------------------------------------
+	  @: Wire Support
    --- */
 
 if WireLib then
@@ -22,8 +22,8 @@ if WireLib then
 	VectorObj:WireOutput( "VECTOR" )
 end
 
-/* -----------------------------------------------------------------------------------
-	@: Logical and Comparison
+/* --- --------------------------------------------------------------------------------
+	  @: Logical and Comparison
    --- */
 
 VectorComponent:AddInlineOperator( "==", "v,v", "b", "(@value 1 == @value 2)" )
@@ -33,8 +33,8 @@ VectorComponent:AddInlineOperator( "<", "v,v", "b", "(@value 1 < @value 2)" )
 VectorComponent:AddInlineOperator( ">=", "v,v", "b", "(@value 1 >= @value 2)" )
 VectorComponent:AddInlineOperator( "<=", "v,v", "b", "(@value 1 <= @value 2)" )
 
-/* -----------------------------------------------------------------------------------
-	@: Arithmetic
+/* --- --------------------------------------------------------------------------------
+	  @: Arithmetic
    --- */
 
 VectorComponent:AddInlineOperator( "+", "v,v", "v", "(@value 1 + @value 2)" )
@@ -42,8 +42,8 @@ VectorComponent:AddInlineOperator( "-", "v,v", "v", "(@value 1 - @value 2)" )
 VectorComponent:AddInlineOperator( "*", "v,v", "v", "(@value 1 * @value 2)" )
 VectorComponent:AddInlineOperator( "/", "v,v", "v", "Vector(@value 1.x / @value 2.x, @value 1.y / @value 2.y, @value 1.z / @value 2.z)" )
 
-/* -----------------------------------------------------------------------------------
-	@: Number Arithmetic
+/* --- --------------------------------------------------------------------------------
+	  @: Number Arithmetic
    --- */
 
 VectorComponent:AddInlineOperator( "+", "v,n", "v", "(@value 1 + Vector(@value 2, @value 2, @value 2))")
@@ -58,22 +58,22 @@ VectorComponent:AddInlineOperator( "*", "n,v", "v", "(Vector(@value 1, @value 1,
 VectorComponent:AddInlineOperator( "/", "v,n", "v", "Vector(@value 1.x / @value 2, @value 1.y / @value 2, @value 1.x / @value 2)")
 VectorComponent:AddInlineOperator( "/", "n,v", "v", "Vector(@value 1 / @value 2.x, @value 1 / @value 2.y, @value 1 / @value 2.z)")
 
-/* -----------------------------------------------------------------------------------
-	@: Operators
+/* --- --------------------------------------------------------------------------------
+	  @: Operators
    --- */
 
 VectorComponent:AddInlineOperator( "is", "v", "b", "(@value 1 ~= Vector(0, 0, 0))" )
 VectorComponent:AddInlineOperator( "not", "v", "b", "(@value 1 == Vector(0, 0, 0))" )
 VectorComponent:AddInlineOperator( "-", "v", "v", "(-@value 1)" )
 
-/* -----------------------------------------------------------------------------------
-	@: Casting
+/* --- --------------------------------------------------------------------------------
+	  @: Casting
    --- */
 
 VectorComponent:AddInlineOperator( "string", "v", "s", "string.format( \"Vec( %i, %i, %i )\", @value 1.x, @value 1.y, @value 1.z)" )
 
-/* -----------------------------------------------------------------------------------
-	@: Assignment
+/* --- --------------------------------------------------------------------------------
+	  @: Assignment
    --- */
 
 VectorObj:AddVMOperator( "=", "n,v", "", function( Context, Trace, MemRef, Value )
@@ -86,8 +86,8 @@ end )
 
 VectorObj:AddInlineOperator( "$", "n", "v", "(Context.Delta[@value 1] or Vector( 0, 0, 0 ))" )
 
-/* -----------------------------------------------------------------------------------
-	@: Constructor
+/* --- --------------------------------------------------------------------------------
+	  @: Constructor
    --- */
 
 VectorComponent:AddInlineFunction( "vec", "", "v", "Vector( 0, 0, 0 )" )
@@ -101,8 +101,8 @@ VectorComponent:AddFunctionHelper( "vec", "", "Creates a vector object" )
 VectorComponent:AddInlineFunction( "randVec", "n,n", "v", "Vector( $math.random( @value 1, @value 2 ), $math.random( @value 1, @value 2 ), $math.random( @value 1, @value 2 ) )" )
 VectorComponent:AddFunctionHelper( "randVec", "n,n", "Creates a random vector constrained to the given values" )
 
-/* -----------------------------------------------------------------------------------
-	@: Accessors
+/* --- --------------------------------------------------------------------------------
+	  @: Accessors
    --- */
 
 --GETTERS
@@ -128,8 +128,8 @@ VectorComponent:AddFunctionHelper( "setZ", "v:n", "Sets the Z value of a vector"
 VectorComponent:AddPreparedFunction( "set", "v:v", "", "@value 1:Set( @value 2 )")
 VectorComponent:AddFunctionHelper( "setZ", "v:n", "Sets a vector to the value of another vector" )
 
-/* -----------------------------------------------------------------------------------
-   @: Rotate
+/* --- --------------------------------------------------------------------------------
+    @: Rotate
    --- */
 
 VectorComponent:AddPreparedFunction( "rotate", "v:a", "v", [[
@@ -139,8 +139,8 @@ VectorComponent:AddPreparedFunction( "rotate", "v:a", "v", [[
 
 VectorComponent:AddFunctionHelper( "rotate", "v:a", "Rotates a vector by the given angle." )
 
-/* -----------------------------------------------------------------------------------
-   @: Angle
+/* --- --------------------------------------------------------------------------------
+    @: Angle
    --- */
 
 VectorComponent:AddInlineFunction( "angle", "v:", "a", "@value 1:Angle( )" )
@@ -149,8 +149,8 @@ VectorComponent:AddInlineFunction( "angleEx", "v:v", "a", "@value 1:AngleEx( @va
 VectorComponent:AddFunctionHelper( "angle", "v:", "Returns an angle representing the normal of the vector." )
 VectorComponent:AddFunctionHelper( "angle", "v:v", "Returns the angle between two vectors." )
 
-/* -----------------------------------------------------------------------------------
-   @: Useful
+/* --- --------------------------------------------------------------------------------
+    @: Useful
    --- */
 
 VectorComponent:AddInlineFunction( "cross", "v:v", "v", "@value 1:Cross( @value 2 )" )
@@ -192,8 +192,8 @@ VectorComponent:AddFunctionHelper( "insideAABox", "v:v,v", "Returns whenever the
 VectorComponent:AddInlineFunction( "zero", "v:", "", "@value 1:zero( )" )
 VectorComponent:AddFunctionHelper( "zero", "v:v,v", "Sets a vectors x, y and z to 0." )
 
-/* -----------------------------------------------------------------------------------
-   @: Headings
+/* --- --------------------------------------------------------------------------------
+    @: Headings
    --- */
 
 local Rad2Deg = 180 / math.pi
@@ -219,8 +219,8 @@ VectorComponent:AddFunctionHelper( "Bearing", "v:a,v", "Return the bearing betwe
 VectorComponent:AddFunctionHelper( "Elevation", "v:a,v", "Return the elevation between a vector facing an angle and a target vector." )
 VectorComponent:AddFunctionHelper( "Heading", "v:a,v", "Return the heading between a vector facing an angle and a target vector." )
 
-/* -----------------------------------------------------------------------------------
-   @: World and Axis
+/* --- --------------------------------------------------------------------------------
+    @: World and Axis
    --- */
 
 VectorComponent:AddInlineFunction( "toWorld", "e:v", "v", "(IsValid( @value 1 ) and @value 1:LocalToWorld(@value 2) or Vector(0, 0, 0))" )
@@ -233,8 +233,8 @@ VectorComponent:AddFunctionHelper( "toWorldAxis", "e:v", "Converts a local axis 
 VectorComponent:AddFunctionHelper( "toLocal", "e:v", "v", "Converts a world vector to a local vector." )
 VectorComponent:AddFunctionHelper( "toLocalAxis", "e:v", "Converts a world axis to a local axis." )
 
-/* -----------------------------------------------------------------------------------
-   @: Intersect
+/* --- --------------------------------------------------------------------------------
+    @: Intersect
    --- */
 
 VectorComponent:AddInlineFunction( "intersectRayWithOBB", "v,v,v,a,v,v", "v", "$util.IntersectRayWithOBB( @value 1, @value 2, @value 3, @value 4, @value 5, @value 6 )")
@@ -243,8 +243,8 @@ VectorComponent:AddInlineFunction( "intersectRayWithPlane", "v,v,v,v", "v", "$ut
 VectorComponent:AddFunctionHelper( "intersectRayWithOBB", "v,v,v,a,v,v", "Performs a ray box intersection and returns position, (vector RayS tart, vector Ray Direction, vector Box Origin, angle BoxAngles, vector BoxMin, vector BoxMax)." )
 VectorComponent:AddFunctionHelper( "intersectRayWithPlane", "v,v,v,v", "Performs a ray plane intersection and returns the hit position, (vector Ray Origin, vector Ray Direction, vector Plane Position, vector Plane Normal)." )
 
-/* -----------------------------------------------------------------------------------
-	@: Vector Object
+/* --- --------------------------------------------------------------------------------
+	  @: Vector Object
    --- */
 
 require( "vector2" )
@@ -254,8 +254,8 @@ local Vector2Obj = VectorComponent:AddClass( "vector2", "v2" )
 Vector2Obj:StringBuilder( function( Vector ) return string.format( "Vec2( %i, %i )", Vector.x, Vector.y ) end )
 Vector2Obj:DefaultAsLua( Vector2(0, 0) )
 
-/* -----------------------------------------------------------------------------------
-	@: Wire Support
+/* --- --------------------------------------------------------------------------------
+	  @: Wire Support
    --- */
 
 if WireLib then
@@ -269,8 +269,8 @@ if WireLib then
 	end )
 end
 
-/* -----------------------------------------------------------------------------------
-	@: Logical and Comparison
+/* --- --------------------------------------------------------------------------------
+	  @: Logical and Comparison
    --- */
 
 VectorComponent:AddInlineOperator( "==", "v2,v2", "b", "(@value 1 == @value 2)" )
@@ -280,8 +280,8 @@ VectorComponent:AddInlineOperator( "<", "v2,v2", "b", "(@value 1 < @value 2)" )
 VectorComponent:AddInlineOperator( ">=", "v2,v2", "b", "(@value 1 >= @value 2)" )
 VectorComponent:AddInlineOperator( "<=", "v2,v2", "b", "(@value 1 <= @value 2)" )
 
-/* -----------------------------------------------------------------------------------
-	@: Arithmetic
+/* --- --------------------------------------------------------------------------------
+	  @: Arithmetic
    --- */
 
 VectorComponent:AddInlineOperator( "+", "v2,v2", "v2", "(@value 1 + @value 2)" )
@@ -289,8 +289,8 @@ VectorComponent:AddInlineOperator( "-", "v2,v2", "v2", "(@value 1 - @value 2)" )
 VectorComponent:AddInlineOperator( "*", "v2,v2", "v2", "(@value 1 * @value 2)" )
 VectorComponent:AddInlineOperator( "/", "v2,v2", "v2", "(@value 1 / @value 2)" )
 
-/* -----------------------------------------------------------------------------------
-	@: Number Arithmetic
+/* --- --------------------------------------------------------------------------------
+	  @: Number Arithmetic
    --- */
 
 VectorComponent:AddInlineOperator( "+", "v2,n", "v2", "(@value 1 + Vector2(@value 2, @value 2))")
@@ -305,22 +305,22 @@ VectorComponent:AddInlineOperator( "*", "n,v", "v2", "(Vector2(@value 1, @value 
 VectorComponent:AddInlineOperator( "/", "v2,n", "v2", "(@value 1 / Vector2(@value 2, @value 2))")
 VectorComponent:AddInlineOperator( "/", "n,v2", "v2", "(Vector2(@value 1, @value 1) / @value 2)")
 
-/* -----------------------------------------------------------------------------------
-	@: Operators
+/* --- --------------------------------------------------------------------------------
+	  @: Operators
    --- */
 
 VectorComponent:AddInlineOperator( "is", "v2", "b", "(@value 1 ~= Vector2(0, 0))" )
 VectorComponent:AddInlineOperator( "not", "v2", "b", "(@value 1 == Vector2(0, 0))" )
 VectorComponent:AddInlineOperator( "-", "v2", "v2", "(-@value 1)" )
 
-/* -----------------------------------------------------------------------------------
-	@: Casting
+/* --- --------------------------------------------------------------------------------
+	  @: Casting
    --- */
 
 VectorComponent:AddInlineOperator( "string", "v2", "s", "string.format( \"Vec2( %i, %i )\", @value 1.x, @value 1.y)" )
 
-/* -----------------------------------------------------------------------------------
-	@: Assignment
+/* --- --------------------------------------------------------------------------------
+	  @: Assignment
    --- */
 
 Vector2Obj:AddVMOperator( "=", "n,v2", "", function( Context, Trace, MemRef, Value )
@@ -333,8 +333,8 @@ end )
 
 Vector2Obj:AddInlineOperator( "$", "n", "v2", "(Context.Delta[@value 1] or Vector2(0,0))" )
 
-/* -----------------------------------------------------------------------------------
-	@: Constructor
+/* --- --------------------------------------------------------------------------------
+	  @: Constructor
    --- */
 
 VectorComponent:AddInlineFunction( "vec2", "", "v2", "Vector2(0, 0)" )
@@ -348,8 +348,8 @@ VectorComponent:AddFunctionHelper( "vec2", "", "Creates a vector2 object" )
 VectorComponent:AddInlineFunction( "randVec2", "n,n", "v2", "Vector2( $math.random(@value 1, @value 2), $math.random(@value 1, @value 2) )" )
 VectorComponent:AddFunctionHelper( "randVec2", "n,n", "Creates a random vector2 constrained to the given values" )
 
-/* -----------------------------------------------------------------------------------
-	@: Accessors
+/* --- --------------------------------------------------------------------------------
+	  @: Accessors
    --- */
 
 --GETTERS
@@ -367,7 +367,7 @@ VectorComponent:AddPreparedFunction( "setY", "v2:n", "", "@value 1.y = @value 2"
 VectorComponent:AddFunctionHelper( "setY", "v2:n", "Sets the Y value of a vector2" )
 
 /* --- --------------------------------------------------------------------------------
-@: Loops
+    @: Loops
    --- */
 
 VectorObj:AddPreparedOperator( "for", "v,v,v,?", "", [[

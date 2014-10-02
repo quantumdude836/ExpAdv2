@@ -1,6 +1,6 @@
-/* -----------------------------------------------------------------------------------
+/* --- --------------------------------------------------------------------------------
 	@: Quatrion Component
-  --- */
+   --- */
 
 require( "quaternion" )
 
@@ -12,9 +12,9 @@ Obj:StringBuilder( function( Q ) return tostring( Q ) end )
 Obj:DefaultAsLua( Quaternion.Zero:Clone() )
 Obj:AddAlias( "quat" )
 
-/* -----------------------------------------------------------------------------------
+/* --- --------------------------------------------------------------------------------
 	@: Operators
-  --- */
+   --- */
 
 EXPADV.SharedOperators( )
 
@@ -103,9 +103,9 @@ Component:AddPreparedOperator( "/", "q,q", "q", [[
 	)
 ]], "@Quat" )
 
-/* -----------------------------------------------------------------------------------
+/* --- --------------------------------------------------------------------------------
 	@: Build Quat
-  --- */
+   --- */
 
 Component:AddInlineFunction( "quat", "", "q", "Quaternion.Zero:Clone()" )
 Component:AddInlineFunction( "quat", "n", "q", "Quaternion(@value 1, 0, 0, 0)" )
@@ -124,9 +124,9 @@ Component:AddInlineFunction( "quat", "a", "q", "Quaternion.Zero:Clone():AngleToQ
 Component:AddInlineFunction( "quat", "e", "q", "IsValid(@value 1) and Quaternion.Zero:Clone():AngleToQuat(@value 1:GetAngles()) or Quaternion.Zero:Clone()" )
 Component:AddInlineFunction( "quat", "v,v", "q", "Quaternion.Zero:Clone():VecsToQuat(@value 1, @value 2)" )
 
-/* -----------------------------------------------------------------------------------
+/* --- --------------------------------------------------------------------------------
 	@: Get Quat
-  --- */
+   --- */
 
 Component:AddInlineFunction( "real", "q:", "n", "(@value 1.r)" )
 Component:AddInlineFunction( "i", "q:", "n", "(@value 1.i)" )
@@ -200,9 +200,9 @@ Component:AddPreparedFunction( "rotationVector", "q", "v", [[
 	end
 ]], "@Ret" )
 
-/* -----------------------------------------------------------------------------------
+/* --- --------------------------------------------------------------------------------
 	@: Helper Data
-  --- */
+   --- */
 
 Component:AddFunctionHelper( "forward", "q:", "Returns the forward vector of a quaternion." )
 Component:AddFunctionHelper( "right", "q:", "Returns the right vector of a quaternion." )

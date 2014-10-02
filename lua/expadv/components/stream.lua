@@ -18,6 +18,7 @@ StreamObject:DefaultAsLua( { V = { }, T = { }, R = 0, W = 0 } )
 /* --- --------------------------------------------------------------------------------
 	@: Operators
    --- */
+
 StreamObject:AddPreparedOperator( "=", "n,st", "", "Context.Memory[@value 1] = @value 2" )
 
 Component:AddInlineFunction( "stream", "", "st", "{ V = { }, T = { }, R = 0, W = 0 }" )
@@ -215,9 +216,9 @@ Component:AddFunctionHelper( "transmit", "nst:e,s", "Sends a stream to another e
 Component:AddPreparedFunction( "hookStream", "s,d", "", "Context.Data['str_' .. @value 1] = @value 2" )
 Component:AddFunctionHelper( "hookStream", "s,d", "Calls the function (delegate) when the stream with the matching name is received from another entity." )
 
-/* --- --------------------------------------------------------------------------------
+	/* --- --------------------------------------------------------------------------------
 		@: Sending
-	   --- */
+   	   --- */
 
 	if SERVER then
 		util.AddNetworkString( "expadv.netstream" )
@@ -278,7 +279,7 @@ do --- Net component: used to sync from server to client :D
 	NetObject:ExtendClass( "st" )
 
 	/* --- --------------------------------------------------------------------------------
-		@: net Stream Operators
+		@: Net Stream Operators
 		@: All we really need here is a way to cast, this object from the stream() functions result.
 	   --- */
 

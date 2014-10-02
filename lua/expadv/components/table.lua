@@ -1,21 +1,21 @@
-/* ---	--------------------------------------------------------------------------------
+/* --- --------------------------------------------------------------------------------
 	@: Table Component
 	@: E2 Tables suck, Lets do this correctly :D
-   ---	*/
+   --- */
 
 local Component = EXPADV.AddComponent( "tables" , true )
 
 Component:AddException( "table" )
 
-/* ---	--------------------------------------------------------------------------------
+/* --- --------------------------------------------------------------------------------
 	@: Default Table Obj
-   ---	*/
+   --- */
 
 local DEFAULT_TABLE = { Data = { }, Types = { }, Look = { }, Size = 0, Count = 0, HasChanged = false }
 
-/* ---	--------------------------------------------------------------------------------
+/* --- --------------------------------------------------------------------------------
 	@: Result Tables
-   ---	*/
+   --- */
 
 function EXPADV.ResultTable( Type, Data )
 	local Types, Look = { }, { }
@@ -23,9 +23,9 @@ function EXPADV.ResultTable( Type, Data )
 	return { Data = { }, Types = Types, Look = Look, Size = #Data, Count = #Data, HasChanged = false }
 end
 
-/* ---	--------------------------------------------------------------------------------
+/* --- --------------------------------------------------------------------------------
 	@: Table Class
-   ---	*/
+   --- */
 
 local Table = Component:AddClass( "table" , "t" )
 
@@ -35,9 +35,9 @@ Table:StringBuilder( function( Table ) return string.format( "table[%s/%s]", Tab
 
 Table:UsesHasChanged( )
 
-/* ---	--------------------------------------------------------------------------------
+/* --- --------------------------------------------------------------------------------
 	@: Basic Operators
-   ---	*/
+   --- */
 
 EXPADV.SharedOperators( )
 
@@ -48,9 +48,9 @@ end ) -- Keeping this virtual, becuase i might need to add to it later :D
 Component:AddInlineOperator( "#","t","n", "@value 1.Count" )
 
 
-/* ---	--------------------------------------------------------------------------------
+/* --- --------------------------------------------------------------------------------
 	@: Basic functions
-   ---	*/
+   --- */
 
 Component:AddInlineFunction( "table", "", "t", "{ Data = { }, Types = { }, Look = { }, Size = 0, Count = 0, HasChanged = false }" )
 Component:AddFunctionHelper( "table", "", "Creates a new table." )
@@ -77,9 +77,9 @@ Component:AddFunctionHelper( "exists", "t:n", "Returns true if obect stored in t
 Component:AddFunctionHelper( "exists", "t:s", "Returns true if obect stored in table at index is not void." )
 Component:AddFunctionHelper( "exists", "t:e", "Returns true if obect stored in table at index is not void." )
 
-/* ---	--------------------------------------------------------------------------------
+/* --- --------------------------------------------------------------------------------
 	@: Unpack to vararg
-   ---	*/
+   --- */
 
 local Unpack
 
@@ -98,9 +98,9 @@ Component:AddVMFunction( "unpack", "t,n", "...", Unpack )
 Component:AddFunctionHelper( "unpack", "t", "Unpacks the array element of a table to a vararg." )
 Component:AddFunctionHelper( "unpack", "t,n", "Unpacks the array element of a table to a vararg, staring at index N." )
 
-/* ---	--------------------------------------------------------------------------------
+/* --- --------------------------------------------------------------------------------
 	@: Concat
-   ---	*/
+   --- */
 
 Component:AddVMFunction( "concat", "t,s", "s",
 	function( Context, Trace, Table, Sep )
@@ -113,9 +113,9 @@ Component:AddVMFunction( "concat", "t,s", "s",
 
 Component:AddFunctionHelper( "concat", "t,s", "concatinates the array element of a table to a string using a seperator." )
 
-/* ---	--------------------------------------------------------------------------------
+/* --- --------------------------------------------------------------------------------
 	@: Variant Get Operators
-   ---	*/
+   --- */
 
 	local Get = function( Context, Trace, Table, Index, _ )
 			local Object = Table.Data[Index]
@@ -131,9 +131,9 @@ Component:AddFunctionHelper( "concat", "t,s", "concatinates the array element of
 	Table:AddVMOperator( "get", "t,s,vr", "vr", Get )
 	Table:AddVMOperator( "get", "t,e,vr", "vr", Get )
 
-/* ---	--------------------------------------------------------------------------------
+/* --- --------------------------------------------------------------------------------
 	@: Variant Set Operators
-   ---	*/
+   --- */
 
 	local Set = function( Context, Trace, Table, Index, Value )
 		local Data = Table.Data
@@ -158,9 +158,9 @@ Component:AddFunctionHelper( "concat", "t,s", "concatinates the array element of
 	Table:AddVMOperator( "set", "t,s,vr", "", Set )
 	Table:AddVMOperator( "set", "t,e,vr", "", Set )
 
-/* ---	--------------------------------------------------------------------------------
+/* --- --------------------------------------------------------------------------------
 	@: Variant insert functions
-   ---	*/
+   --- */
 
    Component:AddVMFunction( "insert", "t:vr", "",
 		function( Context, Trace, Table, Value )
@@ -197,9 +197,9 @@ Component:AddFunctionHelper( "concat", "t,s", "concatinates the array element of
 	Component:AddFunctionHelper( "insert", "t:vr", "Inserts variants object to the top of the tables array element." ) 
 	Component:AddFunctionHelper( "insert", "t:n,vr", "Inserts %variants object tables array element at index, pushing all higher index up." )
 
-/* ---	--------------------------------------------------------------------------------
+/* --- --------------------------------------------------------------------------------
 	@: The remove function, shall return a variant
-   ---	*/
+   --- */
 
 	local Remove = function( Context, Trace, Table, Index )
 		local Data = Table.Data
@@ -235,9 +235,9 @@ Component:AddFunctionHelper( "concat", "t,s", "concatinates the array element of
 	Component:AddFunctionHelper( "remove", "t:s", "Removes value at index of table, the removed object is returned as variant." ) 
 	Component:AddFunctionHelper( "remove", "t:e", "Removes value at index of table, the removed object is returned as variant." ) 
 
-/* ---	--------------------------------------------------------------------------------
+/* --- --------------------------------------------------------------------------------
 	@: Shift is basicaly the same, but it pops
-   ---	*/
+   --- */
 
     Component:AddVMFunction( "shift", "t:n", "vr",
 	   	function( Context, Trace, Table, Index )
@@ -264,9 +264,9 @@ Component:AddFunctionHelper( "concat", "t,s", "concatinates the array element of
 
     Component:AddFunctionHelper( "shift", "t:n", "Removes value at index of table, the removed object is returned as variant." )
 
-/* ---	--------------------------------------------------------------------------------
+/* --- --------------------------------------------------------------------------------
 	@: We need to add support for every class :D
-   ---	*/
+   --- */
 
 function Component:OnPostRegisterClass( Name, Class )
 
@@ -274,9 +274,9 @@ function Component:OnPostRegisterClass( Name, Class )
 
 	if Name == "generic" or Name == "variant" or Name == "function" then return end
 
-	/* ---	--------------------------------------------------------------------------------
+	/* --- --------------------------------------------------------------------------------
 		@: Get Operators
-   	---	*/
+   	   --- */
 
 		local Get = function( Context, Trace, Table, Index, _ )
 				local Object = Table.Data[Index]
@@ -297,9 +297,9 @@ function Component:OnPostRegisterClass( Name, Class )
 		Table:AddVMOperator( "get", "t,s," .. Class.Short, Class.Short, Get )
 		Table:AddVMOperator( "get", "t,e," .. Class.Short, Class.Short, Get )
 
-	/* ---	--------------------------------------------------------------------------------
+	/* --- --------------------------------------------------------------------------------
 		@: Set Operators
-   	---	*/
+   	   --- */
 
    		local Set = function( Context, Trace, Table, Index, Value )
 			local Data = Table.Data
@@ -324,9 +324,9 @@ function Component:OnPostRegisterClass( Name, Class )
 		Table:AddVMOperator( "set", "t,s," .. Class.Short, "", Set )
 		Table:AddVMOperator( "set", "t,e," .. Class.Short, "", Set )
 
-	/* ---	--------------------------------------------------------------------------------
+	/* --- --------------------------------------------------------------------------------
 		@: Insert Function
-   	---	*/
+   	   --- */
 
    		Component:AddVMFunction( "insert", "t:" .. Class.Short, "",
    			function( Context, Trace, Table, Value )
@@ -365,10 +365,10 @@ function Component:OnPostRegisterClass( Name, Class )
 
 end
 
-/* ---	--------------------------------------------------------------------------------
+/* --- --------------------------------------------------------------------------------
 	@: Now for the complicated stuff:
 	@: Lets try adding a sort function :P
-	---	*/
+   --- */
 
 	Component:AddVMFunction( "sort", "t:d", "t",
 		function( Context, Trace, Table, Function )
@@ -399,9 +399,9 @@ end
 
 	Component:AddFunctionHelper( "sort", "t:d", "Takes a table and sorts it, the returned table will be sorted by the provided delegate and all indexs will be numberic. The delegate will be called with 2 variants that are values on the table, return true if the first is bigger then the second this delegate must return a boolean." )
 
-/* ---	--------------------------------------------------------------------------------
+/* --- --------------------------------------------------------------------------------
 	@: Now for a way to build a filled table
-	---	*/
+   --- */
 
 	Component:AddGeneratedFunction( "table", "...", "t", function( Operator, Compiler, Trace, ... )
 		local Inputs = { ... }
