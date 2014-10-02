@@ -80,7 +80,7 @@ StringComponent:AddInlineOperator( "not", "s", "b", "(@value 1 == \"\")" )
 	@: Indexing
    --- */
 
---StringComponent:AddInlineOperator( "[]", "s,n", "s", "string.sub(@value 1, @value 2, @value 2)" )
+String:AddInlineOperator( "get", "s,n", "s", "string.sub(@value 1, @value 2, @value 2)" )
 
 /* --- --------------------------------------------------------------------------------
 	@: Casting
@@ -104,40 +104,40 @@ StringComponent:AddInlineFunction( "replace", "s:s,s", "s", "(string.Replace(@va
 	@: Explodes and matches
    --- */
 
-StringComponent:AddInlineFunction( "explode", "s:s", "t", "EXPADV.ResultTable('s',string.Explode(@value 2, @value 1))" )
+StringComponent:AddInlineFunction( "explode", "s:s", "ar", "{__type = 's',string.Explode(@value 2, @value 1)}" )
 
-StringComponent:AddInlineFunction( "explode", "s:s,b", "t", "EXPADV.ResultTable('s',string.Explode(@value 2, @value 1, @value 3))" )
+StringComponent:AddInlineFunction( "explode", "s:s,b", "ar", "{__type = s',string.Explode(@value 2, @value 1, @value 3)}" )
 
-StringComponent:AddInlineFunction( "matchPattern", "s:s", "t", "EXPADV.ResultTable('s',{string.match(@value 1, @value 2)})" )
+StringComponent:AddInlineFunction( "matchPattern", "s:s", "ar", "{__type = 's',{string.match(@value 1, @value 2)}}" )
 
-StringComponent:AddInlineFunction( "matchPattern", "s:s,n", "t", "EXPADV.ResultTable('s',{string.match(@value 1, @value 2, @value 3)})" )
+StringComponent:AddInlineFunction( "matchPattern", "s:s,n", "ar", "{__type = 's',{string.match(@value 1, @value 2, @value 3)}}" )
 
-StringComponent:AddInlineFunction( "matchFirst", "s:s", "s", "EXPADV.ResultTable('s',string.match(@value 1, @value 2))" )
+StringComponent:AddInlineFunction( "matchFirst", "s:s", "s", "{__type = 's',string.match(@value 1, @value 2)}" )
 
-StringComponent:AddInlineFunction( "matchFirst", "s:s,n", "s", "EXPADV.ResultTable('s',string.match(@value 1, @value 2, @value 3))" )
+StringComponent:AddInlineFunction( "matchFirst", "s:s,n", "s", "{__type = s',string.match(@value 1, @value 2, @value 3)}" )
 
 /*
 StringComponent:CreateSetting( "gmatch_limit", 50 )
 
-StringComponent:AddPreparedFunction( "gmatch", "s:s", "t", [[
-	@define array, iter, values = {}, string.gmatch( @value 1, @value 2 )
+StringComponent:AddPreparedFunction( "gmatch", "s:s", "ar", [[
+	@define array, iter, values = {__type = 's'}, string.gmatch( @value 1, @value 2 )
 
 	for i = 1, @setting gmatch_limit do
 		@values = {@iter( )}
 		if table.getn(@values) == 0 then break end
 		@array[i] = @values
 	end
-]], "EXPADV.ResultTable('s',@array)" )
+]], "@array" )
 
-StringComponent:AddPreparedFunction( "gmatch", "s:s,n", "t", [[
-	@define array, iter, values = {}, string.gmatch( @value 1, @value 2 )
+StringComponent:AddPreparedFunction( "gmatch", "s:s,n", "ar", [[
+	@define array, iter, values = {__type = 's'}, string.gmatch( @value 1, @value 2 )
 
 	for i = 1, math.Clamp( @value 3 or @setting gmatch_limit, 0, @setting gmatch_limit) do
 		@values = {@iter( )}
 		if table.getn(@values) == 0 then break end
 		@array[i] = @values
 	end
-]], "EXPADV.ResultTable('s',@array)" ) */
+]], "@array" ) */
 
 /* --- --------------------------------------------------------------------------------
 	@: Format

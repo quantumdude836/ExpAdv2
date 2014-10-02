@@ -734,12 +734,14 @@ function EXPADV.BuildLuaOperator( Operator )
 				end
 
 				-- Generate the inline and preperation.
-				if Uses == 0 then
+				if Uses == 0 or !Input then
 					InputInline = "nil" -- This should never happen!
 					InputReturn = nil -- This should result in void.
 					
-					if Input.FLAG == EXPADV_PREPARE or Input.FLAG == EXPADV_INLINEPREPARE then
-						InputPrepare = Input.Prepare
+					if istable(Input) then
+						if Input.FLAG == EXPADV_PREPARE or Input.FLAG == EXPADV_INLINEPREPARE then
+							InputPrepare = Input.Prepare
+						end
 					end
 
 				elseif Input.FLAG == EXPADV_FUNCTION then

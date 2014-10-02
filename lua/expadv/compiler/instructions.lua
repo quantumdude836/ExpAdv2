@@ -790,6 +790,35 @@ function Compiler:Build_Function( Trace, Params, UseVarg, Sequence, Memory )
 	return { Trace = Trace, Inline = Lua, Return = "f", FLAG = EXPADV_INLINE }
 end
 
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Arrays
+   --- */
+
+function Compiler:Compile_ARRAY( Trace, Type, Expressions )
+	local Operator = self:LookUpOperator( "array", "s", "..." )
+
+	if !Operator then
+		self:TraceError( Trace, "No such operation { ... }" )
+	end
+
+	return Operator.Compile( self, Trace, Type, unpack( Expressions ) )
+end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Tables
+   --- */
+
+function Compiler:Compile_TABLE( Trace, Expressions )
+	local Operator = EXPADV.Functions[ "table(...)" ]
+		
+	if !Operator then
+		self:TraceError( Trace, "No such operation { ... }" )
+	end
+
+	return Operator.Compile( self, Trace, unpack( Expressions ) )
+end
+
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Loops
    --- */

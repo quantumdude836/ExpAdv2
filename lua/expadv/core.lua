@@ -10,7 +10,7 @@ MsgN( "Expression advanced Two - Installing." )
 	@: Debugging Stuff
    --- */
 
-local DebugMsg = CreateConVar( "expadv_debug", "0", {FCVAR_REPLICATED} )
+local DebugMsg = CreateConVar( "expadv_debug", "1", {FCVAR_REPLICATED} )
 
 function EXPADV.Msg( ... )
 	if DebugMsg:GetInt( ) <= 0 then return end
@@ -188,6 +188,7 @@ function EXPADV.LoadCore( )
 	EXPADV.AddComponentFile( "stream" )
 	EXPADV.AddComponentFile( "render" )
 	EXPADV.AddComponentFile( "table" )
+	EXPADV.AddComponentFile( "array" )
 	EXPADV.AddComponentFile( "utility" )
 
 	EXPADV.CallHook( "AddComponents" )

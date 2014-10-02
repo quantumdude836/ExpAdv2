@@ -130,7 +130,7 @@ local Variant = EXPADV.AddClass( nil, "variant", "vr" )
 		
 	  Variant:DefaultAsLua( { false, "b" } )
 
-Variant:AddInlineOperator( "=", "n,vr", "", "Context.Memory[@Value 1] = @value 2" )
+Variant:AddPreparedOperator( "=", "n,vr", "", "Context.Memory[@Value 1] = @value 2" )
 
 hook.Add( "Expadv.PostRegisterClass", "expad.variant", function( Name, Class )
 	if !Class.LoadOnClient then

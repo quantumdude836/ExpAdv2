@@ -149,26 +149,37 @@ Component:AddFunctionHelper( "drawTexturedBox", "v2,v2,n", "Draws a rotated text
 Component:AddFunctionHelper( "drawTexturedBox", "v2,v2,n,n,n,n", "Draws a textured box with uv co-ordinates ( Position, Size, U1, V1, U2, V2 )." )
 
 /* -----------------------------------------------------------------------------------
+	@: UV Object
+   --- */
+local Vertex = Component:AddClass( "vertex" , "vt" )
+
+Vertex:MakeClientOnly( )
+
+Vertex:DefaultAsLua( function( ) return {x=0,y=0,u=0,v=0} end )
+
+Vertex:StringBuilder( function( Obj ) return string.format( "vert<%s,%i,%i,%i>", Obj.x, Obj.y, Obj.u, Obj.v) end )
+
+Vertex:AddPreparedOperator( "=", "n,vt", "", "Context.Memory[@value 1] = @value 2" )
+
+Component:AddInlineFunction( "vert", "v2,v2", "vt", "{x = @value 1.x, y = @value 1.y, u = @value 2.x, v = @value 2.y }" )
+
+Component:AddInlineFunction( "vert", "v2,n,n", "vt", "{x = @value 1.x, y = @value 1.y, u = @value 2, v = @value 3 }" )
+
+Component:AddInlineFunction( "vert", "n,n,n,n", "vt", "{x = @value 1, y = @value 2, u = @value 3, v = @value 4 }" )
+
+/* --- -------------------------------------------------------------------------------
 	@: Polys
    --- */
 
 Component:AddPreparedFunction( "drawTriangle", "v2,v2,v2", "", "$surface.DrawPoly( {@value 1, @value 2, @value 3} )" )
 
-Component:AddPreparedFunction( "drawPoly", "c,...", "", [[
-	@define polygon = { }
-
-	for _, Variant in pairs( { @... } ) do
-		if Variant[2] == "_v2" then
-			@polygon[#@polygon + 1] = Variant[1]
-		end
-	end
-
-	$surface.DrawPoly( @polygon )
+Component:AddPreparedFunction( "drawPoly", "ar", "", [[
+	if @value 1.__type ~= "_vt" and @value 1.__type ~= "_v2" then Context.Throw(@trace, "array", "array type missmatch, vertex expected got " .. EXPADV.TypeName(@value 1.__type)) end
+	$surface.DrawPoly( @value 1 )
 ]] )
 
-
 Component:AddFunctionHelper( "drawTriangle", "v2,v2,v2", "Draws a traingle from 3 points." )
-Component:AddFunctionHelper( "drawPoly", "c,...", "Draws a polygon using 2d vectors." )
+Component:AddFunctionHelper( "drawPoly", "ar", "Draws a polygon using an arry of 2d vectors or vertexs." )
 
 /* -----------------------------------------------------------------------------------
 	@: Screen
@@ -184,15 +195,15 @@ Component:AddFunctionHelper( "pauseNextFrame", "b", "While set to true the scree
 Component:AddInlineFunction( "nextFramePaused", "", "b", "((IsValid( Context.entity ) and Context.entity.Screen) and Context.entity:GetRenderingPaused( ) or false)" )
 Component:AddFunctionHelper( "pauseNextFrame", "b", "returns true, if the screens next frame is paused." )
 
-Component:AddPreparedFunction( "noFrameReresh", "b", "", [[
+Component:AddPreparedFunction( "noFrameRefresh", "b", "", [[
 if IsValid( Context.entity ) and Context.entity.Screen then
 	Context.entity:SetNoClearFrame( @value 1 )
 end]] )
 
-Component:AddFunctionHelper( "noFrameReresh", "b", "While set to true the screen will not draw the next frame." )
+Component:AddFunctionHelper( "noFrameRefresh", "b", "While set to true the screen will not draw the next frame." )
 
-Component:AddInlineFunction( "frameResheshDisabled", "", "b", "((IsValid( Context.entity ) and Context.entity.Screen) and Context.entity:GetNoClearFrame( ) or false)" )
-Component:AddFunctionHelper( "frameResheshDisabled", "b", "returns true, if the screens is set not to clear the screen each frame." )
+Component:AddInlineFunction( "frameRefreshDisabled", "", "b", "((IsValid( Context.entity ) and Context.entity.Screen) and Context.entity:GetNoClearFrame( ) or false)" )
+Component:AddFunctionHelper( "frameRefreshDisabled", "b", "returns true, if the screens is set not to clear the screen each frame." )
 
 EXPADV.SharedOperators( )
 

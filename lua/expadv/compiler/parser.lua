@@ -553,8 +553,51 @@ function Compiler:Expression_Value( Trace )
 		local Instr = self:Build_Function( Trace, Perams, UseVarg, Sequence, Memory )
 		Instr.Return = "d"
 		return Instr
+	elseif self:CheckToken("lcb") then
+		return self:GetArray( Trace )
 	end
 end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Array and Tables
+   --- */
+
+function Compiler:GetArray( Trace )
+	if !self:AcceptToken("lcb") then return end
+	
+	local Expressions, Type = { }
+
+	if !self:CheckToken( "rcb" ) then
+		local Expr = self:Expression( Trace )
+
+		Expressions[1] = Expr
+		Type = Expr.Return
+
+		while self:AcceptToken( "com" ) do
+			local Expr = self:Expression( Trace )
+			Expressions[#Expressions + 1] = Expr
+
+			if Expr.Return ~= Type then
+				Type = nil -- Type missmatch, make a table :D
+			end
+
+			self:Yield( )
+		end
+	end
+	
+	self:RequireToken( "rcb", "Right curly bracket (}) missing, to terminate " .. ( Type and "array" or "table" ) )
+
+	if Type then
+		return Compiler:Compile_ARRAY( Trace, Type, Expressions )
+	end
+
+	return Compiler:Compile_TABLE( Trace, Expressions )
+end
+
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Directives
+   --- */
 
 -- Stage 16: Increment, Decrement and Variables.
 function Compiler:Expression_Variable( Trace )
