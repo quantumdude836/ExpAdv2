@@ -302,6 +302,7 @@ end
 ]])
 
 Component:AddFunctionHelper( "applyAngForce", "e:a", "Applies torque to the given entity depending on the given angle")
+
 /* --- --------------------------------------------------------------------------------
 	@: Misc
    --- */

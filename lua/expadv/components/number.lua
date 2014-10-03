@@ -1,11 +1,11 @@
 /* --- --------------------------------------------------------------------------------
-@: Math Component
+    @: Math Component
    --- */
 
 local MathComponent = EXPADV.AddComponent( "math" , true )
 
 /* --- --------------------------------------------------------------------------------
-@: Number Object
+    @: Number Object
    --- */
 
 local Number = MathComponent:AddClass( "number" , "n" )
@@ -14,7 +14,7 @@ Number:DefaultAsLua( 0 )
 Number:AddAlias( "int" )
 
 /* --- --------------------------------------------------------------------------------
-@: Wire Support
+    @: Wire Support
    --- */
 
 if WireLib then
@@ -23,7 +23,7 @@ if WireLib then
 end
 
 /* --- --------------------------------------------------------------------------------
-@: Logical and Comparison
+    @: Logical and Comparison
    --- */
 
 MathComponent:AddInlineOperator( "==", "n,n", "b", "(@value 1 == @value 2)" )
@@ -34,7 +34,7 @@ MathComponent:AddInlineOperator( ">=", "n,n", "b", "(@value 1 >= @value 2)" )
 MathComponent:AddInlineOperator( "<=", "n,n", "b", "(@value 1 <= @value 2)" )
 
 /* --- --------------------------------------------------------------------------------
-@: Arithmetic
+    @: Arithmetic
    --- */
 
 MathComponent:AddInlineOperator( "+", "n,n", "n", "(@value 1 + @value 2)" )
@@ -45,7 +45,7 @@ MathComponent:AddInlineOperator( "%", "n,n", "n", "(@value 1 % @value 2)" )
 MathComponent:AddInlineOperator( "^", "n,n", "n", "(@value 1 ^ @value 2)" )
  
 /* --- --------------------------------------------------------------------------------
-@: Operators
+    @: Operators
    --- */
 
 MathComponent:AddInlineOperator( "is", "n", "b", "(@value 1 >= 1)" )
@@ -53,8 +53,9 @@ MathComponent:AddInlineOperator( "not", "n", "b", "(@value 1 < 1)" )
 MathComponent:AddInlineOperator( "-", "n", "n", "(-@value 1)" )
 
 /* --- --------------------------------------------------------------------------------
-@: Bitwise
+    @: Bitwise
    --- */
+
 MathComponent:AddInlineOperator( "&", "n,n", "n", "bit.band(@value 1 , @value 2)" )
 MathComponent:AddInlineOperator( "|", "n,n", "n", "bit.bor(@value 1 , @value 2)" )
 MathComponent:AddInlineOperator( "^^", "n,n", "n", "bit.bxor(@value 1 , @value 2)" )
@@ -62,7 +63,7 @@ MathComponent:AddInlineOperator( ">>", "n,n", "n", "bit.rshift(@value 1 , @value
 MathComponent:AddInlineOperator( "<<", "n,n", "n", "bit.lshift(@value 1 , @value 2)" )
 
 /* --- --------------------------------------------------------------------------------
-@: Assigment
+    @: Assigment
    --- */
 
 Number:AddVMOperator( "=", "n,n", "", function( Context, Trace, MemRef, Value )
@@ -116,7 +117,7 @@ Number:AddVMOperator( "--i", "n", "n", function( Context, Trace, MemRef )
 end )
 
 /* --- --------------------------------------------------------------------------------
-@: Casting
+    @: Casting
    --- */
 
 MathComponent:AddInlineOperator( "string", "n", "s", "tostring(@value 1)" )
@@ -124,7 +125,7 @@ MathComponent:AddInlineOperator( "boolean", "n", "s", "(@value 1 > 1)" )
 MathComponent:AddInlineOperator( "number", "n", "s", "($tonumber(@value 1) or 0)" )
 
 /* --- --------------------------------------------------------------------------------
-@: Max Value
+    @: Max Value
    --- */
 
 MathComponent:AddInlineFunction( "max", "n,n,n,n,n", "n", "math.max(@value 1, @value 2, @value 3, @value 4, @value 5)" )
@@ -134,7 +135,7 @@ EXPADV.AddFunctionAlias( "max", "n,n,n" )
 EXPADV.AddFunctionAlias( "max", "n,n" )
 
 /* --- --------------------------------------------------------------------------------
-@: Min Value
+    @: Min Value
    --- */
 
 MathComponent:AddInlineFunction( "min", "n,n,n,n,n", "n", "math.min(@value 1, @value 2, @value 3, @value 4, @value 5)" )
@@ -144,7 +145,7 @@ EXPADV.AddFunctionAlias( "min", "n,n,n" )
 EXPADV.AddFunctionAlias( "min", "n,n" )
 
 /* --- --------------------------------------------------------------------------------
-@: General math
+    @: General math
    --- */
 
 MathComponent:AddInlineFunction( "floor", "n", "n", "math.floor(@value 1)" )
@@ -345,7 +346,7 @@ MathComponent:AddInlineFunction("mix", "n,n,n", "n", "(@value 1 * @value 3 + @va
 MathComponent:AddFunctionHelper( "mix", "n,n,n", "Returns a linear interpolation between three numbers." )
 
 /* --- --------------------------------------------------------------------------------
-@: Loop
+    @: Loop
    --- */
 
 Number:AddPreparedOperator( "for", "n,n,n,?", "", [[

@@ -39,7 +39,7 @@ Component:AddInlineOperator( "<", "a,a", "b", "(@value 1 < @value 2)" )
 Component:AddInlineOperator( ">=", "a,a", "b", "(@value 1 >= @value 2)" )
 Component:AddInlineOperator( "<=", "a,a", "b", "(@value 1 <= @value 2)" )
 
-/* -----------------------------------------------------------------------------------
+/* --- --------------------------------------------------------------------------------
 	@: Arithmetic
    --- */
 
@@ -48,7 +48,7 @@ Component:AddInlineOperator( "-", "a,a", "a", "(@value 1 - @value 2)" )
 Component:AddInlineOperator( "*", "a,a", "a", "(@value 1 * @value 2)" )
 Component:AddInlineOperator( "/", "a,a", "a", "(@value 1 / @value 2)" )
 
-/* -----------------------------------------------------------------------------------
+/* --- --------------------------------------------------------------------------------
 	@: Number Arithmetic
    --- */
 
@@ -64,7 +64,7 @@ Component:AddInlineOperator( "*", "n,a", "a", "(Angle(@value 1, @value 1, @value
 Component:AddInlineOperator( "/", "a,n", "a", "(@value 1 / Angle(@value 2, @value 2, @value 2))")
 Component:AddInlineOperator( "/", "n,a", "a", "(Angle(@value 1, @value 1, @value 1) / @value 2)")
 
-/* -----------------------------------------------------------------------------------
+/* --- --------------------------------------------------------------------------------
 	@: Operators
    --- */
 
@@ -72,7 +72,7 @@ Component:AddInlineOperator( "is", "a", "b", "(@value 1 ~= Angle(0, 0, 0))" )
 Component:AddInlineOperator( "not", "a", "b", "(@value 1 == Angle(0, 0, 0))" )
 Component:AddInlineOperator( "-", "a", "a", "(-@value 1)" )
 
-/* -----------------------------------------------------------------------------------
+/* --- --------------------------------------------------------------------------------
 	@: Constructor
    --- */
 
@@ -87,7 +87,7 @@ Component:AddFunctionHelper( "ang", "", "Creates an angle object" )
 Component:AddInlineFunction( "randAng", "n,n", "v", "Angle( $math.random(@value 1, @value 2), $math.random(@value 1, @value 2), $math.random(@value 1, @value 2) )" )
 Component:AddFunctionHelper( "randAng", "n,n", "Creates a random angle constrained to the given values" )
 
-/* -----------------------------------------------------------------------------------
+/* --- --------------------------------------------------------------------------------
 	@: Accessors
    --- */
 
@@ -111,7 +111,7 @@ Component:AddFunctionHelper( "setYaw", "a:n", "Sets the yaw value of an angle" )
 Component:AddPreparedFunction( "setRoll", "a:n", "", "@value 1.r = @value 2" )
 Component:AddFunctionHelper( "setRoll", "a:n", "Sets the roll value of an angle" )
 
-/* -----------------------------------------------------------------------------------
+/* --- --------------------------------------------------------------------------------
 	@: Directions
    --- */
 
@@ -124,7 +124,7 @@ Component:AddFunctionHelper( "right", "a:", "Returns a normal vector facing in t
 Component:AddInlineFunction( "up", "a:", "v", "@value 1:Up( )" )
 Component:AddFunctionHelper( "up", "a:", "Returns a normal vector facing in the direction that points up relative to the angle's direction" )
 
-/* -----------------------------------------------------------------------------------
+/* --- --------------------------------------------------------------------------------
 	@: Normalize
    --- */
 
@@ -134,7 +134,7 @@ Component:AddPreparedFunction( "normalize", "a:", "a", [[
 
 Component:AddFunctionHelper( "normalize", "a:", "Normalizes the angles by applying a module with 360 to pitch, yaw and roll" )
 
-/* -----------------------------------------------------------------------------------
+/* --- --------------------------------------------------------------------------------
 	@: Normalize
    --- */
 
@@ -144,7 +144,7 @@ Component:AddPreparedFunction( "rotateAroundAxis", "a:v,n", "a", [[
 
 Component:AddFunctionHelper( "rotateAroundAxis", "a:v,n", "Rotates the angle around the specified axis by the specified degree" )
 
-/* -----------------------------------------------------------------------------------
+/* --- --------------------------------------------------------------------------------
 	@: Snap
    --- */
 

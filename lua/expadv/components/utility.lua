@@ -1,13 +1,13 @@
-/* ---	--------------------------------------------------------------------------------
+/* --- --------------------------------------------------------------------------------
 	@: Utility Component
-   ---	*/
+   --- */
 
 local Component = EXPADV.AddComponent( "utility", true )
 
-/* ---	--------------------------------------------------------------------------------
+/* --- --------------------------------------------------------------------------------
 	@: Add A user hook system, They can add hooks to extend events, manualy.
 	@: This add no default hook, and shall encourage poeple to add there own.
-   ---	*/
+   --- */
 
 Component:AddVMFunction( "hookAdd", "s,s,d", "", function( Context, Trace, Hook, Name, Function )
 		local Data = Context.Data
@@ -45,9 +45,9 @@ Component:AddFunctionHelper( "hookAdd", "s,s,d", "Adds a user defined hook with 
 Component:AddFunctionHelper( "hookRemove", "s,s", "Removes a user defined hook with the given unique name." )
 Component:AddFunctionHelper( "hookCall", "s,...", "Calls the named hook, passing its arguments to all hooks defined using hookAdd(n,n,d)." )
 
-/* ---	--------------------------------------------------------------------------------
+/* --- --------------------------------------------------------------------------------
 	@: Add a simple timer system.
-   ---	*/
+   --- */
 
 Component:AddVMFunction( "timerCreate", "s,n,n,d,...", "", function( Context, Trace, Name, Delay, Reps, Delegate, ... )
 		local Data = Context.Data
@@ -136,9 +136,9 @@ hook.Add( "Think", "expadv.timers", function( )
 	end
 end )
 
-/* ---	--------------------------------------------------------------------------------
+/* --- --------------------------------------------------------------------------------
 	@: Need some time functions.
-   ---	*/
+   --- */
 
 Component:AddInlineFunction( "curTime", "", "n", "$CurTime( )" )
 
