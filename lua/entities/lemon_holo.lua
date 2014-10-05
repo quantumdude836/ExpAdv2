@@ -101,7 +101,7 @@ function ENT:Initialize( )
 
 	if CLIENT then return self:ApplyHoloInfo( ) end
 	
-	self.PlyID = IsValid( self.Player ) and self.Player:UniqueID( ) or ""
+	self.PlyID = IsValid( self.player ) and self.player:UniqueID( ) or ""
 	
 	self:SetSolid( SOLID_NONE )
 	self:SetMoveType( MOVETYPE_NONE )
@@ -116,8 +116,8 @@ function ENT:OnRemove( )
 	INFOTABLE[ self:EntIndex( ) ] = nil
 	RemoveQueue[ self:EntIndex( ) ] = true
 
-	if IsValid( self.Player ) then
-		self.Player:SetNWInt( "lemon.holograms", self.Player:GetNWInt( "lemon.holograms", 0 ) - 1 )
+	if IsValid( self.player ) then
+		self.Player:SetNWInt( "lemon.holograms", self.player:GetNWInt( "lemon.holograms", 0 ) - 1 )
 	end
 end
 /*==============================================================================================

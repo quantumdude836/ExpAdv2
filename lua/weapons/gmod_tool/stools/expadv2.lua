@@ -215,6 +215,7 @@ end
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Tool Panel
    --- */
+
 if CLIENT then
 	function TOOL.BuildCPanel( CPanel )
 		local CheckScreen = CPanel:CheckBox( "Create screen" )
@@ -252,5 +253,34 @@ if CLIENT then
 		end
 
 		ShowGateModels( )
+	end
+end
+
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Ghost
+   --- */
+
+function TOOL:Think( )
+
+	if !IsValid( self.GhostEntity ) or self.GhostEntity:GetModel( ) != self:GetClientInfo( "model" ) then
+		return self:MakeGhostEntity( self:GetClientInfo( "model" ), Vector(0,0,0), Angle(0,0,0) )
+	end
+	
+	local Trace = util.TraceLine( util.GetPlayerTrace( self:GetOwner( ) ) )
+		
+	if Trace.Hit then
+		
+		if IsValid( Trace.Entity ) and (Trace.Entity.ExpAdv or Trace.Entity:IsPlayer( ) ) then
+			return self.GhostEntity:SetNoDraw( true )
+		end
+		
+		local Ang = Trace.HitNormal:Angle( )
+		Ang.pitch = Ang.pitch + 90
+		
+		self.GhostEntity:SetPos( Trace.HitPos - Trace.HitNormal * self.GhostEntity:OBBMins( ).z )
+		self.GhostEntity:SetAngles( Ang )
+		
+		self.GhostEntity:SetNoDraw( false )
 	end
 end
