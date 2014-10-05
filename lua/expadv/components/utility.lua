@@ -123,7 +123,7 @@ hook.Add( "Think", "expadv.timers", function( )
 					end
 				end
 
-				Context:Execute( "Timer " .. Name, Timer.Delegate, Context, Timer.Inputs and unpack( Timer.Inputs ) or nil )
+				Context:Execute( "Timer " .. Name, Timer.Delegate, Timer.Inputs and unpack( Timer.Inputs ) or nil )
 
 			end
 
