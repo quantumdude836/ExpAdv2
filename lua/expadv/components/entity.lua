@@ -259,9 +259,10 @@ end)
 Component:AddFunctionHelper( "applyForce", "e:v", "Applies a vector of force on the given entity.")
 
 Component:AddPreparedFunction( "applyOffsetForce", "e:v,v", "", function( Context, Trace, Target, Pos1, Pos2 )
-if(Target:IsValid() && EXPADV.PPCheck(Target, Context.player) && Target:GetPhysicsObject():IsValid() && Target:GetMoveType == MOVETYPE_VPHYSICS) then
-	if(Pos1 < Vector(math.huge, math.huge, math.huge) && -Vector(math.huge, math.huge, math.huge) < Pos1 && Pos2 < Vector(math.huge, math.huge, math.huge) && -Vector(math.huge, math.huge, math.huge) < Pos2) then
-		Target:GetPhysicsObject():ApplyForceOffset(Pos1, Pos2)
+	if(Target:IsValid() && EXPADV.PPCheck(Target, Context.player) && Target:GetPhysicsObject():IsValid() && Target:GetMoveType == MOVETYPE_VPHYSICS) then
+		if(Pos1 < Vector(math.huge, math.huge, math.huge) && -Vector(math.huge, math.huge, math.huge) < Pos1 && Pos2 < Vector(math.huge, math.huge, math.huge) && -Vector(math.huge, math.huge, math.huge) < Pos2) then
+			Target:GetPhysicsObject():ApplyForceOffset(Pos1, Pos2)
+		end
 	end
 end)
 
@@ -280,8 +281,8 @@ if(Target:IsValid() && EXPADV.PPCheck(Target, Context.player) && Target:GetPhysi
 			
 			if(Angle.p ~= 0) then
 				local pitch = up * (Angle.p * 0.5)
-				@phys:ApplyForceOffset( forward, pitch )
-				@phys:ApplyForceOffset( forward * -1, pitch * -1 )
+				phys:ApplyForceOffset( forward, pitch )
+				phys:ApplyForceOffset( forward * -1, pitch * -1 )
 			end
 
 			-- apply yaw force
@@ -299,8 +300,7 @@ if(Target:IsValid() && EXPADV.PPCheck(Target, Context.player) && Target:GetPhysi
 			end
 		end
 	end
-end
-)
+end)
 
 Component:AddFunctionHelper( "applyAngForce", "e:a", "Applies torque to the given entity depending on the given angle")
 
