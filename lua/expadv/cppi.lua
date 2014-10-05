@@ -2,7 +2,7 @@
 	@: CPPI support - Prop Protection intigration.
    --- */
 
-if CCPI then
+if CPPI then
 	function EXPADV.GetOwner( Entity )
 		if !IsValid( Entity ) then return end
 
@@ -44,7 +44,7 @@ if CCPI then
 		return Owner == Player or EXPADV.IsFriend( Player, Owner )
 	end
 
-	return -- Cave Jhonson, we're done here!
+	return -- Cave Johnson, we're done here!
 end
 
 /* --- --------------------------------------------------------------------------------
