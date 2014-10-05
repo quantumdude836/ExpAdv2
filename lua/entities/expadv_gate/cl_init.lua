@@ -5,7 +5,20 @@
 include( "shared.lua" )
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+    @: Utility func
+   --- */
+
+local function Shorten( Num )
+    if Num < 1000 then return Num end
+    if Num < 1000000 then return math.Round(Num / 1000, 3) .. "k" end
+    if Num < 1000000000 then return math.Round(Num / 1000000, 3) .. "m" end
+    return math.Round(Num / 1000000000, 3) .. "b" -- Lets hope we never reach the billions :D
+end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Overlay
+    @: Images - Omicron
+    @: Terrible Code: Divran
    --- */
    
 local mul = 4
@@ -32,7 +45,11 @@ surface.CreateFont( "ExpAdv_OverlayFont", {
         additive = false,
         outline = false,
 } )
- 
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+    @: Draw Overlay
+   --- */
+
 function ENT:DrawOverlay( Pos, Ang )
         cam.Start3D2D( self:LocalToWorld( Pos ), self:LocalToWorldAngles( Ang or Angle(0.1,90,0.1) ), 0.05 / mul )
  
@@ -70,10 +87,10 @@ function ENT:DrawOverlay( Pos, Ang )
                         draw.SimpleText( "Client:", "ExpAdv_OverlayFont", 50 * mul, 30 * mul, Color( 255, 255, 255, 255 ), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
                         
                         local Counter = self.ClientTickQuota or 0
-                        local Line = string.format( "Quota: %i, %i%%", Counter, (Counter / expadv_hardquota) * 100 )
+                        local Line = string.format( "Quota: %s, %i%%", Shorten( Counter ), (Counter / expadv_hardquota) * 100 )
                         draw.SimpleText( Line, "ExpAdv_OverlayFont", 50 * mul, 40 * mul, Color( 255, 255, 255, 255 ), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
                            
-                        local Line2 = string.format( "Usage: %i",  self.ClientAverage or 0 )
+                        local Line2 = string.format( "Usage: %s",  Shorten(self.ClientAverage or 0 ))
                         draw.SimpleText( Line2, "ExpAdv_OverlayFont", 50 * mul, 50 * mul, Color( 255, 255, 255, 255 ), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
                             
                         local Line3 = string.format( "CPU: %i us",  self.ClientStopWatch or 0 )
@@ -84,10 +101,10 @@ function ENT:DrawOverlay( Pos, Ang )
                         draw.SimpleText( "Server:", "ExpAdv_OverlayFont", 150 * mul, 30 * mul, Color( 255, 255, 255, 255 ), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
                             
                         local Counter = self:GetTickQuota( ) or 0
-                        local Line = string.format( "Quota: %i, %i%%", Counter, (Counter / expadv_hardquota) * 100 )
+                        local Line = string.format( "Quota: %s, %i%%", Shorten( Counter ), (Counter / expadv_hardquota) * 100 )
                         draw.SimpleText( Line, "ExpAdv_OverlayFont", 150 * mul, 40 * mul, Color( 255, 255, 255, 255 ), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
                            
-                        local Line2 = string.format( "Usage: %i",  self:GetAverage( ) or 0 )
+                        local Line2 = string.format( "Usage: %s",  Shorten(self:GetAverage( ) or 0 ))
                         draw.SimpleText( Line2, "ExpAdv_OverlayFont", 150 * mul, 50 * mul, Color( 255, 255, 255, 255 ), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
                             
                         local Line3 = string.format( "CPU: %i us",  self:GetStopWatch( ) or 0 )

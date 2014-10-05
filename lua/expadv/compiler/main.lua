@@ -205,7 +205,7 @@ function Compiler:MakeVirtual( Instruction )
 		"return function( Context )",
 			"setfenv( 1, Context.Enviroment )",
 			Instruction.Prepare or "",
-			"return " .. Instruction.Inline or "",
+			"return " .. (Instruction.Inline or ""),
 		"end"
 	}, "\n" )
 
@@ -218,7 +218,7 @@ function Compiler:MakeVirtual( Instruction )
 	self.VMInstructions[ID] = Compiled( )
 	self.NativeLog[ "Instructions " .. ID ] = Natvie
 
-	local Instr = self:NewLuaInstruction( Trace, Operator, nil, string.format( "Context.Instructions[%i]( Context )", ID ) )
+	local Instr = self:NewLuaInstruction( Trace, Instruction, nil, string.format( "Context.Instructions[%i]( Context )", ID ) )
 
 	Instr.IsRaw = true
 

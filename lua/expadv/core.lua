@@ -10,7 +10,7 @@ MsgN( "Expression advanced Two - Installing." )
 	@: Debugging Stuff
    --- */
 
-local DebugMsg = CreateConVar( "expadv_debug", "1", {FCVAR_REPLICATED} )
+local DebugMsg = CreateConVar( "expadv_debug", "0", {FCVAR_REPLICATED} )
 
 function EXPADV.Msg( ... )
 	if DebugMsg:GetInt( ) <= 0 then return end
@@ -137,6 +137,18 @@ end
 	@: We have files to load, lets load them.
    --- */
 
+function EXPADV.CleanCore( )
+	EXPADV.EXPADV_BaseComponent = nil
+
+	EXPADV.Components = nil
+	EXPADV.Operators = nil
+	EXPADV.Class_Operators = nil
+	EXPADV.Functions = nil
+	EXPADV.Directives = nil
+	EXPADV.Events = nil
+	EXPADV.Compiler = nil
+end
+
 function EXPADV.IncludeCore( )
 	include( "expadv/components.lua" )
 	include( "expadv/classes.lua" )
@@ -172,6 +184,8 @@ function EXPADV.LoadCore( )
 
 	EXPADV.LoadConfig( )
 
+	EXPADV.CleanCore( )
+
 	EXPADV.IncludeCore( )
 
 	EXPADV.AddComponentFile( "core" )
@@ -189,6 +203,7 @@ function EXPADV.LoadCore( )
 	EXPADV.AddComponentFile( "render" )
 	EXPADV.AddComponentFile( "table" )
 	EXPADV.AddComponentFile( "array" )
+	EXPADV.AddComponentFile( "co-routine" )
 	EXPADV.AddComponentFile( "utility" )
 
 	EXPADV.CallHook( "AddComponents" )
@@ -390,29 +405,6 @@ if SERVER then
 
 	end
 
-	function EXPADV.SendDataStream( )
-		if #player.GetAll( ) == 0 then return end
-
-		local DataStream = { }
-
-		if EXPADV.BuildDataStream( DataStream, false ) > 0 then
-
-			local Package = vnet.CreatePacket( "expadv.stream" )
-
-			Package:Table( DataStream )
-
-			Package:Broadcast( )
-		end
-	end
-
-	hook.Add( "Thick", "expadv.Stream", function( )
-		local Ok, Msg = pcall( EXPADV.SendDataStream )
-		
-		if !Ok then
-			EXPADV.Msg( "ExpAdv2 - Error in main Data stream: ", Msg )
-		end
-	end )
-
 else
 
 	vnet.Watch( "expadv.stream", function( Package )
@@ -529,16 +521,19 @@ end, vnet.OPTION_WATCH_OVERRIDE )
 	@: Quota Managment
    --- */
 
+-- local expadv_cpu_mult     = 0 -- This is our multiplyer :D
 local cv_expadv_luahook   = CreateConVar( "expadv_quota_hook", "500", {FCVAR_REPLICATED} )
-local cv_expadv_tickquota = CreateConVar( "expadv_tick_quota", "25000", {FCVAR_REPLICATED} )
-local cv_expadv_softquota = CreateConVar( "expadv_soft_quota", "10000", {FCVAR_REPLICATED} )
-local cv_expadv_hardquota = CreateConVar( "expadv_hard_quota", "100000", {FCVAR_REPLICATED} )
+local cv_expadv_tickquota = CreateConVar( "expadv_tick_quota", "250000", {FCVAR_REPLICATED} )
+local cv_expadv_softquota = CreateConVar( "expadv_soft_quota", "100000", {FCVAR_REPLICATED} )
+local cv_expadv_hardquota = CreateConVar( "expadv_hard_quota", "1000000", {FCVAR_REPLICATED} )
 
 timer.Create( "expadv.quota", 1, 0, function( )
 	expadv_luahook   = cv_expadv_luahook:GetInt( )
-	expadv_tickquota = cv_expadv_tickquota:GetInt( )
-	expadv_softquota = cv_expadv_softquota:GetInt( )
-	expadv_hardquota = cv_expadv_hardquota:GetInt( )
+	-- expadv_cpu_mult  = engine.TickInterval( ) / 0.0303030303
+
+	expadv_tickquota = cv_expadv_tickquota:GetInt( ) -- * expadv_cpu_mult
+	expadv_softquota = cv_expadv_softquota:GetInt( ) -- * expadv_cpu_mult
+	expadv_hardquota = cv_expadv_hardquota:GetInt( ) -- * expadv_cpu_mult
 end )
 
 /* --- --------------------------------------------------------------------------------

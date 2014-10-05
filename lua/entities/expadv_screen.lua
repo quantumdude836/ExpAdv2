@@ -161,7 +161,6 @@ function ENT:Draw( )
 			Angles = Monitor.Rot
 		end
 
-		//print( "Rednering Overlay!" )
 		self:DrawOverlay( Position, Angles )
 	end
 end
@@ -217,7 +216,12 @@ function ENT:RenderScreen( )
 	end
 
 	cam.Start2D( )
+
+		surface.SetDrawColor( 255, 255, 255, 255 )
+		surface.SetTextColor( 0, 0, 0, 255 )
+		
 		Context:Execute( "Event drawScreen", Event, 512, 512 )
+
 	cam.End2D( )
 
 	render.SetViewPort( 0, 0, _ScrW, _ScrH )

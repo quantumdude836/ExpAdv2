@@ -499,7 +499,7 @@ function Compiler:Compile_TRY( Trace, Sequence, Catch, Final )
 end
 
 function Compiler:Compile_CATCH( Trace, MemRef, Accepted, Sequence, Catch )
-	local Operator = self:LookUpOperator( "ex=", "n", "ex" )
+	local Operator = self:LookUpClassOperator( "_ex", "=", "n", "_ex" )
 	local Ass = Operator.Compile( self, Trace, { Trace = Trace, Inline = "Result", Return = "_ex", FLAG = EXPADV_INLINE, IsRaw = true } )
 
 	local Condition = "true"

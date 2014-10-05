@@ -37,6 +37,7 @@ local HolosByPlayer = { }
 local DeltaPerPlayer = { }
 
 function HoloComponent:OnShutDown( Context )
+	MsgN( "HOLOGRAM SHUTDOWN CALL!" )
 	if IsValid( Context.player ) then
 		local PlyTbl = HolosByPlayer[ Context.player:UniqueID( ) ]
 

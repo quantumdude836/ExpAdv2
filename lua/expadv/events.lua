@@ -130,6 +130,14 @@ function EXPADV.LoadEvents( )
 end
 
 /* --- --------------------------------------------------------------------------------
+	@: Event Enums
+   --- */
+
+EXPADV_EVENT_NORMAL = 1
+EXPADV_EVENT_PLAYER = 2
+EXPADV_EVENT_PLAYERRETURN = 3
+
+/* --- --------------------------------------------------------------------------------
 	@: Event Interface
    --- */
 
@@ -151,6 +159,8 @@ function EXPADV.CallEvent( Name, ... )
 		if !Result and Ok and Value ~= nil then Result, ResultType = Value, Type end
 	end
 	
+	EXPADV.CallHook( "PostEvent", EXPADV_EVENT_NORMAL, Name, ... )
+
 	return Result, ResultType
 end
 
@@ -173,6 +183,8 @@ function EXPADV.CallPlayerEvent( Player, Name, ... )
 		if !Result and Ok and Value ~= nil then Result, ResultType = Value, Type end
 	end
 	
+	EXPADV.CallHook( "PostEvent", EXPADV_EVENT_PLAYER, Player, Name, ... )
+	
 	return Result, ResultType
 end
 
@@ -194,6 +206,8 @@ function EXPADV.CallPlayerReturnableEvent( Player, Name, ... )
 		
 		if !Result and Ok and Value ~= nil then Result, ResultType = Value, Type end
 	end
+	
+	EXPADV.CallHook( "PostEvent", EXPADV_EVENT_PLAYERRETURN, Player, Name, ... )
 	
 	return Result, ResultType
 end

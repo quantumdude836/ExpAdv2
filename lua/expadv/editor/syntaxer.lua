@@ -487,7 +487,7 @@ function Syntaxer:Parse( Row )
 						local exception = self.tokendata 
 						self:NextPattern( " *" ) 
 						
-						if API.Exceptions[ exception ] then 
+						if EXPADV.Exceptions[ exception ] then 
 							addToken( "exception", self.tokendata )
 						else 
 							addToken( "notfound", self.tokendata )

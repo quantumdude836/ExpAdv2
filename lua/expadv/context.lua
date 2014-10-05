@@ -44,6 +44,7 @@ function EXPADV.BuildNewContext( Instance, Player, Entity ) -- Table, Player, En
 	Context.Monitor = {
 		Perf = 0,
 		Usage = 0,
+		Counter = 0,
 		StopWatch = 0,
 		State = 0,
 	}
@@ -61,15 +62,14 @@ local SysTime = SysTime
 local debug_sethook = debug.sethook
 
 -- Safely execute a function on this context.
-function EXPADV.RootContext:Execute( Location, Operation, Ctx, ... ) -- String, Function, ...
+function EXPADV.RootContext:Execute( Location, Operation, ... ) -- String, Function, ...
 	
 	local Status, Instance = self.Status
 
 	-- Memory Instaces
 
-		if Location ~= "Root" then
+		if Location and Location ~= "Root" then
 			Instance = EXPADV.CloneContext( self )
-			if Ctx == self then Ctx = Instance end
 		end
 
 	-- Ops monitoring:
@@ -77,20 +77,24 @@ function EXPADV.RootContext:Execute( Location, Operation, Ctx, ... ) -- String, 
 		local function op_counter( )
 			Status.Perf = Status.Perf + expadv_luahook
 
+			-- Status.Perf = Status.Perf + ((SysTime( ) - Status.BenchMark) * 1000000)
+
 			if Status.Perf > expadv_tickquota then
 				debug.sethook( )
-				MsgN( "Quota Exceeded: ", Status.Perf, " / ", expadv_tickquota )
 				error( { Trace = {0,0}, Quota = true, Msg = Message, Context = Context }, 0 )
 			end
+
+			Status.BenchMark = SysTime( )
 		end
 
 		Status.BenchMark = SysTime( )
+		-- Status.CounterFunction = op_counter
 
 		debug_sethook( op_counter, "", expadv_luahook )
 
 	-- Execuiton:
 
-		local Ok, Result = pcall( Operation, Instance or self, Ctx, ... )
+		local Ok, Result = pcall( Operation, Instance or self, ... )
 
 	-- Reset Ops Monitor
 		debug.sethook( )
@@ -105,7 +109,9 @@ function EXPADV.RootContext:Execute( Location, Operation, Ctx, ... ) -- String, 
 		self:ShutDown( )
 
 		return false
-	elseif Ok or Result.Exit then
+	end
+
+	if Ok or Result.Exit then
 
 		if (Status.Counter + Status.Perf - expadv_softquota) > expadv_hardquota then
 
@@ -124,20 +130,23 @@ function EXPADV.RootContext:Execute( Location, Operation, Ctx, ... ) -- String, 
 
 		return true, Result
 
-	else
-
-		if !IsValid( self.entity ) then
-			-- Do nothing :P
-		elseif Result.Quota then
-			self.entity:HitTickQuota( )
-		elseif Result.Script then
-			self.entity:ScriptError( Result )
-		elseif Result.Exception then
-			self.entity:Exception( Result )
-		end
-
-		self:ShutDown( )
 	end
+
+	if istable( Result ) and Result.Context and Result.Context ~= self then
+		self = Result.Context
+	end
+
+	if !IsValid( self.entity ) then
+		-- Do nothing :P
+	elseif Result.Quota then
+		self.entity:HitTickQuota( )
+	elseif Result.Script then
+		self.entity:ScriptError( Result )
+	elseif Result.Exception then
+		self.entity:Exception( Result )
+	end
+
+	self:ShutDown( )
 
 	return false
 end
@@ -301,6 +310,7 @@ hook.Add( "Tick", "ExpAdv2.Performance", function( )
 		Status.Perf = 0
 		Status.StopWatch = 0
 		Status.Counter = Counter
+		Monitor.Counter = Counter
 
 		if Counter > expadv_hardquota * 0.5 then
 			Monitor.State = EXPADV_STATE_ALERT

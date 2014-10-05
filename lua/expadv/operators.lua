@@ -677,6 +677,44 @@ function EXPADV.BuildVMOperator( Operator )
 
 		end
 
+
+
+		if Operator.UsesVarg and Operator.InputCount < #Instructions then
+
+			for I = Operator.InputCount + 1, #Instructions do
+				local Instruction = Instructions[I]
+
+				if !Instruction then
+					Arguments[I] = "{nil,\"NIL\"}"
+
+				elseif isstring( Instruction ) then
+
+					Arguments[I] = string.format( "{%q,%q}", Instruction, "s" )
+
+				elseif isnumber( Instruction ) then
+
+					Arguments[I] = string.format( "{%i,%q}", Instruction, "n" )
+
+				elseif Instruction.FLAG == EXPADV_FUNCTION then
+					error( "Compiler is yet to support virtuals" )
+
+				elseif Instruction.FLAG == EXPADV_INLINE then
+
+					Arguments[I] = string.format( "{%s,%q}", Instruction.Inline, Instruction.Return )
+
+				elseif Instruction.FLAG == EXPADV_PREPARE then
+
+					Prepare[ #Prepare + 1 ] = Instruction.Prepare
+
+				else
+					Arguments[I] = string.format( "{%s,%q}", Instruction.Inline, Instruction.Return )
+
+					Prepare[ #Prepare + 1 ] = Instruction.Prepare
+				end
+			end
+			
+		end
+
 		local ID = Compiler.VMLookUp[Operator.Function] 
 		
 		if !ID then

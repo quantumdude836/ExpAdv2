@@ -265,6 +265,9 @@ hook.Add( "HUDPaint", "expadv.hudpaint", function( )
 		
 		if !Event or !Context.EnableHUD then continue end
 		
+		surface.SetDrawColor( 255, 255, 255, 255 )
+		surface.SetTextColor( 0, 0, 0, 255 )
+		
 		Context:Execute( "Event drawHUD", Event, W, H )
 	end
 end )

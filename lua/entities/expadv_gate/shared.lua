@@ -34,6 +34,8 @@ end
    --- */
 
 function ENT:ResetState( State )
+	
+	MsgN( "RESET STATE" ) 
 	if SERVER then
 		self:SetTickQuota( 0 )
 		self:SetStopWatch( 0 )
@@ -71,14 +73,14 @@ function ENT:Think( )
 
 	if self:IsRunning( ) then
 		local Monitor = self.Context.Monitor
-		
+
 		if SERVER then
-			self:SetTickQuota( Monitor.Perf )
+			self:SetTickQuota( Monitor.Counter ) -- Perf )
 			self:SetStopWatch( Monitor.StopWatch )
 			self:SetAverage( Monitor.Usage )
 			self:SetServerState( Monitor.State or EXPADV_STATE_OFFLINE )
 		elseif CLIENT then
-			self.ClientTickQuota = Monitor.Perf
+			self.ClientTickQuota = Monitor.Counter -- Monitor.Perf
 			self.ClientStopWatch = Monitor.StopWatch
 			self.ClientAverage = Monitor.Usage
 			self:SetClientState( Monitor.State or EXPADV_STATE_OFFLINE )
