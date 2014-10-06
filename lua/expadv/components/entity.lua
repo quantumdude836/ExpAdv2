@@ -72,7 +72,7 @@ Component:AddFunctionHelper( "entity", ":n", "Returns the entity of the given in
 Component:AddInlineFunction( "isValid", "e:", "b", "@value 1:IsValid()")
 Component:AddFunctionHelper( "isValid", "e:", "Returns if the given entity is valid.")
 
-Component:AddInlineFunction( "validPhysics", "e:", "b", "@value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType == MOVETYPE_VPHYSICS")
+Component:AddInlineFunction( "validPhysics", "e:", "b", "@value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType( )== MOVETYPE_VPHYSICS")
 Component:AddFunctionHelper( "validPhysics", "e:", "Returns if the given entity has valid physics.")
 
 Component:AddInlineFunction( "pos", "e:", "v", "(@value 1:IsValid() and @value 1:GetPos() or Vector(0,0,0))")
@@ -201,22 +201,22 @@ Component:AddFunctionHelper( "killPod", "e:", "Kills the driver of the given veh
 
 EXPADV.SharedOperators()
 
-Component:AddInlineFunction( "mass", "e:", "e", "((@value 1:IsValid() && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType == MOVETYPE_VPHYSICS) and @value 1:GetPhysicsObject():GetMass() or 0)")
+Component:AddInlineFunction( "mass", "e:", "e", "((@value 1:IsValid() && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType( )== MOVETYPE_VPHYSICS) and @value 1:GetPhysicsObject():GetMass() or 0)")
 Component:AddFunctionHelper( "mass", "e:", "Returns the mass of the given entity.")
 
-Component:AddInlineFunction( "massCenter", "e:", "v", "((@value 1:IsValid() && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType == MOVETYPE_VPHYSICS) and @value 1:LocalToWorld(@value 1:GetPhysicsObject():GetMassCenter()) or Vector(0,0,0))")
+Component:AddInlineFunction( "massCenter", "e:", "v", "((@value 1:IsValid() && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType( )== MOVETYPE_VPHYSICS) and @value 1:LocalToWorld(@value 1:GetPhysicsObject():GetMassCenter()) or Vector(0,0,0))")
 Component:AddFunctionHelper( "massCenter", "e:", "Returns the center of mass of the given entity.")
 
-Component:AddInlineFunction( "massCenterL", "e:", "v", "((@value 1:IsValid() && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType == MOVETYPE_VPHYSICS) and @value 1:GetPhysicsObject():GetMassCenter() or Vector(0,0,0))")
+Component:AddInlineFunction( "massCenterL", "e:", "v", "((@value 1:IsValid() && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType( )== MOVETYPE_VPHYSICS) and @value 1:GetPhysicsObject():GetMassCenter() or Vector(0,0,0))")
 Component:AddFunctionHelper( "massCenterL", "e:", "Returns the local center of mass of the given entity.")
 
-Component:AddInlineFunction( "volume", "e:", "n", "((@value 1:IsValid() && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType == MOVETYPE_VPHYSICS) and @value 1:GetPhysicsObject():GetVolume() or 0)")
+Component:AddInlineFunction( "volume", "e:", "n", "((@value 1:IsValid() && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType( )== MOVETYPE_VPHYSICS) and @value 1:GetPhysicsObject():GetVolume() or 0)")
 Component:AddFunctionHelper( "volume", "e:", "Returns the volume of the given entity.")
 
-Component:AddInlineFunction( "isfrozen", "e:", "b", "((@value 1:IsValid() && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType == MOVETYPE_VPHYSICS) and (@value 1:GetPhysicsObject():IsMoveable() == false) or false)")
+Component:AddInlineFunction( "isfrozen", "e:", "b", "((@value 1:IsValid() && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType( )== MOVETYPE_VPHYSICS) and (@value 1:GetPhysicsObject():IsMoveable() == false) or false)")
 Component:AddFunctionHelper( "isfrozen", "e:", "Returns if the given entity is frozen.")
 
-Component:AddInlineFunction( "inertia", "e:", "v", "((@value 1:IsValid() && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType == MOVETYPE_VPHYSICS) and @value 1:GetPhysicsObject():GetInertia() or Vector(0,0,0))")
+Component:AddInlineFunction( "inertia", "e:", "v", "((@value 1:IsValid() && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType( )== MOVETYPE_VPHYSICS) and @value 1:GetPhysicsObject():GetInertia() or Vector(0,0,0))")
 Component:AddFunctionHelper( "inertia", "e:", "Returns the inertia of the given entity.")
 
 Component:AddInlineFunction( "vel", "e:", "v", "(@value 1:IsValid() and @value 1:GetVelocity() or Vector(0,0,0))")
@@ -226,14 +226,14 @@ Component:AddInlineFunction( "velL", "e:", "v", "(@value 1:IsValid() and (@value
 Component:AddFunctionHelper( "velL", "e:", "Returns the local velocity of the given entity.")
 
 Component:AddInlineFunction( "angVel", "e:", "a",
-[[if(@value 1:IsValid() && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType == MOVETYPE_VPHYSICS) then
+[[if(@value 1:IsValid() && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType( )== MOVETYPE_VPHYSICS) then
 	@define vel = @value 1:GetPhysicsObject():GetAngleVelocity()
 	Angle(@vel.y, @vel.z, @vel.x)
 end]])
 
 Component:AddFunctionHelper( "angVel", "e:", "Returns the angular velocity of the given entity.")
 
-Component:AddInlineFunction( "angVelVector", "e:", "a","((@value 1:IsValid() && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType == MOVETYPE_VPHYSICS) and @value 1:GetPhysicsObject():GetAngleVelocity() or Vector(0,0,0))")
+Component:AddInlineFunction( "angVelVector", "e:", "a","((@value 1:IsValid() && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType( )== MOVETYPE_VPHYSICS) and @value 1:GetPhysicsObject():GetAngleVelocity() or Vector(0,0,0))")
 Component:AddFunctionHelper( "angVelVector", "e:", "Returns the angular velocity of the given entity as a vector.")
 
 Component:AddInlineFunction( "radius", "e:", "n","(@value 1:IsValid() and @value 1:BoundingRadius() or 0)")
@@ -249,7 +249,7 @@ Component:AddPreparedFunction( "setMass", "e:n", "","if(@value 1:IsValid() && EX
 Component:AddFunctionHelper( "setMass", "e:n", "Sets the mass of the given entity.")
 
 Component:AddVMFunction( "applyForce", "e:v", "", function( Context, Trace, Target, Pos )
-	if(Target:IsValid() && EXPADV.PPCheck(Target, Context.player) && Target:GetPhysicsObject():IsValid() && Target:GetMoveType == MOVETYPE_VPHYSICS) then
+	if(Target:IsValid() && EXPADV.PPCheck(Target, Context.player) && Target:GetPhysicsObject():IsValid() && Target:GetMoveType() == MOVETYPE_VPHYSICS) then
 		if(Pos < Vector(math.huge, math.huge, math.huge) && -Vector(math.huge, math.huge, math.huge) < Pos) then
 			Target:GetPhysicsObject():ApplyForceCenter(Pos)
 		end
@@ -259,7 +259,7 @@ end)
 Component:AddFunctionHelper( "applyForce", "e:v", "Applies a vector of force on the given entity.")
 
 Component:AddPreparedFunction( "applyOffsetForce", "e:v,v", "", function( Context, Trace, Target, Pos1, Pos2 )
-	if(Target:IsValid() && EXPADV.PPCheck(Target, Context.player) && Target:GetPhysicsObject():IsValid() && Target:GetMoveType == MOVETYPE_VPHYSICS) then
+	if(Target:IsValid() && EXPADV.PPCheck(Target, Context.player) && Target:GetPhysicsObject():IsValid() && Target:GetMoveType() == MOVETYPE_VPHYSICS) then
 		if(Pos1 < Vector(math.huge, math.huge, math.huge) && -Vector(math.huge, math.huge, math.huge) < Pos1 && Pos2 < Vector(math.huge, math.huge, math.huge) && -Vector(math.huge, math.huge, math.huge) < Pos2) then
 			Target:GetPhysicsObject():ApplyForceOffset(Pos1, Pos2)
 		end
@@ -268,39 +268,43 @@ end)
 
 Component:AddFunctionHelper( "applyForceOffset", "e:v,v", "Applies an offset vector of force on the given entity.")
 
-Component:AddPreparedFunction( "applyAngForce", "e:a", "", function( Context, Trace, Target, Angle )
+local InfAng = Angle(math.huge, math.huge, math.huge)
 
-if(Target:IsValid() && EXPADV.PPCheck(Target, Context.player) && Target:GetPhysicsObject():IsValid() && Target:GetMoveType == MOVETYPE_VPHYSICS) then
-	if(Angle < Angle(math.huge, math.huge, math.huge) && -Angle(math.huge, math.huge, math.huge) < Angle) then
-		if(Angle.p != 0 || Angle.y != 0 || Angle.r != 0) then
-			local phys = Target:GetPhysicsObject()
-			
-			local up = Target:GetUp()
-			local left = Target:GetRight() * -1
-			local forward = Target:GetForward()
-			
-			if(Angle.p ~= 0) then
-				local pitch = up * (Angle.p * 0.5)
-				phys:ApplyForceOffset( forward, pitch )
-				phys:ApplyForceOffset( forward * -1, pitch * -1 )
-			end
+Component:AddPreparedFunction( "applyAngForce", "e:a", "",
+	function( Context, Trace, Target, Angle )
 
-			-- apply yaw force
-			if(Angle.y ~= 0) then
-				local yaw = forward * (Angle.y * 0.5)
-				phys:ApplyForceOffset( left, yaw )
-				phys:ApplyForceOffset( left * -1, yaw * -1 )
-			end
+		if Target:IsValid() && EXPADV.PPCheck(Target, Context.player) and Target:GetPhysicsObject():IsValid() and Target:GetMoveType() == MOVETYPE_VPHYSICS then
+			if Angle < InfAng && -InfAng < Angle then
+				if Angle.p != 0 or Angle.y != 0 or Angle.r != 0 then
+					local phys = Target:GetPhysicsObject()
+					
+					local up = Target:GetUp()
+					local left = Target:GetRight() * -1
+					local forward = Target:GetForward()
+					
+					if Angle.p ~= 0 then
+						local pitch = up * (Angle.p * 0.5)
+						phys:ApplyForceOffset( forward, pitch )
+						phys:ApplyForceOffset( forward * -1, pitch * -1 )
+					end
 
-			-- apply roll force
-			if(Angle.r ~= 0) then
-				local roll = left * (Angle.r * 0.5)
-				phys:ApplyForceOffset( up, roll )
-				phys:ApplyForceOffset( up * -1, roll * -1 )
+					-- apply yaw force
+					if Angle.y ~= 0  then
+						local yaw = forward * (Angle.y * 0.5)
+						phys:ApplyForceOffset( left, yaw )
+						phys:ApplyForceOffset( left * -1, yaw * -1 )
+					end
+
+					-- apply roll force
+					if Angle.r ~= 0 then
+						local roll = left * (Angle.r * 0.5)
+						phys:ApplyForceOffset( up, roll )
+						phys:ApplyForceOffset( up * -1, roll * -1 )
+					end
+				end
 			end
 		end
-	end
-end)
+	end )
 
 Component:AddFunctionHelper( "applyAngForce", "e:a", "Applies torque to the given entity depending on the given angle")
 
@@ -349,6 +353,134 @@ Component:AddPreparedFunction( "heading", "e:v", "a", [[
 	end
 ]], "(@ang or Angle(0,0,0))" )
 Component:AddFunctionHelper( "heading", "e:v", "Returns the heading angle between the two given points")
+
+/* --- --------------------------------------------------------------------------------
+	@: Entity Discovery
+   --- */
+
+EXPADV.EntitySearchFilter = { 
+		["prop_dynamic"] = "prop_dynamic",
+		["physgun_beam"] = "physgun_beam",
+		["player_manager"] = "player_manager",
+		["predicted_viewmodel"] = "player_manager",
+		["gmod_ghost"] = "gmod_ghost",
+		["info_player_allies"] = "info_player_allies",
+		["info_player_axis"] = "info_player_axis",
+		["info_player_combine"] = "info_player_combine",
+		["info_player_counterterrorist"] = "info_player_counterterrorist",
+		["info_player_deathmatch"] = "info_player_deathmatch",
+		["info_player_logo"] = "info_player_logo",
+		["info_player_rebel"] = "info_player_rebel",
+		["info_player_start"] = "info_player_start",
+		["info_player_terrorist"] = "info_player_terrorist",
+		["info_player_blu"] = "info_player_blu",
+		["info_player_red"] = "info_player_red",
+	}
+
+Component:AddPreparedFunction( "findByClass", "s", "ar", [[
+@define Results = { __type = "e" }
+for _, Ent in pairs( $ents.FindByClass( @value 1 ) ) do
+	if Ent:IsValid() and !EXPADV.EntitySearchFilter[Ent:GetClass( )] then
+		@Results[#@Results + 1] = Ent
+	end
+end]], "@Results" )
+
+Component:AddPreparedFunction( "findByModel", "s", "ar", [[
+@define Results = { __type = "e" }
+for _, Ent in pairs( $ents.FindByModel( @value 1 ) ) do
+	if Ent:IsValid() and !EXPADV.EntitySearchFilter[Ent:GetClass( )] then
+		@Results[#@Results + 1] = Ent
+	end
+end]], "@Results" )
+
+Component:AddPreparedFunction( "findInSphere", "v,n", "ar", [[
+@define Results = { __type = "e" }
+for _, Ent in pairs( $ents.FindInSphere( @value 1, @value 2 ) ) do
+	if Ent:IsValid() and !EXPADV.EntitySearchFilter[Ent:GetClass( )] then
+		@Results[#@Results + 1] = Ent
+	end
+end]], "@Results" )
+
+Component:AddPreparedFunction( "findInBox", "v,v", "ar", [[
+@define Results = { __type = "e" }
+for _, Ent in pairs( $ents.FindInBox( @value 1, @value 2 ) ) do
+	if Ent:IsValid() and !EXPADV.EntitySearchFilter[Ent:GetClass( )] then
+		@Results[#@Results + 1] = Ent
+	end
+end]], "@Results" )
+
+Component:AddPreparedFunction( "findInCone", "v,v,n,a", "ar", [[
+@define Results = { __type = "e" }
+for _, Ent in pairs( $ents.FindInCone( @value 1, @value 2, @value 3, @value 4)) do
+	if Ent:IsValid() and !EXPADV.EntitySearchFilter[Ent:GetClass( )] then
+		@Results[#@Results + 1] = Ent
+	end
+end]], "@Results" )
+
+/***********************************************************************************************/
+
+Component:AddPreparedFunction( "findByModel", "s,s", "ar", [[
+@define Results = { __type = "e" }
+for _, Ent in pairs( $ents.FindByModel( @value 1 ) ) do
+	local Class = Ent:GetClass( )
+	if Ent:IsValid() and !EXPADV.EntitySearchFilter[Class] and Class == @value 2 then
+		@Results[#@Results + 1] = Ent
+	end
+end]], "@Results" )
+
+Component:AddPreparedFunction( "findInSphere", "s,v,n", "t", [[
+@define Results = { __type = "e" }
+for _, Ent in pairs( $ents.FindInSphere( @value 2, @value 3 ) ) do
+	local Class = Ent:GetClass( )
+	if Ent:IsValid() and !EXPADV.EntitySearchFilter[Class] and Class == @value 1 then
+		@Results[#@Results + 1] = Ent
+	end
+end]], "@Results" )
+
+Component:AddPreparedFunction( "findInSphere", "s,v,n", "t", [[
+@define Results = { __type = "e" }
+for _, Ent in pairs( $ents.FindInSphere( @value 2, @value 3 ) ) do
+	local Class = Ent:GetClass( )
+	if Ent:IsValid() and !EXPADV.EntitySearchFilter[Class] and Class == @value 1 then
+		@Results[#@Results + 1] = Ent
+	end
+end]], "@Results" )
+
+Component:AddPreparedFunction( "findInBox", "s,v,v", "t", [[
+@define Results = { __type = "e" }
+for _, Ent in pairs( $ents.FindInBox( @value 2, @value 3) ) do
+	local Class = Ent:GetClass( )
+	if Ent:IsValid() and !EXPADV.EntitySearchFilter[Class] and Class == @value 1 then
+		@Results[#@Results + 1] = Ent
+	end
+end]], "@Results" )
+
+Component:AddPreparedFunction( "findInCone", "s,v,v,n,a", "t", [[
+@define Results = { __type = "e" }
+for _, Ent in pairs( $ents.FindInCone( @value 2, @value 3, @value 4, @value 5)) do
+	local Class = Ent:GetClass( )
+	if Ent:IsValid() and !EXPADV.EntitySearchFilter[Class] and Class == @value 1 then
+		@Results[#@Results + 1] = Ent
+	end
+end]], "@Results" )
+
+Component:AddPreparedFunction( "sortByDistanceEntitys", "a,v", "", [[
+if @value 1.__type ~= "e" then self:Throw( @trace, "invoke", "sortByDistanceEntitys #1, entity array exspected." ) end
+$table.sort( @value 1,
+	function( A, B )
+		return A:GetPos():Distance( @value2 ) < B:GetPos():Distance( @value2 )
+	end )
+]])
+
+Component:AddPreparedFunction( "playerByName", "s,b", "e", [[
+for _, Ply in pairs( $player.GetAll( ) ) do
+	@define Name, Query = Ply:Name( ):lower( ), @value 1:lower( )
+	if @Name == @Query or ( !@value 2 and @Name:find( @value 1 ) ) then
+		@define Player = Ply
+		break
+	end
+end
+]], "(@Player or $Entity(0))" )
 
 /* --- --------------------------------------------------------------------------------
 	@: Entity Events
