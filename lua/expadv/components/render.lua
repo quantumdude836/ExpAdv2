@@ -253,35 +253,38 @@ EXPADV.ClientEvents( )
 Component:AddEvent( "drawScreen", "n,n", "" )
 Component:AddEvent( "drawHUD", "n,n", "" )
 
-hook.Add( "HUDPaint", "expadv.hudpaint", function( )
-	if !EXPADV.IsLoaded then return end
+if CLIENT then
+	hook.Add( "HUDPaint", "expadv.hudpaint", function( )
+		if !EXPADV.IsLoaded then return end
 
-	local W, H = ScrW( ), ScrH( )
+		local W, H = ScrW( ), ScrH( )
 
-	for _, Context in pairs( EXPADV.CONTEXT_REGISTERY ) do
-		if !Context.Online then continue end
-		
-		local Event = Context.event_drawHUD
-		
-		if !Event or !Context.EnableHUD then continue end
-		
-		surface.SetDrawColor( 255, 255, 255, 255 )
-		surface.SetTextColor( 0, 0, 0, 255 )
-		
-		Context:Execute( "Event drawHUD", Event, W, H )
-	end
-end )
+		for _, Context in pairs( EXPADV.CONTEXT_REGISTERY ) do
+			if !Context.Online then continue end
+			
+			local Event = Context.event_drawHUD
+			
+			if !Event or !Context.EnableHUD then continue end
+			
+			surface.SetDrawColor( 255, 255, 255, 255 )
+			surface.SetTextColor( 0, 0, 0, 255 )
+			
+			Context:Execute( "Event drawHUD", Event, W, H )
+		end
+	end )
+end
 
 /* -----------------------------------------------------------------------------------
 	@: Enable Hud Rendering
    --- */
+if CLIENT then
+	function Component:OnOpenContextMenu( Entity, Menu, Trace, Option )
+		if !Entity.Context or !Entity.Context.event_drawHUD then return end
 
-function Component:OnOpenContextMenu( Entity, Menu, Trace, Option )
-	if !Entity.Context or !Entity.Context.event_drawHUD then return end
-
-	if Entity.Context.EnableHUD then
-		Menu:AddOption( "Disable HUD Rendering", function( ) Entity.Context.EnableHUD = false end )
-	else
-		Menu:AddOption( "Enable HUD Rendering", function( ) Entity.Context.EnableHUD = true end )
+		if Entity.Context.EnableHUD then
+			Menu:AddOption( "Disable HUD Rendering", function( ) Entity.Context.EnableHUD = false end )
+		else
+			Menu:AddOption( "Enable HUD Rendering", function( ) Entity.Context.EnableHUD = true end )
+		end
 	end
 end
