@@ -1,6 +1,6 @@
 /* --- --------------------------------------------------------------------------------
 	@: Entity Component
-	@: Author: RipMax
+	@: Author: Ripmax
    --- */
 
 local Component = EXPADV.AddComponent( "entity", true )
@@ -240,7 +240,7 @@ Component:AddInlineFunction( "radius", "e:", "n","(@value 1:IsValid() and @value
 Component:AddFunctionHelper( "radius", "e:", "Returns the bounding radius of the given entity.")
 
 /* --- --------------------------------------------------------------------------------
-	@: Physics Seters
+	@: Physics Setters
    --- */
 
 EXPADV.ServerOperators()
@@ -248,58 +248,59 @@ EXPADV.ServerOperators()
 Component:AddPreparedFunction( "setMass", "e:n", "","if(@value 1:IsValid() && EXPADV.PPCheck(@value 1, Context.player) && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType() == MOVETYPE_VPHYSICS then @value 1:GetPhysicsObject():SetMass(@value 2 or 0) end")
 Component:AddFunctionHelper( "setMass", "e:n", "Sets the mass of the given entity.")
 
-Component:AddPreparedFunction( "applyForce", "e:v", "",
-[[if(@value 1:IsValid() && EXPADV.PPCheck(@value 1, Context.player) && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType == MOVETYPE_VPHYSICS) then
-	if(@value 2 < Vector(math.huge, math.huge, math.huge) && -Vector(math.huge, math.huge, math.huge) < @value 2) then
-		@value 1:GetPhysicsObject():ApplyForceCenter(@value 2)
+Component:AddVMFunction( "applyForce", "e:v", "", function( Context, Trace, Target, Pos )
+	if(Target:IsValid() && EXPADV.PPCheck(Target, Context.player) && Target:GetPhysicsObject():IsValid() && Target:GetMoveType == MOVETYPE_VPHYSICS) then
+		if(Pos < Vector(math.huge, math.huge, math.huge) && -Vector(math.huge, math.huge, math.huge) < Pos) then
+			Target:GetPhysicsObject():ApplyForceCenter(Pos)
+		end
 	end
-end]])
+end)
 
 Component:AddFunctionHelper( "applyForce", "e:v", "Applies a vector of force on the given entity.")
 
-Component:AddPreparedFunction( "applyOffsetForce", "e:v,v", "",
-[[if(@value 1:IsValid() && EXPADV.PPCheck(@value 1, Context.player) && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType == MOVETYPE_VPHYSICS) then
-	if(@value 2 < Vector(math.huge, math.huge, math.huge) && -Vector(math.huge, math.huge, math.huge) < @value 2 && @value 3 < Vector(math.huge, math.huge, math.huge) && -Vector(math.huge, math.huge, math.huge) < @value 3) then
-		@value 1:GetPhysicsObject():ApplyForceOffset(@value 2, @value 3)
+Component:AddPreparedFunction( "applyOffsetForce", "e:v,v", "", function( Context, Trace, Target, Pos1, Pos2 )
+	if(Target:IsValid() && EXPADV.PPCheck(Target, Context.player) && Target:GetPhysicsObject():IsValid() && Target:GetMoveType == MOVETYPE_VPHYSICS) then
+		if(Pos1 < Vector(math.huge, math.huge, math.huge) && -Vector(math.huge, math.huge, math.huge) < Pos1 && Pos2 < Vector(math.huge, math.huge, math.huge) && -Vector(math.huge, math.huge, math.huge) < Pos2) then
+			Target:GetPhysicsObject():ApplyForceOffset(Pos1, Pos2)
+		end
 	end
-end]])
+end)
 
 Component:AddFunctionHelper( "applyForceOffset", "e:v,v", "Applies an offset vector of force on the given entity.")
 
-Component:AddPreparedFunction( "applyAngForce", "e:a", "",
-[[
-if(@value 1:IsValid() && EXPADV.PPCheck(@value 1, Context.player) && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType == MOVETYPE_VPHYSICS) then
-	if(@value 2 < Angle(math.huge, math.huge, math.huge) && -Angle(math.huge, math.huge, math.huge) < @value 2) then
-		if(@value 2.p != 0 || @value 2.y != 0 || @value 2.r != 0) then
-			@define phys = @value 1:GetPhysicsObject()
+Component:AddPreparedFunction( "applyAngForce", "e:a", "", function( Context, Trace, Target, Angle )
+
+if(Target:IsValid() && EXPADV.PPCheck(Target, Context.player) && Target:GetPhysicsObject():IsValid() && Target:GetMoveType == MOVETYPE_VPHYSICS) then
+	if(Angle < Angle(math.huge, math.huge, math.huge) && -Angle(math.huge, math.huge, math.huge) < Angle) then
+		if(Angle.p != 0 || Angle.y != 0 || Angle.r != 0) then
+			local phys = Target:GetPhysicsObject()
 			
-			@define up = @value 1:GetUp()
-			@define left = @value 1:GetRight() * -1
-			@define forward = @value 1:GetForward()
+			local up = Target:GetUp()
+			local left = Target:GetRight() * -1
+			local forward = Target:GetForward()
 			
-			if(@value 2.p ~= 0) then
-				@define pitch = @up * (@value 2.p * 0.5)
-				@phys:ApplyForceOffset( @forward, @pitch )
-				@phys:ApplyForceOffset( @forward * -1, @pitch * -1 )
+			if(Angle.p ~= 0) then
+				local pitch = up * (Angle.p * 0.5)
+				phys:ApplyForceOffset( forward, pitch )
+				phys:ApplyForceOffset( forward * -1, pitch * -1 )
 			end
 
 			-- apply yaw force
-			if(@value 2.y ~= 0) then
-				@define yaw = forward * (@value 2.y * 0.5)
-				@phys:ApplyForceOffset( @left, @yaw )
-				@phys:ApplyForceOffset( @left * -1, @yaw * -1 )
+			if(Angle.y ~= 0) then
+				local yaw = forward * (Angle.y * 0.5)
+				phys:ApplyForceOffset( left, yaw )
+				phys:ApplyForceOffset( left * -1, yaw * -1 )
 			end
 
 			-- apply roll force
-			if(@value 2.r ~= 0) then
-				@define roll = left * (@value 2.r * 0.5)
-				@phys:ApplyForceOffset( @up, @roll )
-				@phys:ApplyForceOffset( @up * -1, @roll * -1 )
+			if(Angle.r ~= 0) then
+				local roll = left * (Angle.r * 0.5)
+				phys:ApplyForceOffset( up, roll )
+				phys:ApplyForceOffset( up * -1, roll * -1 )
 			end
 		end
 	end
-end
-]])
+end)
 
 Component:AddFunctionHelper( "applyAngForce", "e:a", "Applies torque to the given entity depending on the given angle")
 
