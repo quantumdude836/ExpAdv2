@@ -82,7 +82,7 @@ EXPADV.AddPreparedOperator( nil, "while", "b,?", "", [[
 
 local Component = EXPADV.AddComponent( "performance" , true )
 
-EXPADV.ServerOperators( )
+EXPADV.SharedOperators( )( )
 
 Component:AddInlineFunction( "ops", "", "n", "math.Round(Context.Status.Perf)" )
 
