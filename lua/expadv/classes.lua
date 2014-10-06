@@ -351,8 +351,6 @@ function EXPADV.LoadClasses( )
 			Class.DeserializeFromString = DeriveClass.DeserializeFromString
 		end
 
-		-- TODO: Extend net usage?
-
  	end
 
  	for Name, Class in pairs( EXPADV.Classes ) do
