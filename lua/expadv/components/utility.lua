@@ -168,7 +168,7 @@ local Ranger = Component:AddClass( "ranger", "rd" )
 
 Ranger:AddPreparedOperator( "=", "n,rd", "", "Context.Memory[@value 1] = @value 2" )
 
-local Ranger = { Default_Zero = false, Ignore_World = false, Hit_Water = false, Ignore_Entities = false, Mins = false, Maxs = false }
+local Ranger = { Default_Zero = false, Ignore_World = false, Hit_Water = false, Ignore_Entities = false, Mins = false, Maxs = false, FilterFunc = false }
 Ranger.Result = { }
 
 Ranger.__index = Ranger
@@ -249,6 +249,7 @@ function Ranger:DoTrace( Start, End, Distance )
 	end
 	
 	self.Result = Trace
+
 end
 
 function Ranger.__tostring( Table )
@@ -292,7 +293,7 @@ Component:AddInlineFunction( "maxs", "rd:", "v", "( @value 1.Maxs or Vector( 0, 
 
 -- Do Trace
 
-Component:AddPreparedFunction( "fire", "rd:v,v", "", "@value 1:DoTrace( @value 2, @value 3 )" )
+Component:AddPreparedFunction( "fire", "rd:v,v", "", "@value 1:DoTrace( @value 2, @value 3 ) end )" )
 
 Component:AddPreparedFunction( "fire", "rd:v,v,n", "", "@value 1:DoTrace( @value 2, @value 3, @value 4 )" )
 

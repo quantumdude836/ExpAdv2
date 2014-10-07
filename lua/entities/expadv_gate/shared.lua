@@ -162,6 +162,7 @@ function ENT:Exception( Exception )
 end
 
 function ENT:OnCompileError( ErMsg, Compiler )
+	MsgN( "Compiler Error: ", ErMsg )
 	self:SetState( EXPADV_STATE_CRASHED )
 
 	if SERVER then
