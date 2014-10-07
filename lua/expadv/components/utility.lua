@@ -166,7 +166,7 @@ Component:AddPreparedFunction( "sortByDistanceVectors", "a,v", "", [[
 
 local Ranger = Component:AddClass( "ranger", "rd" )
 
-Ranger:AddPreparedOperator( "=", "n,rd", "", "Context.Memory[MemRef] = Value" )
+Ranger:AddPreparedOperator( "=", "n,rd", "", "Context.Memory[@value 1] = @value 2" )
 
 local Ranger = { Default_Zero = false, Ignore_World = false, Hit_Water = false, Ignore_Entities = false, Mins = false, Maxs = false }
 Ranger.Result = { }
