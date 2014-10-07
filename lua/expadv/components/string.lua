@@ -112,9 +112,9 @@ StringComponent:AddInlineFunction( "replace", "s:s,s", "s", "(string.Replace(@va
 	@: Explodes and matches
    --- */
 
-StringComponent:AddInlineFunction( "explode", "s:s", "ar", "{__type = 's',string.Explode(@value 2, @value 1)}" )
+StringComponent:AddPreparedFunction( "explode", "s:s", "ar", "@define Array = string.Explode(@value 2, @value 1)\n@Array.__type = 's'", "@Array" )
 
-StringComponent:AddInlineFunction( "explode", "s:s,b", "ar", "{__type = s',string.Explode(@value 2, @value 1, @value 3)}" )
+StringComponent:AddPreparedFunction( "explode", "s:s,b", "ar", "@define Array = string.Explode(@value 2, @value 1, @value 3)\n@Array.__type = 's'", "@Array" )
 
 StringComponent:AddInlineFunction( "matchPattern", "s:s", "ar", "{__type = 's',string.match(@value 1, @value 2)}" )
 
