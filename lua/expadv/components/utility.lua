@@ -373,16 +373,16 @@ Component:AddPreparedFunction( "clear", "rd:", "", "@value 1.Result = nil" )
 
 Component:AddPreparedFunction( "httpRequest", "s,d,d", "", [[$http.Fetch( @value 1,
 	function( Body )
-		Context.entity:Execute( "http success callback", @value 2, { Body, "s" } )
+		Context:Execute( "http success callback", @value 2, { Body, "s" } )
 	end, function( )
-		Context.entity:Execute( "http fail callback", @value 1 )
+		Context:Execute( "http fail callback", @value 1 )
 	end
 )]] )
 
 Component:AddPreparedFunction( "httpPostRequest", "s,t,d,d", "", [[$http.Post( @value 1, @value 2.Data,
 	function( Body )
-		Context.entity:Execute( "http success callback", @value 3, { Body, "s" } )
+		Context:Execute( "http success callback", @value 3, { Body, "s" } )
 	end, function( )
-		Context.entity:Execute( "http fail callback", @value 4 )
+		Context:Execute( "http fail callback", @value 4 )
 	end
 )]] )
