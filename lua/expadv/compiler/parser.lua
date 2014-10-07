@@ -192,23 +192,6 @@ function Compiler:Expression( Trace )
 	return Expression
 end
 
-function Compiler:Expression( Trace )
-	-- MsgN( "Compiler -> Expression" )
-
-	local _ExprRequire = self.ExpressionRequired
-	self.ExpressionRequired = true
-
-	local _ExprRoot = self.ExpressionRoot
-	self.ExpressionRoot = self:GetTokenTrace( Trace )
-	
-	local Expression = self:Expression_1( Trace )
-
-	self.ExpressionRequired = _ExprRequire
-	self.ExpressionRoot = _ExprRoot
-
-	return Expression
-end
-
 -- Stage 1: Ternary
 function Compiler:Expression_1( Trace )
 	-- MsgN( "Compiler -> Expression 1" )
@@ -458,12 +441,12 @@ function Compiler:Expression_12( Trace )
 	elseif self:AcceptToken( "not" ) then
 		local Trace = self:GetTokenTrace( Trace )
 		self:ExcludeWhiteSpace( "Logical not operator (!) must not be succeeded by whitespace" )
-		return self:Compile_NOT( Trace, self:Expression_1( Trace ) )
+		return self:Compile_NOT( Trace, self:GetGroupedOrValue( Trace ) )
 		
 	elseif self:AcceptToken( "len" ) then
 		local Trace = self:GetTokenTrace( Trace )
 		self:ExcludeWhiteSpace( "length operator (#) must not be succeeded by whitespace" )
-		return self:Compile_LEN( Trace, self:Expression_1( Trace ) )
+		return self:Compile_LEN( Trace, self:GetGroupedOrValue( Trace ) )
 
 	elseif self:AcceptToken( "cst" ) then
 		local Trace = self:GetTokenTrace( Trace )
@@ -495,6 +478,14 @@ function Compiler:Expression_13( Trace )
 		return Expression
 	end
 	
+	return self:Expression_14( Trace )
+end
+
+function Compiler:GetGroupedOrValue( Trace )
+	if self:CheckToken( "lpa ") then
+		return self:Expression_13( Trace )
+	end
+
 	return self:Expression_14( Trace )
 end
 

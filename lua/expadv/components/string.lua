@@ -116,9 +116,9 @@ StringComponent:AddInlineFunction( "explode", "s:s", "ar", "{__type = 's',string
 
 StringComponent:AddInlineFunction( "explode", "s:s,b", "ar", "{__type = s',string.Explode(@value 2, @value 1, @value 3)}" )
 
-StringComponent:AddInlineFunction( "matchPattern", "s:s", "ar", "{__type = 's',{string.match(@value 1, @value 2)}}" )
+StringComponent:AddInlineFunction( "matchPattern", "s:s", "ar", "{__type = 's',string.match(@value 1, @value 2)}" )
 
-StringComponent:AddInlineFunction( "matchPattern", "s:s,n", "ar", "{__type = 's',{string.match(@value 1, @value 2, @value 3)}}" )
+StringComponent:AddInlineFunction( "matchPattern", "s:s,n", "ar", "{__type = 's',string.match(@value 1, @value 2, @value 3)}" )
 
 StringComponent:AddInlineFunction( "matchFirst", "s:s", "s", "{__type = 's',string.match(@value 1, @value 2)}" )
 
