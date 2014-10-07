@@ -185,6 +185,9 @@ Component:AddFunctionHelper( "drawPoly", "ar", "Draws a polygon using an arry of
 	@: Screen
    --- */
 
+Component:AddPreparedFunction( "traceSurfaceColor", "v,v", "c", "@define Value = $render.GetSurfaceColor( @value 1, @value 2 )", "Color(@Value.x, @Value.y, @Value.z, 255)" )
+Component:AddFunctionHelper( "traceSurfaceColor", "v,v", "Performs a render trace and returns the color of the surface hit, this uses a low res version of the texture." )
+
 Component:AddPreparedFunction( "pauseNextFrame", "b", "", [[
 if IsValid( Context.entity ) and Context.entity.Screen then
 	Context.entity:SetRenderingPaused( @value 1 )
