@@ -5,10 +5,10 @@ if !EXPADV then return ErrorNoHalt( "Expression Advanced 2, Failed to load tool.
    --- */
 
 if CLIENT then
-	language.Add( "Tool.expadv2.name", "Expression Advanced 01000000" )
+	language.Add( "Tool.expadv2.name", "Expression Advanced 2" )
 	language.Add( "Tool.expadv2.desc", "Creats an ingame scriptable entity." )
-	language.Add( "Tool.expadv2.help", "TODO - Replace me!" )
-	language.Add( "Tool.expadv2.0", "TODO - Fuck me!." )
+	language.Add( "Tool.expadv2.help", "Place an Expession Advanced Gate or screen." )
+	language.Add( "Tool.expadv2.0", "Place an Expession Advanced Gate or screen." )
 	
 	language.Add( "limit_expadv", "Expression Advanced entity limit reached." )
 	language.Add( "Undone_expadv", "Expression Advanced - Removed." )
@@ -136,15 +136,13 @@ duplicator.RegisterEntityClass( "expadv_screen", MakeExpadvScreen, "Pos", "Ang",
 
 function TOOL:LeftClick( Trace )
 	if IsValid( Trace.Entity ) then -- and EXPADV.IsFriend( Trace.Entity, self:GetOwner( ) ) then
-		if !Trace.Entity.ExpAdv then
-			return
-		elseif SERVER then
+		if Trace.Entity.ExpAdv and SERVER then
 			net.Start( "expadv.request" )
 			net.WriteUInt( Trace.Entity:EntIndex( ), 16 )
 			net.Send( self:GetOwner( ) )
-		end
 
-		return true
+			return true
+		end
 	elseif CLIENT then
 		return true
 	end
@@ -197,19 +195,16 @@ end
 function TOOL:RightClick( Trace )
 	if CLIENT then return false end
 
-	if !IsValid( Trace.Entity ) then -- and EXPADV.IsFriend( Trace.Entity, self:GetOwner( ) ) then
-		self:GetOwner( ):SendLua( "EXPADV.Editor.Open( )" )
-		return false
-	elseif !Trace.Entity.ExpAdv then
-		return false
-	else
+	if IsValid( Trace.Entity ) and Trace.Entity.ExpAdv then -- and EXPADV.IsFriend( Trace.Entity, self:GetOwner( ) ) then
 		net.Start( "expadv.download" )
 		net.WriteUInt( Trace.Entity:EntIndex( ), 16 )
 		net.WriteString( Trace.Entity:GetGateName( ) )
 		net.Send( self:GetOwner( ) )
+		return true
 	end
 
-	return true
+	self:GetOwner( ):SendLua( "EXPADV.Editor.Open( )" )
+	return false
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------

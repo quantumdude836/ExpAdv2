@@ -41,6 +41,8 @@ Component:AddPreparedFunction( "resume", "cr:", "b", "Context.Status.BenchMark =
 
 Component:AddPreparedFunction( "resume", "cr:...", "b", "Context.Status.BenchMark = $SysTime( )", "$coroutine.resume( @value 1, @... )" )
 
+Component:AddPreparedFunction( "yield", "", "", [[if !$coroutine.running( ) then Context:Throw( @trace, "coroutine", "Used yield( ) outside coroutine." ) else yield( ) end]] )
+
 Component:AddVMFunction( "sleep", "n", "",
 	function( Context, Trace, Value )
 		local CoRoutine = coroutine.running( )
