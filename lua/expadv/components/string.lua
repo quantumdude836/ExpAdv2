@@ -89,6 +89,14 @@ String:AddInlineOperator( "get", "s,n", "s", "string.sub(@value 1, @value 2, @va
 StringComponent:AddInlineOperator( "number", "s", "n", "tonumber(@value 1)" )
 
 /* --- --------------------------------------------------------------------------------
+	@: basic
+   --- */
+
+StringComponent:AddInlineFunction( "sub", "s:n,n", "s", "string.sub(@value 1, @value 2, @value 3)" )
+StringComponent:AddInlineFunction( "lower", "s:", "s", "string.lower(@value 1)" )
+StringComponent:AddInlineFunction( "upper", "s:", "s", "string.upper(@value 1)" )
+
+/* --- --------------------------------------------------------------------------------
 	@: Find and replace
    --- */
 

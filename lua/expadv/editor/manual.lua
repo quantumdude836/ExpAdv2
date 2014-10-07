@@ -98,7 +98,6 @@ for _, Component in pairs( EXPADV.Components ) do
 	---------------------------------------------------------------------
 	
 	Sheet.Info = Sheet:Add( "DListView" )
-	Sheet.Info:Dock( TOP )
 	Sheet.Info:AddColumn( "Information" )
 	Sheet.Info:AddColumn( "" )
 	
@@ -161,7 +160,6 @@ for Name, Class in pairs( EXPADV.Classes ) do
 	---------------------------------------------------------------------
 	
 	Sheet.Info = Sheet:Add( "DListView" )
-	Sheet.Info:Dock( TOP )
 	Sheet.Info:AddColumn( "Information" )
 	Sheet.Info:AddColumn( "" )
 	
@@ -181,7 +179,6 @@ for Name, Class in pairs( EXPADV.Classes ) do
 			Sheet.Operators:AddColumn( "Return" )
 			Sheet.Operators:AddColumn( "Example" )
 			Sheet.Operators:AddColumn( "Description" )
-			Sheet.Operators:Dock( TOP )
 		end
 		
 		for _, Operator in pairs( EXPADV.Class_Operators[Class.Short] ) do
@@ -205,7 +202,6 @@ for _, Operator in pairs( EXPADV.Operators ) do
 		Sheet.Operators:AddColumn( "Return" )
 		Sheet.Operators:AddColumn( "Example" )
 		Sheet.Operators:AddColumn( "Description" )
-		Sheet.Operators:Dock( TOP )
 	end
 	
 	Sheet.Operators:AddLine( GetAvaliblity(Operator), Operator.Type or "", EXPADV.TypeName( Operator.Return or "" ) or "Void", Operator.Example, Operator.Description )
@@ -225,7 +221,6 @@ for _, Operator in pairs( EXPADV.Functions ) do
 			Sheet.Methods:AddColumn( "Return" )
 			Sheet.Methods:AddColumn( "Method" )
 			Sheet.Methods:AddColumn( "Description" )
-			Sheet.Methods:Dock( TOP )
 		end
 		
 		local Inputs = table.Copy( Operator.Input )
@@ -249,7 +244,6 @@ for _, Operator in pairs( EXPADV.Functions ) do
 			Sheet.Functions:AddColumn( "Return" )
 			Sheet.Functions:AddColumn( "function" )
 			Sheet.Functions:AddColumn( "Description" )
-			Sheet.Functions:Dock( TOP )
 		end
 		
 		local Signature = string.format( "%s(%s)", Operator.Name, NamePerams( Operator.Input, Operator.UsesVarg ) )
@@ -275,7 +269,6 @@ for _, Event in pairs( EXPADV.Events ) do
 		Sheet.Events:AddColumn( "Return" )
 		Sheet.Events:AddColumn( "event" )
 		Sheet.Events:AddColumn( "Description" )
-		Sheet.Events:Dock( TOP )
 	end
 		
 	local Signature = string.format( "%s(%s)", Event.Name, NamePerams( Event.Input, false ) )
