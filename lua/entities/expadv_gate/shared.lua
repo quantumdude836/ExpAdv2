@@ -35,7 +35,6 @@ end
 
 function ENT:ResetState( State )
 	
-	MsgN( "RESET STATE" ) 
 	if SERVER then
 		self:SetTickQuota( 0 )
 		self:SetStopWatch( 0 )
@@ -138,6 +137,9 @@ function ENT:LuaError( Msg )
 	if SERVER then
 		self:NotifiOwner( "Expression Advanced 2 - Suffered a serverside Lua error:", 1, 5 )
 		self:NotifiOwner( Msg, 1, 3 )
+	elseif CLIENT and self.player == LocalPlayer( ) then
+		self:NotifiOwner( "Expression Advanced 2 - Suffered a clientside Lua error:", 1, 5 )
+		self:NotifiOwner( Msg, 1, 3 )
 	end
 end
 
@@ -146,6 +148,9 @@ function ENT:ScriptError( Msg )
 
 	if SERVER then
 		self:NotifiOwner( "Expression Advanced 2 - Suffered a serverside Script error:", 1, 5 )
+		self:NotifiOwner( Msg, 1, 3 )
+	elseif CLIENT and self.player == LocalPlayer( ) then
+		self:NotifiOwner( "Expression Advanced 2 - Suffered a clientside Script error:", 1, 5 )
 		self:NotifiOwner( Msg, 1, 3 )
 	end
 end
@@ -158,6 +163,9 @@ function ENT:Exception( Exception )
 	if SERVER then
 		self:NotifiOwner( "Expression Advanced 2 - Uncatched Exception (serverside):", 1, 5 )
 		self:NotifiOwner( Msg, 1, 3 )
+	elseif CLIENT and self.player == LocalPlayer( ) then
+		self:NotifiOwner( "Expression Advanced 2 - Uncatched Exception (clientside):", 1, 5 )
+		self:NotifiOwner( Msg, 1, 3 )
 	end
 end
 
@@ -168,6 +176,9 @@ function ENT:OnCompileError( ErMsg, Compiler )
 	if SERVER then
 		self:NotifiOwner( "Expression Advanced 2 - Failed to compile serverside:", 1, 5 )
 		self:NotifiOwner( ErMsg, 1, 3 )
+	elseif CLIENT and self.player == LocalPlayer( ) then
+		self:NotifiOwner( "Expression Advanced 2 - Failed to compile clientside:", 1, 5 )
+		self:NotifiOwner( Msg, 1, 3 )
 	end
 end
 

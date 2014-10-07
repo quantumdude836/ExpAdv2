@@ -132,9 +132,9 @@ function EXPADV.RootContext:Execute( Location, Operation, ... ) -- String, Funct
 
 	end
 
-	if istable( Result ) and Result.Context and Result.Context ~= self then
-		self = Result.Context
-	end
+	--if istable( Result ) and Result.Context and Result.Context ~= self then
+	--	self = Result.Context
+	--end
 
 	if !IsValid( self.entity ) then
 		-- Do nothing :P

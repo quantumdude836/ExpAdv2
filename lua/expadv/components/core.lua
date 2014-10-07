@@ -192,8 +192,6 @@ Component:AddVMFunction( "print", "...", "",
 		if CLIENT and Context.player ~= LocalPlayer( ) then return end
 
 		local Values = { ... }
-		
-		MsgN( "print: ", ... )
 
 		for Key, Value in pairs( Values ) do
 			Values[Key] = EXPADV.ToString( Value[2], Value[1] )
