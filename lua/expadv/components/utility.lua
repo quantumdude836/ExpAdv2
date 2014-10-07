@@ -41,6 +41,8 @@ Component:AddVMFunction( "hookCall", "s,...", "", function( Context, Trace, Hook
 		end
 	end )
 
+EXPADV.AddFunctionAlias( "hookCall", "s" )
+
 Component:AddFunctionHelper( "hookAdd", "s,s,d", "Adds a user defined hook with a unique name, witch will run the delagte when called." )
 Component:AddFunctionHelper( "hookRemove", "s,s", "Removes a user defined hook with the given unique name." )
 Component:AddFunctionHelper( "hookCall", "s,...", "Calls the named hook, passing its arguments to all hooks defined using hookAdd(n,n,d)." )
