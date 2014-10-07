@@ -45,7 +45,7 @@ function Compiler:Compile_NOT( Trace, Expresion1 )
 end
 
 function Compiler:Compile_LEN( Trace, Expresion1 )
-	local Operator = self:LookUpOperator( "len", Expresion1.Return )
+	local Operator = self:LookUpOperator( "#", Expresion1.Return )
 
 	if !Operator then self:TraceError( Trace, "Length operator does not support '#%s'", self:NiceClass( Expresion1.Return ) ) end
 
