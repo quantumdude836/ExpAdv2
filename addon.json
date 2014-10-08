@@ -9,6 +9,5 @@
 		"README.md",
 		".git*",
 		"pre-commit",
-		"*.mediawiki"
 	]
 }
