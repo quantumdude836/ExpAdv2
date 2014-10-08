@@ -143,7 +143,9 @@ function TOOL:LeftClick( Trace )
 
 			return true
 		end
-	elseif CLIENT then
+	end
+
+	if CLIENT then
 		return true
 	end
 
