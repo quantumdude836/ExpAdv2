@@ -9,5 +9,6 @@
 		"README.md",
 		".git*",
 		"pre-commit",
+		"LICENSE"
 	]
 }
