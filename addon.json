@@ -1,6 +1,14 @@
 {
 	"title"		:	"Expression Advanced 2",
 	"type"		:	"tool",
-	"tags"		:	[ "n/a" ],
+	"tags"		:	[ "build", "fun" ],
 	"description":	"Your local friendly neighbourhood LemonGate!",
+	"ignore"	:
+	[
+		"*.txt",
+		"README.md",
+		".git*",
+		"pre-commit",
+		"*.mediawiki"
+	]
 }
