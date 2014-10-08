@@ -51,6 +51,9 @@ AddCSLuaFile( "expadv/editor/ea_search.lua" )
 AddCSLuaFile( "expadv/editor.lua" )
 AddCSLuaFile( "expadv/editor/shared.lua" )
 
+resource.AddWorkshop( "323792126" )
+
+--[[ WORKSHOP!
 resource.AddFile( "models/lemongate/lemongate.mdl" )
 resource.AddFile( "models/shadowscion/lemongate/gate.mdl" )
 
@@ -108,6 +111,4 @@ resource.AddFile( "materials/oskar/arrow-left.png" )
 resource.AddFile( "materials/oskar/arrow-right.png" )
 resource.AddFile( "materials/oskar/minus.png" )
 resource.AddFile( "materials/oskar/plus.png" )
-
-
-
+]]
