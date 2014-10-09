@@ -114,9 +114,9 @@ end
    --- */
 
 function BaseComponent:CreateSetting( Name, Default ) -- String, Obj
-	local Config = EXPADV.Config.Components[self.Name] or { }
+	local Config = EXPADV.Config.components[self.Name] or { }
 	
-	EXPADV.Config.Components[self.Name] = Config
+	EXPADV.Config.components[self.Name] = Config
 	
 	Name = string.lower( Name )
 
@@ -125,9 +125,9 @@ end
 
 -- Reads a setting from the config.
 function BaseComponent:ReadSetting( Name, Default ) -- String, Obj
-	local Config = EXPADV.Config.Components[self.Name] or { }
+	local Config = EXPADV.Config.components[self.Name] or { }
 	
-	EXPADV.Config.Components[self.Name] = Config
+	EXPADV.Config.components[self.Name] = Config
 	
 	Name = string.lower( Name )
 
@@ -160,11 +160,11 @@ function EXPADV.LoadComponents( )
 
 	for _, Component in pairs( Temp_Components ) do
 
-		if EXPADV.Config.EnabledComponents[ Component.Name ] ~= nil then
-			Component.Enabled = EXPADV.Config.EnabledComponents[ Component.Name ]
+		if EXPADV.Config.enabledcomponents[ Component.Name ] ~= nil then
+			Component.Enabled = EXPADV.Config.enabledcomponents[ Component.Name ]
 		else
 			Component.Enabled = Component.Default_Enabled
-			EXPADV.Config.EnabledComponents[ Component.Name ] = Component.Default_Enabled
+			EXPADV.Config.enabledcomponents[ Component.Name ] = Component.Default_Enabled
 		end
 
 		if !Component.Enabled then

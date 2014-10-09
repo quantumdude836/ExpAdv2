@@ -117,7 +117,7 @@ function ENT:OnRemove( )
 	RemoveQueue[ self:EntIndex( ) ] = true
 
 	if IsValid( self.player ) then
-		self.Player:SetNWInt( "lemon.holograms", self.player:GetNWInt( "lemon.holograms", 0 ) - 1 )
+		self.player:SetNWInt( "lemon.holograms", self.player:GetNWInt( "lemon.holograms", 0 ) - 1 )
 	end
 end
 /*==============================================================================================

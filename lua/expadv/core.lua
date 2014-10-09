@@ -83,17 +83,17 @@ EXPADV.Config = { }
 function EXPADV.LoadConfig( )
 	if CLIENT then return end
 
-	local Config = { Settings = { } }
+	local Config = { }
 
 	if file.Exists( "expadv.txt", "DATA" ) then
 		Config = util.KeyValuesToTable( file.Read( "expadv.txt", "DATA" ) )
 	end
 	
-	Config.EnabledComponents = Config.EnabledComponents or { }
+	Config.enabledcomponents = Config.enabledcomponents or { }
 
-	Config.Components = Config.Components or { }
+	Config.components = Config.components or { }
 
-	Config.Settings = Config.Settings or { }
+	Config.settings = Config.settings or { }
 
 	EXPADV.Msg( "ExpAdv: Loaded config file, sucessfully." )
 
@@ -114,13 +114,136 @@ end
 function EXPADV.CreateSetting( Name, Default ) -- String, Obj
 	Name = string.lower( Name )
 
-	EXPADV.Config.Settings[ Name ] = EXPADV.Config.Settings[ Name ] or Default
+	EXPADV.Config.settings[ Name ] = EXPADV.Config.settings[ Name ] or Default
 end
 
 -- Reads a setting from the config.
 function EXPADV.ReadSetting( Name, Default ) -- String, Obj
-	return EXPADV.Config.Settings[ string.lower( Name ) ] or Default
+	return EXPADV.Config.settings[ string.lower( Name ) ] or Default
 end
+
+/* --- --------------------------------------------------------------------------------
+	@: We need a con command to :D
+   --- */
+
+if SERVER then
+	local function PrintFromCommand( Player, Msg, A, ... )
+		if A then Msg = string.format( Msg, A, ... ) end
+		if !IsValid( Player ) then return MsgN( Msg ) end
+		Player:ChatPrint( Msg )
+	end
+
+	local function Command( Player, _, Args )
+		local A, B, C = Args[1], Args[2], Args[3]
+
+		if !A or ( IsValid(Player) and !Player:IsAdmin( ) ) then return end
+
+		A = string.lower( A )
+		if B then B = string.lower( B ) end
+
+		local Config = EXPADV.Config
+		if !Config or !Config.components or !Config.settings then return end
+
+		if Config.enabledcomponents[A] ~= nil then
+			if !B then
+				local D = Config.enabledcomponents[ A ] and "Enabled" or "Disabled"
+				return PrintFromCommand( Player, "Component: %s is %s", A, D )
+			elseif B == "enable" then
+				Config.enabledcomponents[ Args[1] ] = true
+				EXPADV.SaveConfig( )
+				return PrintFromCommand( Player, "Component: %s will be enabled after reload.", A, D )
+			elseif B == "disable" then
+				Config.enabledcomponents[ Args[1] ] = false
+				EXPADV.SaveConfig( )
+				return PrintFromCommand( Player, "Component: %s will be disabled after reload.", A, D )
+			elseif Config.components[A] then
+				local Component = Config.components[A]
+
+				if !Component[B] then
+					return PrintFromCommand( Player, "%s.%s: is not a valid setting.", A, B )
+				elseif C then
+					Component[B] = tonumber(Args[3]) or Args[3]
+					EXPADV.SaveConfig( )
+				end
+
+				return PrintFromCommand( Player, "%s.%s is set to %s", A, B, tostring( Component[B] ) )
+			end
+		end
+
+		if Config.settings[A] then
+			if B then
+				Config.settings[A] = tonumber(B) or B
+				EXPADV.SaveConfig( )
+			end
+
+			return PrintFromCommand( Player, "%s: ", A, Config.Settings[ string.lower( A ) ] )
+		end
+
+		return PrintFromCommand( Player, "No such command %s", A )
+	end
+
+	concommand.Add( "expadv", Command )
+
+elseif CLIENT then
+
+	local function AutoComplete( _, Args )
+		local A = Args[1]
+		if A and A == "" then A = nil end
+
+
+		local Config = EXPADV.Config
+		if !Config then return { "No config file" } end
+
+		if !A then
+			local AC = { }
+
+			if Config.settings then
+				for Key, _ in pairs( Config.settings ) do
+					AC[#AC + 1] = Key
+				end
+			end
+
+			if Config.enabledcomponents then
+				for Key, _ in pairs( Config.enabledcomponents ) do
+					AC[#AC + 1] = Key
+				end
+			end
+
+			if Config.components then
+				for Key, _ in pairs( Config.components ) do
+					if !Config.enabledcomponents[Key] then
+						AC[#AC + 1] = Key
+					end
+				end
+			end
+
+			return AC
+		end
+
+		A = string.lower( A )
+
+		if Config.enabledcomponents and Config.enabledcomponents[A] then
+			local AC = { "enable", "disable" }
+
+			if Config.components[A] then
+				for Key, _ in pairs( Config.components[A] ) do
+					AC[#AC + 1] = Key
+				end
+			end
+
+			return AC
+		end
+
+		return { "This should not be posible" }
+	end
+
+	local function Command( Player, _, Args )
+		RunConsoleCommand( "cmd", "expadv", unpack( Args ) )
+	end
+
+	concommand.Add( "expadv_config", Command, AutoComplete, "Changes a configeration setting for expression advanced 2." )
+end
+
 
 /* --- --------------------------------------------------------------------------------
 	@: Exceptions
