@@ -76,15 +76,15 @@ Component:AddInlineOperator( "-", "a", "a", "(-@value 1)" )
 	@: Constructor
    --- */
 
-Component:AddInlineFunction( "ang", "", "v", "Angle(0, 0, 0)" )
-Component:AddInlineFunction( "ang", "n", "v", "Angle(@value 1, @value 1, @value 1)" )
-Component:AddInlineFunction( "ang", "n,n,n", "v", "Angle(@value 1, @value 2, @value 3)" )
+Component:AddInlineFunction( "ang", "", "a", "Angle(0, 0, 0)" )
+Component:AddInlineFunction( "ang", "n", "a", "Angle(@value 1, @value 1, @value 1)" )
+Component:AddInlineFunction( "ang", "n,n,n", "a", "Angle(@value 1, @value 2, @value 3)" )
 
 Component:AddFunctionHelper( "ang", "n,n,n", "Creates an angle object" )
 Component:AddFunctionHelper( "ang", "n", "Creates an angle object" )
 Component:AddFunctionHelper( "ang", "", "Creates an angle object" )
 
-Component:AddInlineFunction( "randAng", "n,n", "v", "Angle( $math.random(@value 1, @value 2), $math.random(@value 1, @value 2), $math.random(@value 1, @value 2) )" )
+Component:AddInlineFunction( "randAng", "n,n", "a", "Angle( $math.random(@value 1, @value 2), $math.random(@value 1, @value 2), $math.random(@value 1, @value 2) )" )
 Component:AddFunctionHelper( "randAng", "n,n", "Creates a random angle constrained to the given values" )
 
 /* --- --------------------------------------------------------------------------------

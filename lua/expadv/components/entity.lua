@@ -135,25 +135,25 @@ Component:AddFunctionHelper( "boxMin", "e:", "Gets the collision bounding min si
 
 EXPADV.ServerOperators()
 
-Component:AddPreparedFunction( "setPos", "e:v", "", "if(IsValid(@value 1) && EXPADV.PPCheck(@value 1,Context.player)) then @value 1:SetPos(@value 2) end")
+Component:AddPreparedFunction( "setPos", "e:v", "", "if(IsValid(@value 1) && EXPADV.PPCheck(Context.player,@value 1)) then @value 1:SetPos(@value 2) end")
 Component:AddFunctionHelper( "setPos", "e:v", "Sets the position of the given entity.")
 
-Component:AddPreparedFunction( "setAng", "e:a", "", "if(IsValid(@value 1) && EXPADV.PPCheck(@value 1,Context.player)) then @value 1:SetAngles(@value 2) end")
+Component:AddPreparedFunction( "setAng", "e:a", "", "if(IsValid(@value 1) && EXPADV.PPCheck(Context.player,@value 1)) then @value 1:SetAngles(@value 2) end")
 Component:AddFunctionHelper( "setAng", "e:a", "Sets the angle of the given entity.")
 
-Component:AddPreparedFunction( "setModel", "e:s", "", "if(IsValid(@value 1) && EXPADV.PPCheck(@value 1,Context.player)) then @value 1:SetModel(Model(@value 2)) end")
+Component:AddPreparedFunction( "setModel", "e:s", "", "if(IsValid(@value 1) && EXPADV.PPCheck(Context.player,@value 1)) then @value 1:SetModel(Model(@value 2)) end")
 Component:AddFunctionHelper( "setModel", "e:s", "Sets the model of the given entity.")
 
-Component:AddPreparedFunction( "setMaterial", "e:s", "", "if(IsValid(@value 1) && EXPADV.PPCheck(@value 1,Context.player)) then @value 1:SetMaterial(@value 2) end")
+Component:AddPreparedFunction( "setMaterial", "e:s", "", "if(IsValid(@value 1) && EXPADV.PPCheck(Context.player,@value 1)) then @value 1:SetMaterial(@value 2) end")
 Component:AddFunctionHelper( "setMaterial", "e:s", "Sets the material of the given entity.")
 
-Component:AddPreparedFunction( "setPhysProp", "e:s", "", "if(IsValid(@value 1) && EXPADV.PPCheck(@value 1,Context.player)) then @value 1:GetPhysicsObject():SetMaterial(@value 2) end")
+Component:AddPreparedFunction( "setPhysProp", "e:s", "", "if(IsValid(@value 1) && EXPADV.PPCheck(Context.player,@value 1)) then @value 1:GetPhysicsObject():SetMaterial(@value 2) end")
 Component:AddFunctionHelper( "setPhysProp", "e:s", "Sets the physical properties of the given entity.")
 
-Component:AddPreparedFunction( "setColor", "e:c", "", "if(IsValid(@value 1) && EXPADV.PPCheck(@value 1,Context.player)) then @value 1:SetColor(@value 2) end")
+Component:AddPreparedFunction( "setColor", "e:c", "", "if(IsValid(@value 1) && EXPADV.PPCheck(Context.player,@value 1)) then @value 1:SetColor(@value 2) end")
 Component:AddFunctionHelper( "setColor", "e:c", "Sets the color of the given entity.")
 
-Component:AddPreparedFunction( "setColour", "e:c", "", "if(IsValid(@value 1) && EXPADV.PPCheck(@value 1,Context.player)) then @value 1:SetColor(@value 2) end") -- Because why not :) ?
+Component:AddPreparedFunction( "setColour", "e:c", "", "if(IsValid(@value 1) && EXPADV.PPCheck(Context.player,@value 1)) then @value 1:SetColor(@value 2) end") -- Because why not :) ?
 Component:AddFunctionHelper( "setColour", "e:c", "Sets the colour of the given entity.")
 
 /* --- --------------------------------------------------------------------------------
@@ -171,7 +171,7 @@ Component:AddFunctionHelper( "passenger", "e:", "Gets the passenger of the given
 EXPADV.ServerOperators()
 
 Component:AddPreparedFunction( "lockPod", "e:", "", 
-[[if(@value 1:IsValid() && EXPADV.PPCheck(@value 1,Context.player) && @value 1:IsVehicle()) then
+[[if(@value 1:IsValid() && EXPADV.PPCheck(Context.player,@value 1) && @value 1:IsVehicle()) then
 	if(@value 2) then 
 		this:Fire("Lock","",0)
 	else
@@ -182,14 +182,14 @@ end]])
 Component:AddFunctionHelper( "lockPod", "e:", "Locks the given vehicle.")
 
 Component:AddPreparedFunction( "ejectPod", "e:", "", 
-[[if(@value 1:IsValid() && EXPADV.PPCheck(@value 1,Context.player) && @value 1:IsVehicle() && @value 1:GetDriver():IsValid()) then
+[[if(@value 1:IsValid() && EXPADV.PPCheck(Context.player,@value 1) && @value 1:IsVehicle() && @value 1:GetDriver():IsValid()) then
 	@value 1:GetDriver():ExitVehicle()
 end]])
 
 Component:AddFunctionHelper( "lockPod", "e:", "Ejects the driver from the given vehicle.")
 
 Component:AddPreparedFunction( "killPod", "e:", "", 
-[[if(@value 1:IsValid() && EXPADV.PPCheck(@value 1,Context.player) && @value 1:IsVehicle() && @value 1:GetDriver():IsValid()) then
+[[if(@value 1:IsValid() && EXPADV.PPCheck(Context.player,@value 1) && @value 1:IsVehicle() && @value 1:GetDriver():IsValid()) then
 	@value 1:GetDriver():Kill()
 end]])
 
@@ -245,11 +245,11 @@ Component:AddFunctionHelper( "radius", "e:", "Returns the bounding radius of the
 
 EXPADV.ServerOperators()
 
-Component:AddPreparedFunction( "setMass", "e:n", "","if(@value 1:IsValid() && EXPADV.PPCheck(@value 1, Context.player) && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType() == MOVETYPE_VPHYSICS then @value 1:GetPhysicsObject():SetMass(@value 2 or 0) end")
+Component:AddPreparedFunction( "setMass", "e:n", "","if(@value 1:IsValid() && EXPADV.PPCheck(Context.player,@value 1) && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType() == MOVETYPE_VPHYSICS then @value 1:GetPhysicsObject():SetMass(@value 2 or 0) end")
 Component:AddFunctionHelper( "setMass", "e:n", "Sets the mass of the given entity.")
 
 Component:AddVMFunction( "applyForce", "e:v", "", function( Context, Trace, Target, Pos )
-	if(Target:IsValid() && EXPADV.PPCheck(Target, Context.player) && Target:GetPhysicsObject():IsValid() && Target:GetMoveType() == MOVETYPE_VPHYSICS) then
+	if(Target:IsValid() && EXPADV.PPCheck(Context.player, Target) && Target:GetPhysicsObject():IsValid() && Target:GetMoveType() == MOVETYPE_VPHYSICS) then
 		if(Pos < Vector(math.huge, math.huge, math.huge) && -Vector(math.huge, math.huge, math.huge) < Pos) then
 			Target:GetPhysicsObject():ApplyForceCenter(Pos)
 		end
@@ -259,7 +259,7 @@ end)
 Component:AddFunctionHelper( "applyForce", "e:v", "Applies a vector of force on the given entity.")
 
 Component:AddPreparedFunction( "applyOffsetForce", "e:v,v", "", function( Context, Trace, Target, Pos1, Pos2 )
-	if(Target:IsValid() && EXPADV.PPCheck(Target, Context.player) && Target:GetPhysicsObject():IsValid() && Target:GetMoveType() == MOVETYPE_VPHYSICS) then
+	if(Target:IsValid() && EXPADV.PPCheck(Context.player,Target) && Target:GetPhysicsObject():IsValid() && Target:GetMoveType() == MOVETYPE_VPHYSICS) then
 		if(Pos1 < Vector(math.huge, math.huge, math.huge) && -Vector(math.huge, math.huge, math.huge) < Pos1 && Pos2 < Vector(math.huge, math.huge, math.huge) && -Vector(math.huge, math.huge, math.huge) < Pos2) then
 			Target:GetPhysicsObject():ApplyForceOffset(Pos1, Pos2)
 		end
@@ -273,7 +273,7 @@ local InfAng = Angle(math.huge, math.huge, math.huge)
 Component:AddPreparedFunction( "applyAngForce", "e:a", "",
 	function( Context, Trace, Target, Angle )
 
-		if Target:IsValid() && EXPADV.PPCheck(Target, Context.player) and Target:GetPhysicsObject():IsValid() and Target:GetMoveType() == MOVETYPE_VPHYSICS then
+		if Target:IsValid() && EXPADV.PPCheck(Context.player,Target) and Target:GetPhysicsObject():IsValid() and Target:GetMoveType() == MOVETYPE_VPHYSICS then
 			if Angle < InfAng && -InfAng < Angle then
 				if Angle.p != 0 or Angle.y != 0 or Angle.r != 0 then
 					local phys = Target:GetPhysicsObject()

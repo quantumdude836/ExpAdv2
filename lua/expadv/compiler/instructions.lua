@@ -556,7 +556,12 @@ function Compiler:Compile_ASS( Trace, Variable, Expression, DefinedClass, Modifi
 		self:TraceError( Trace, "Assigment operator (=) does not support 'var = %s'", self:NiceClass( Expression.Return ) )
 	end
 
-	return Operator.Compile( self, Trace, Quick( MemRef, "n" ), Expression )
+	local Inst = Operator.Compile( self, Trace, Quick( MemRef, "n" ), Expression )
+	if Modifier ~= "static" then return Inst end
+
+	Inst.Prepare = string.format( "if Context.Memory[%i] == nil then\n%s\nend", MemRef, Inst.Prepare )
+
+	return Inst
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------

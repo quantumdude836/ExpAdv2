@@ -154,17 +154,19 @@ end
 	@: Load Components
    --- */
 
--- Internal function, not for public use.
+-- Internal function, you can call it, but your break everything.
 function EXPADV.LoadComponents( )
 	EXPADV.Components = { }
 
+	local ConfigEnabled = EXPADV.Config.enabledcomponents
+
 	for _, Component in pairs( Temp_Components ) do
 
-		if EXPADV.Config.enabledcomponents[ Component.Name ] ~= nil then
-			Component.Enabled = EXPADV.Config.enabledcomponents[ Component.Name ]
+		if ConfigEnabled[ Component.Name ] ~= nil then
+			Component.Enabled = tobool( ConfigEnabled[ Component.Name ] )
 		else
-			Component.Enabled = Component.Default_Enabled
-			EXPADV.Config.enabledcomponents[ Component.Name ] = Component.Default_Enabled
+			Component.Enabled = Component.Default_Enabled or false
+			ConfigEnabled[ Component.Name ] = Component.Enabled and 1 or 0
 		end
 
 		if !Component.Enabled then

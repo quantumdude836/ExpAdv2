@@ -25,7 +25,7 @@ local Cache, ToLua, ToLuaTable = { }
 
 EXPADV.__Cache = Cache
 
-function ToLua( Value, bNoTables )
+function ToLua( Value, bNoTables, bNoFunctions )
 	if !Value then return "nil" end
 	
 	local Type = type(Value)
@@ -38,7 +38,7 @@ function ToLua( Value, bNoTables )
 		return Value and "true" or "false"
 	elseif Type == "table" and !bNoTables then
 		return ToLuaTable( Value )
-	elseif Type == "function" and !NoTables then
+	elseif Type == "function" and !NoTables and !bNoFunctions then
 		local Index = #Cache + 1
 		Cache[Index] = Value
 		return "EXPADV.__Cache[" .. Index .. "]"
@@ -65,8 +65,6 @@ function ToLuaTable( Table )
 		end
 		
 		Lua = string.format( "%s[%s] = %s, ", Lua, kLua, vLua )
-		
-		--Lua .. "[" .. kLua .. "] = " .. vLua .. ", ")
 	end
 	
 	return Lua .. "}"
@@ -90,9 +88,7 @@ function EXPADV.LoadConfig( )
 	end
 	
 	Config.enabledcomponents = Config.enabledcomponents or { }
-
 	Config.components = Config.components or { }
-
 	Config.settings = Config.settings or { }
 
 	EXPADV.Msg( "ExpAdv: Loaded config file, sucessfully." )
@@ -119,6 +115,7 @@ end
 
 -- Reads a setting from the config.
 function EXPADV.ReadSetting( Name, Default ) -- String, Obj
+	if !EXPADV.Config or !EXPADV.Config.settings then return Default end
 	return EXPADV.Config.settings[ string.lower( Name ) ] or Default
 end
 
@@ -133,12 +130,23 @@ if SERVER then
 		Player:ChatPrint( Msg )
 	end
 
+	local function SaveAndSendConfig( )
+		EXPADV.SaveConfig( )
+		EXPADV.SendConfig( )
+	end
+
 	local function Command( Player, _, Args )
 		local A, B, C = Args[1], Args[2], Args[3]
 
 		if !A or ( IsValid(Player) and !Player:IsAdmin( ) ) then return end
 
 		A = string.lower( A )
+
+		if A == "reload" then
+			EXPADV.LoadCore( )
+			return PrintFromCommand( Player, "Reloaded Expression Advanced 2" )
+		end
+
 		if B then B = string.lower( B ) end
 
 		local Config = EXPADV.Config
@@ -149,12 +157,12 @@ if SERVER then
 				local D = Config.enabledcomponents[ A ] and "Enabled" or "Disabled"
 				return PrintFromCommand( Player, "Component: %s is %s", A, D )
 			elseif B == "enable" then
-				Config.enabledcomponents[ Args[1] ] = true
-				EXPADV.SaveConfig( )
+				Config.enabledcomponents[ A ] = true
+				SaveAndSendConfig( )
 				return PrintFromCommand( Player, "Component: %s will be enabled after reload.", A, D )
 			elseif B == "disable" then
-				Config.enabledcomponents[ Args[1] ] = false
-				EXPADV.SaveConfig( )
+				Config.enabledcomponents[ A ] = false
+				SaveAndSendConfig( )
 				return PrintFromCommand( Player, "Component: %s will be disabled after reload.", A, D )
 			elseif Config.components[A] then
 				local Component = Config.components[A]
@@ -162,8 +170,8 @@ if SERVER then
 				if !Component[B] then
 					return PrintFromCommand( Player, "%s.%s: is not a valid setting.", A, B )
 				elseif C then
-					Component[B] = tonumber(Args[3]) or Args[3]
-					EXPADV.SaveConfig( )
+					Component[B] = tonumber(C) or C
+					SaveAndSendConfig( )
 				end
 
 				return PrintFromCommand( Player, "%s.%s is set to %s", A, B, tostring( Component[B] ) )
@@ -173,7 +181,7 @@ if SERVER then
 		if Config.settings[A] then
 			if B then
 				Config.settings[A] = tonumber(B) or B
-				EXPADV.SaveConfig( )
+				SaveAndSendConfig( )
 			end
 
 			return PrintFromCommand( Player, "%s: ", A, Config.Settings[ string.lower( A ) ] )
@@ -182,37 +190,35 @@ if SERVER then
 		return PrintFromCommand( Player, "No such command %s", A )
 	end
 
-	concommand.Add( "expadv", Command )
+	concommand.Add( "sv_expadv", Command )
 
 elseif CLIENT then
 
-	local function AutoComplete( _, Args )
-		local A = Args[1]
-		if A and A == "" then A = nil end
-
-
+	local function AutoComplete( _, Line )
+		local A = string.Trim( Line, " " )
+		
 		local Config = EXPADV.Config
-		if !Config then return { "No config file" } end
+		if !Config then return end
 
-		if !A then
-			local AC = { }
+		if A == "" then
+			local AC = { "expadv reload" }
 
 			if Config.settings then
 				for Key, _ in pairs( Config.settings ) do
-					AC[#AC + 1] = Key
+					AC[#AC + 1] = "expadv " .. Key
 				end
 			end
 
 			if Config.enabledcomponents then
 				for Key, _ in pairs( Config.enabledcomponents ) do
-					AC[#AC + 1] = Key
+					AC[#AC + 1] = "expadv " .. Key
 				end
 			end
 
 			if Config.components then
 				for Key, _ in pairs( Config.components ) do
 					if !Config.enabledcomponents[Key] then
-						AC[#AC + 1] = Key
+						AC[#AC + 1] = "expadv " .. Key
 					end
 				end
 			end
@@ -223,25 +229,23 @@ elseif CLIENT then
 		A = string.lower( A )
 
 		if Config.enabledcomponents and Config.enabledcomponents[A] then
-			local AC = { "enable", "disable" }
+			local AC = { string.format( "expadv %s enable", A ), string.format( "expadv %s disable", A ) }
 
 			if Config.components[A] then
 				for Key, _ in pairs( Config.components[A] ) do
-					AC[#AC + 1] = Key
+					AC[#AC + 1] = string.format( "expadv %s %s", A, Key )
 				end
 			end
 
 			return AC
 		end
-
-		return { "This should not be posible" }
 	end
 
 	local function Command( Player, _, Args )
-		RunConsoleCommand( "cmd", "expadv", unpack( Args ) )
+		RunConsoleCommand( "cmd", "sv_expadv", unpack( Args ) )
 	end
 
-	concommand.Add( "expadv_config", Command, AutoComplete, "Changes a configeration setting for expression advanced 2." )
+	concommand.Add( "expadv", Command, AutoComplete, "Changes a configeration setting for expression advanced 2." )
 end
 
 
@@ -363,10 +367,10 @@ function EXPADV.LoadCore( )
 	EXPADV.LoadEditor( )
 
 	if SERVER then
-		EXPADV.SendInitalDataStream( )
+		EXPADV.SendConfig( nil, true )
 
-		hook.Add( "PlayerInitialSpawn", "expadv.initaldatastream", function( Player )
-			EXPADV.SendInitalDataStream( Player )
+		hook.Add( "PlayerInitialSpawn", "expadv.sendconfig", function( Player )
+			EXPADV.SendConfig( Player, true )
 		end )
 	end
 	
@@ -461,90 +465,38 @@ function EXPADV.CallHook( Name, ... )
 end
 
 /* --- --------------------------------------------------------------------------------
-	@: We need a data stream, this will use vnet.
+	@: We need to send the config file to players.
    --- */
-
-   -- Usage:
-   -- hook.Add -> "Expadv.PreBuildDataStream" -> ( DataTable, Inital Send )
-   -- hook.Add -> "Expadv.PostBuildDataStream" -> ( DataTable, Inital Send )
-   -- Component:BuildDataStream( Inital Send ) -> return Key, Value
-   -- Will sync clients via 1 data stream per tick, 
 
 require( "vnet" )
 
 if SERVER then
 
-	util.AddNetworkString( "expadv.stream" )
+	util.AddNetworkString( "expadv.config" )
 
-	function EXPADV.BuildDataStream( Data, Force )
-		local SendCount = 0
-
-		hook.Run( "Expadv.PreBuildDataStream", Data, Force )
-
-		if EXPADV.Components then
-			for _, Component in pairs( EXPADV.Components ) do
-
-				if !Component.Enabled then continue end
-
-				local Func = Component["BuildDataStream"]
-				
-				if !Func then continue end
-
-				local Key, Value = Func( Component, Force )
-
-				if Key and Key ~= "" and key ~="config" and Value then
-					Data[Key] = Value
-
-					SendCount = SendCount + 1
-				end
-			end
-		end
-
-		hook.Run( "Expadv.PostBuildDataStream", Data, Force )
-
-		return SendCount
-	end
-
-	function EXPADV.SendInitalDataStream( Player )
-		
+	function EXPADV.SendConfig( Player, Load )
 		if !IsValid( Player ) and #player.GetAll( ) == 0 then return end
 
-		local DataStream = { }
+		local Package = vnet.CreatePacket( "expadv.config" )
 
-		DataStream.config = EXPADV.Config
+		Package:Table( EXPADV.Config )
 
-		EXPADV.BuildDataStream( DataStream, true )
+		Package:Bool( Load or false )
 
-		local Package = vnet.CreatePacket( "expadv.stream" )
-
-		Package:Table( DataStream )
-
-		if IsValid( Player ) then
-				Package:AddTargets( { Player } )
-
-				Package:Send( )
+		if Player then
+			Package:AddTargets( { Player } )
+			Package:Send( )
 		else
 			Package:Broadcast( )
 		end
-
 	end
-
 else
+	vnet.Watch( "expadv.config", function( Package )
+		EXPADV.Config = Package:Table( )
 
-	vnet.Watch( "expadv.stream", function( Package )
-		local Data = Package:Table( )
+		if Package:Bool( ) then EXPADV.LoadCore( ) end
 
-		if Data.config then
-			EXPADV.Config = Data.config 
-			
-			Data.config = nil
-
-			EXPADV.LoadCore( )
-		end
-
-		EXPADV.CallHook( "GetDataStream", Data )
 	end, vnet.OPTION_WATCH_OVERRIDE )
-
 end
 /* --- --------------------------------------------------------------------------------
 	@: Convenience hooks.
@@ -645,20 +597,19 @@ end, vnet.OPTION_WATCH_OVERRIDE )
 	@: Quota Managment
    --- */
 
--- local expadv_cpu_mult     = 0 -- This is our multiplyer :D
-local cv_expadv_luahook   = CreateConVar( "expadv_quota_hook", "500", {FCVAR_REPLICATED} )
-local cv_expadv_tickquota = CreateConVar( "expadv_tick_quota", "250000", {FCVAR_REPLICATED} )
-local cv_expadv_softquota = CreateConVar( "expadv_soft_quota", "100000", {FCVAR_REPLICATED} )
-local cv_expadv_hardquota = CreateConVar( "expadv_hard_quota", "1000000", {FCVAR_REPLICATED} )
+hook.Add( "Expadv.PostLoadConfig", "expadv.quota", function( )
+	EXPADV.CreateSetting( "hookrate", 500 )
+	EXPADV.CreateSetting( "tickquota", 250000 )
+	EXPADV.CreateSetting( "softquota", 100000 )
+	EXPADV.CreateSetting( "hardquota", 1000000 )
+end )
 
 timer.Create( "expadv.quota", 1, 0, function( )
-	expadv_luahook   = cv_expadv_luahook:GetInt( )
-	-- expadv_cpu_mult  = engine.TickInterval( ) / 0.0303030303
-
-	expadv_tickquota = cv_expadv_tickquota:GetInt( ) -- * expadv_cpu_mult
-	expadv_softquota = cv_expadv_softquota:GetInt( ) -- * expadv_cpu_mult
-	expadv_hardquota = cv_expadv_hardquota:GetInt( ) -- * expadv_cpu_mult
-end )
+	expadv_luahook   = EXPADV.ReadSetting( "hookrate", 500 )
+	expadv_tickquota = EXPADV.ReadSetting( "tickquota", 250000 )
+	expadv_softquota = EXPADV.ReadSetting( "softquota", 100000 )
+	expadv_hardquota = EXPADV.ReadSetting( "hardquota", 1000000 )
+end ) 
 
 /* --- --------------------------------------------------------------------------------
 	@: Transmit Notice.
@@ -678,7 +629,6 @@ if SERVER then
 	net.Receive( "expadv.notify", function(  )
 		local Player = net.ReadEntity( )
 		if !IsValid( Player ) then return end
-
 		EXPADV.Notifi( Player ,net.ReadString( ), net.ReadUInt( 8 ), net.ReadFloat( ) )
 	end)
 
@@ -771,10 +721,6 @@ end
 
 if SERVER then
 	hook.Add( "Initialize", "expadv.Loadcore", function( )
-		EXPADV.LoadCore( )
-	end )
-
-	concommand.Add( "expadv_reload", function( Player )
 		EXPADV.LoadCore( )
 	end )
 end

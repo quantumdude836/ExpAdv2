@@ -9,6 +9,8 @@ local Component = EXPADV.AddComponent( "utility", true )
 	@: This add no default hook, and shall encourage poeple to add there own.
    --- */
 
+EXPADV.SharedOperators( )
+
 Component:AddVMFunction( "hookAdd", "s,s,d", "", function( Context, Trace, Hook, Name, Function )
 		local Data = Context.Data
 		local Hooks = Data.hooks
@@ -50,6 +52,8 @@ Component:AddFunctionHelper( "hookCall", "s,...", "Calls the named hook, passing
 /* --- --------------------------------------------------------------------------------
 	@: Add a simple timer system.
    --- */
+
+EXPADV.SharedOperators( )
 
 Component:AddVMFunction( "timerCreate", "s,n,n,d,...", "", function( Context, Trace, Name, Delay, Reps, Delegate, ... )
 		local Data = Context.Data
@@ -142,6 +146,8 @@ end )
 	@: Need some time functions.
    --- */
 
+EXPADV.SharedOperators( )
+
 Component:AddInlineFunction( "curTime", "", "n", "$CurTime( )" )
 
 Component:AddInlineFunction( "realtime", "", "n", "$RealTime( )" )
@@ -153,6 +159,8 @@ Component:AddInlineFunction( "time", "s", "n", "$tonumber( $os.date(\"!*t\")[ @v
 /* --- --------------------------------------------------------------------------------
 	@: Some useful array sorting functions
    --- */
+
+EXPADV.SharedOperators( )
 
 Component:AddPreparedFunction( "sortByDistanceVectors", "a,v", "", [[
 	if @value 1.__type ~= "v" then self:Throw( @trace, "invoke", "sortByDistanceEntitys #1, entity array exspected." ) end
@@ -258,6 +266,8 @@ function Ranger.__tostring( Table )
 	return "Ranger"
 end
 
+EXPADV.SharedOperators( )
+
 Component:AddVMFunction( "ranger", "", "rd", function( ) return setmetatable( { Filter = { } }, Ranger ) end )
 
 -- Set up a ranger.
@@ -295,7 +305,7 @@ Component:AddInlineFunction( "maxs", "rd:", "v", "( @value 1.Maxs or Vector( 0, 
 
 -- Do Trace
 
-Component:AddPreparedFunction( "fire", "rd:v,v", "", "@value 1:DoTrace( @value 2, @value 3 ) end )" )
+Component:AddPreparedFunction( "fire", "rd:v,v", "", "@value 1:DoTrace( @value 2, @value 3 )" )
 
 Component:AddPreparedFunction( "fire", "rd:v,v,n", "", "@value 1:DoTrace( @value 2, @value 3, @value 4 )" )
 
@@ -374,6 +384,8 @@ Component:AddPreparedFunction( "clear", "rd:", "", "@value 1.Result = nil" )
 	@: HTTP
    --- */
 
+EXPADV.SharedOperators( )
+
 Component:AddPreparedFunction( "httpRequest", "s,d,d", "", [[$http.Fetch( @value 1,
 	function( Body )
 		Context:Execute( "http success callback", @value 2, { Body, "s" } )
@@ -389,3 +401,246 @@ Component:AddPreparedFunction( "httpPostRequest", "s,t,d,d", "", [[$http.Post( @
 		Context:Execute( "http fail callback", @value 4 )
 	end
 )]] )
+
+/* --- --------------------------------------------------------------------------------
+	@: Physics Control Component
+   --- */
+
+local PropComponent = EXPADV.AddComponent( "propcore", false )
+
+PropComponent:AddException( "propcore" )
+
+/* --- --------------------------------------------------------------------------------
+	@: PropCore should just be offical. Still need to disable it.
+	@: Enable: expadv propcore enable; expadv reload
+   --- */
+
+PropComponent:CreateSetting( "maxprops", 50 )
+PropComponent:CreateSetting( "cooldown", 10 )
+
+local Props, PlayerCount, PlayerRate = { }, { }, { }
+
+timer.Create( "expadv.propcore", 1, 0, function( )
+	for K, V in pairs( PlayerRate ) do PlayerRate[K] = 0 end
+end )
+
+function Component:OnRegisterContext( Context )
+	Props[ Context ] = { }
+end
+
+function Component:OnUnregisterContext( Context )
+	if Props[Context.entity] then
+		for K, V in pairs( Props[Context] ) do if IsValid( V ) then V:Remove( ) end end
+		Props[Context] = nil
+	end
+end
+
+/* --- --------------------------------------------------------------------------------
+	@: Physics Control Component
+	@: Prop protection
+   --- */
+
+local function AddProp( Prop, Context )
+	Prop.player = Context.player
+	Context.player:AddCleanup( "props", Prop )
+	
+	undo.Create("lemon_spawned_prop")
+		undo.AddEntity( Prop )
+		undo.SetPlayer( Context.player )
+	undo.Finish( ) -- Add to undo que.
+
+	Prop:CallOnRemove( "lemon_propcore_remove", function( E )
+		if Props[Context] then Props[Context][E] = nil end
+
+		if IsValid( Context.player ) then
+			local Count = (PlayerCount[Context.player] or 1) - 1
+			if Count < 0 then Count = 0 end
+			PlayerCount[Context.player] = Count
+		end
+	end )
+
+	if CPPI then Prop:CPPISetOwner( Context.player ) end
+end
+
+/* --- --------------------------------------------------------------------------------
+	@: Physics Control Component
+	@: Functions
+   --- */
+
+local NIL_FUNC = function( ) end
+local _DoPropSpawnedEffect = DoPropSpawnedEffect
+
+local function PropCoreSpawn ( Context, Trace,  Model, Freeze )
+	local G, P = Context.entity, Context.player
+	local PRate, PCount = PlayerRate[P] or 0, PlayerCount[P] or 0
+	
+	local Max = PropComponent:GetSetting( "maxprops", 50 )
+	local Rate = PropComponent:GetSetting( "cooldown", 10 )
+
+	if Max ~= -1 and PCount >= Max then
+		Context:Throw(Trace, "propcore", "Max total props reached (" .. Max .. ")." )
+	elseif PRate >= Rate then
+		Context:Throw(Trace, "propcore", "Max prop spawn rate reached (" .. Rate .. ")." )
+	elseif !util.IsValidModel( Model ) or !util.IsValidProp( Model ) then
+		Context:Throw(Trace, "propcore", "Invalid model for prop spawn." )
+	elseif Context.Data.PC_NoEffect then
+		DoPropSpawnedEffect = NIL_FUNC
+	end
+	
+	local Prop = MakeProp( P, G:GetPos(), G:GetAngles(), Model, {}, {} )
+	
+	if Context.Data.PC_NoEffect then
+		DoPropSpawnedEffect = _DoPropSpawnedEffect
+	end
+	
+	if !Prop or !Prop:IsValid( ) then
+		Context:Throw("propcore", "Unable to spawn prop." )
+	end
+
+	AddProp( Prop, Context )
+	
+	Prop:Activate()
+
+	local Phys = Prop:GetPhysicsObject()
+	if Phys and Phys:IsValid( ) then
+		if Freeze then Phys:EnableMotion( false ) end
+		Phys:Wake()
+	end
+
+	Props[ Context ][ Prop ] = Prop
+	PlayerRate[ P ] = PRate + 1
+	PlayerCount[ P ] = PCount + 1
+
+	return Prop
+end
+
+EXPADV.ServerOperators( )
+
+PropComponent:AddVMFunction("spawn", "s,b", "e", PropCoreSpawn )
+
+PropComponent:AddVMFunction( "canSpawn", "", "b", function( Context )
+	local Max = PropComponent:GetSetting( "maxprops", 50 )
+	
+	if Max ~= -1 and (PlayerCount[Context.player] or 0) >= Max then
+		return false
+	elseif (PlayerRate[Context.player] or 0) >= PropComponent:GetSetting( "cooldown", 10 ) then
+		return false
+	end
+	
+	return true
+end )
+
+PropComponent:AddVMFunction( "spawnedProps", "", "a", function( Context )
+	local Array = { __type = "e" }
+
+	if Props[Context] then
+		for K, V in pairs( Props[Context] ) do
+			Array[#Array + 1] = v
+		end
+	end
+
+	return Array
+end )
+
+PropComponent:AddPreparedFunction( "noSpawnEffect", "b", "", "Context.Data.PC_NoEffect = @value 1" )
+
+PropComponent:AddPreparedFunction( "remove", "e:", "", "if IsValid( @value 1 ) and EXPADV.PPCheck( Context.player, @value 1 ) then @value 1:Remove( ) end" )
+
+PropComponent:AddPreparedFunction( "setPos", "e:v", "",[[
+if IsValid( @value 1 ) and EXPADV.PPCheck( Context.player, @value 1 ) then
+	if !( @value 2.x ~= @value 2.x and @value 2.y ~= @value 2.y and @value 2.z ~= @value 2.z ) then
+		@value 1:SetPos( @value 2 )
+	end
+end]] )
+
+PropComponent:AddPreparedFunction( "setAng", "e:a", "",[[
+if IsValid( @value 1 ) and EXPADV.PPCheck( Context.player, @value 1 ) then
+	if !( @value 2.p ~= @value 2.p and @value 2.y ~= @value 2.y and @value 2.r ~= @value 2.r ) then
+		@value 1:SetAngles( @value 2 )
+	end
+end]] )
+
+PropComponent:AddPreparedFunction( "parent", "e:e", "", [[
+if IsValid( @value 1 ) and EXPADV.PPCheck( Context.player, @value 1 ) and IsValid( @value 2 ) then
+	if !@value 1:IsVehicle( ) and !@value 2:IsVehicle( ) then
+		@value 1:SetParent(@value 2)
+	end
+end]] )
+
+PropComponent:AddPreparedFunction( "parent", "e:p", "", [[
+if IsValid( @value 1 ) and EXPADV.PPCheck( Context.player, @value 1 ) and IsValid( @value 2 ) then
+	if !@value 1:IsVehicle( ) then
+		@value 1:SetParent(@value 2)
+	end
+end]] )
+
+PropComponent:AddPreparedFunction( "unparent", "e:", "", [[
+if IsValid( @value 1 ) and EXPADV.PPCheck( Context.player, @value 1 ) then
+	@value 1:SetParent( nil )
+end]] )
+
+PropComponent:AddPreparedFunction( "freeze", "e:b", "", [[
+if IsValid( @value 1 ) and EXPADV.PPCheck( Context.player, @value 1 ) then
+	local @define Phys = @value 1:GetPhysicsObject()
+	@define Phys:EnableMotion( !@value 2 )
+	@define Phys:Wake( )
+end]], "" )
+
+PropComponent:AddPreparedFunction( "freeze", "p:b", "", [[
+if IsValid( @value 1 ) and EXPADV.PPCheck( Context.player, @value 1:GetEntity( ) ) then
+	@value 1:EnableMotion( !@value 2 )
+	@value 1:Wake( )
+end]] )
+
+PropComponent:AddPreparedFunction( "setNotSolid", "e:b", "", [[
+if IsValid( @value 1 ) and EXPADV.PPCheck( Context.player, @value 1 ) then
+	@value 1:SetNotSolid( @value 2 )
+end]] )
+
+PropComponent:AddPreparedFunction("enableGravity", "e:b", "", [[
+if IsValid( @value 1 ) and EXPADV.PPCheck( Context.player, @value 1 ) then
+	local @define Phys = @value 1:GetPhysicsObject()
+	@define Phys:EnableGravity( @value 2 )
+	@define Phys:Wake( )
+
+	if !@define Phys:IsMoveable() then
+		@define Phys:EnableMotion( true )
+		@define Phys:EnableMotion( false )
+	end
+end]], "" )
+
+Component:AddPreparedFunction("enableGravity", "p:b", "", [[
+if IsValid( @value 1 ) and EXPADV.PPCheck( Context.player, @value 1:GetEntity( ) ) then
+	@value 1:EnableGravity( @value 2 )
+	@value 1:Wake( )
+
+	if !@value 1:IsMoveable( ) then
+		@value 1:EnableMotion( true )
+		@value 1:EnableMotion( false )
+	end
+end]] )
+
+PropComponent:AddPreparedFunction( "setPhysProp", "e:s,b", "", [[
+if IsValid( @value 1 ) and EXPADV.PPCheck( Context.player, @value 1 ) then
+	$construct.SetPhysProp( Context.player, @value 1, 0, nil, { GravityToggle = @value 3, Material = @value 2 } )
+end]] )
+
+PropComponent:AddPreparedFunction( "destroy", "e:", "",[[
+if IsValid( @value 1 ) and EXPADV.PPCheck( Context.player, @value 1 ) then
+	@value 1:GibBreakClient( Vector() )
+	@value 1:Remove( )
+end]] )
+
+PropComponent:AddPreparedFunction( "destroy", "e:v,b", "",[[
+if IsValid( @value 1 ) and @value 2:IsNotHuge( ) and EXPADV.PPCheck( Context.player, @value 1 ) then
+	if !( @value 2.x ~= @value 2.x and @value 2.y ~= @value 2.y and @value 2.z ~= @value 2.z ) then
+		@value 1:GibBreakClient( @value 2 )
+		if ( @value 3 ) then @value 1:Remove( ) end
+	end
+end]] )
+
+PropComponent:AddPreparedFunction( "dealDamage", "e:n", "",[[
+if IsValid( @value 1 ) and EXPADV.PPCheck( Context.player, @value 1 ) then
+	@value 1:TakeDamage( @value 2, Context.player, Context.entity )
+end]] )
+

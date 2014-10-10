@@ -35,7 +35,7 @@ if CPPI then
 		return false
 	end
 
-	function EXPADV.PPCheck( Entity, Player )
+	function EXPADV.PPCheck( Player, Entity )
 		if !IsValid( Entity ) or !IsValid( Player ) then return false end
 
 		local Owner = Entity:CPPIGetOwner( )
@@ -84,7 +84,7 @@ function EXPADV.IsFriend( Friend, Player )
 	return Friends[ UIDCach[Player] ][ UIDCach[Friend] ] or false
 end
 
-function EXPADV.PPCheck( Entity, Player )
+function EXPADV.PPCheck( Player, Entity )
 	if !IsValid( Entity ) or !IsValid( Player ) then return false end
 
 	local Owner = EXPADV.GetOwner( Entity )

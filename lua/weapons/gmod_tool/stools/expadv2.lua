@@ -40,7 +40,7 @@ TOOL.ClientConVar.weldworld 	= 0
 TOOL.ClientConVar.frozen		= 0
 
 hook.Add( "Expadv.PostLoadConfig", "Expadv.Tool", function( )
-	EXPADV.CreateSetting( "sboxmax_expadv", 20 )
+	EXPADV.CreateSetting( "limit", 20 )
 end )
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -79,7 +79,7 @@ end -- TODO: Use somthing other then base class comparason.
    --- */
 
 local function MakeExpadv( Player, Position, Angle, Model )
-	if Player:GetCount( "expadv" ) > EXPADV.ReadSetting( "sboxmax_expadv", 20 ) then
+	if Player:GetCount( "expadv" ) > EXPADV.ReadSetting( "limit", 20 ) then
 		Player:LimitHit( "Expression Advanced entity limit reached." )
 		return nil
 	end
@@ -107,7 +107,7 @@ duplicator.RegisterEntityClass( "expadv_gate", MakeExpadv, "Pos", "Ang", "Model"
    --- */
 
 local function MakeExpadvScreen( Player, Position, Angle, Model )
-	if Player:GetCount( "expadv" ) > EXPADV.ReadSetting( "sboxmax_expadv", 20 ) then
+	if Player:GetCount( "expadv" ) > EXPADV.ReadSetting( "limit", 20 ) then
 		Player:LimitHit( "Expression Advanced entity limit reached." )
 		return nil
 	end
