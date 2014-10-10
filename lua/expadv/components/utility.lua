@@ -424,11 +424,11 @@ timer.Create( "expadv.propcore", 1, 0, function( )
 	for K, V in pairs( PlayerRate ) do PlayerRate[K] = 0 end
 end )
 
-function Component:OnRegisterContext( Context )
+function PropComponent:OnRegisterContext( Context )
 	Props[ Context ] = { }
 end
 
-function Component:OnUnregisterContext( Context )
+function PropComponent:OnUnregisterContext( Context )
 	if Props[Context.entity] then
 		for K, V in pairs( Props[Context] ) do if IsValid( V ) then V:Remove( ) end end
 		Props[Context] = nil

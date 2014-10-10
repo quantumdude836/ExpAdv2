@@ -157,11 +157,11 @@ if SERVER then
 				local D = Config.enabledcomponents[ A ] and "Enabled" or "Disabled"
 				return PrintFromCommand( Player, "Component: %s is %s", A, D )
 			elseif B == "enable" then
-				Config.enabledcomponents[ A ] = true
+				Config.enabledcomponents[ A ] = 1
 				SaveAndSendConfig( )
 				return PrintFromCommand( Player, "Component: %s will be enabled after reload.", A, D )
 			elseif B == "disable" then
-				Config.enabledcomponents[ A ] = false
+				Config.enabledcomponents[ A ] = 0
 				SaveAndSendConfig( )
 				return PrintFromCommand( Player, "Component: %s will be disabled after reload.", A, D )
 			elseif Config.components[A] then
