@@ -18,6 +18,8 @@ WireLink:MakeServerOnly( )
 
 WireLink:WireInput( "WIRELINK" )
 
+WireLink:DefaultAsLua( Entity(0) )
+
 /* --- --------------------------------------------------------------------------------
 	@: Operators
    --- */

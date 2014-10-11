@@ -27,7 +27,6 @@ if WireLib then
 else
 	TOOL.Name						= "Expression Advanced 2"
 	TOOL.Category					= "Scriptable"
-	TOOL.Tab						= "Tools"
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -78,7 +77,7 @@ end -- TODO: Use somthing other then base class comparason.
 	@: Make Gate Entity
    --- */
 
-local function MakeExpadv( Player, Position, Angle, Model )
+local function MakeExpadv( Player, Position, Angle, Model, InPorts, OutPorts )
 	if Player:GetCount( "expadv" ) > EXPADV.ReadSetting( "limit", 20 ) then
 		Player:LimitHit( "Expression Advanced entity limit reached." )
 		return nil
@@ -97,16 +96,18 @@ local function MakeExpadv( Player, Position, Angle, Model )
 	ExpAdv:SetPlayer( Player )
 	ExpAdv.player = Player
 
+	ExpAdv:ApplyDupePorts( InPorts, OutPorts )
+
 	return ExpAdv
 end
 
-duplicator.RegisterEntityClass( "expadv_gate", MakeExpadv, "Pos", "Ang", "Model" )
+duplicator.RegisterEntityClass( "expadv_gate", MakeExpadv, "Pos", "Ang", "Model", "DupeInPorts", "DupeOutPorts" )
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Make Screen Entity
    --- */
 
-local function MakeExpadvScreen( Player, Position, Angle, Model )
+local function MakeExpadvScreen( Player, Position, Angle, Model, InPorts, OutPorts )
 	if Player:GetCount( "expadv" ) > EXPADV.ReadSetting( "limit", 20 ) then
 		Player:LimitHit( "Expression Advanced entity limit reached." )
 		return nil
@@ -125,10 +126,12 @@ local function MakeExpadvScreen( Player, Position, Angle, Model )
 	ExpAdv:SetPlayer( Player )
 	ExpAdv.player = Player
 
+	ExpAdv:ApplyDupePorts( InPorts, OutPorts )
+
 	return ExpAdv
 end
 
-duplicator.RegisterEntityClass( "expadv_screen", MakeExpadvScreen, "Pos", "Ang", "Model" )
+duplicator.RegisterEntityClass( "expadv_screen", MakeExpadvScreen, "Pos", "Ang", "Model", "DupeInPorts", "DupeOutPorts" )
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Left Click

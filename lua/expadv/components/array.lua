@@ -28,6 +28,14 @@ Component:AddInlineOperator( "#","ar","n", "#@value 1" )
 
 Component:AddInlineOperator( "table", "ar", "t", "EXPADV.ResultTable(@value 1.__type, @value 1)" )
 
+/* ---	--------------------------------------------------------------------------------
+	@: Basic Functions
+   ---	*/
+
+Component:AddInlineFunction( "exists", "ar,n", "b", "(@value 1[@value 2] ~= nil)" )
+
+Component:AddInlineFunction( "unpack", "ar", "...", "$unpack( @value 1 )" )
+
 function Component:OnPostRegisterClass( Name, Class )
 
 	EXPADV.SharedOperators( )
@@ -56,8 +64,24 @@ function Component:OnPostRegisterClass( Name, Class )
    ---	*/
 
    Component:AddInlineFunction( string.format("%sArray", Class.Name ), "", "ar", string.format( "{__type=%q}", Class.Short) )
-end
 
+/* ---	--------------------------------------------------------------------------------
+	@: Functions
+   ---	*/
+
+	Component:AddPreparedFunction( "remove" .. Class.Name, "ar,n", Class.Short, string.format([[
+		if @value 1.__type ~= %q then Context.Throw(@trace, "array", "array type missmatch, %s expected got " .. EXPADV.TypeName(@value 1.__type)) end
+		if @value 1[@value 2] == nil then Context.Throw(@trace, "array", "array reach index " .. @value 2 .. " returned void" ) end
+		]], Class.Short, Class.Name), "$table.remove(@value 1, @value 2)")
+
+	Component:AddPreparedFunction( "insert", "ar,n," .. Class.Short, "", string.format([[
+		if @value 1.__type ~= %q then Context.Throw(@trace, "array", "array type missmatch, %s expected got " .. EXPADV.TypeName(@value 1.__type)) end
+		]], Class.Short, Class.Name), "$table.insert(@value 1, @value 2, @value 3)")
+
+	Component:AddPreparedFunction( "insert", "ar," .. Class.Short, "", string.format([[
+		if @value 1.__type ~= %q then Context.Throw(@trace, "array", "array type missmatch, %s expected got " .. EXPADV.TypeName(@value 1.__type)) end
+		]], Class.Short, Class.Name), "$table.insert(@value 1, @value 2)")
+end
 /* ---	--------------------------------------------------------------------------------
 	@: Now for a way to build a filled table
 	---	*/

@@ -156,3 +156,9 @@ Component:AddFunctionHelper( "snapToYaw", "a:n", "Snaps the angle's yaw to neare
 
 Component:AddInlineFunction( "snapToRoll", "a:n", "a", [[@value 1@SnapTo("r",@value 2)]] )
 Component:AddFunctionHelper( "snapToRoll", "a:n", "Snaps the angle's roll to nearest interval of degrees" )
+
+/* --- --------------------------------------------------------------------------------
+	@: Casting
+   --- */
+
+Component:AddInlineOperator( "string", "a", "s", [[string.format("Ang<%i,%i,%i>",@value 1.p, @value 1.y, @value 1.r)]] )

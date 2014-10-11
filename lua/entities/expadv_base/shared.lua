@@ -154,18 +154,15 @@ function ENT:CompileScript( Root, Files )
 		EXPADV.UnregisterContext( self.Context )
 	end
 
-	self.Compiler = EXPADV.Compile( Root, Files,
+	EXPADV.Compile( Root, Files,
 
 		function( ErMsg )
 			local Cmp = self.Compiler
-
-			self.Compiler = nil
 
 			return self:OnCompileError( ErMsg, Cmp )
 		end,
 
 		function( Instance, Instruction )
-			self.Compiler = nil -- The instance is the compiler :D
 			return self:BuildInstance( Instance, Instruction )
 		end
 	) -- Now we wait for the callback!
@@ -206,6 +203,8 @@ function ENT:BuildInstance( Instance, Instruction )
 		Context:StartUp( Compiled( ) )
 
 		self:PostStartUp( Context )
+
+		Context.Enviroment = nil
 	end )
 
 	if !Ok then
@@ -225,12 +224,6 @@ function ENT:BuildInstance( Instance, Instruction )
 	end
 end
 
-function ENT:GetCompilePer( )
-	if !self.Compiler then return self:IsRunning( ) and 100 or 0 end
-
-	return self.Compiler:PercentCompiled( )
-end
-
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Call Event
    --- */
@@ -239,9 +232,9 @@ function ENT:CallEvent( Name, ... )
 	if !self:IsRunning( ) then return false, nil end
 
 	local Event = self.Context[ "event_" .. Name ]
-	if !Name then return end
+	if !Event then return end
 
-	return Context:Execute( "Event " .. Name, Event, ... )
+	return self.Context:Execute( "Event " .. Name, Event, ... )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------

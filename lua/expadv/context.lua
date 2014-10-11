@@ -94,7 +94,7 @@ function EXPADV.RootContext:Execute( Location, Operation, ... ) -- String, Funct
 
 	-- Execuiton:
 
-		local Ok, Result = pcall( Operation, Instance or self, ... )
+		local Ok, Result, ResultType = pcall( Operation, Instance or self, ... )
 
 	-- Reset Ops Monitor
 		debug.sethook( )
@@ -128,7 +128,7 @@ function EXPADV.RootContext:Execute( Location, Operation, ... ) -- String, Funct
 
 		EXPADV.Updates[self] = true
 
-		return true, Result
+		return true, Result, ResultType
 
 	end
 

@@ -201,7 +201,7 @@ function EXPADV.CallPlayerReturnableEvent( Player, Name, ... )
 		if !Event then continue end
 		
 		local Ok, Value, Type = Context:Execute( "Event " .. Name, Event, ... )
-		
+
 		if Context.player ~= Player then continue end
 		
 		if !Result and Ok and Value ~= nil then Result, ResultType = Value, Type end

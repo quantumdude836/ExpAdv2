@@ -233,6 +233,7 @@ EXPADV.AddEvent( nil, "think", "", "" )
 EXPADV.ServerEvents( )
 EXPADV.AddEvent( nil, "trigger", "s,s", "" )
 EXPADV.AddEvent( nil, "clientLoaded", "ply", "" )
+EXPADV.AddEvent( nil, "dupePasted" )
 
 /* --- -------------------------------------------------------------------------------
 	@: Shared Hooks
