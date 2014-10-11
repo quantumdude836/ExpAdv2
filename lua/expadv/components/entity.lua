@@ -428,7 +428,7 @@ for _, Ent in pairs( $ents.FindByModel( @value 1 ) ) do
 	end
 end]], "@Results" )
 
-Component:AddPreparedFunction( "findInSphere", "s,v,n", "t", [[
+Component:AddPreparedFunction( "findInSphere", "s,v,n", "ar", [[
 @define Results = { __type = "e" }
 for _, Ent in pairs( $ents.FindInSphere( @value 2, @value 3 ) ) do
 	local Class = Ent:GetClass( )
@@ -437,7 +437,7 @@ for _, Ent in pairs( $ents.FindInSphere( @value 2, @value 3 ) ) do
 	end
 end]], "@Results" )
 
-Component:AddPreparedFunction( "findInSphere", "s,v,n", "t", [[
+Component:AddPreparedFunction( "findInSphere", "s,v,n", "ar", [[
 @define Results = { __type = "e" }
 for _, Ent in pairs( $ents.FindInSphere( @value 2, @value 3 ) ) do
 	local Class = Ent:GetClass( )
@@ -446,7 +446,7 @@ for _, Ent in pairs( $ents.FindInSphere( @value 2, @value 3 ) ) do
 	end
 end]], "@Results" )
 
-Component:AddPreparedFunction( "findInBox", "s,v,v", "t", [[
+Component:AddPreparedFunction( "findInBox", "s,v,v", "ar", [[
 @define Results = { __type = "e" }
 for _, Ent in pairs( $ents.FindInBox( @value 2, @value 3) ) do
 	local Class = Ent:GetClass( )
@@ -455,7 +455,7 @@ for _, Ent in pairs( $ents.FindInBox( @value 2, @value 3) ) do
 	end
 end]], "@Results" )
 
-Component:AddPreparedFunction( "findInCone", "s,v,v,n,a", "t", [[
+Component:AddPreparedFunction( "findInCone", "s,v,v,n,a", "ar", [[
 @define Results = { __type = "e" }
 for _, Ent in pairs( $ents.FindInCone( @value 2, @value 3, @value 4, @value 5)) do
 	local Class = Ent:GetClass( )
@@ -472,7 +472,7 @@ $table.sort( @value 1,
 	end )
 ]])
 
-Component:AddPreparedFunction( "playerByName", "s,b", "e", [[
+Component:AddPreparedFunction( "playerByName", "s,b", "ply", [[
 for _, Ply in pairs( $player.GetAll( ) ) do
 	@define Name, Query = Ply:Name( ):lower( ), @value 1:lower( )
 	if @Name == @Query or ( !@value 2 and @Name:find( @value 1 ) ) then

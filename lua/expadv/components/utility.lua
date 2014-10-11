@@ -474,8 +474,8 @@ local function PropCoreSpawn ( Context, Trace,  Model, Freeze )
 	local G, P = Context.entity, Context.player
 	local PRate, PCount = PlayerRate[P] or 0, PlayerCount[P] or 0
 	
-	local Max = PropComponent:GetSetting( "maxprops", 50 )
-	local Rate = PropComponent:GetSetting( "cooldown", 10 )
+	local Max = PropComponent:ReadSetting( "maxprops", 50 )
+	local Rate = PropComponent:ReadSetting( "cooldown", 10 )
 
 	if Max ~= -1 and PCount >= Max then
 		Context:Throw(Trace, "propcore", "Max total props reached (" .. Max .. ")." )
@@ -519,11 +519,11 @@ EXPADV.ServerOperators( )
 PropComponent:AddVMFunction("spawn", "s,b", "e", PropCoreSpawn )
 
 PropComponent:AddVMFunction( "canSpawn", "", "b", function( Context )
-	local Max = PropComponent:GetSetting( "maxprops", 50 )
+	local Max = PropComponent:ReadSetting( "maxprops", 50 )
 	
 	if Max ~= -1 and (PlayerCount[Context.player] or 0) >= Max then
 		return false
-	elseif (PlayerRate[Context.player] or 0) >= PropComponent:GetSetting( "cooldown", 10 ) then
+	elseif (PlayerRate[Context.player] or 0) >= PropComponent:ReadSetting( "cooldown", 10 ) then
 		return false
 	end
 	
