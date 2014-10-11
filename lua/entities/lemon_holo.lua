@@ -685,9 +685,7 @@ if SERVER then
 	function ENT:SetScaleUnits( Vector )
 		local  OBBSize = self:OBBMaxs( ) - self:OBBMins( )
 
-		Vector.x = Vector.x / OBBSize.x
-		Vector.y = Vector.y / OBBSize.y
-		Vector.z = Vector.z / OBBSize.z
+		Vector = Vector( Vector.x / OBBSize.x, Vector.y / OBBSize.y, Vector.z / OBBSize.z )
 
 		self:SetScale( Vector )
 	end
