@@ -86,7 +86,7 @@ Component:AddFunctionHelper( "entity", ":n", "Returns the entity of the given in
 Component:AddInlineFunction( "isValid", "e:", "b", "@value 1:IsValid()")
 Component:AddFunctionHelper( "isValid", "e:", "Returns if the given entity is valid.")
 
-Component:AddInlineFunction( "validPhysics", "e:", "b", "@value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType( )== MOVETYPE_VPHYSICS")
+Component:AddInlineFunction( "validPhysics", "e:", "b", "@value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType( )== $MOVETYPE_VPHYSICS")
 Component:AddFunctionHelper( "validPhysics", "e:", "Returns if the given entity has valid physics.")
 
 Component:AddInlineFunction( "pos", "e:", "v", "(@value 1:IsValid() and @value 1:GetPos() or Vector(0,0,0))")
@@ -215,22 +215,22 @@ Component:AddFunctionHelper( "killPod", "e:", "Kills the driver of the given veh
 
 EXPADV.SharedOperators()
 
-Component:AddInlineFunction( "mass", "e:", "n", "((@value 1:IsValid() && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType( )== MOVETYPE_VPHYSICS) and @value 1:GetPhysicsObject():GetMass() or 0)")
+Component:AddInlineFunction( "mass", "e:", "n", "((@value 1:IsValid() && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType( )== $MOVETYPE_VPHYSICS) and @value 1:GetPhysicsObject():GetMass() or 0)")
 Component:AddFunctionHelper( "mass", "e:", "Returns the mass of the given entity.")
 
-Component:AddInlineFunction( "massCenter", "e:", "v", "((@value 1:IsValid() && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType( )== MOVETYPE_VPHYSICS) and @value 1:LocalToWorld(@value 1:GetPhysicsObject():GetMassCenter()) or Vector(0,0,0))")
+Component:AddInlineFunction( "massCenter", "e:", "v", "((@value 1:IsValid() && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType( )== $MOVETYPE_VPHYSICS) and @value 1:LocalToWorld(@value 1:GetPhysicsObject():GetMassCenter()) or Vector(0,0,0))")
 Component:AddFunctionHelper( "massCenter", "e:", "Returns the center of mass of the given entity.")
 
-Component:AddInlineFunction( "massCenterL", "e:", "v", "((@value 1:IsValid() && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType( )== MOVETYPE_VPHYSICS) and @value 1:GetPhysicsObject():GetMassCenter() or Vector(0,0,0))")
+Component:AddInlineFunction( "massCenterL", "e:", "v", "((@value 1:IsValid() && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType( )== $MOVETYPE_VPHYSICS) and @value 1:GetPhysicsObject():GetMassCenter() or Vector(0,0,0))")
 Component:AddFunctionHelper( "massCenterL", "e:", "Returns the local center of mass of the given entity.")
 
-Component:AddInlineFunction( "volume", "e:", "n", "((@value 1:IsValid() && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType( )== MOVETYPE_VPHYSICS) and @value 1:GetPhysicsObject():GetVolume() or 0)")
+Component:AddInlineFunction( "volume", "e:", "n", "((@value 1:IsValid() && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType( )== $MOVETYPE_VPHYSICS) and @value 1:GetPhysicsObject():GetVolume() or 0)")
 Component:AddFunctionHelper( "volume", "e:", "Returns the volume of the given entity.")
 
-Component:AddInlineFunction( "isfrozen", "e:", "b", "((@value 1:IsValid() && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType( )== MOVETYPE_VPHYSICS) and (@value 1:GetPhysicsObject():IsMoveable() == false) or false)")
+Component:AddInlineFunction( "isfrozen", "e:", "b", "((@value 1:IsValid() && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType( )== $MOVETYPE_VPHYSICS) and (@value 1:GetPhysicsObject():IsMoveable() == false) or false)")
 Component:AddFunctionHelper( "isfrozen", "e:", "Returns if the given entity is frozen.")
 
-Component:AddInlineFunction( "inertia", "e:", "v", "((@value 1:IsValid() && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType( )== MOVETYPE_VPHYSICS) and @value 1:GetPhysicsObject():GetInertia() or Vector(0,0,0))")
+Component:AddInlineFunction( "inertia", "e:", "v", "((@value 1:IsValid() && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType( )== $MOVETYPE_VPHYSICS) and @value 1:GetPhysicsObject():GetInertia() or Vector(0,0,0))")
 Component:AddFunctionHelper( "inertia", "e:", "Returns the inertia of the given entity.")
 
 Component:AddInlineFunction( "vel", "e:", "v", "(@value 1:IsValid() and @value 1:GetVelocity() or Vector(0,0,0))")
@@ -240,14 +240,14 @@ Component:AddInlineFunction( "velL", "e:", "v", "(@value 1:IsValid() and (@value
 Component:AddFunctionHelper( "velL", "e:", "Returns the local velocity of the given entity.")
 
 Component:AddInlineFunction( "angVel", "e:", "a",
-[[if(@value 1:IsValid() && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType( )== MOVETYPE_VPHYSICS) then
+[[if(@value 1:IsValid() && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType( )== $MOVETYPE_VPHYSICS) then
 	@define vel = @value 1:GetPhysicsObject():GetAngleVelocity()
 	Angle(@vel.y, @vel.z, @vel.x)
 end]])
 
 Component:AddFunctionHelper( "angVel", "e:", "Returns the angular velocity of the given entity.")
 
-Component:AddInlineFunction( "angVelVector", "e:", "a","((@value 1:IsValid() && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType( )== MOVETYPE_VPHYSICS) and @value 1:GetPhysicsObject():GetAngleVelocity() or Vector(0,0,0))")
+Component:AddInlineFunction( "angVelVector", "e:", "a","((@value 1:IsValid() && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType( )== $MOVETYPE_VPHYSICS) and @value 1:GetPhysicsObject():GetAngleVelocity() or Vector(0,0,0))")
 Component:AddFunctionHelper( "angVelVector", "e:", "Returns the angular velocity of the given entity as a vector.")
 
 Component:AddInlineFunction( "radius", "e:", "n","(@value 1:IsValid() and @value 1:BoundingRadius() or 0)")
@@ -259,7 +259,7 @@ Component:AddFunctionHelper( "radius", "e:", "Returns the bounding radius of the
 
 EXPADV.ServerOperators()
 
-Component:AddPreparedFunction( "setMass", "e:n", "","if(@value 1:IsValid() && EXPADV.PPCheck(Context.player,@value 1) && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType() == MOVETYPE_VPHYSICS then @value 1:GetPhysicsObject():SetMass(@value 2 or 0) end")
+Component:AddPreparedFunction( "setMass", "e:n", "","if(@value 1:IsValid() && EXPADV.PPCheck(Context.player,@value 1) && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType() == $MOVETYPE_VPHYSICS then @value 1:GetPhysicsObject():SetMass(@value 2 or 0) end")
 Component:AddFunctionHelper( "setMass", "e:n", "Sets the mass of the given entity.")
 
 Component:AddVMFunction( "applyForce", "e:v", "", function( Context, Trace, Target, Pos )
