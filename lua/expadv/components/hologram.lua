@@ -411,14 +411,13 @@ end]] )
 
 HoloComponent:AddPreparedFunction("getScale", "h:", "v",[[
 if IsValid( @value 1 ) and @value 1.GetScale then
-	@define Val @value 1:GetScale( )
-end]], "Vector3( @Val or Vector( 0, 0, 0 ) )" )
+	@define Val = @value 1:GetScale( )
+end]], "(@Val or Vector( 0, 0, 0 ))" )
 
 HoloComponent:AddPreparedFunction("getScaleUnits", "h:", "v",[[
-@define pos
 if IsValid( @value 1 ) and @value 1.GetScale then
-	@pos = @value 1:GetScaleUnits( )
-end]], "( @pos or Vector( 0, 0, 0 ) )" )
+	@define pos = @value 1:GetScaleUnits( )
+end]], "(@pos or Vector( 0, 0, 0 ))" )
 
 HoloComponent:AddFunctionHelper( "stopRotate", "h:", "Stops the rotation animation of a hologram." )
 HoloComponent:AddFunctionHelper("setScale", "h:v", "Sets the scale of a hologram." )
