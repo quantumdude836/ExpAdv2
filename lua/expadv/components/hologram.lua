@@ -411,8 +411,8 @@ end]] )
 
 HoloComponent:AddPreparedFunction("getScale", "h:", "v",[[
 if IsValid( @value 1 ) and @value 1.GetScale then
-	%util = @value 1:GetScale( )
-end]], "Vector3( %util or Vector( 0, 0, 0 ) )" )
+	@define Val @value 1:GetScale( )
+end]], "Vector3( @Val or Vector( 0, 0, 0 ) )" )
 
 HoloComponent:AddPreparedFunction("getScaleUnits", "h:", "v",[[
 @define pos
