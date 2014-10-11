@@ -271,6 +271,8 @@ function Component:OnPostRegisterClass( Name, Class )
 	self:AddInlineOperator( Name, "vr", Class.Short, string.format( "( @value 1[2] == %q and @value 1[1] or Context:Throw(@trace, %q, \"Attempt to cast value \" .. EXPADV.TypeName(@value 1[2]) .. \" to %s \") )", Class.Short, "cast", Name ) )
 end
 
+Component:AddInlineFunction( "type", "vr:", "s", "EXPADV.TypeName(@value 1[2])" )
+
 /* --- --------------------------------------------------------------------------------
 	@: Debug
    --- */
