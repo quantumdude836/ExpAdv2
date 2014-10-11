@@ -201,7 +201,7 @@ Component:AddFunctionHelper( "killPod", "e:", "Kills the driver of the given veh
 
 EXPADV.SharedOperators()
 
-Component:AddInlineFunction( "mass", "e:", "e", "((@value 1:IsValid() && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType( )== MOVETYPE_VPHYSICS) and @value 1:GetPhysicsObject():GetMass() or 0)")
+Component:AddInlineFunction( "mass", "e:", "n", "((@value 1:IsValid() && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType( )== MOVETYPE_VPHYSICS) and @value 1:GetPhysicsObject():GetMass() or 0)")
 Component:AddFunctionHelper( "mass", "e:", "Returns the mass of the given entity.")
 
 Component:AddInlineFunction( "massCenter", "e:", "v", "((@value 1:IsValid() && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType( )== MOVETYPE_VPHYSICS) and @value 1:LocalToWorld(@value 1:GetPhysicsObject():GetMassCenter()) or Vector(0,0,0))")
