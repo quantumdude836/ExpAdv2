@@ -5,6 +5,20 @@
 
 local Component = EXPADV.AddComponent( "entity", true )
 
+local function VectorNotHuge( Vec )
+	if Vec.x >= math.huge or Vec.x <= -math.huge then return false end
+	if Vec.y >= math.huge or Vec.y <= -math.huge then return false end
+	if Vec.z >= math.huge or Vec.z <= -math.huge then return false end
+	return true
+end
+
+local function AngleNotHuge( Vec )
+	if Vec.p >= math.huge or Vec.p <= -math.huge then return false end
+	if Vec.y >= math.huge or Vec.y <= -math.huge then return false end
+	if Vec.r >= math.huge or Vec.r <= -math.huge then return false end
+	return true
+end
+
 /* --- --------------------------------------------------------------------------------
 	@: Entity Class
    --- */
@@ -249,34 +263,34 @@ Component:AddPreparedFunction( "setMass", "e:n", "","if(@value 1:IsValid() && EX
 Component:AddFunctionHelper( "setMass", "e:n", "Sets the mass of the given entity.")
 
 Component:AddVMFunction( "applyForce", "e:v", "", function( Context, Trace, Target, Pos )
-	if(Target:IsValid() && EXPADV.PPCheck(Context.player, Target) && Target:GetPhysicsObject():IsValid() && Target:GetMoveType() == MOVETYPE_VPHYSICS) then
-		if(Pos < Vector(math.huge, math.huge, math.huge) && -Vector(math.huge, math.huge, math.huge) < Pos) then
-			Target:GetPhysicsObject():ApplyForceCenter(Pos)
-		end
+	if Target:IsValid() and VectorNotHuge( Pos ) and EXPADV.PPCheck(Context.player, Target) then
+		local Phys = Target:GetPhysicsObject()
+		if !Phys or !Phys:IsValid( ) then return end
+		if Target:GetMoveType() == MOVETYPE_VPHYSICS then Phys:ApplyForceCenter(Pos) end
 	end
 end)
 
 Component:AddFunctionHelper( "applyForce", "e:v", "Applies a vector of force on the given entity.")
 
 Component:AddPreparedFunction( "applyOffsetForce", "e:v,v", "", function( Context, Trace, Target, Pos1, Pos2 )
-	if(Target:IsValid() && EXPADV.PPCheck(Context.player,Target) && Target:GetPhysicsObject():IsValid() && Target:GetMoveType() == MOVETYPE_VPHYSICS) then
-		if(Pos1 < Vector(math.huge, math.huge, math.huge) && -Vector(math.huge, math.huge, math.huge) < Pos1 && Pos2 < Vector(math.huge, math.huge, math.huge) && -Vector(math.huge, math.huge, math.huge) < Pos2) then
-			Target:GetPhysicsObject():ApplyForceOffset(Pos1, Pos2)
-		end
+	if Target:IsValid() and VectorNotHuge( Pos1 ) and VectorNotHuge( Pos2 ) and EXPADV.PPCheck(Context.player, Target) then
+		local Phys = Target:GetPhysicsObject()
+		if !Phys or !Phys:IsValid( ) then return end
+		if Target:GetMoveType() == MOVETYPE_VPHYSICS then Phys:ApplyForceOffset(Pos1, Pos2) end
 	end
 end)
 
 Component:AddFunctionHelper( "applyForceOffset", "e:v,v", "Applies an offset vector of force on the given entity.")
 
-local InfAng = Angle(math.huge, math.huge, math.huge)
-
 Component:AddPreparedFunction( "applyAngForce", "e:a", "",
 	function( Context, Trace, Target, Angle )
 
-		if Target:IsValid() && EXPADV.PPCheck(Context.player,Target) and Target:GetPhysicsObject():IsValid() and Target:GetMoveType() == MOVETYPE_VPHYSICS then
-			if Angle < InfAng && -InfAng < Angle then
+		if Target:IsValid() and AngleNotHuge(Angle )and EXPADV.PPCheck(Context.player,Target) then
+			local Phys = Target:GetPhysicsObject()
+			if !Phys or !Phys:IsValid( ) then return end
+			
+			if Target:GetMoveType() == MOVETYPE_VPHYSICS then
 				if Angle.p != 0 or Angle.y != 0 or Angle.r != 0 then
-					local phys = Target:GetPhysicsObject()
 					
 					local up = Target:GetUp()
 					local left = Target:GetRight() * -1
@@ -284,22 +298,22 @@ Component:AddPreparedFunction( "applyAngForce", "e:a", "",
 					
 					if Angle.p ~= 0 then
 						local pitch = up * (Angle.p * 0.5)
-						phys:ApplyForceOffset( forward, pitch )
-						phys:ApplyForceOffset( forward * -1, pitch * -1 )
+						Phys:ApplyForceOffset( forward, pitch )
+						Phys:ApplyForceOffset( forward * -1, pitch * -1 )
 					end
 
 					-- apply yaw force
 					if Angle.y ~= 0  then
 						local yaw = forward * (Angle.y * 0.5)
-						phys:ApplyForceOffset( left, yaw )
-						phys:ApplyForceOffset( left * -1, yaw * -1 )
+						Phys:ApplyForceOffset( left, yaw )
+						Phys:ApplyForceOffset( left * -1, yaw * -1 )
 					end
 
 					-- apply roll force
 					if Angle.r ~= 0 then
 						local roll = left * (Angle.r * 0.5)
-						phys:ApplyForceOffset( up, roll )
-						phys:ApplyForceOffset( up * -1, roll * -1 )
+						Phys:ApplyForceOffset( up, roll )
+						Phys:ApplyForceOffset( up * -1, roll * -1 )
 					end
 				end
 			end
