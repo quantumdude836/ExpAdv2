@@ -194,8 +194,8 @@ function Compiler:NewLuaInstruction( Trace, Operator, Prepare, Inline )
 	}
 end
 
-function Compiler:MakeVirtual( Instruction )
-	if Instruction.IsRaw then return Instruction end
+function Compiler:MakeVirtual( Instruction, Force )
+	if Instruction.IsRaw and !Force then return Instruction end
 
 	if Instruction.FLAG == EXPADV_INLINE then return Instruction end
 
