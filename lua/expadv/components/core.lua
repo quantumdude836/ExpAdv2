@@ -257,7 +257,7 @@ local Class_Variant = Component:AddClass( "variant", "vr" )
 
 Class_Variant:DefaultAsLua( { false, "b" } )
 
-Class_Variant:AddPreparedOperator( "=", "n,vr", "", "Context.Memory[@Value 1] = @value 2" )
+Class_Variant:AddPreparedOperator( "=", "n,vr", "", "Context.Memory[@value 1] = @value 2" )
 
 function Component:OnPostRegisterClass( Name, Class )
 	if !Class.LoadOnClient then
