@@ -4,27 +4,30 @@
 
 EXPADV.ServerOperators( )
 
-local HoloComponent = EXPADV.AddComponent( "hologram" , true )
+local Component = EXPADV.AddComponent( "hologram" , true )
+
+Component.Author = "Rusketh"
+Component.Description = "Adds a holographic object, that is visible in world and can be manipulated to suit any purpose."
 
 /* --- --------------------------------------------------------------------------------
 	@: Settings
    --- */
 
-HoloComponent:CreateSetting( "max", 250 )
-HoloComponent:CreateSetting( "rate", 50 )
-HoloComponent:CreateSetting( "clips", 5 )
-HoloComponent:CreateSetting( "Size", 50 )
-HoloComponent:CreateSetting( "model_any", 1 )
+Component:CreateSetting( "max", 250 )
+Component:CreateSetting( "rate", 50 )
+Component:CreateSetting( "clips", 5 )
+Component:CreateSetting( "Size", 50 )
+Component:CreateSetting( "model_any", 1 )
 
 /* --- --------------------------------------------------------------------------------
 	@: Settings as inlined functions
    --- */
 
-HoloComponent:AddInlineFunction( "hologramLimit", "", "n", "@setting max" )
-HoloComponent:AddInlineFunction( "hologramSpawnRate", "", "n", "@setting rate" )
-HoloComponent:AddInlineFunction( "hologramClipLimit", "", "n", "@setting clips" )
-HoloComponent:AddInlineFunction( "hologramMaxScale", "", "n", "@setting Size" )
-HoloComponent:AddInlineFunction( "hologramAnyModel", "", "b", "@setting model_any" )
+Component:AddInlineFunction( "hologramLimit", "", "n", "@setting max" )
+Component:AddInlineFunction( "hologramSpawnRate", "", "n", "@setting rate" )
+Component:AddInlineFunction( "hologramClipLimit", "", "n", "@setting clips" )
+Component:AddInlineFunction( "hologramMaxScale", "", "n", "@setting Size" )
+Component:AddInlineFunction( "hologramAnyModel", "", "b", "@setting model_any" )
 
 /* --- --------------------------------------------------------------------------------
 	@: Hologram Handeling
@@ -36,7 +39,7 @@ local HolosByPlayer = { }
 
 local DeltaPerPlayer = { }
 
-function HoloComponent:OnShutDown( Context )
+function Component:OnShutDown( Context )
 	
 	if IsValid( Context.player ) then
 		local PlyTbl = HolosByPlayer[ Context.player:UniqueID( ) ]
@@ -52,7 +55,7 @@ function HoloComponent:OnShutDown( Context )
 	end
 end
 
-function HoloComponent:OnCoreReload( )
+function Component:OnCoreReload( )
 	HolosByPlayer = { }
 
 	for Ent, Holos in pairs( HolosByEntity ) do
@@ -170,18 +173,18 @@ EXPADV.CallHook( "BuildHologramModels", ModelEmu )
 	@: Model list functions
    --- */
 
-HoloComponent:AddVMFunction( "asGameModel", "s", "s",
+Component:AddVMFunction( "asGameModel", "s", "s",
 	function( Context, Trace, Model )
 		return ModelEmu[Model] or ""
 	end )
 
-HoloComponent:AddFunctionHelper( "asGameModel", "s", "Gets the full model path of a wire hologram model." )
+Component:AddFunctionHelper( "asGameModel", "s", "Gets the full model path of a wire hologram model." )
 
 /* --- --------------------------------------------------------------------------------
 	@: Class
    --- */
 
-local Hologram = HoloComponent:AddClass( "hologram", "h" )
+local Hologram = Component:AddClass( "hologram", "h" )
 
 Hologram:MakeServerOnly( )
 
@@ -195,7 +198,7 @@ Hologram:AddAlias( "holo" )
 	@: Casting
    --- */
 
-HoloComponent:AddPreparedOperator( "hologram", "e", "h", [[
+Component:AddPreparedOperator( "hologram", "e", "h", [[
 if !IsValid( @value 1 ) or !@value 1.IsHologram then
 	Context:Throw( %trace, "hologram", "casted none hologram from entity.")
 end ]], "@value 1" )
@@ -212,14 +215,14 @@ local function SetModel( Context, Trace, Entity, Model )
 			Entity:SetModel( "models/holograms/" .. ValidModel .. ".mdl" )
 		end
 
-	elseif !HoloComponent:ReadSetting( "model_any", true ) or !util.IsValidModel( Model ) then
+	elseif !Component:ReadSetting( "model_any", true ) or !util.IsValidModel( Model ) then
 		Context:Throw( Trace, "hologram", "Invalid model set " .. Model )
 	elseif Entity.IsHologram and Entity.player == Context.player then
 		Entity:SetModel( ValidModel or Model )
 	end
 end
 
-HoloComponent:AddVMFunction( "setModel", "h:s", "", SetModel )
+Component:AddVMFunction( "setModel", "h:s", "", SetModel )
 
 /*==============================================================================================
     Section: ID Emulation
@@ -236,13 +239,13 @@ local function SetID( Context, Trace, Entity, ID )
 	Entity.ID = ID
 end
 
-HoloComponent:AddVMFunction( "setID", "h:n", "", SetID )
-HoloComponent:AddInlineFunction( "getID", "h:", "n", "(@value 1.ID or -1)" )
-HoloComponent:AddInlineFunction( "hologram", "n", "h", "(Context.Data.Holograms[ @value 1] or $Entity(0))" )
+Component:AddVMFunction( "setID", "h:n", "", SetID )
+Component:AddInlineFunction( "getID", "h:", "n", "(@value 1.ID or -1)" )
+Component:AddInlineFunction( "hologram", "n", "h", "(Context.Data.Holograms[ @value 1] or $Entity(0))" )
 
-HoloComponent:AddFunctionHelper( "setID", "h:n", "Sets the id of a hologram for use with hologram(N), the ID is specific to the Gate." )
-HoloComponent:AddFunctionHelper( "getID", "h:", "Returns the current ID of hologram H." )
-HoloComponent:AddFunctionHelper( "hologram", "n", "Returns the hologram with the id set to N." )
+Component:AddFunctionHelper( "setID", "h:n", "Sets the id of a hologram for use with hologram(N), the ID is specific to the Gate." )
+Component:AddFunctionHelper( "getID", "h:", "Returns the current ID of hologram H." )
+Component:AddFunctionHelper( "hologram", "n", "Returns the hologram with the id set to N." )
 
 /*==============================================================================================
     Section: Creation
@@ -251,9 +254,9 @@ HoloComponent:AddFunctionHelper( "hologram", "n", "Returns the hologram with the
 local function NewHolo( Context, Trace, Model, Position, Angle )
 	local UID = Context.player:UniqueID( )
 
-	if Context.player:GetNWInt( "lemon.holograms", 0 ) >= HoloComponent:ReadSetting( "max", 0 ) then
+	if Context.player:GetNWInt( "lemon.holograms", 0 ) >= Component:ReadSetting( "max", 0 ) then
 		Context:Throw( Trace, "hologram", "Hologram limit reached." )
-	elseif ( DeltaPerPlayer[ UID ] or 0 ) >= HoloComponent:ReadSetting( "rate", 0 ) then
+	elseif ( DeltaPerPlayer[ UID ] or 0 ) >= Component:ReadSetting( "rate", 0 ) then
 		Context:Throw( Trace, "hologram", "Hologram cooldown reached." )
 	end
 
@@ -306,17 +309,17 @@ local function NewHolo( Context, Trace, Model, Position, Angle )
 	return Entity
 end
 
-HoloComponent:AddVMFunction( "hologram", "", "h", NewHolo )
-HoloComponent:AddFunctionHelper( "hologram", "", "Creates a hologram." )
+Component:AddVMFunction( "hologram", "", "h", NewHolo )
+Component:AddFunctionHelper( "hologram", "", "Creates a hologram." )
 
-HoloComponent:AddVMFunction( "hologram", "s", "h", NewHolo )
-HoloComponent:AddFunctionHelper( "hologram", "s", "Creates a hologram with (string model)." )
+Component:AddVMFunction( "hologram", "s", "h", NewHolo )
+Component:AddFunctionHelper( "hologram", "s", "Creates a hologram with (string model)." )
 
-HoloComponent:AddVMFunction( "hologram", "s,v", "h", NewHolo )
-HoloComponent:AddFunctionHelper( "hologram", "s,v", "Creates a hologram with (string model) at (vector position)." )
+Component:AddVMFunction( "hologram", "s,v", "h", NewHolo )
+Component:AddFunctionHelper( "hologram", "s,v", "Creates a hologram with (string model) at (vector position)." )
 
-HoloComponent:AddVMFunction( "hologram", "s,v,a", "h", NewHolo )
-HoloComponent:AddFunctionHelper( "hologram", "s,v,a", "Creates a hologram with (string model) at (vector position) with (angle rotation)." )
+Component:AddVMFunction( "hologram", "s,v,a", "h", NewHolo )
+Component:AddFunctionHelper( "hologram", "s,v,a", "Creates a hologram with (string model) at (vector position) with (angle rotation)." )
 
 /*==============================================================================================
     Section: Can Hologram
@@ -324,259 +327,259 @@ HoloComponent:AddFunctionHelper( "hologram", "s,v,a", "Creates a hologram with (
 local function CanHolo( Context )
 	local UID = Context.player:UniqueID( )
 	
-	if Context.player:GetNWInt( "lemon.holograms", 0 ) >= HoloComponent:ReadSetting( "max", 0 )  then
+	if Context.player:GetNWInt( "lemon.holograms", 0 ) >= Component:ReadSetting( "max", 0 )  then
 		return false
-	elseif ( DeltaPerPlayer[ UID ] or 0 ) >= HoloComponent:ReadSetting( "rate", 0 )  then
+	elseif ( DeltaPerPlayer[ UID ] or 0 ) >= Component:ReadSetting( "rate", 0 )  then
 		return false
 	end
 
 	return true
 end
 
-HoloComponent:AddVMFunction( "canMakeHologram", "", "b", CanHolo )
-HoloComponent:AddFunctionHelper( "canMakeHologram", "", "Returns true if a hologram can be made this tick." )
+Component:AddVMFunction( "canMakeHologram", "", "b", CanHolo )
+Component:AddFunctionHelper( "canMakeHologram", "", "Returns true if a hologram can be made this tick." )
 
 /*==============================================================================================
     Position
 ==============================================================================================*/
-HoloComponent:AddPreparedFunction("setPos", "h:v", "",[[
+Component:AddPreparedFunction("setPos", "h:v", "",[[
 if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:SetPos( @value 2 )
 end]] )
 
-HoloComponent:AddPreparedFunction("moveTo", "h:v,n", "",[[
+Component:AddPreparedFunction("moveTo", "h:v,n", "",[[
 if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:MoveTo( @value 2, @value 3 )
 end]] )
 
-HoloComponent:AddPreparedFunction("stopMove", "h:", "",[[
+Component:AddPreparedFunction("stopMove", "h:", "",[[
 if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:StopMove( )
 end]] )
 
 
-HoloComponent:AddFunctionHelper( "setPos", "h:v", "Sets the postion of the hologram." )
-HoloComponent:AddFunctionHelper( "moveTo", "h:v,n", "Moves the hologram to position V at speed N" )
-HoloComponent:AddFunctionHelper( "stopMove", "h:", "If a hologram is being moved, by a call to h:moveTo(v,) this stops it." )
+Component:AddFunctionHelper( "setPos", "h:v", "Sets the postion of the hologram." )
+Component:AddFunctionHelper( "moveTo", "h:v,n", "Moves the hologram to position V at speed N" )
+Component:AddFunctionHelper( "stopMove", "h:", "If a hologram is being moved, by a call to h:moveTo(v,) this stops it." )
 
 /*==============================================================================================
     Angles
 ==============================================================================================*/
-HoloComponent:AddPreparedFunction("setAng", "h:a", "",[[
+Component:AddPreparedFunction("setAng", "h:a", "",[[
 if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:SetAngles( @value 2 )
 end]] )
 
-HoloComponent:AddPreparedFunction("rotateTo", "h:a,n", "",[[
+Component:AddPreparedFunction("rotateTo", "h:a,n", "",[[
 if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:RotateTo( @value 2, @value 3 )
 end]] )
 
-HoloComponent:AddPreparedFunction("stopRotate", "h:", "",[[
+Component:AddPreparedFunction("stopRotate", "h:", "",[[
 if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:StopRotate( )
 end]] )
 
-HoloComponent:AddFunctionHelper( "setAng", "h:a", "Sets the angle of a hologram." )
-HoloComponent:AddFunctionHelper( "rotateTo", "h:a,n", "Animates a hologram to move to rotation A, N is speed." )
-HoloComponent:AddFunctionHelper( "stopRotate", "h:", "Stops the rotation animation of a hologram." )
+Component:AddFunctionHelper( "setAng", "h:a", "Sets the angle of a hologram." )
+Component:AddFunctionHelper( "rotateTo", "h:a,n", "Animates a hologram to move to rotation A, N is speed." )
+Component:AddFunctionHelper( "stopRotate", "h:", "Stops the rotation animation of a hologram." )
 
 /*==============================================================================================
     Scale
 ==============================================================================================*/
-HoloComponent:AddPreparedFunction("setScale", "h:v", "",[[
+Component:AddPreparedFunction("setScale", "h:v", "",[[
 if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:SetScale( @value 2 )
 end]] )
 
-HoloComponent:AddPreparedFunction("setScaleUnits", "h:v", "",[[
+Component:AddPreparedFunction("setScaleUnits", "h:v", "",[[
 if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:SetScaleUnits( @value 2 )
 end]] )
 
-HoloComponent:AddPreparedFunction("scaleTo", "h:v,n", "",[[
+Component:AddPreparedFunction("scaleTo", "h:v,n", "",[[
 if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:ScaleTo( @value 2, @value 3 )
 end]] )
 
-HoloComponent:AddPreparedFunction("scaleToUnits", "h:v,n", "",[[
+Component:AddPreparedFunction("scaleToUnits", "h:v,n", "",[[
 if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:ScaleToUnits( @value 2, @value 3 )
 end]] )
 
-HoloComponent:AddPreparedFunction("stopScale", "h:", "",[[
+Component:AddPreparedFunction("stopScale", "h:", "",[[
 if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:StopScale( )
 end]] )
 
-HoloComponent:AddPreparedFunction("getScale", "h:", "v",[[
+Component:AddPreparedFunction("getScale", "h:", "v",[[
 if IsValid( @value 1 ) and @value 1.GetScale then
 	@define Val = @value 1:GetScale( )
 end]], "(@Val or Vector( 0, 0, 0 ))" )
 
-HoloComponent:AddPreparedFunction("getScaleUnits", "h:", "v",[[
+Component:AddPreparedFunction("getScaleUnits", "h:", "v",[[
 if IsValid( @value 1 ) and @value 1.GetScale then
 	@define pos = @value 1:GetScaleUnits( )
 end]], "(@pos or Vector( 0, 0, 0 ))" )
 
-HoloComponent:AddFunctionHelper( "stopRotate", "h:", "Stops the rotation animation of a hologram." )
-HoloComponent:AddFunctionHelper("setScale", "h:v", "Sets the scale of a hologram." )
-HoloComponent:AddFunctionHelper("setScaleUnits", "h:v", "Sets the scale of a hologram in units." )
-HoloComponent:AddFunctionHelper("scaleTo", "h:v,n", "Animates a hologram to rescale to size V, N is speed." )
-HoloComponent:AddFunctionHelper("scaleToUnits", "h:v,n", "Animates a hologram to rescale to size V in units, N is speed." )
-HoloComponent:AddFunctionHelper("stopScale", "h:", "Stops the rescale animation of a hologram." )
-HoloComponent:AddFunctionHelper("getScale", "h:", "Returns the scale of a hologram." )
-HoloComponent:AddFunctionHelper("getScaleUnits", "h:", "Returns the scale of a hologram in units." )
+Component:AddFunctionHelper( "stopRotate", "h:", "Stops the rotation animation of a hologram." )
+Component:AddFunctionHelper("setScale", "h:v", "Sets the scale of a hologram." )
+Component:AddFunctionHelper("setScaleUnits", "h:v", "Sets the scale of a hologram in units." )
+Component:AddFunctionHelper("scaleTo", "h:v,n", "Animates a hologram to rescale to size V, N is speed." )
+Component:AddFunctionHelper("scaleToUnits", "h:v,n", "Animates a hologram to rescale to size V in units, N is speed." )
+Component:AddFunctionHelper("stopScale", "h:", "Stops the rescale animation of a hologram." )
+Component:AddFunctionHelper("getScale", "h:", "Returns the scale of a hologram." )
+Component:AddFunctionHelper("getScaleUnits", "h:", "Returns the scale of a hologram in units." )
 
 /*==============================================================================================
     Visible and Shading
 ==============================================================================================*/
-HoloComponent:AddPreparedFunction("shading", "h:b", "", [[
+Component:AddPreparedFunction("shading", "h:b", "", [[
 if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:SetShading(@value 2)
 end]] )
 
-HoloComponent:AddPreparedFunction("shadow", "h:b", "", [[
+Component:AddPreparedFunction("shadow", "h:b", "", [[
 if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:DrawShadow(@value 2)
 end]] )
 
-HoloComponent:AddPreparedFunction("visible", "h:b", "", [[
+Component:AddPreparedFunction("visible", "h:b", "", [[
 if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:SetVisible(@value 2)
 end]] )
 
-HoloComponent:AddInlineFunction("isVisible", "h:", "b", "(IsValid( @value 1 ) and @value 1.INFO.VISIBLE or false )" )
+Component:AddInlineFunction("isVisible", "h:", "b", "(IsValid( @value 1 ) and @value 1.INFO.VISIBLE or false )" )
 
-HoloComponent:AddInlineFunction("hasShading", "h:", "b", "(IsValid( @value 1 ) and @value 1.INFO.SHADING or false )" )
+Component:AddInlineFunction("hasShading", "h:", "b", "(IsValid( @value 1 ) and @value 1.INFO.SHADING or false )" )
 
-HoloComponent:AddFunctionHelper("shading", "h:b", "Enables or disables shading of a hologram." )
-HoloComponent:AddFunctionHelper("shadow", "h:b", "Set to true to make a hologram cast a shadow." )
-HoloComponent:AddFunctionHelper("visible", "h:b", "Enables or disables visibility of a hologram." )
-HoloComponent:AddFunctionHelper("isVisible", "h:", "Returns true of the hologram is visible." )
-HoloComponent:AddFunctionHelper("hasShading", "h:", "Returns true if a hologram has shading enabled." )
+Component:AddFunctionHelper("shading", "h:b", "Enables or disables shading of a hologram." )
+Component:AddFunctionHelper("shadow", "h:b", "Set to true to make a hologram cast a shadow." )
+Component:AddFunctionHelper("visible", "h:b", "Enables or disables visibility of a hologram." )
+Component:AddFunctionHelper("isVisible", "h:", "Returns true of the hologram is visible." )
+Component:AddFunctionHelper("hasShading", "h:", "Returns true if a hologram has shading enabled." )
 
 /*==============================================================================================
     Section: Clipping
 ==============================================================================================*/
 
 
-HoloComponent:AddPreparedFunction("pushClip", "h:n,v,v", "", [[
+Component:AddPreparedFunction("pushClip", "h:n,v,v", "", [[
 if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:PushClip( @value 2, @value 3, value %4 )
 end]] )
 
-/*HoloComponent:AddPreparedFunction("removeClip", "h:n", "", [[
+/*Component:AddPreparedFunction("removeClip", "h:n", "", [[
 if IsValid( @value 1 ) and @value 1.player == Context.player and @value 1:RemoveClip( @value 2 ) then
 	%HoloLib.QueueHologram( @value 1 )
 end]] ) Not supported yet*/
 
-HoloComponent:AddPreparedFunction("enableClip", "h:n,b", "", [[
+Component:AddPreparedFunction("enableClip", "h:n,b", "", [[
 if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:SetClipEnabled( @value 2, @value 3 )
 end]] )
 
-HoloComponent:AddPreparedFunction( "setClipOrigin", "h:n,v", "", [[
+Component:AddPreparedFunction( "setClipOrigin", "h:n,v", "", [[
 if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:SetClipOrigin( @value 2, @value 3 )
 end]] )
 
-HoloComponent:AddPreparedFunction( "setClipNormal", "h:n,v", "", [[
+Component:AddPreparedFunction( "setClipNormal", "h:n,v", "", [[
 if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:SetClipNormal( @value 2, @value 3 )
 end]] )
 
-HoloComponent:AddFunctionHelper( "pushClip", "h:n,v,v", "Clip a hologram, (number clip index) at (vector position) across (vector axis)." )
-HoloComponent:AddFunctionHelper( "removeClip", "h:n", "Removes a clip from the hologram." )
-HoloComponent:AddFunctionHelper( "enableClip", "h:n,b", "Enables clip (number) on the hologram if (boolean) is true." )
-HoloComponent:AddFunctionHelper( "setClipOrigin", "h:n,v", "Set the origin of clip N on hologram." )
-HoloComponent:AddFunctionHelper( "setClipNormal", "h:n,v", "Set the normal of clip N on hologram." )
+Component:AddFunctionHelper( "pushClip", "h:n,v,v", "Clip a hologram, (number clip index) at (vector position) across (vector axis)." )
+Component:AddFunctionHelper( "removeClip", "h:n", "Removes a clip from the hologram." )
+Component:AddFunctionHelper( "enableClip", "h:n,b", "Enables clip (number) on the hologram if (boolean) is true." )
+Component:AddFunctionHelper( "setClipOrigin", "h:n,v", "Set the origin of clip N on hologram." )
+Component:AddFunctionHelper( "setClipNormal", "h:n,v", "Set the normal of clip N on hologram." )
 
 /*==============================================================================================
     Section: Color
 ==============================================================================================*/
-HoloComponent:AddPreparedFunction("setColor", "h:c", "", [[
+Component:AddPreparedFunction("setColor", "h:c", "", [[
 if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:SetColor( @value 2 )
 	@value 1:SetRenderMode(@value 2.a == 255 and 0 or 4)
 end]] )
 
-HoloComponent:AddPreparedFunction("getColor", "h:", "c", [[
+Component:AddPreparedFunction("getColor", "h:", "c", [[
 if IsValid( @value 1 ) then
 	@define val = @value 1:GetColor( )
 end]], "(@val or Color(0, 0, 0))" )
 
 
-HoloComponent:AddFunctionHelper( "setColor", "h:c", "Sets the color of a hologram." )
-HoloComponent:AddFunctionHelper( "getColor", "h:", "Returns the color RGBA of hologram." )
+Component:AddFunctionHelper( "setColor", "h:c", "Sets the color of a hologram." )
+Component:AddFunctionHelper( "getColor", "h:", "Returns the color RGBA of hologram." )
 
 /*==============================================================================================
 	Section: Material / Skin / Bodygroup
 ==============================================================================================*/
-HoloComponent:AddPreparedFunction( "setMaterial", "h:s", "", [[
+Component:AddPreparedFunction( "setMaterial", "h:s", "", [[
 if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:SetMaterial(@value 2)
 end]] )
 
-HoloComponent:AddPreparedFunction( "getMaterial", "h:", "s", [[
+Component:AddPreparedFunction( "getMaterial", "h:", "s", [[
 if IsValid( @value 1 ) then
 	@define val = @value 1:GetMaterial( ) or ""
 end]], "(@val or \"\")" )
 
-HoloComponent:AddPreparedFunction( "getSkin", "h:", "n", [[
+Component:AddPreparedFunction( "getSkin", "h:", "n", [[
 if IsValid( @value 1 ) then
 	@define val = @value 1:GetSkin( ) or 0
 end]], "(@val or \"\")" )
 
-HoloComponent:AddPreparedFunction( "getSkinCount", "h:", "n", [[
+Component:AddPreparedFunction( "getSkinCount", "h:", "n", [[
 if IsValid( @value 1 ) then
 	@define val = @value 1:SkinCount( ) or 0
 end]], "(@val or \"\")" )
 
-HoloComponent:AddPreparedFunction( "setSkin", "h:n", "", [[
+Component:AddPreparedFunction( "setSkin", "h:n", "", [[
 if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:SetSkin(@value 2)
 end]] )
 
-HoloComponent:AddPreparedFunction( "setBodygroup", "h:n,n", "", [[
+Component:AddPreparedFunction( "setBodygroup", "h:n,n", "", [[
 if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:SetBodygroup(@value 2, @value 3)
 end]] )
 
 
-HoloComponent:AddFunctionHelper( "setMaterial", "h:s", "Sets the material of a hologram." )
-HoloComponent:AddFunctionHelper( "getMaterial", "h:", "Returns the material of a hologram." )
-HoloComponent:AddFunctionHelper( "getSkin", "h:", "Returns the current skin number of hologram." )
-HoloComponent:AddFunctionHelper( "getSkinCount", "h:", "Returns the amount of skins a hologram has." )
-HoloComponent:AddFunctionHelper( "setSkin", "h:n", "Sets the skin of a hologram." )
-HoloComponent:AddFunctionHelper( "setBodygroup", "h:n,n", "Sets the bodygroup of a hologram (number groupID) (number subID)." )
+Component:AddFunctionHelper( "setMaterial", "h:s", "Sets the material of a hologram." )
+Component:AddFunctionHelper( "getMaterial", "h:", "Returns the material of a hologram." )
+Component:AddFunctionHelper( "getSkin", "h:", "Returns the current skin number of hologram." )
+Component:AddFunctionHelper( "getSkinCount", "h:", "Returns the amount of skins a hologram has." )
+Component:AddFunctionHelper( "setSkin", "h:n", "Sets the skin of a hologram." )
+Component:AddFunctionHelper( "setBodygroup", "h:n,n", "Sets the bodygroup of a hologram (number groupID) (number subID)." )
 
 /*==============================================================================================
     Section: Parent
 ==============================================================================================*/
 
 
-HoloComponent:AddPreparedFunction( "parent", "h:e", "", [[
+Component:AddPreparedFunction( "parent", "h:e", "", [[
 if IsValid( @value 1 ) and @value 1.player == Context.player and IsValid( @value 2 )then
 	@value 1:SetParent(@value 2)
 end]] )
 
-HoloComponent:AddPreparedFunction( "parent", "h:h", "", [[
+Component:AddPreparedFunction( "parent", "h:h", "", [[
 if IsValid( @value 1 ) and @value 1.player == Context.player and IsValid( @value 2 )then
 	@value 1:SetParent(@value 2)
 end]] )
 
-HoloComponent:AddPreparedFunction( "parent", "h:p", "", [[
+Component:AddPreparedFunction( "parent", "h:p", "", [[
 if IsValid( @value 1 ) and @value 1.player == Context.player and IsValid( @value 2 )then
 	@value 1:SetParent(@value 2)
 end]] )
 
-HoloComponent:AddPreparedFunction( "unParent", "h:", "", [[
+Component:AddPreparedFunction( "unParent", "h:", "", [[
 if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:SetParent( nil )
 end]] )
 
-HoloComponent:AddPreparedFunction( "getParentHolo", "h:", "h", [[
+Component:AddPreparedFunction( "getParentHolo", "h:", "h", [[
 @define val = $Entity(0)
 
 if IsValid( @value 1 ) then
@@ -587,7 +590,7 @@ if IsValid( @value 1 ) then
 	end
 end]], "@val" )
 
-HoloComponent:AddPreparedFunction( "getParent", "h:", "e", [[
+Component:AddPreparedFunction( "getParent", "h:", "e", [[
 if IsValid( @value 1 ) then
 	local Parent = @value 1:GetParent( )
 	
@@ -596,70 +599,70 @@ if IsValid( @value 1 ) then
 	end
 end]], "(@val or $Entity(0))" )
 
-HoloComponent:AddFunctionHelper( "parent", "h:e", "Sets the parent entity of a hologram." )
-HoloComponent:AddFunctionHelper( "parent", "h:h", "Sets the parent hologram of a hologram." )
-HoloComponent:AddFunctionHelper( "parent", "h:p", "Sets the parent physics object of a hologram." )
-HoloComponent:AddFunctionHelper( "unParent", "h:", "Unparents H from its parent." )
-HoloComponent:AddFunctionHelper( "getParentHolo", "h:", "Returns the parent hologram of a hologram." )
-HoloComponent:AddFunctionHelper( "getParent", "h:", "Returns the parent entity of a hologram." )
+Component:AddFunctionHelper( "parent", "h:e", "Sets the parent entity of a hologram." )
+Component:AddFunctionHelper( "parent", "h:h", "Sets the parent hologram of a hologram." )
+Component:AddFunctionHelper( "parent", "h:p", "Sets the parent physics object of a hologram." )
+Component:AddFunctionHelper( "unParent", "h:", "Unparents H from its parent." )
+Component:AddFunctionHelper( "getParentHolo", "h:", "Returns the parent hologram of a hologram." )
+Component:AddFunctionHelper( "getParent", "h:", "Returns the parent entity of a hologram." )
 
 /*==============================================================================================
     Section: Bones
 ==============================================================================================*/
-HoloComponent:AddPreparedFunction( "setBonePos", "h:n,v", "", [[
+Component:AddPreparedFunction( "setBonePos", "h:n,v", "", [[
 if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:SetBonePos( @value 2, @value 3 )
 end]] )
 
-HoloComponent:AddPreparedFunction( "setBoneAngle", "h:n,a", "", [[
+Component:AddPreparedFunction( "setBoneAngle", "h:n,a", "", [[
 if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:SetBoneAng( @value 2, @value 3 )
 end]] )
 
-HoloComponent:AddPreparedFunction( "setBoneScale", "h:n,v", "", [[
+Component:AddPreparedFunction( "setBoneScale", "h:n,v", "", [[
 if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:SetBoneScale( @value 2, @value 3 )
 end]] )
 
-HoloComponent:AddPreparedFunction( "jiggleBone", "h:n,b", "", [[
+Component:AddPreparedFunction( "jiggleBone", "h:n,b", "", [[
 if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:SetBoneJiggle( @value 2, @value 3 )
 end]] )
 
-HoloComponent:AddPreparedFunction( "getBonePos", "h:n", "v", [[
+Component:AddPreparedFunction( "getBonePos", "h:n", "v", [[
 if IsValid( @value 1 ) then
 	@define val = @value 1:GetBonePos( @value 2 )
 end]], "( @val or Vector( 0, 0, 0 ) )" )
 
-HoloComponent:AddPreparedFunction( "getBoneAng", "h:n", "v", [[
+Component:AddPreparedFunction( "getBoneAng", "h:n", "v", [[
 if IsValid( @value 1 ) then
 	@define val = @value 1:GetBoneAngle( @value 2 )
 end]], "( @val or Angle( 0, 0, 0 ) )" )
 
-HoloComponent:AddPreparedFunction( "getBoneScale", "h:n", "v", [[
+Component:AddPreparedFunction( "getBoneScale", "h:n", "v", [[
 if IsValid( @value 1 ) then
 	@define val = @value 1:GetBoneScale( @value 2 )
 end]], "( @val or Vector( 0, 0, 0 ) )" )
 
-HoloComponent:AddPreparedFunction( "boneCount", "h:", "n", [[
+Component:AddPreparedFunction( "boneCount", "h:", "n", [[
 if IsValid( @value 1 ) then
 	@define val = @value 1:GetBoneCount( )
 end]], "( @val or 0 )" )
 
-HoloComponent:AddFunctionHelper( "setBonePos", "h:n,v", "Sets the position of bone N on the hologram." )
-HoloComponent:AddFunctionHelper( "setBoneAngle", "h:n,a", "Sets the angle of bone N on the hologram." )
-HoloComponent:AddFunctionHelper( "setBoneScale", "h:n,v", "Sets the scale of bone N on the hologram." )
-HoloComponent:AddFunctionHelper( "jiggleBone", "h:n,b", "Makes the bone N on the hologram jiggle about when B is true." )
-HoloComponent:AddFunctionHelper( "getBonePos", "h:n", "Gets the position of bone N on hologram." )
-HoloComponent:AddFunctionHelper( "getBoneAng", "h:n", "Gets the angle of bone N on hologram." )
-HoloComponent:AddFunctionHelper( "getBoneScale", "h:n", "Gets the scale of bone N on hologram." )
-HoloComponent:AddFunctionHelper( "boneCount", "h:", "Returns the ammount of bones of a hologram." )
+Component:AddFunctionHelper( "setBonePos", "h:n,v", "Sets the position of bone N on the hologram." )
+Component:AddFunctionHelper( "setBoneAngle", "h:n,a", "Sets the angle of bone N on the hologram." )
+Component:AddFunctionHelper( "setBoneScale", "h:n,v", "Sets the scale of bone N on the hologram." )
+Component:AddFunctionHelper( "jiggleBone", "h:n,b", "Makes the bone N on the hologram jiggle about when B is true." )
+Component:AddFunctionHelper( "getBonePos", "h:n", "Gets the position of bone N on hologram." )
+Component:AddFunctionHelper( "getBoneAng", "h:n", "Gets the angle of bone N on hologram." )
+Component:AddFunctionHelper( "getBoneScale", "h:n", "Gets the scale of bone N on hologram." )
+Component:AddFunctionHelper( "boneCount", "h:", "Returns the ammount of bones of a hologram." )
 
 /*==============================================================================================
     Section: Animation
 ==============================================================================================*/
 
-HoloComponent:AddPreparedFunction("setAnimation", "h:n,n,n", "", [[
+Component:AddPreparedFunction("setAnimation", "h:n,n,n", "", [[
 if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:SetHoloAnimation(@value 2, @value 3, value %4)
 end]] )
@@ -667,7 +670,7 @@ end]] )
 EXPADV.AddFunctionAlias( "setAnimation", "h:n,n" )
 EXPADV.AddFunctionAlias( "setAnimation", "h:n" )
 
-HoloComponent:AddPreparedFunction("setAnimation", "h:s,n,n", "", [[
+Component:AddPreparedFunction("setAnimation", "h:s,n,n", "", [[
 if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:SetHoloAnimation(@value 1:LookupSequence( @value 2 ), @value 3, value %4)
 end]] )
@@ -675,73 +678,73 @@ end]] )
 EXPADV.AddFunctionAlias( "setAnimation", "h:s,n" )
 EXPADV.AddFunctionAlias( "setAnimation", "h:s" )
 
-HoloComponent:AddInlineFunction("animationLength", "h:", "n", "( IsValid( @value 1 ) and @value 1:SequenceDuration( ) or 0 )" )
+Component:AddInlineFunction("animationLength", "h:", "n", "( IsValid( @value 1 ) and @value 1:SequenceDuration( ) or 0 )" )
 
-HoloComponent:AddPreparedFunction("setPose", "h:s,n", "", [[
+Component:AddPreparedFunction("setPose", "h:s,n", "", [[
 if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:SetPoseParameter(@value 2, @value 3 )
 end]], "" )
 
-HoloComponent:AddInlineFunction("getPose", "h:s", "n", "( IsValid( @value 1 ) and @value 1:GetPoseParameter( @value 2 ) or 0 )" )
+Component:AddInlineFunction("getPose", "h:s", "n", "( IsValid( @value 1 ) and @value 1:GetPoseParameter( @value 2 ) or 0 )" )
 
-HoloComponent:AddPreparedFunction("animation", "h:s", "n", [[
+Component:AddPreparedFunction("animation", "h:s", "n", [[
 if IsValid( @value 1 ) then
 	@define val = @value 1:LookupSequence(@value 2)
 end]], "(@val or 0)" )
 
-HoloComponent:AddInlineFunction( "getAnimation", "h:", "n", "( IsValid( @value 1 ) and @value 1:GetSequence( ) or 0 )" )
+Component:AddInlineFunction( "getAnimation", "h:", "n", "( IsValid( @value 1 ) and @value 1:GetSequence( ) or 0 )" )
 
-HoloComponent:AddInlineFunction( "getAnimationName", "h:n", "s", "( IsValid( @value 1 ) and @value 1:GetSequenceName( @value 2 ) or \"\" )" )
+Component:AddInlineFunction( "getAnimationName", "h:n", "s", "( IsValid( @value 1 ) and @value 1:GetSequenceName( @value 2 ) or \"\" )" )
 
-HoloComponent:AddPreparedFunction( "setAnimationRate", "h:n", "", [[
+Component:AddPreparedFunction( "setAnimationRate", "h:n", "", [[
 if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:SetPlaybackRate(@value 2)
 end]] )
 
-HoloComponent:AddFunctionHelper( "setAnimation", "h:n,n,n", "Sets the animation of a hologram." )
-HoloComponent:AddFunctionHelper( "setAnimation", "h:s,n,n", "Sets the animation of a hologram." )
-HoloComponent:AddFunctionHelper( "animationLength", "h:", "Gets the lengh of the animation running on H." )
-HoloComponent:AddFunctionHelper( "setPose", "h:s,n", "Sets the pose of a hologram." )
-HoloComponent:AddFunctionHelper( "getPose", "h:s", "Gets the pose of a hologram." )
-HoloComponent:AddFunctionHelper( "animation", "h:s", "Gets lookup number of an animation." )
-HoloComponent:AddFunctionHelper( "getAnimation", "h:", "Returns the current animation of a hologram." )
-HoloComponent:AddFunctionHelper( "getAnimationName", "h:n", "Returns the name of the current animation of a hologram." )
-HoloComponent:AddFunctionHelper( "setAnimationRate", "h:n", "Sets the animation rate of a hologram." )
+Component:AddFunctionHelper( "setAnimation", "h:n,n,n", "Sets the animation of a hologram." )
+Component:AddFunctionHelper( "setAnimation", "h:s,n,n", "Sets the animation of a hologram." )
+Component:AddFunctionHelper( "animationLength", "h:", "Gets the lengh of the animation running on H." )
+Component:AddFunctionHelper( "setPose", "h:s,n", "Sets the pose of a hologram." )
+Component:AddFunctionHelper( "getPose", "h:s", "Gets the pose of a hologram." )
+Component:AddFunctionHelper( "animation", "h:s", "Gets lookup number of an animation." )
+Component:AddFunctionHelper( "getAnimation", "h:", "Returns the current animation of a hologram." )
+Component:AddFunctionHelper( "getAnimationName", "h:n", "Returns the name of the current animation of a hologram." )
+Component:AddFunctionHelper( "setAnimationRate", "h:n", "Sets the animation rate of a hologram." )
 
 /*==============================================================================================
     Section: Remove
 ==============================================================================================*/
-HoloComponent:AddPreparedFunction( "remove", "h:", "", [[
+Component:AddPreparedFunction( "remove", "h:", "", [[
 if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:Remove( )
 end]] )
 
-HoloComponent:AddFunctionHelper( "remove", "h:", "Removes the hologram." )
+Component:AddFunctionHelper( "remove", "h:", "Removes the hologram." )
 
 /*==============================================================================================
     Section: Player Blocking, Does not work on the entity.
 ==============================================================================================*/
-HoloComponent:AddPreparedFunction( "blockPlayer", "h:e", "", [[
+Component:AddPreparedFunction( "blockPlayer", "h:e", "", [[
 if IsValid( @value 1 ) and @value 1.player == Context.player then
 	if IsValid( @value 2 ) and @value 2:IsPlayer( ) then
 		@value 1:BlockPlayer( @value 2 )
 	end
 end]] )
 
-HoloComponent:AddPreparedFunction( "unblockPlayer", "h:e", "", [[
+Component:AddPreparedFunction( "unblockPlayer", "h:e", "", [[
 if IsValid( @value 1 ) and @value 1.player == Context.player then
 	if IsValid( @value 2 ) and @value 2:IsPlayer( ) then
 		@value 1:UnblockPlayer( @value 2 )
 	end
 end]] )
 
-HoloComponent:AddPreparedFunction( "isBlocked", "h:e", "b", [[
+Component:AddPreparedFunction( "isBlocked", "h:e", "b", [[
 if IsValid( @value 1 ) and @value 1.player == Context.player then
 	if IsValid( @value 2 ) and @value 2:IsPlayer( ) then
 		@define val = @value 1:IsBlocked( @value 2 )
 	end
 end]], "(@val or false)" )
 
-HoloComponent:AddFunctionHelper( "blockPlayer", "h:e", "Blocks a player from seeing the hologram." )
-HoloComponent:AddFunctionHelper( "unblockPlayer", "h:e", "Unblocks a player from seeing the hologram, allow them to see it again." )
-HoloComponent:AddFunctionHelper( "isBlocked", "h:e", "Returns true is a player is blocked from seeing the hologram." )
+Component:AddFunctionHelper( "blockPlayer", "h:e", "Blocks a player from seeing the hologram." )
+Component:AddFunctionHelper( "unblockPlayer", "h:e", "Unblocks a player from seeing the hologram, allow them to see it again." )
+Component:AddFunctionHelper( "isBlocked", "h:e", "Returns true is a player is blocked from seeing the hologram." )

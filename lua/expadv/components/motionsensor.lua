@@ -4,6 +4,9 @@
 
 local MSComponent = EXPADV.AddComponent( "motionsensor", true )
 
+MSComponent.Author = "Rusketh"
+MSComponent.Description = "Adds support for xbox kinect interaction."
+
 /* --- --------------------------------------------------------------------------------
 	@: Client
    --- */

@@ -4,6 +4,9 @@
 
 local Component = EXPADV.AddComponent( "angle", true )
 
+Component.Author = "Rusketh"
+Component.Description = "Adds an eluler angle object."
+
 /* --- --------------------------------------------------------------------------------
 	@: Angle Class
    --- */
@@ -172,3 +175,5 @@ Component:AddInlineFunction( "toLocal", "e:a", "a", "(IsValid( @value 1 ) and @v
 
 Component:AddFunctionHelper( "toWorld", "e:a", "Converts a vector to a world vector." )
 Component:AddFunctionHelper( "toLocal", "e:a", "Converts a world vector to a local vector." )
+
+

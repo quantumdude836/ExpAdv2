@@ -4,6 +4,9 @@
 
 local Component = EXPADV.AddComponent( "stream", true )
 
+Component.Author = "Rusketh"
+Component.Description = "Allows expression advanced chips and screens to communicate."
+
 /* --- --------------------------------------------------------------------------------
 	@: Base Stream Object
 	@: This should not have extra data type, avalible.
@@ -269,6 +272,9 @@ Component:AddFunctionHelper( "hookStream", "s,d", "Calls the function (delegate)
 do --- Net component: used to sync from server to client :D
 
 	local Component = EXPADV.AddComponent( "net", true )
+
+	Component.Author = "Rusketh"
+	Component.Description = "Allows data to be transfered between server and client."
 
 	/* --- --------------------------------------------------------------------------------
 		@: Net Stream Object

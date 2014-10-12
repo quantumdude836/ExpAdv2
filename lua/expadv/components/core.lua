@@ -82,6 +82,9 @@ EXPADV.AddPreparedOperator( nil, "while", "b,?", "", [[
 
 local Component = EXPADV.AddComponent( "performance" , true )
 
+Component.Author = "Rusketh"
+Component.Description = "Allows for monitoring performance and usage."
+
 EXPADV.SharedOperators( )
 
 Component:AddInlineFunction( "ops", "", "n", "math.Round(Context.Status.Perf)" )
@@ -163,6 +166,9 @@ Component:AddVMFunction( "hardQuota", "", "n",
 
 local Component = EXPADV.AddComponent( "print" , true )
 
+Component.Author = "Rusketh"
+Component.Description = "Prints stuff to your chat."
+
 EXPADV.SharedOperators( )
 
 Component:AddVMFunction( "printColor", "...", "",
@@ -203,6 +209,8 @@ Component:AddVMFunction( "print", "...", "",
 			chat.AddText( unpack( Values ) )
 		end
 	end )
+
+Component:AddFunctionHelper( "print", "...", "Prints the contents of ( ... ) to chat seperated with a space." )
 
 if SERVER then
 	util.AddNetworkString( "expadv.printcolor" )
@@ -253,6 +261,9 @@ end )
 
 local Component = EXPADV.AddComponent( "variant" , true )
 
+Component.Author = "Rusketh"
+Component.Description = "Adds an object that can pass around anything."
+
 local Class_Variant = Component:AddClass( "variant", "vr" )
 
 Class_Variant:DefaultAsLua( { false, "b" } )
@@ -279,9 +290,14 @@ Component:AddInlineFunction( "type", "vr:", "s", "EXPADV.TypeName(@value 1[2])" 
 
 local Component = EXPADV.AddComponent( "debug" , true )
 
+Component.Author = "Rusketh"
+Component.Description = "Used to debug thrown exceptions in your code."
+
 Component:AddInlineFunction( "type", "ex:", "s", "@value 1.Exception" )
+Component:AddFunctionHelper( "type", "_ex:", "Returns the true type of an Exception" )
 
 Component:AddInlineFunction( "message", "ex:", "s", "@value 1.Message" )
+Component:AddFunctionHelper( "message", "_ex:", "Returns the current exceptions message." )
 
 Component:AddInlineFunction( "root", "ex:", "ar", [[{@value 1.Trace[1] or 0, @value 1.Trace[2] or 0, __type = "n" } ]] )
 

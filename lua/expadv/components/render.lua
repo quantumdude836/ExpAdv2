@@ -4,6 +4,9 @@
 
 local Component = EXPADV.AddComponent( "render", true )
 
+Component.Author = "Rusketh"
+Component.Description = "Allows rendering objects to screens and players HUDs."
+
 require( "Vector2" )
 
 EXPADV.ClientOperators( )

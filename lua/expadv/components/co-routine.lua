@@ -12,6 +12,9 @@ end
 
 local Component = EXPADV.AddComponent( "Coroutine" , true )
 
+Component.Author = "Rusketh"
+Component.Description = "Adds coroutines witch can be yeileded and resumed later."
+
 Component:AddException( "coroutine" )
 
 local CoRoutine = Component:AddClass( "coroutine" , "cr" )
@@ -109,5 +112,13 @@ Component:AddVMFunction( "wait", "s", "",
 		coroutine.yield( )
 	end )
 
-
-		
+/* --- --------------------------------------------------------------------------------
+    @: Helper
+   --- */
+   
+Component:AddFunctionHelper( "sleep", "n", "Pauses the current coroutine for N seconds." )   
+Component:AddFunctionHelper( "wait", "s", "Pauses the current coroutine until event S is called." )
+Component:AddFunctionHelper( "getCoroutine", "", "Returns the current coroutine or throws exception." )
+Component:AddFunctionHelper( "yield", "", "Yields the current coroutine to be resumed later." )
+Component:AddFunctionHelper( "resume", "_cr:", "Resumes/starts a coroutine." )
+Component:AddFunctionHelper( "status", "_cr:", "Returns the status of a coroutine." )

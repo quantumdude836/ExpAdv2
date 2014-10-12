@@ -92,7 +92,7 @@ function PANEL:Init( )
 	end 
 	
 	function self.btnHelp:DoClick( ) 
-		self:GetParent( ):OpenHelper( ) 
+		EXPADV.Editor.OpenHelper( ) 
 	end 
 	
 	function self.btnWiki:DoClick( )

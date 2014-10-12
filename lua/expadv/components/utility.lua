@@ -4,6 +4,9 @@
 
 local Component = EXPADV.AddComponent( "utility", true )
 
+Component.Author = "Rusketh"
+Component.Description = "Adds useful functions and objects that are not inportant enogh for there own component."
+
 /* --- --------------------------------------------------------------------------------
 	@: Add A user hook system, They can add hooks to extend events, manualy.
 	@: This add no default hook, and shall encourage poeple to add there own.
@@ -149,12 +152,16 @@ end )
 EXPADV.SharedOperators( )
 
 Component:AddInlineFunction( "curTime", "", "n", "$CurTime( )" )
+Component:AddFunctionHelper( "curTime", "", "Returns the time since server start in seconds." )
 
 Component:AddInlineFunction( "realtime", "", "n", "$RealTime( )" )
+Component:AddFunctionHelper( "realtime", "", "Returns the real time." )
 
 Component:AddInlineFunction( "sysTime", "", "n", "$SysTime( )" )
+Component:AddFunctionHelper( "sysTime", "", "Returns the current system time of the server." )
 
 Component:AddInlineFunction( "time", "s", "n", "$tonumber( $os.date(\"!*t\")[ @value 1 ] or 0 )" )
+Component:AddFunctionHelper( "time", "s", "Returns the current time is unit S." )
 
 /* --- --------------------------------------------------------------------------------
 	@: Some useful array sorting functions
@@ -381,6 +388,49 @@ Component:AddInlineFunction( "entity", "rd:", "e", "( @value 1.Result.Entity or 
 Component:AddPreparedFunction( "clear", "rd:", "", "@value 1.Result = nil" )
 
 /* --- --------------------------------------------------------------------------------
+	@: Ranger Helpers
+   --- */
+
+Component:AddFunctionHelper( "materialType", "_rd:", "Returns the type of material hit by the ranger." )
+Component:AddFunctionHelper( "noHull", "_rd:", "Removes the box min and max from the trace." )
+Component:AddFunctionHelper( "hitWater", "_rd:", "Returns true if a ranger is allowed to hit the world." )
+Component:AddFunctionHelper( "fractionLeftSolid", "_rd:", "If the ranger starts in a solid, this describes when the ranger leaves it as a fraction of the trace distance." )
+Component:AddFunctionHelper( "defaultZero", "_rd:", "Returns true if a trace is set to default zero." )
+Component:AddFunctionHelper( "filter", "_rd:e", "Filters an entity from a ranger." )
+Component:AddFunctionHelper( "startSolid", "_rd:", "Untits before trace exited a solid object." )
+Component:AddFunctionHelper( "mins", "_rd:", "Returns the box min of a trace." )
+Component:AddFunctionHelper( "hitWater", "_rd:b", "Sets wether a ranger is allowed to hit water." )
+Component:AddFunctionHelper( "unfilter", "_rd:e", "Removes E from a rangers filter." )
+Component:AddFunctionHelper( "ignoreEntities", "_rd:", "Returns true if the ranger is set to ignore all entitys." )
+Component:AddFunctionHelper( "ignoreWorld", "_rd:", "Returns true if the ranger is set to ignore world." )
+Component:AddFunctionHelper( "hit", "_rd:", "Returns true if the ranger hit anything." )
+Component:AddFunctionHelper( "hitPos", "_rd:", "Returns the position that was hit by ranger." )
+Component:AddFunctionHelper( "entity", "_rd:", "Returns the hit entity of a ranger." )
+Component:AddFunctionHelper( "normal", "_rd:", "Returns a normalized vector representing the direction of the ranger from start to finish." )
+Component:AddFunctionHelper( "start", "_rd:", "Sets the start position of a ranger." )
+Component:AddFunctionHelper( "hitBox", "_rd:", "Returns the ENUM of hitGroup the ranger hit. Alternative to hitGroup. See wiki for list of ENUMs." )
+Component:AddFunctionHelper( "setHull", "_rd:v,v", "Sets the mix and max hull size of a ranger." )
+Component:AddFunctionHelper( "end", "_rd:", "Returns the end position of a ranger." )
+Component:AddFunctionHelper( "maxs", "_rd:", "Returns the box max of a trace." )
+Component:AddFunctionHelper( "clear", "_rd:", "Clears the ranger data of the ranger." )
+Component:AddFunctionHelper( "ignoreEntities", "_rd:b", "Sets a ranger to ingore all entitys." )
+Component:AddFunctionHelper( "hitNoDraw", "_rd:", "Returns true if the ranger hit a no-draw brush." )
+Component:AddFunctionHelper( "hitTexture", "_rd:", "Returns the texture of surface hit by ranger." )
+Component:AddFunctionHelper( "defaultZero", "_rd:b", "Sets the defaulty zero of a trace." )
+Component:AddFunctionHelper( "distance", "_rd:", "Returns the distance from the renagers start to the rangers hit positions." )
+Component:AddFunctionHelper( "hitPhysics", "_rd:", "Returns the index of the physics object (on the hit entity) hit by a ranger." )
+Component:AddFunctionHelper( "fraction", "_rd:", "This is a number between 0 and 1. Ex. 0.01 = 1/100 of your ranger's max range." )
+Component:AddFunctionHelper( "hitNormal", "_rd:", "Returns the normal of the surface that was hit by ranger." )
+Component:AddFunctionHelper( "hitWorld", "_rd:", "Sets wether a ranger is allowed to hit the world." )
+Component:AddFunctionHelper( "fire", "_rd:", "Generates the ranger data of the ranger." )
+Component:AddFunctionHelper( "fire", "_rd:v,v,n", "Generates the ranger data of the ranger, using start position, direction and distance." )
+Component:AddFunctionHelper( "fire", "_rd:v,v", "Generates the ranger data of the ranger, using start and end position." )
+Component:AddFunctionHelper( "ranger", "", "Creates a new ranger object." )
+Component:AddFunctionHelper( "ignoreWorld", "_rd:b", "Sets a ranger to ingore the world." )
+Component:AddFunctionHelper( "hitNoneWorld", "_rd:", "Returns true if the ranger hit a non-world surface (a prop, for example)." )
+Component:AddFunctionHelper( "hitSky", "_rd:", "Returns true if skybox was hit by ranger." )
+
+/* --- --------------------------------------------------------------------------------
 	@: HTTP
    --- */
 
@@ -406,13 +456,16 @@ Component:AddPreparedFunction( "httpPostRequest", "s,t,d,d", "", [[$http.Post( @
 	@: Physics Control Component
    --- */
 
-local PropComponent = EXPADV.AddComponent( "propcore", false )
+local PropComponent = EXPADV.AddComponent( "propcore", true )
+
+PropComponent.Author = "Rusketh"
+PropComponent.Description = "Prop core allows the coder to spawn and manipulate props."
 
 PropComponent:AddException( "propcore" )
 
 /* --- --------------------------------------------------------------------------------
 	@: PropCore should just be offical. Still need to disable it.
-	@: Enable: expadv propcore enable; expadv reload
+	@: Disable: expadv propcore disable; expadv reload
    --- */
 
 PropComponent:CreateSetting( "maxprops", 50 )
@@ -609,7 +662,7 @@ if IsValid( @value 1 ) and EXPADV.PPCheck( Context.player, @value 1 ) then
 	end
 end]], "" )
 
-Component:AddPreparedFunction("enableGravity", "p:b", "", [[
+PropComponent:AddPreparedFunction("enableGravity", "p:b", "", [[
 if IsValid( @value 1 ) and EXPADV.PPCheck( Context.player, @value 1:GetEntity( ) ) then
 	@value 1:EnableGravity( @value 2 )
 	@value 1:Wake( )
@@ -644,3 +697,22 @@ if IsValid( @value 1 ) and EXPADV.PPCheck( Context.player, @value 1 ) then
 	@value 1:TakeDamage( @value 2, Context.player, Context.entity )
 end]] )
 
+/* --- --------------------------------------------------------------------------------
+	@: Prop core Helpers
+   --- */
+
+PropComponent:AddFunctionHelper( "parent", "e:e", "Sets the parent entity of E." )
+PropComponent:AddFunctionHelper( "destroy", "e:", "Creates an array." )
+PropComponent:AddFunctionHelper( "setNotSolid", "e:b", "Changes the solidity of an entity." )
+PropComponent:AddFunctionHelper( "noSpawnEffect", "b", "Makes propcore use an effect when spawning props." )
+PropComponent:AddFunctionHelper( "enableGravity", "e:b", "Enable gravity on E." )
+PropComponent:AddFunctionHelper( "destroy", "e:v,b", "Creates an array." )
+PropComponent:AddFunctionHelper( "freeze", "p:b", "Set B to true to freeze a physics object." )
+PropComponent:AddFunctionHelper( "freeze", "e:b", "Set B to true to freeze an entity." )
+PropComponent:AddFunctionHelper( "unparent", "e:", "Unparents E from its parent." )
+PropComponent:AddFunctionHelper( "parent", "e:p", "Sets the parent physics object of E." )
+PropComponent:AddFunctionHelper( "canSpawn", "", "Returns true if a prop can be created." )
+PropComponent:AddFunctionHelper( "spawn", "s,b", "Creates and returns a new prop using S as its model, it will be frozen if B is true." )
+PropComponent:AddFunctionHelper( "remove", "e:", "Removes entity E." )
+PropComponent:AddFunctionHelper( "dealDamage", "e:n", "Deals damage to an entity." )
+PropComponent:AddFunctionHelper( "enableGravity", "p:b", "Enable gravity on physics object P." )

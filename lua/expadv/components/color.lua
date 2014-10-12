@@ -2,13 +2,16 @@
 	@: Color Component
    --- */
 
-local ColorComponent = EXPADV.AddComponent( "color", true )
+local Component = EXPADV.AddComponent( "color", true )
+
+Component.Author = "Nez"
+Component.Description = "Adds color objects and color based functions."
 
 /* --- --------------------------------------------------------------------------------
 	@: Color Object
    --- */
 
-local ColorObj = ColorComponent:AddClass( "color", "c" )
+local ColorObj = Component:AddClass( "color", "c" )
 
 ColorObj:StringBuilder( function( Color) return string.format( "Color( %i, %i, %i, %i )", Color.r, Color.g, Color.b, Color.a ) end )
 ColorObj:DefaultAsLua( Color(255, 255, 255, 255) )
@@ -30,25 +33,25 @@ end
 	@: Logical and Comparison
    --- */
 
-ColorComponent:AddInlineOperator( "==", "c,c", "b", "(@value 1 == @value 2)" )
+Component:AddInlineOperator( "==", "c,c", "b", "(@value 1 == @value 2)" )
 
-ColorComponent:AddInlineOperator( "!=", "c,c", "b", "(@value 1 ~= @value 2)" )
+Component:AddInlineOperator( "!=", "c,c", "b", "(@value 1 ~= @value 2)" )
 
 /* --- --------------------------------------------------------------------------------
 	@: Operators
    --- */
 
-ColorComponent:AddInlineOperator( "is", "c", "b", "(@value 1 ~= Color(0, 0, 0, 0))" )
+Component:AddInlineOperator( "is", "c", "b", "(@value 1 ~= Color(0, 0, 0, 0))" )
 
-ColorComponent:AddInlineOperator( "not", "c", "b", "(@value 1 == Color(0, 0, 0, 0))" )
+Component:AddInlineOperator( "not", "c", "b", "(@value 1 == Color(0, 0, 0, 0))" )
 
 /* --- --------------------------------------------------------------------------------
 	@: Casting
    --- */
 
-ColorComponent:AddInlineOperator( "string", "c", "s", "string.format( \"Color( %i, %i, %i, %i )\", @value 1.r, @value 1.g, @value 1.b, @value 1.a )" )
+Component:AddInlineOperator( "string", "c", "s", "string.format( \"Color( %i, %i, %i, %i )\", @value 1.r, @value 1.g, @value 1.b, @value 1.a )" )
 
-ColorComponent:AddInlineOperator( "color", "s", "c", "string.ToColor(@value 1)" )
+Component:AddInlineOperator( "color", "s", "c", "string.ToColor(@value 1)" )
 
 /* --- --------------------------------------------------------------------------------
 	@: Assignment
@@ -68,8 +71,8 @@ ColorObj:AddInlineOperator( "$", "n", "c", "(Context.Delta[@value 1] or Color(0,
 	@: Constructor
    --- */
 
-ColorComponent:AddInlineFunction( "color", "n,n,n,n", "c", "Color(@value 1, @value 2, @value 3, @value 4)" )
-ColorComponent:AddFunctionHelper( "color", "n,n,n,n", "Creates a color object")
+Component:AddInlineFunction( "color", "n,n,n,n", "c", "Color(@value 1, @value 2, @value 3, @value 4)" )
+Component:AddFunctionHelper( "color", "n,n,n,n", "Creates a color object")
 EXPADV.AddFunctionAlias( "color", "n,n,n" )
 
 /* --- --------------------------------------------------------------------------------
@@ -77,37 +80,37 @@ EXPADV.AddFunctionAlias( "color", "n,n,n" )
    --- */
 
 --GETTERS
-ColorComponent:AddInlineFunction( "getRed", "c:", "n", "@value 1.r")
-ColorComponent:AddFunctionHelper( "getRed", "c:", "Gets the red value of a color object")
+Component:AddInlineFunction( "getRed", "c:", "n", "@value 1.r")
+Component:AddFunctionHelper( "getRed", "c:", "Gets the red value of a color object")
 
-ColorComponent:AddInlineFunction( "getGreen", "c:", "n", "@value 1.g")
-ColorComponent:AddFunctionHelper( "getGreen", "c:", "Gets the green value of a color object")
+Component:AddInlineFunction( "getGreen", "c:", "n", "@value 1.g")
+Component:AddFunctionHelper( "getGreen", "c:", "Gets the green value of a color object")
 
-ColorComponent:AddInlineFunction( "getBlue", "c:", "n", "@value 1.b")
-ColorComponent:AddFunctionHelper( "getBlue", "c:", "Gets the blue value of a color object")
+Component:AddInlineFunction( "getBlue", "c:", "n", "@value 1.b")
+Component:AddFunctionHelper( "getBlue", "c:", "Gets the blue value of a color object")
 
-ColorComponent:AddInlineFunction( "getAlpha", "c:", "n", "@value 1.a")
-ColorComponent:AddFunctionHelper( "color", "c:", "Gets the alpha value of a color object")
+Component:AddInlineFunction( "getAlpha", "c:", "n", "@value 1.a")
+Component:AddFunctionHelper( "color", "c:", "Gets the alpha value of a color object")
 
 --SETTERS
-ColorComponent:AddPreparedFunction( "setRed", "c:n", "", "@value 1.r = @value 2")
-ColorComponent:AddFunctionHelper( "setRed", "c:n", "Sets the red value of a color object")
+Component:AddPreparedFunction( "setRed", "c:n", "", "@value 1.r = @value 2")
+Component:AddFunctionHelper( "setRed", "c:n", "Sets the red value of a color object")
 
-ColorComponent:AddPreparedFunction( "setGreen", "c:n", "", "@value 1.g = @value 2")
-ColorComponent:AddFunctionHelper( "setGreen", "c:n", "Sets the green value of a color object")
+Component:AddPreparedFunction( "setGreen", "c:n", "", "@value 1.g = @value 2")
+Component:AddFunctionHelper( "setGreen", "c:n", "Sets the green value of a color object")
 
-ColorComponent:AddPreparedFunction( "setBlue", "c:n", "", "@value 1.b = @value 2")
-ColorComponent:AddFunctionHelper( "setBlue", "c:n", "Sets the blue value of a color object")
+Component:AddPreparedFunction( "setBlue", "c:n", "", "@value 1.b = @value 2")
+Component:AddFunctionHelper( "setBlue", "c:n", "Sets the blue value of a color object")
 
-ColorComponent:AddPreparedFunction( "setAlpha", "c:n", "", "@value 1.a = @value 2")
-ColorComponent:AddFunctionHelper( "setAlpha", "c:n", "Sets the alpha value of a color object")
+Component:AddPreparedFunction( "setAlpha", "c:n", "", "@value 1.a = @value 2")
+Component:AddFunctionHelper( "setAlpha", "c:n", "Sets the alpha value of a color object")
 
 /* --- --------------------------------------------------------------------------------
 	@: HSV2RGB
    --- */
 
-ColorComponent:AddInlineFunction( "hsv2rgb", "n,n,n", "c", "$HSVToColor(@value 1, @value 2, @value 3)")
-ColorComponent:AddFunctionHelper( "hsv2rgb", "n,n,n", "Converts hsv color to regular color")
+Component:AddInlineFunction( "hsv2rgb", "n,n,n", "c", "$HSVToColor(@value 1, @value 2, @value 3)")
+Component:AddFunctionHelper( "hsv2rgb", "n,n,n", "Converts hsv color to regular color")
 
-ColorComponent:AddInlineFunction( "rgb2hsv", "n,n,n", "c", "$ColorToHSV(@value 1, @value 2, @value 3)")
-ColorComponent:AddFunctionHelper( "rgb2hsv", "n,n,n", "Converts regular color to hsv color")
+Component:AddInlineFunction( "rgb2hsv", "n,n,n", "c", "$ColorToHSV(@value 1, @value 2, @value 3)")
+Component:AddFunctionHelper( "rgb2hsv", "n,n,n", "Converts regular color to hsv color")

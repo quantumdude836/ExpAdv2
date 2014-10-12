@@ -4,6 +4,9 @@
 
 local MathComponent = EXPADV.AddComponent( "math" , true )
 
+MathComponent.Author = "Rusketh"
+MathComponent.Description = "Handels basic arithmatic with numbers and adds functions for advanced mathmatics."
+
 /* --- --------------------------------------------------------------------------------
     @: Number Object
    --- */

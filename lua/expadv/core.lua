@@ -323,6 +323,7 @@ function EXPADV.LoadCore( )
 	EXPADV.AddComponentFile( "angle" )
 	EXPADV.AddComponentFile( "quaternion" )
 	EXPADV.AddComponentFile( "entity" )
+	EXPADV.AddComponentFile( "physics" )
 	EXPADV.AddComponentFile( "player" )
 	EXPADV.AddComponentFile( "hologram" )
 	EXPADV.AddComponentFile( "motionsensor" )
@@ -404,6 +405,8 @@ function EXPADV.LoadEditor( )
 		include( "expadv/editor/pastebin.lua" )
 		include( "expadv/editor/ea_search.lua" )
 		include( "expadv/editor.lua" )
+		
+		include( "expadv/editor/manual.lua" )
 	end
 
 	include( "expadv/editor/shared.lua" )

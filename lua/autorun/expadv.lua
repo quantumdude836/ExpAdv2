@@ -50,6 +50,7 @@ AddCSLuaFile( "expadv/editor/ea_search.lua" )
 
 AddCSLuaFile( "expadv/editor.lua" )
 AddCSLuaFile( "expadv/editor/shared.lua" )
+AddCSLuaFile( "expadv/editor/manual.lua" )
 
 resource.AddWorkshop( "323792126" )
 

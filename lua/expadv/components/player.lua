@@ -6,6 +6,9 @@ EXPADV.SharedOperators( )
 
 local Component = EXPADV.AddComponent( "player", true )
 
+Component.Author = "Rusketh"
+Component.Description = "Allows for player interaction."
+
 /* --- --------------------------------------------------------------------------------
 	@: Player Class
    --- */

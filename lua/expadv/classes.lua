@@ -209,6 +209,10 @@ end
    --- */
 
 function EXPADV.TypeName( Name, bNoVoid )
+	if !Name or Name == "" then return "void" end
+
+	if Name == "..." then return "..." end
+	
 	if EXPADV.Classes[ Name ] then return EXPADV.Classes[ Name ].Name end
 
 	if EXPADV.ClassAliases[ Name ] then return EXPADV.ClassAliases[ Name ].Name end

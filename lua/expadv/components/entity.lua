@@ -5,6 +5,9 @@
 
 local Component = EXPADV.AddComponent( "entity", true )
 
+Component.Author = "Ripmax"
+Component.Description = "Allows for advanced entity control."
+
 local function VectorNotHuge( Vec )
 	if Vec.x >= math.huge or Vec.x <= -math.huge then return false end
 	if Vec.y >= math.huge or Vec.y <= -math.huge then return false end
@@ -321,6 +324,39 @@ Component:AddPreparedFunction( "applyAngForce", "e:a", "",
 	end )
 
 Component:AddFunctionHelper( "applyAngForce", "e:a", "Applies torque to the given entity depending on the given angle")
+
+Component:AddPreparedFunction( "applyTorque", "e:v", "", function( Context, Trace, Target, TQ )
+	if Target:IsValid() and EXPADV.PPCheck(Context.player, Target) then
+		local Phys = Target:GetPhysicsObject()
+		if !Phys or !Phys:IsValid( ) then return end
+		if TQ.x == 0 and TQ.y == 0 and TQ.z == 0 then return end
+
+		if Target:GetMoveType() == MOVETYPE_VPHYSICS then
+
+			local torqueamount = TQ:Length()
+
+			-- Convert torque from local to world axis
+			TQ = Phys:LocalToWorld( TQ ) - Phys:GetPos()
+
+			-- Find two vectors perpendicular to the torque axis
+			local off
+			if math.abs(TQ.x) > torqueamount * 0.1 or math.abs(TQ.z) > torqueamount * 0.1 then
+				off = Vector(-TQ.z, 0, TQ.x)
+			else
+				off = Vector(-TQ.y, TQ.x, 0)
+			end
+			off = off:GetNormal() * torqueamount * 0.5
+
+			local dir = ( TQ:Cross(off) ):GetNormal()
+
+			if !VectorNotHuge( dir ) or !VectorNotHuge( off ) then return end
+			Phys:ApplyForceOffset( dir, off )
+			Phys:ApplyForceOffset( dir * -1, off * -1 )
+		end
+	end
+end)
+
+Component:AddFunctionHelper( "applyTorque", "e:v", "Applies a vector torque force to an entity." )
 
 /* --- --------------------------------------------------------------------------------
 	@: Misc

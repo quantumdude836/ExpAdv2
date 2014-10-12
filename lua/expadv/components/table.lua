@@ -5,6 +5,9 @@
 
 local Component = EXPADV.AddComponent( "tables" , true )
 
+Component.Author = "Rusketh"
+Component.Description = "Adds a slow but powerful table object."
+
 Component:AddException( "table" )
 
 /* --- --------------------------------------------------------------------------------
