@@ -151,7 +151,7 @@ function EXPADV.Editor.OpenHelper( )
 			local ComponentNode = CoreNode
 			
 			if Class.Component then
-				ComponentNode = ClassTab.ComponentNodes[Class.Component]
+				ComponentNode = ClassTab.ComponentNodes[Class.Component.Name]
 				if !ComponentNode then
 					ComponentNode = RootNode:AddNode( Class.Component.Name )
 					ClassTab.ComponentNodes[Class.Component] = ComponentNode
