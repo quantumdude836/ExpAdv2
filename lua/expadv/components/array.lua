@@ -37,8 +37,8 @@ Component:AddInlineFunction( "exists", "ar,n", "b", "(@value 1[@value 2] ~= nil)
 Component:AddInlineFunction( "unpack", "ar", "...", "$unpack( @value 1 )" )
 
 Component:AddPreparedFunction( "remove", "ar:n", "vr", [[
-		if @value 1[@value 2] == nil then Context.Throw(@trace, "array", "array reach index " .. @value 2 .. " returned void" ) end
-		]] ), "{$table.remove(@value 1, @value 2),@value 1.__type}")
+if @value 1[@value 2] == nil then Context.Throw(@trace, "array", "array reach index " .. @value 2 .. " returned void" ) end
+]], "{$table.remove(@value 1, @value 2), @value 1.__type}" )
 
 /* --- --------------------------------------------------------------------------------
 	@: Unpack to vararg
