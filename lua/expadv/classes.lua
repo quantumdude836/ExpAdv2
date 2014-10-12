@@ -208,7 +208,7 @@ end
 	@: Type Name!
    --- */
 
-function EXPADV.TypeName( Name )
+function EXPADV.TypeName( Name, bNoVoid )
 	if EXPADV.Classes[ Name ] then return EXPADV.Classes[ Name ].Name end
 
 	if EXPADV.ClassAliases[ Name ] then return EXPADV.ClassAliases[ Name ].Name end
@@ -216,6 +216,8 @@ function EXPADV.TypeName( Name )
 	if #Name > 1 and Name[1] ~= "_" then Name = "_" .. Name end
 
 	if EXPADV.ClassShorts[ Name ] then return EXPADV.ClassShorts[ Name ].Name end
+
+	if !bNoVoid then return "void" end
 end
 
 /* --- --------------------------------------------------------------------------------

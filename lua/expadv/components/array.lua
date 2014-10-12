@@ -12,7 +12,7 @@ Component:AddException( "array" )
 
 local Array = Component:AddClass( "array" , "ar" )
 
-Array:DefaultAsLua( function( ) return {_type="void"} end )
+Array:DefaultAsLua( function( ) return {__type="void"} end )
 
 Array:StringBuilder( function( A ) return string.format( "array<%s,%i>", EXPADV.TypeName(A._type), #A ) end )
 
@@ -35,6 +35,25 @@ Component:AddInlineOperator( "table", "ar", "t", "EXPADV.ResultTable(@value 1.__
 Component:AddInlineFunction( "exists", "ar,n", "b", "(@value 1[@value 2] ~= nil)" )
 
 Component:AddInlineFunction( "unpack", "ar", "...", "$unpack( @value 1 )" )
+
+/* --- --------------------------------------------------------------------------------
+	@: Unpack to vararg
+   --- */
+
+local Unpack
+
+function Unpack( Array, Index )
+	if Array[Index] == nil then return end
+	print( "Array", Index, Array[Index], Array.__type )
+	return { Array[Index], Array.__type }, Unpack( Array, Index + 1 )
+end
+
+Component:AddVMFunction( "unpack", "ar", "...", function( C, T, A ) return Unpack( A, 1 ) end )
+Component:AddVMFunction( "unpack", "ar,n", "...", function( C, T, A, I ) return Unpack( A, I ) end )
+
+Component:AddFunctionHelper( "unpack", "ar", "Unpacks an array to a vararg." )
+Component:AddFunctionHelper( "unpack", "ar,n", "Unpacks an array to a vararg, staring at index N." )
+
 
 function Component:OnPostRegisterClass( Name, Class )
 
@@ -69,7 +88,7 @@ function Component:OnPostRegisterClass( Name, Class )
 	@: Functions
    ---	*/
 
-	Component:AddPreparedFunction( "remove" .. Class.Name, "ar,n", Class.Short, string.format([[
+	Component:AddPreparedFunction( "remove" .. Class.Name, "ar:n", Class.Short, string.format([[
 		if @value 1.__type ~= %q then Context.Throw(@trace, "array", "array type missmatch, %s expected got " .. EXPADV.TypeName(@value 1.__type)) end
 		if @value 1[@value 2] == nil then Context.Throw(@trace, "array", "array reach index " .. @value 2 .. " returned void" ) end
 		]], Class.Short, Class.Name), "$table.remove(@value 1, @value 2)")

@@ -162,3 +162,13 @@ Component:AddFunctionHelper( "snapToRoll", "a:n", "Snaps the angle's roll to nea
    --- */
 
 Component:AddInlineOperator( "string", "a", "s", [[string.format("Ang<%i,%i,%i>",@value 1.p, @value 1.y, @value 1.r)]] )
+
+/* --- --------------------------------------------------------------------------------
+    @: World and Axis
+   --- */
+
+Component:AddInlineFunction( "toWorld", "e:a", "a", "(IsValid( @value 1 ) and @value 1:LocalToWorldAngles(@value 2) or Vector(0, 0, 0))" )
+Component:AddInlineFunction( "toLocal", "e:a", "a", "(IsValid( @value 1 ) and @value 1:WorldToLocalAngles(@value 2) or Vector3.Zero:Clone())" )
+
+Component:AddFunctionHelper( "toWorld", "e:a", "Converts a vector to a world vector." )
+Component:AddFunctionHelper( "toLocal", "e:a", "Converts a world vector to a local vector." )

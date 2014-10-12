@@ -475,7 +475,9 @@ function Compiler:Expression_13( Trace )
 
 		self:RequireToken( "rpa", "Right parenthesis ( )) missing, to close grouped equation." )
 
-		return Expression
+		Expression.Inline = string.format( "(%s)", Expression.Inline )
+		
+		return self:Expression_17( Trace, Expression )
 	end
 	
 	return self:Expression_14( Trace )
@@ -856,6 +858,8 @@ function Compiler:GetBlock( Trace, RCB, Flag )
 
 	local Statement = self:Statement( Trace )
 	
+	self.BreakOut = nil
+
 	self:PopScope( )
 
 	return Statement
@@ -1063,7 +1067,7 @@ function Compiler:Statement_5( Trace )
 
 		self.BreakOut = "return"
 
-		if self:CheckToken( "rsb" ) then
+		if self:CheckToken( "rcb", "sep" ) or self.PrepTokenLine != self.TokenLine then
 			return self:Compile_RETURN( Trace )
 		end
 

@@ -636,14 +636,17 @@ end
 
 if CLIENT then
 	net.Receive( "expadv.notify", function( )
-		GAMEMODE:AddNotify( net.ReadString( ), net.ReadUInt( 8 ), net.ReadFloat( ) )
+		local Msg = net.ReadString( )
+		GAMEMODE:AddNotify( Msg, net.ReadUInt( 8 ), net.ReadFloat( ) )
+		MsgN( Msg )
 	end)
 
 	function EXPADV.Notifi( Player, Message, Type, Duration )
 		if !IsValid( Player ) then return end
 
 		if Player == LocalPlayer( ) then
-			return GAMEMODE:AddNotify( Message, Type, Duration )
+			GAMEMODE:AddNotify( Message, Type, Duration )
+			return MsgN( Message )
 		end
 
 		net.Start("expadv.notify")

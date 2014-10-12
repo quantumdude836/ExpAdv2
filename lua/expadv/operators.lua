@@ -839,19 +839,27 @@ function EXPADV.BuildLuaOperator( Operator )
 				local VAPrepare, VAInline = { }, { }
 
 				for I = Operator.InputCount + 1, #Inputs do
+					local Inline
 					local Input = Inputs[I]
-					 
+
 					if Input.FLAG == EXPADV_FUNCTION then
-						VAInline[ #VAInline + 1 ] = string.format( "{%s,%q}", Compiler:VMToLua( Input ), Input.Return or "NIL" )
+						Inline = Compiler:VMToLua( Input )
 					elseif Input.FLAG == EXPADV_INLINE then
-						VAInline[ #VAInline + 1 ] = string.format( "{%s,%q}", Input.Inline, Input.Return or "NIL" )
+						Inline = Input.Inline
 					elseif Input.FLAG == EXPADV_PREPARE then
-						InputInline = "{nil,\"NIL\"}"
+						Inline = "nil"
 						VAPrepare[ #VAPrepare + 1 ] = Input.Prepare
 					else
-						VAInline[ #VAInline + 1 ] = string.format( "{%s,%q}", Input.Inline, Input.Return or "NIL" )
+						Inline = Input.Inline
 						VAPrepare[ #VAPrepare + 1 ] = Input.Prepare
 					end
+
+					if Input.Return ~= "..." and Input.Return ~= "_vr" then
+						Inline = string.format( "{%s,%q}", Inline, Input.Return or "NIL" )
+					end
+
+					VAInline[ #VAInline + 1 ] = Inline
+					
 				end
 
 				-- Preare the varargs preperation statments.

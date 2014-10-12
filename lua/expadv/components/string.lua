@@ -165,7 +165,7 @@ StringComponent:AddPreparedFunction( "format", "s:...", "s", [[
 	@: Insert / Remove
    --- */
    
-StringComponent:AddInlineFunction( "remove", "s:n,n", "s", "(string.sub( @Value 1, 1, @value - 1 ) .. string.sub( @Value 1, @value 3 or (@value 2 + 1) ))" )
+StringComponent:AddInlineFunction( "remove", "s:n,n", "s", "(string.sub( @value 1, 1, @value 2 - 1 ) .. string.sub( @value 1, @value 3 or (@value 2 + 1) ))" )
 StringComponent:AddFunctionHelper( "remove", "s:n,n", "Removes nth Char from string." )
 		  EXPADV.AddFunctionAlias( "remove", "s:n" )
 

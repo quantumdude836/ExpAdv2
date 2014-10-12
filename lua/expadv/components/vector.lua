@@ -230,7 +230,7 @@ VectorComponent:AddInlineFunction( "toLocalAxis", "e:v", "v", "(IsValid( @value 
 
 VectorComponent:AddFunctionHelper( "toWorld", "e:v", "Converts a vector to a world vector." )
 VectorComponent:AddFunctionHelper( "toWorldAxis", "e:v", "Converts a local axis to a world axis." )
-VectorComponent:AddFunctionHelper( "toLocal", "e:v", "v", "Converts a world vector to a local vector." )
+VectorComponent:AddFunctionHelper( "toLocal", "e:v", "Converts a world vector to a local vector." )
 VectorComponent:AddFunctionHelper( "toLocalAxis", "e:v", "Converts a world axis to a local axis." )
 
 /* --- --------------------------------------------------------------------------------

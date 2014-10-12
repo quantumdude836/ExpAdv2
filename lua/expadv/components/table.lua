@@ -61,17 +61,17 @@ Component:AddInlineFunction( "count", "t:", "n", "@value 1.Count" )
 Component:AddFunctionHelper( "size", "t:", "Returns the amount of entries in a table." )
 Component:AddFunctionHelper( "count", "t:", "Returns the lengh of the tables array element." )
 
-Component:AddInlineFunction( "type", "t:n", "s", "EXPADV.TypeName(value @1.Types[@value 2])" )
-Component:AddInlineFunction( "type", "t:s", "s", "EXPADV.TypeName(value @1.Types[@value 2])" )
-Component:AddInlineFunction( "type", "t:e", "s", "EXPADV.TypeName(value @1.Types[@value 2])" )
+Component:AddInlineFunction( "type", "t:n", "s", "EXPADV.TypeName(@value 1.Types[@value 2])" )
+Component:AddInlineFunction( "type", "t:s", "s", "EXPADV.TypeName(@value 1.Types[@value 2])" )
+Component:AddInlineFunction( "type", "t:e", "s", "EXPADV.TypeName(@value 1.Types[@value 2])" )
 
 Component:AddFunctionHelper( "type", "t:n", "Returns the type of obect stored in table at index." )
 Component:AddFunctionHelper( "type", "t:s", "Returns the type of obect stored in table at index." )
 Component:AddFunctionHelper( "type", "t:e", "Returns the type of obect stored in table at index." )
 
-Component:AddInlineFunction( "exists", "t:n", "b", "(value @1.Types[@value 2] ~= nil)" )
-Component:AddInlineFunction( "exists", "t:s", "b", "(value @1.Types[@value 2] ~= nil)" )
-Component:AddInlineFunction( "exists", "t:e", "b", "(value @1.Types[@value 2] ~= nil)" )
+Component:AddInlineFunction( "exists", "t:n", "b", "(@value 1.Types[@value 2] ~= nil)" )
+Component:AddInlineFunction( "exists", "t:s", "b", "(@value 1.Types[@value 2] ~= nil)" )
+Component:AddInlineFunction( "exists", "t:e", "b", "(@value 1.Types[@value 2] ~= nil)" )
 
 Component:AddFunctionHelper( "exists", "t:n", "Returns true if obect stored in table at index is not void." )
 Component:AddFunctionHelper( "exists", "t:s", "Returns true if obect stored in table at index is not void." )
@@ -112,6 +112,37 @@ Component:AddVMFunction( "concat", "t,s", "s",
 	end )
 
 Component:AddFunctionHelper( "concat", "t,s", "concatinates the array element of a table to a string using a seperator." )
+
+/* --- --------------------------------------------------------------------------------
+	@: Itorators
+   --- */
+
+Component:AddPreparedFunction( "numberKeys", "t:", "ar", [[
+	@define Array = { __type = "n" }
+	for _, Index in pairs( @value 1.Look ) do
+		if @value 1.Types[Index] == "n" then
+			@Array[@Array + 1] = @value 1.Data[Index]
+		end
+	end
+]], "@Array" )
+
+Component:AddPreparedFunction( "stringKeys", "t:", "ar", [[
+	@define Array = { __type = "s" }
+	for _, Index in pairs( @value 1.Look ) do
+		if @value 1.Types[Index] == "s" then
+			@Array[@Array + 1] = @value 1.Data[Index]
+		end
+	end
+]], "@Array" )
+
+Component:AddPreparedFunction( "entityKeys", "t:", "ar", [[
+	@define Array = { __type = "e" }
+	for _, Index in pairs( @value 1.Look ) do
+		if @value 1.Types[Index] == "e" then
+			@Array[@Array + 1] = @value 1.Data[Index]
+		end
+	end
+]], "@Array" )
 
 /* --- --------------------------------------------------------------------------------
 	@: Variant Get Operators
