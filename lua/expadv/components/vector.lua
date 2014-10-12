@@ -225,7 +225,7 @@ VectorComponent:AddFunctionHelper( "Heading", "v:a,v", "Return the heading betwe
 
 VectorComponent:AddInlineFunction( "toWorld", "e:v", "v", "(IsValid( @value 1 ) and @value 1:LocalToWorld(@value 2) or Vector(0, 0, 0))" )
 VectorComponent:AddInlineFunction( "toWorldAxis", "e:v", "v", "(IsValid( @value 1 ) and @value 1:LocalToWorld(@value 2 ) - @value 1:GetPos() or Vector(0, 0, 0))" )
-VectorComponent:AddInlineFunction( "toLocal", "e:v", "v", "(IsValid( @value 1 ) and @value 1:WorldToLocal(@value 2) or Vector3.Zero:Clone())" )
+VectorComponent:AddInlineFunction( "toLocal", "e:v", "v", "(IsValid( @value 1 ) and @value 1:WorldToLocal(@value 2) or Vector(0, 0, 0))" )
 VectorComponent:AddInlineFunction( "toLocalAxis", "e:v", "v", "(IsValid( @value 1 ) and @value 1:WorldToLocal(@value 2 + @value 1:GetPos()) or Vector(0, 0, 0))" )
 
 VectorComponent:AddFunctionHelper( "toWorld", "e:v", "Converts a vector to a world vector." )
