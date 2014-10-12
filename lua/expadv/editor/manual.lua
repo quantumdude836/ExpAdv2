@@ -2,7 +2,7 @@ function EXPADV.Editor.OpenHelper( )
 
 		--------------------------------------------------------------------------
 
-		local function GetAvaliblity( Operator )
+		local function GetAvalibility( Operator )
 			if Operator.LoadOnServer and Operator.LoadOnClient then return "Shared" end
 			if Operator.LoadOnServer then return "Serverside" end
 			if Operator.LoadOnClient then return "Clientside" end
@@ -58,7 +58,7 @@ function EXPADV.Editor.OpenHelper( )
 		ClassTab.ClassCanvas:DockMargin( 5, 5, 5 ,5 )
 		ClassTab.ClassCanvas:Dock( FILL )
 
-		TabSheet:AddSheet( "Compoents", ClassTab, nil, true, true, "Classes" )
+		TabSheet:AddSheet( "Components", ClassTab, nil, true, true, "Classes" )
 
 		--------------------------------------------------------------------------
 
@@ -184,7 +184,7 @@ function EXPADV.Editor.OpenHelper( )
 			Sheet.Info:AddLine( "Class", Name )
 			Sheet.Info:AddLine( "Extends", Class.DerivedClass and Class.DerivedClass.Name or "generic" ) 
 			Sheet.Info:AddLine( "Component", Class.Component and Class.Component.Name or "Core" )
-			Sheet.Info:AddLine( "Avaliblity", GetAvaliblity( Class ) )
+			Sheet.Info:AddLine( "Avalibility", GetAvalibility( Class ) )
 			Sheet.Info:DataLayout( )
 			
 			---------------------------------------------------------------------
@@ -200,7 +200,7 @@ function EXPADV.Editor.OpenHelper( )
 				end
 				
 				for _, Operator in pairs( EXPADV.Class_Operators[Class.Short] ) do
-					Sheet.Operators:AddLine( GetAvaliblity(Operator), Operator.Type or "", EXPADV.TypeName( Operator.Return or "" ) or "Void", Operator.Example, Operator.Description )
+					Sheet.Operators:AddLine( GetAvalibility(Operator), Operator.Type or "", EXPADV.TypeName( Operator.Return or "" ) or "Void", Operator.Example, Operator.Description )
 				end
 			end
 			
@@ -222,7 +222,7 @@ function EXPADV.Editor.OpenHelper( )
 				Sheet.Operators:AddColumn( "Description" )
 			end
 			
-			Sheet.Operators:AddLine( GetAvaliblity(Operator), Operator.Type or "", EXPADV.TypeName( Operator.Return or "" ) or "Void", Operator.Example, Operator.Description )
+			Sheet.Operators:AddLine( GetAvalibility(Operator), Operator.Type or "", EXPADV.TypeName( Operator.Return or "" ) or "Void", Operator.Example, Operator.Description )
 		end
 
 		--------------------------------------------------------------------------
@@ -247,7 +247,7 @@ function EXPADV.Editor.OpenHelper( )
 				local Inputs = table.Copy( Operator.Input )
 				local Signature = string.format( "%s.%s(%s)", EXPADV.TypeName( table.remove( Inputs, 1 ) ), Operator.Name, NamePerams( Inputs, Operator.InputCount, Operator.UsesVarg ) )
 				
-				Sheet.Methods:AddLine( GetAvaliblity(Operator), EXPADV.TypeName( Operator.Return or "" ) or "Void", Signature, Operator.Description )
+				Sheet.Methods:AddLine( GetAvalibility(Operator), EXPADV.TypeName( Operator.Return or "" ) or "Void", Signature, Operator.Description )
 				
 			else
 				
@@ -267,7 +267,7 @@ function EXPADV.Editor.OpenHelper( )
 				
 				local Signature = string.format( "%s(%s)", Operator.Name, NamePerams( Operator.Input, Operator.InputCount, Operator.UsesVarg ) )
 				
-				Sheet.Functions:AddLine( GetAvaliblity(Operator), EXPADV.TypeName( Operator.Return or "" ) or "Void", Signature, Operator.Description )
+				Sheet.Functions:AddLine( GetAvalibility(Operator), EXPADV.TypeName( Operator.Return or "" ) or "Void", Signature, Operator.Description )
 			end
 		end
 
@@ -292,7 +292,7 @@ function EXPADV.Editor.OpenHelper( )
 				
 			local Signature = string.format( "%s(%s)", Event.Name, NamePerams( Event.Input, Event.InputCount, false ) )
 				
-			Sheet.Events:AddLine( GetAvaliblity(Event), EXPADV.TypeName( Event.Return or "" ) or "Void", Signature, Event.Description or "N/A" )
+			Sheet.Events:AddLine( GetAvalibility(Event), EXPADV.TypeName( Event.Return or "" ) or "Void", Signature, Event.Description or "N/A" )
 			
 		end
 
