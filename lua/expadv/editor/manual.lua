@@ -80,7 +80,7 @@ function EXPADV.Editor.OpenHelper( )
 
 		CoreComponentSheet.Info = CoreComponentSheet:Add( "DListView" )
 		CoreComponentSheet.Info:Dock( FILL )
-		CoreComponentSheet.Info:AddColumn( "Information" )
+		CoreComponentSheet.Info:AddColumn( "" ):SetFixedWidth( 60 )
 		CoreComponentSheet.Info:AddColumn( "" )
 			
 		CoreComponentSheet.Info:AddLine( "Component", "Core" )
@@ -113,7 +113,7 @@ function EXPADV.Editor.OpenHelper( )
 			---------------------------------------------------------------------
 			
 			Sheet.Info = Sheet:Add( "DListView" )
-			Sheet.Info:AddColumn( "Information" )
+			Sheet.Info:AddColumn( "" ):SetFixedWidth( 60 )
 			Sheet.Info:AddColumn( "" )
 			
 			Sheet.Info:AddLine( "Component", Component.Name )
@@ -178,7 +178,7 @@ function EXPADV.Editor.OpenHelper( )
 			---------------------------------------------------------------------
 			
 			Sheet.Info = Sheet:Add( "DListView" )
-			Sheet.Info:AddColumn( "Information" )
+			Sheet.Info:AddColumn( "" ):SetFixedWidth( 60 )
 			Sheet.Info:AddColumn( "" )
 			
 			Sheet.Info:AddLine( "Class", Name )
@@ -192,9 +192,9 @@ function EXPADV.Editor.OpenHelper( )
 			if EXPADV.Class_Operators[Class.Short] then
 				if !Sheet.Operators then
 					Sheet.Operators = Sheet:Add( "DListView" )
-					Sheet.Operators:AddColumn( "Avalibility" )
-					Sheet.Operators:AddColumn( "Operator" )
-					Sheet.Operators:AddColumn( "Return" )
+					Sheet.Operators:AddColumn( "Avalibility" ):SetFixedWidth( 60 )
+					Sheet.Operators:AddColumn( "Operator" ):SetFixedWidth( 70 )
+					Sheet.Operators:AddColumn( "Return" ):SetFixedWidth( 60 )
 					Sheet.Operators:AddColumn( "Example" )
 					Sheet.Operators:AddColumn( "Description" )
 				end
@@ -215,9 +215,9 @@ function EXPADV.Editor.OpenHelper( )
 			
 			if !Sheet.Operators then
 				Sheet.Operators = Sheet:Add( "DListView" )
-				Sheet.Operators:AddColumn( "Avalibility" )
-				Sheet.Operators:AddColumn( "Operator" )
-				Sheet.Operators:AddColumn( "Return" )
+				Sheet.Operators:AddColumn( "Avalibility" ):SetFixedWidth( 60 )
+				Sheet.Operators:AddColumn( "Operator" ):SetFixedWidth( 70 )
+				Sheet.Operators:AddColumn( "Return" ):SetFixedWidth( 60 )
 				Sheet.Operators:AddColumn( "Example" )
 				Sheet.Operators:AddColumn( "Description" )
 			end
@@ -238,8 +238,8 @@ function EXPADV.Editor.OpenHelper( )
 				
 				if !Sheet.Methods then
 					Sheet.Methods = Sheet:Add( "DListView" )
-					Sheet.Methods:AddColumn( "Avalibility" )
-					Sheet.Methods:AddColumn( "Return" )
+					Sheet.Methods:AddColumn( "Avalibility" ):SetFixedWidth( 60 )
+					Sheet.Methods:AddColumn( "Return" ):SetFixedWidth( 60 )
 					Sheet.Methods:AddColumn( "Method" )
 					Sheet.Methods:AddColumn( "Description" )
 				end
@@ -259,9 +259,9 @@ function EXPADV.Editor.OpenHelper( )
 				
 				if !Sheet.Functions then
 					Sheet.Functions = Sheet:Add( "DListView" )
-					Sheet.Functions:AddColumn( "Avalibility" )
-					Sheet.Functions:AddColumn( "Return" )
-					Sheet.Functions:AddColumn( "function" )
+					Sheet.Functions:AddColumn( "Avalibility" ):SetFixedWidth( 60 )
+					Sheet.Functions:AddColumn( "Return" ):SetFixedWidth( 60 )
+					Sheet.Functions:AddColumn( "Function" )
 					Sheet.Functions:AddColumn( "Description" )
 				end
 				
@@ -284,9 +284,9 @@ function EXPADV.Editor.OpenHelper( )
 				
 			if !Sheet.Events then
 				Sheet.Events = Sheet:Add( "DListView" )
-				Sheet.Events:AddColumn( "Avalibility" )
-				Sheet.Events:AddColumn( "Return" )
-				Sheet.Events:AddColumn( "event" )
+				Sheet.Events:AddColumn( "Avalibility" ):SetFixedWidth( 60 )
+				Sheet.Events:AddColumn( "Return" ):SetFixedWidth( 60 )
+				Sheet.Events:AddColumn( "Event" )
 				Sheet.Events:AddColumn( "Description" )
 			end
 				
@@ -299,7 +299,7 @@ function EXPADV.Editor.OpenHelper( )
 		--------------------------------------------------------------------------
 
 		local LabelColor = Color( 0, 0, 0 )
-
+		
 		local function LayOut( Sheet )
 			local W, H = Sheet:GetParent( ):GetSize( )
 			local X, Y = 5, 5
