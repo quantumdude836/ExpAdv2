@@ -203,7 +203,7 @@ function Compiler:Expression_1( Trace )
 
 		local Expression2 = self:Expression_1( Trace ) -- Ha Ha, Expression 2 :D
 
-		self:RequireToken( "col", "colon (:) expected for tinary operator." ) -- TODO: This error message is shit.
+		self:RequireToken( "col", "colon (:) expected for ternary operator." ) -- TODO: This error message is shit.
 
 		Expression = self:Compile_TEN( Trace, Expression, Expression2, self:Expression_1( Trace ) )
 

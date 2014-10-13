@@ -26,38 +26,38 @@ end
 	@: Operators
    --- */
 
-function Compiler:Compile_IS( Trace, Expresion1 )
-	if Expresion1.Return == "b" then return Expresion1 end
+function Compiler:Compile_IS( Trace, Expression1 )
+	if Expression1.Return == "b" then return Expression1 end
 
-	local Operator = self:LookUpOperator( "is", Expresion1.Return )
+	local Operator = self:LookUpOperator( "is", Expression1.Return )
 
-	if !Operator then self:TraceError( Trace, "%s can not be used as condition", self:NiceClass( Expresion1.Return ) ) end
+	if !Operator then self:TraceError( Trace, "%s can not be used as condition", self:NiceClass( Expression1.Return ) ) end
 
-	return Operator.Compile( self, Trace, Expresion1 )
+	return Operator.Compile( self, Trace, Expression1 )
 end
 
-function Compiler:Compile_NOT( Trace, Expresion1 )
-	local Operator = self:LookUpOperator( "not", Expresion1.Return )
+function Compiler:Compile_NOT( Trace, Expression1 )
+	local Operator = self:LookUpOperator( "not", Expression1.Return )
 
-	if !Operator then self:TraceError( Trace, "Operator does not support '!%s'", self:NiceClass( Expresion1.Return ) ) end
+	if !Operator then self:TraceError( Trace, "Operator does not support '!%s'", self:NiceClass( Expression1.Return ) ) end
 
-	return Operator.Compile( self, Trace, Expresion1 )
+	return Operator.Compile( self, Trace, Expression1 )
 end
 
-function Compiler:Compile_LEN( Trace, Expresion1 )
-	local Operator = self:LookUpOperator( "#", Expresion1.Return )
+function Compiler:Compile_LEN( Trace, Expression1 )
+	local Operator = self:LookUpOperator( "#", Expression1.Return )
 
-	if !Operator then self:TraceError( Trace, "Length operator does not support '#%s'", self:NiceClass( Expresion1.Return ) ) end
+	if !Operator then self:TraceError( Trace, "Length operator does not support '#%s'", self:NiceClass( Expression1.Return ) ) end
 
-	return Operator.Compile( self, Trace, Expresion1 )
+	return Operator.Compile( self, Trace, Expression1 )
 end
 
-function Compiler:Compile_NEG( Trace, Expresion1 )
-	local Operator = self:LookUpOperator( "-", Expresion1.Return )
+function Compiler:Compile_NEG( Trace, Expression1 )
+	local Operator = self:LookUpOperator( "-", Expression1.Return )
 
-	if !Operator then self:TraceError( Trace, "Negation operator does not support '-%s'", self:NiceClass( Expresion1.Return ) ) end
+	if !Operator then self:TraceError( Trace, "Negation operator does not support '-%s'", self:NiceClass( Expression1.Return ) ) end
 
-	return Operator.Compile( self, Trace, Expresion1 )
+	return Operator.Compile( self, Trace, Expression1 )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -70,108 +70,108 @@ end
 	@: Logical Operators
    --- */
 
-function Compiler:Compile_OR( Trace, Expresion1, Expression2 )
-	local Operator = self:LookUpOperator( "||", Expresion1.Return, Expression2.Return )
+function Compiler:Compile_OR( Trace, Expression1, Expression2 )
+	local Operator = self:LookUpOperator( "||", Expression1.Return, Expression2.Return )
 
-	if !Operator then self:TraceError( Trace, "Logic operator (or) does not support '%s || %s'", self:NiceClass( Expresion1.Return, Expression2.Return ) ) end
+	if !Operator then self:TraceError( Trace, "Logic operator (or) does not support '%s || %s'", self:NiceClass( Expression1.Return, Expression2.Return ) ) end
 
-	return Operator.Compile( self, Trace, Expresion1, self:MakeVirtual( Expression2 ) )
+	return Operator.Compile( self, Trace, Expression1, self:MakeVirtual( Expression2 ) )
 end
 
-function Compiler:Compile_AND( Trace, Expresion1, Expression2 )
-	local Operator = self:LookUpOperator( "&&", Expresion1.Return, Expression2.Return )
+function Compiler:Compile_AND( Trace, Expression1, Expression2 )
+	local Operator = self:LookUpOperator( "&&", Expression1.Return, Expression2.Return )
 
-	if !Operator then self:TraceError( Trace, "Logic operator (and) does not support '%s && %s'", self:NiceClass( Expresion1.Return, Expression2.Return ) ) end
+	if !Operator then self:TraceError( Trace, "Logic operator (and) does not support '%s && %s'", self:NiceClass( Expression1.Return, Expression2.Return ) ) end
 
-	return Operator.Compile( self, Trace, Expresion1, self:MakeVirtual( Expression2 ) )
+	return Operator.Compile( self, Trace, Expression1, self:MakeVirtual( Expression2 ) )
 end
 
-function Compiler:Compile_BOR( Trace, Expresion1, Expression2 )
-	local Operator = self:LookUpOperator( "|", Expresion1.Return, Expression2.Return )
+function Compiler:Compile_BOR( Trace, Expression1, Expression2 )
+	local Operator = self:LookUpOperator( "|", Expression1.Return, Expression2.Return )
 
-	if !Operator then self:TraceError( Trace, "Binary operator (bor) does not support '%s | %s'", self:NiceClass( Expresion1.Return, Expression2.Return ) ) end
+	if !Operator then self:TraceError( Trace, "Binary operator (bor) does not support '%s | %s'", self:NiceClass( Expression1.Return, Expression2.Return ) ) end
 
-	return Operator.Compile( self, Trace, Expresion1, Expression2 )
+	return Operator.Compile( self, Trace, Expression1, Expression2 )
 end
 
-function Compiler:Compile_BAND( Trace, Expresion1, Expression2 )
-	local Operator = self:LookUpOperator( "&", Expresion1.Return, Expression2.Return )
+function Compiler:Compile_BAND( Trace, Expression1, Expression2 )
+	local Operator = self:LookUpOperator( "&", Expression1.Return, Expression2.Return )
 
-	if !Operator then self:TraceError( Trace, "Binary operator (band) does not support '%s & %s'", self:NiceClass( Expresion1.Return, Expression2.Return ) ) end
+	if !Operator then self:TraceError( Trace, "Binary operator (band) does not support '%s & %s'", self:NiceClass( Expression1.Return, Expression2.Return ) ) end
 
-	return Operator.Compile( self, Trace, Expresion1, Expression2 )
+	return Operator.Compile( self, Trace, Expression1, Expression2 )
 end
 
-function Compiler:Compile_BXOR( Trace, Expresion1, Expression2 )
-	local Operator = self:LookUpOperator( "^^", Expresion1.Return, Expression2.Return )
+function Compiler:Compile_BXOR( Trace, Expression1, Expression2 )
+	local Operator = self:LookUpOperator( "^^", Expression1.Return, Expression2.Return )
 
-	if !Operator then self:TraceError( Trace, "Binary operator (bxor) does not support '%s ^^ %s'", self:NiceClass( Expresion1.Return, Expression2.Return ) ) end
+	if !Operator then self:TraceError( Trace, "Binary operator (bxor) does not support '%s ^^ %s'", self:NiceClass( Expression1.Return, Expression2.Return ) ) end
 
-	return Operator.Compile( self, Trace, Expresion1, Expression2 )
+	return Operator.Compile( self, Trace, Expression1, Expression2 )
 end
 
-function Compiler:Compile_GTH( Trace, Expresion1, Expression2 )
-	local Operator = self:LookUpOperator( ">", Expresion1.Return, Expression2.Return )
+function Compiler:Compile_GTH( Trace, Expression1, Expression2 )
+	local Operator = self:LookUpOperator( ">", Expression1.Return, Expression2.Return )
 
-	if !Operator then self:TraceError( Trace, "Comparason operator (grater then) does not support '%s > %s'", self:NiceClass( Expresion1.Return, Expression2.Return ) ) end
+	if !Operator then self:TraceError( Trace, "Comparason operator (grater then) does not support '%s > %s'", self:NiceClass( Expression1.Return, Expression2.Return ) ) end
 
-	return Operator.Compile( self, Trace, Expresion1, Expression2 )
+	return Operator.Compile( self, Trace, Expression1, Expression2 )
 end
 
-function Compiler:Compile_LTH( Trace, Expresion1, Expression2 )
-	local Operator = self:LookUpOperator( "<", Expresion1.Return, Expression2.Return )
+function Compiler:Compile_LTH( Trace, Expression1, Expression2 )
+	local Operator = self:LookUpOperator( "<", Expression1.Return, Expression2.Return )
 
-	if !Operator then self:TraceError( Trace, "Comparason operator (less then) does not support '%s < %s'", self:NiceClass( Expresion1.Return, Expression2.Return ) ) end
+	if !Operator then self:TraceError( Trace, "Comparason operator (less then) does not support '%s < %s'", self:NiceClass( Expression1.Return, Expression2.Return ) ) end
 
-	return Operator.Compile( self, Trace, Expresion1, Expression2 )
+	return Operator.Compile( self, Trace, Expression1, Expression2 )
 end
 
-function Compiler:Compile_GEQ( Trace, Expresion1, Expression2 )
-	local Operator = self:LookUpOperator( ">=", Expresion1.Return, Expression2.Return )
+function Compiler:Compile_GEQ( Trace, Expression1, Expression2 )
+	local Operator = self:LookUpOperator( ">=", Expression1.Return, Expression2.Return )
 
-	if !Operator then self:TraceError( Trace, "Comparason operator (grater equal) does not support '%s >= %s'", self:NiceClass( Expresion1.Return, Expression2.Return ) ) end
+	if !Operator then self:TraceError( Trace, "Comparason operator (grater equal) does not support '%s >= %s'", self:NiceClass( Expression1.Return, Expression2.Return ) ) end
 
-	return Operator.Compile( self, Trace, Expresion1, Expression2 )
+	return Operator.Compile( self, Trace, Expression1, Expression2 )
 end
 
-function Compiler:Compile_LEQ( Trace, Expresion1, Expression2 )
-	local Operator = self:LookUpOperator( "<=", Expresion1.Return, Expression2.Return )
+function Compiler:Compile_LEQ( Trace, Expression1, Expression2 )
+	local Operator = self:LookUpOperator( "<=", Expression1.Return, Expression2.Return )
 
-	if !Operator then self:TraceError( Trace, "Comparason operator (less equal) does not support '%s <= %s'", self:NiceClass( Expresion1.Return, Expression2.Return ) ) end
+	if !Operator then self:TraceError( Trace, "Comparason operator (less equal) does not support '%s <= %s'", self:NiceClass( Expression1.Return, Expression2.Return ) ) end
 
-	return Operator.Compile( self, Trace, Expresion1, Expression2 )
+	return Operator.Compile( self, Trace, Expression1, Expression2 )
 end
 
-function Compiler:Compile_BSHR( Trace, Expresion1, Expression2 )
-	local Operator = self:LookUpOperator( ">>", Expresion1.Return, Expression2.Return )
+function Compiler:Compile_BSHR( Trace, Expression1, Expression2 )
+	local Operator = self:LookUpOperator( ">>", Expression1.Return, Expression2.Return )
 
-	if !Operator then self:TraceError( Trace, "Binary operator (bitshift right) does not support '%s >> %s'", self:NiceClass( Expresion1.Return, Expression2.Return ) ) end
+	if !Operator then self:TraceError( Trace, "Binary operator (bitshift right) does not support '%s >> %s'", self:NiceClass( Expression1.Return, Expression2.Return ) ) end
 
-	return Operator.Compile( self, Trace, Expresion1, Expression2 )
+	return Operator.Compile( self, Trace, Expression1, Expression2 )
 end
 
-function Compiler:Compile_BSHL( Trace, Expresion1, Expression2 )
-	local Operator = self:LookUpOperator( "<<", Expresion1.Return, Expression2.Return )
+function Compiler:Compile_BSHL( Trace, Expression1, Expression2 )
+	local Operator = self:LookUpOperator( "<<", Expression1.Return, Expression2.Return )
 
-	if !Operator then self:TraceError( Trace, "Binary operator (bitshift left) does not support '%s << %s'", self:NiceClass( Expresion1.Return, Expression2.Return ) ) end
+	if !Operator then self:TraceError( Trace, "Binary operator (bitshift left) does not support '%s << %s'", self:NiceClass( Expression1.Return, Expression2.Return ) ) end
 
-	return Operator.Compile( self, Trace, Expresion1, Expression2 )
+	return Operator.Compile( self, Trace, Expression1, Expression2 )
 end
 
-function Compiler:Compile_EQ( Trace, Expresion1, Expression2 )
-	local Operator = self:LookUpOperator( "==", Expresion1.Return, Expression2.Return )
+function Compiler:Compile_EQ( Trace, Expression1, Expression2 )
+	local Operator = self:LookUpOperator( "==", Expression1.Return, Expression2.Return )
 
-	if !Operator then self:TraceError( Trace, "Comparason operator (equals) does not support '%s == %s'", self:NiceClass( Expresion1.Return, Expression2.Return ) ) end
+	if !Operator then self:TraceError( Trace, "Comparason operator (equals) does not support '%s == %s'", self:NiceClass( Expression1.Return, Expression2.Return ) ) end
 
-	return Operator.Compile( self, Trace, Expresion1, Expression2 )
+	return Operator.Compile( self, Trace, Expression1, Expression2 )
 end
 
-function Compiler:Compile_NEQ( Trace, Expresion1, Expression2 )
-	local Operator = self:LookUpOperator( "!=", Expresion1.Return, Expression2.Return )
+function Compiler:Compile_NEQ( Trace, Expression1, Expression2 )
+	local Operator = self:LookUpOperator( "!=", Expression1.Return, Expression2.Return )
 
-	if !Operator then self:TraceError( Trace, "Comparason operator (not equal) does not support '%s != %s'", self:NiceClass( Expresion1.Return, Expression2.Return ) ) end
+	if !Operator then self:TraceError( Trace, "Comparason operator (not equal) does not support '%s != %s'", self:NiceClass( Expression1.Return, Expression2.Return ) ) end
 
-	return Operator.Compile( self, Trace, Expresion1, Expression2 )
+	return Operator.Compile( self, Trace, Expression1, Expression2 )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -222,52 +222,68 @@ end
 	@: Arithmatic Operators
    --- */
 
-function Compiler:Compile_ADD( Trace, Expresion1, Expression2 )
-	local Operator = self:LookUpOperator( "+", Expresion1.Return, Expression2.Return )
+function Compiler:Compile_ADD( Trace, Expression1, Expression2 )
+	local Operator = self:LookUpOperator( "+", Expression1.Return, Expression2.Return )
 
-	if !Operator then self:TraceError( Trace, "Arithmatic operator (add) does not support '%s + %s'", self:NiceClass( Expresion1.Return, Expression2.Return ) ) end
+	if !Operator then self:TraceError( Trace, "Arithmatic operator (add) does not support '%s + %s'", self:NiceClass( Expression1.Return, Expression2.Return ) ) end
 
-	return Operator.Compile( self, Trace, Expresion1, Expression2 )
+	return Operator.Compile( self, Trace, Expression1, Expression2 )
 end
 
-function Compiler:Compile_SUB( Trace, Expresion1, Expression2 )
-	local Operator = self:LookUpOperator( "-", Expresion1.Return, Expression2.Return )
+function Compiler:Compile_SUB( Trace, Expression1, Expression2 )
+	local Operator = self:LookUpOperator( "-", Expression1.Return, Expression2.Return )
 
-	if !Operator then self:TraceError( Trace, "Arithmatic operator (subtract) does not support '%s - %s'", self:NiceClass( Expresion1.Return, Expression2.Return ) ) end
+	if !Operator then self:TraceError( Trace, "Arithmatic operator (subtract) does not support '%s - %s'", self:NiceClass( Expression1.Return, Expression2.Return ) ) end
 
-	return Operator.Compile( self, Trace, Expresion1, Expression2 )
+	return Operator.Compile( self, Trace, Expression1, Expression2 )
 end
 
-function Compiler:Compile_MUL( Trace, Expresion1, Expression2 )
-	local Operator = self:LookUpOperator( "*", Expresion1.Return, Expression2.Return )
+function Compiler:Compile_MUL( Trace, Expression1, Expression2 )
+	local Operator = self:LookUpOperator( "*", Expression1.Return, Expression2.Return )
 
-	if !Operator then self:TraceError( Trace, "Arithmatic operator (multiply) does not support '%s * %s'", self:NiceClass( Expresion1.Return, Expression2.Return ) ) end
+	if !Operator then self:TraceError( Trace, "Arithmatic operator (multiply) does not support '%s * %s'", self:NiceClass( Expression1.Return, Expression2.Return ) ) end
 
-	return Operator.Compile( self, Trace, Expresion1, Expression2 )
+	return Operator.Compile( self, Trace, Expression1, Expression2 )
 end
 
-function Compiler:Compile_DIV( Trace, Expresion1, Expression2 )
-	local Operator = self:LookUpOperator( "/", Expresion1.Return, Expression2.Return )
+function Compiler:Compile_DIV( Trace, Expression1, Expression2 )
+	local Operator = self:LookUpOperator( "/", Expression1.Return, Expression2.Return )
 
-	if !Operator then self:TraceError( Trace, "Arithmatic operator (divishion) does not support '%s / %s'", self:NiceClass( Expresion1.Return, Expression2.Return ) ) end
+	if !Operator then self:TraceError( Trace, "Arithmatic operator (divishion) does not support '%s / %s'", self:NiceClass( Expression1.Return, Expression2.Return ) ) end
 
-	return Operator.Compile( self, Trace, Expresion1, Expression2 )
+	return Operator.Compile( self, Trace, Expression1, Expression2 )
 end
 
-function Compiler:Compile_MOD( Trace, Expresion1, Expression2 )
-	local Operator = self:LookUpOperator( "%", Expresion1.Return, Expression2.Return )
+function Compiler:Compile_MOD( Trace, Expression1, Expression2 )
+	local Operator = self:LookUpOperator( "%", Expression1.Return, Expression2.Return )
 
-	if !Operator then self:TraceError( Trace, "Arithmatic operator (modulus) does not support '%s %% %s'", self:NiceClass( Expresion1.Return, Expression2.Return ) ) end
+	if !Operator then self:TraceError( Trace, "Arithmatic operator (modulus) does not support '%s %% %s'", self:NiceClass( Expression1.Return, Expression2.Return ) ) end
 
-	return Operator.Compile( self, Trace, Expresion1, Expression2 )
+	return Operator.Compile( self, Trace, Expression1, Expression2 )
 end
 
-function Compiler:Compile_EXP( Trace, Expresion1, Expression2 )
-	local Operator = self:LookUpOperator( "^", Expresion1.Return, Expression2.Return )
+function Compiler:Compile_EXP( Trace, Expression1, Expression2 )
+	local Operator = self:LookUpOperator( "^", Expression1.Return, Expression2.Return )
 
-	if !Operator then self:TraceError( Trace, "Arithmatic operator (exponent) does not support '%s ^ %s'", self:NiceClass( Expresion1.Return, Expression2.Return ) ) end
+	if !Operator then self:TraceError( Trace, "Arithmatic operator (exponent) does not support '%s ^ %s'", self:NiceClass( Expression1.Return, Expression2.Return ) ) end
 
-	return Operator.Compile( self, Trace, Expresion1, Expression2 )
+	return Operator.Compile( self, Trace, Expression1, Expression2 )
+end
+
+function Compiler:Compile_TEN( Trace, Expression1, Expression2, Expression3 )
+	if Expression2.Return ~= Expression3.Return then
+		self:TraceError( Trace, "Ternary operator does not support '%s : %s ? %s'", self:NiceClass( Expression1.Return, Expression2.Return, Expression3.Return ) )
+	end
+
+	Expression1 = self:Compile_IS( Trace, Expression1 )
+
+	local Inline, Prepare = string.format( "(%s and %s or %s)", Expression1.Inline, Expression2.Inline, Expression3.Inline )
+	
+	if Expression1.Prepare or Expression2.Prepare or Expression3.Prepare then
+		Prepare = table.concat( { Expression1.Prepare or "", Expression2.Prepare or "", Expression3.Prepare or "" }, "\n" )
+	end
+
+	return { Trace = Trace, Inline = Inline, Prepare = Prepare, Return = Expression2.Return, FLAG = Prepare and EXPADV_INLINEPREPARE or EXPADV_INLINE }
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -479,6 +495,7 @@ end
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Try Catch
    --- */
+
 function Compiler:Compile_TRY( Trace, Sequence, Catch, Final )
 	local _, VM_ID = self:MakeVirtual( Sequence, true )
 

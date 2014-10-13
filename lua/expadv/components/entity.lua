@@ -242,11 +242,11 @@ Component:AddFunctionHelper( "vel", "e:", "Returns the velocity of the given ent
 Component:AddInlineFunction( "velL", "e:", "v", "(@value 1:IsValid() and (@value 1:WorldToLocal(@value 1:GetVelocity() + @value 1:GetPos())) or Vector(0,0,0))")
 Component:AddFunctionHelper( "velL", "e:", "Returns the local velocity of the given entity.")
 
-Component:AddInlineFunction( "angVel", "e:", "a",
+Component:AddPreparedFunction( "angVel", "e:", "a",
 [[if(@value 1:IsValid() && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType( )== $MOVETYPE_VPHYSICS) then
 	@define vel = @value 1:GetPhysicsObject():GetAngleVelocity()
 	Angle(@vel.y, @vel.z, @vel.x)
-end]])
+end]], "@vel" )
 
 Component:AddFunctionHelper( "angVel", "e:", "Returns the angular velocity of the given entity.")
 
