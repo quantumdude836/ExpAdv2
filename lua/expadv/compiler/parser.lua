@@ -1128,7 +1128,7 @@ function Compiler:Statement_6( Trace )
 	if self:AcceptToken( "var" ) then
 		local Trace = self:GetTokenTrace( Trace )
 
-		if !self:CheckToken( "var", "ass", "aadd", "asub", "advi", "amul" ) then
+		if !self:CheckToken( "var", "ass", "aadd", "asub", "advi", "amul", "com" ) then
 			self:PrevToken( )
 			return self:Statement_7( Trace )
 		end
