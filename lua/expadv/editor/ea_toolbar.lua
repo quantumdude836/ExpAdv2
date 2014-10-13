@@ -47,7 +47,7 @@ function PANEL:Init( )
 	self:AddTabNamer( )
 	
 	self.btnOptions = self:SetupButton( "Options", Material( "fugue/gear.png" ), RIGHT )
-	self.btnHelp = self:SetupButton( "Open helper", Material( "fugue/question.png" ), RIGHT )
+	self.btnHelp = self:SetupButton( "Open user manual", Material( "fugue/question.png" ), RIGHT )
 	self.btnWiki = self:SetupButton( "Visit the wiki", Material( "fugue/home.png" ), RIGHT )
 
 	self:AddInviteMenu( )

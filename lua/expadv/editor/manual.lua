@@ -397,4 +397,106 @@ function EXPADV.Editor.OpenHelper( )
 		end
 
 		ClassTab.ClassCanvas:InvalidateLayout( )
+
+		--------------------------------------------------------------------------
+
+		local FunctionPanel = vgui.Create( "DPanel" )
+		FunctionPanel:DockMargin( 5, 5, 5 ,5 )
+		FunctionPanel:Dock( FILL )
+
+		TabSheet:AddSheet( "Browser", FunctionPanel, nil, true, true, "Browse and search functions." )
+
+		local Sheet = FunctionPanel:Add( "DScrollPanel" )
+
+		Sheet.Methods = Sheet:Add( "DListView" )
+		Sheet.Methods:AddColumn( "Avalibility" ):SetFixedWidth( 60 )
+		Sheet.Methods:AddColumn( "Return" ):SetFixedWidth( 60 )
+		Sheet.Methods:AddColumn( "Method" )
+		Sheet.Methods:AddColumn( "Description" )
+
+		Sheet.Functions = Sheet:Add( "DListView" )
+		Sheet.Functions:AddColumn( "Avalibility" ):SetFixedWidth( 60 )
+		Sheet.Functions:AddColumn( "Return" ):SetFixedWidth( 60 )
+		Sheet.Functions:AddColumn( "Function" )
+		Sheet.Functions:AddColumn( "Description" )
+
+		Sheet.Events = Sheet:Add( "DListView" )
+		Sheet.Events:AddColumn( "Avalibility" ):SetFixedWidth( 60 )
+		Sheet.Events:AddColumn( "Return" ):SetFixedWidth( 60 )
+		Sheet.Events:AddColumn( "Event" )
+		Sheet.Events:AddColumn( "Description" )
+
+		local function Search( Query )
+			
+			Sheet.Methods:Clear( )
+
+			Sheet.Functions:Clear( )
+
+			Sheet.Events:Clear( )
+
+			for _, Operator in pairs( EXPADV.Functions ) do
+				
+				if Query and Query ~= "" and !string.find( Operator.Name, Query ) then continue end
+				
+				if Operator.Method then
+					local Inputs = table.Copy( Operator.Input )
+					local Signature = string.format( "%s.%s(%s)", EXPADV.TypeName( table.remove( Inputs, 1 ) ), Operator.Name, NamePerams( Inputs, Operator.InputCount, Operator.UsesVarg ) )
+					
+					Sheet.Methods:AddLine( GetAvalibility(Operator), EXPADV.TypeName( Operator.Return or "" ) or "Void", Signature, Operator.Description )
+				else
+					local Signature = string.format( "%s(%s)", Operator.Name, NamePerams( Operator.Input, Operator.InputCount, Operator.UsesVarg ) )
+					
+					Sheet.Functions:AddLine( GetAvalibility(Operator), EXPADV.TypeName( Operator.Return or "" ) or "Void", Signature, Operator.Description )
+				end
+			end
+
+			for _, Event in pairs( EXPADV.Events ) do
+				if Query and Query ~= "" and !string.find( Event.Name, Query ) then continue end
+
+				local Signature = string.format( "%s(%s)", Event.Name, NamePerams( Event.Input, Event.InputCount, false ) )
+					
+				Sheet.Events:AddLine( GetAvalibility(Event), EXPADV.TypeName( Event.Return or "" ) or "Void", Signature, Event.Description or "N/A" )
+				
+			end
+
+			FunctionPanel:InvalidateLayout( )
+		end
+
+		local SearchPanel = FunctionPanel:Add( "DPanel" )
+		local QueryBox = SearchPanel:Add( "DTextEntry" )
+		QueryBox:SetEnterAllowed( true )
+
+		local SearchButton = SearchPanel:Add( "EA_ImageButton" ) 
+		SearchButton:SetIconFading( false )
+		SearchButton:SetIconCentered( false )
+		SearchButton:SetTextCentered( false )
+		SearchButton:DrawButton( true )
+		SearchButton:SetMaterial( Material( "fugue/magnifier-left.png" ) )
+
+		function SearchButton:DoClick( )
+			Search( QueryBox:GetValue( ) )
+		end
+
+		function SearchButton:OnEnter( )
+			Search( QueryBox:GetValue( ) )
+		end
+
+		Search( )
+
+		function FunctionPanel:InvalidateLayout( )
+			LayOut( Sheet )
+
+			Sheet:SetPos( 5, 5 )
+			Sheet:SetSize( self:GetWide( ) - 20, self:GetTall( ) - 50 )
+
+			SearchPanel:SetPos( 5, self:GetTall( ) - 40 )
+			SearchPanel:SetSize( self:GetWide( ) - 20, 30 )
+
+			QueryBox:SetSize( SearchPanel:GetWide( ) - 40, 20 )
+			QueryBox:SetPos( 5, 5 )
+
+			SearchButton:SetSize( 20, 20 )
+			SearchButton:SetPos( SearchPanel:GetWide( ) - 30, 5 )
+		end
 end
+
