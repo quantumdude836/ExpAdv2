@@ -75,11 +75,10 @@ function EXPADV.Editor.OpenHelper( )
 
 		local CoreComponentSheet = ClassTab.ClassCanvas:Add( "DScrollPanel" )
 		CoreComponentSheet:DockPadding( 5, 5, 5 ,5 )
-		CoreComponentSheet:SetVisible( false )
+		CoreComponentSheet:SetVisible( true )
 		CoreComponentSheet:Dock( FILL )
 
 		CoreComponentSheet.Info = CoreComponentSheet:Add( "DListView" )
-		CoreComponentSheet.Info:Dock( FILL )
 		CoreComponentSheet.Info:AddColumn( "" ):SetFixedWidth( 60 )
 		CoreComponentSheet.Info:AddColumn( "" )
 			
