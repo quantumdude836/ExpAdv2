@@ -252,9 +252,9 @@ function Ranger:DoTrace( Start, End, Distance )
 		TraceData.mins = self.Mins
 		TraceData.maxs = self.Maxs
 		
-		Trace = TraceHull( TraceData )
+		Trace = util.TraceHull( TraceData )
 	else
-		Trace = TraceLine( TraceData )
+		Trace = util.TraceLine( TraceData )
 	end
 	
 	if Ignore_World and Trace.HitWorld then
