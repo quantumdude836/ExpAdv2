@@ -54,7 +54,7 @@ end )
 local HomeScreen = [[
 /*----------------------------------------------------
     Welcome to Expression Advanced 2 - Alpha:
-  Your Lemon-Gate code is outdated and won't work.
+ Your old Lemon-Gate code is outdated and won't work.
 ----------------------------------------------------*/
  
 //Define Variables:
@@ -68,14 +68,13 @@ local HomeScreen = [[
 //Method operator is now period (.) not colon (:):
     entity().pos();
  
-//For loops are now inbeded:
+//For loops are now embedded:
     for ( number i = 1; 100; 2 ) {
         print( i );
     }
  
 /*----------------------------------------------------
     Your code now runs on the server and client.
-        for now clientside code is usless.
 ----------------------------------------------------*/
  
 //Define serverside code:
