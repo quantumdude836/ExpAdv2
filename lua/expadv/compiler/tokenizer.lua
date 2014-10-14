@@ -439,9 +439,9 @@ function Compiler:GetNextToken( )
 		
 		if Token then return Token end
 		
-		for ClassName, _ in pairs( EXPADV.Classes ) do
+		for ClassName, Class in pairs( EXPADV.ClassAliases ) do -- EXPADV.Classes ) do
 			if self:NextPattern( "%( *" .. ClassName .. " *%)" ) then
-				self.ReadData = ClassName
+				self.ReadData = Class.Name --ClassName
 				return self:NewToken( "cst", "cast" )
 			end
 		end

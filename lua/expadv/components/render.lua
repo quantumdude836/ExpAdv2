@@ -173,16 +173,30 @@ Component:AddInlineFunction( "vert", "n,n,n,n", "vt", "{x = @value 1, y = @value
 /* --- -------------------------------------------------------------------------------
 	@: Polys
    --- */
+Component:AddPreparedFunction( "drawTexturedTriangle", "vt,vt,vt", "", "$surface.DrawPoly( {@value 1, @value 2, @value 3} )" )
+Component:AddPreparedFunction( "drawTexturedTriangle", "v2,v2,v2", "", "$surface.DrawPoly( {@value 1, @value 2, @value 3} )" )
 
-Component:AddPreparedFunction( "drawTriangle", "v2,v2,v2", "", "$surface.DrawPoly( {@value 1, @value 2, @value 3} )" )
+Component:AddPreparedFunction( "drawTriangle", "v2,v2,v2", "", [[
+	$draw.NoTexture()
+	$surface.DrawPoly( {@value 1, @value 2, @value 3} )
+]] )
 
 Component:AddPreparedFunction( "drawPoly", "ar", "", [[
+	if @value 1.__type ~= "_v2" then Context.Throw(@trace, "array", "array type missmatch, vector2 expected got " .. EXPADV.TypeName(@value 1.__type)) end
+	$draw.NoTexture()
+	$surface.DrawPoly( @value 1 )
+]] )
+
+Component:AddPreparedFunction( "drawTexturedPoly", "ar", "", [[
 	if @value 1.__type ~= "_vt" and @value 1.__type ~= "_v2" then Context.Throw(@trace, "array", "array type missmatch, vertex expected got " .. EXPADV.TypeName(@value 1.__type)) end
 	$surface.DrawPoly( @value 1 )
 ]] )
 
 Component:AddFunctionHelper( "drawTriangle", "v2,v2,v2", "Draws a traingle from 3 points." )
 Component:AddFunctionHelper( "drawPoly", "ar", "Draws a polygon using an arry of 2d vectors or vertexs." )
+Component:AddFunctionHelper( "drawTexturedTriangle", "v2,v2,v2", "Draws a textured traingle from 3 points." )
+Component:AddFunctionHelper( "drawTexturedPoly", "ar", "Draws a textured polygon using an arry of 2d vectors or vertexs." )
+
 
 /* -----------------------------------------------------------------------------------
 	@: Screen
@@ -270,7 +284,7 @@ if CLIENT then
 			
 			local Event = Context.event_drawHUD
 			
-			if !Event or !Context.EnableHUD then continue end
+			if !Event or !IsValid(Context.entity) or !Context.entity.EnableHUD then continue end
 			
 			surface.SetDrawColor( 255, 255, 255, 255 )
 			surface.SetTextColor( 0, 0, 0, 255 )
@@ -287,7 +301,7 @@ if CLIENT then
 	function Component:OnOpenContextMenu( Entity, Menu, Trace, Option )
 		if !Entity.Context or !Entity.Context.event_drawHUD then return end
 
-		if Entity.Context.EnableHUD then
+		if Entity.EnableHUD then
 			Menu:AddOption( "Disable HUD Rendering", function( ) Entity.Context.EnableHUD = false end )
 		else
 			Menu:AddOption( "Enable HUD Rendering", function( ) Entity.Context.EnableHUD = true end )

@@ -40,7 +40,7 @@ end )
 function Component:OnPostRegisterClass( Name, Class )
 	EXPADV.ServerOperators( )
 
-	if Wire_Out_Type then
+	if Class.Wire_Out_Type then
 
 		WireLink:AddVMOperator( "get", "wl,s," .. Class.Short, Class.Short,
 			function( Context, Trace, WireLink, Index )
@@ -64,7 +64,7 @@ function Component:OnPostRegisterClass( Name, Class )
 			end )
 	end
 
-	if Wire_Out_Util then
+	if Class.Wire_Out_Util then
 
 		WireLink:AddVMOperator( "set", "wl,s," .. Class.Short, "",
 			function( Context, Trace, WireLink, Index, Value )
@@ -147,7 +147,7 @@ local function ReadArray( Context, Trace, WireLink, Start, End )
 	return Array
 end
 
-Component:AddVMFunction( "readArray", "wl:n,n", "a", ReadArray )
+Component:AddVMFunction( "readArray", "wl:n,n", "ar", ReadArray )
 
 /* --- --------------------------------------------------------------------------------
 	@: Read / Write String

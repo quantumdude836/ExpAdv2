@@ -177,17 +177,17 @@ Component:AddFunctionHelper( "isEqualto", "v:v,n", "Returns if the vector is equ
 Component:AddInlineFunction( "isZero", "v:", "b", "@value 1:IsZero()" )
 Component:AddFunctionHelper( "isZero", "v:", "Checks whenever all fields of the vector are 0." )
 
-Component:AddInlineFunction( "lengh", "v:", "n", "@value 1:Length()" )
-Component:AddFunctionHelper( "lengh", "v:", "Returns the pythagorean length of the vector." )
+Component:AddInlineFunction( "length", "v:", "n", "@value 1:Length()" )
+Component:AddFunctionHelper( "length", "v:", "Returns the pythagorean length of the vector." )
 
-Component:AddInlineFunction( "lengh2D", "v:", "n", "@value 1:Length2D()" )
-Component:AddFunctionHelper( "lengh2D", "v:", "Returns the length of the vector in two dimensions, without the Z axis." )
+Component:AddInlineFunction( "length2D", "v:", "n", "@value 1:Length2D()" )
+Component:AddFunctionHelper( "length2D", "v:", "Returns the length of the vector in two dimensions, without the Z axis." )
 
-Component:AddInlineFunction( "lengh2DSqr", "v:", "n", "@value 1:Length2DSqr()" )
-Component:AddFunctionHelper( "lengh2DSqr", "v:", "Returns the squared length of the vectors x and y value." )
+Component:AddInlineFunction( "length2DSqr", "v:", "n", "@value 1:Length2DSqr()" )
+Component:AddFunctionHelper( "length2DSqr", "v:", "Returns the squared length of the vectors x and y value." )
 
-Component:AddInlineFunction( "lenghSqr", "v:", "n", "@value 1:LengthSqr()" )
-Component:AddFunctionHelper( "lenghSqr", "v:", "Returns the squared length of the vector." )
+Component:AddInlineFunction( "lengthSqr", "v:", "n", "@value 1:LengthSqr()" )
+Component:AddFunctionHelper( "lengthSqr", "v:", "Returns the squared length of the vector." )
 
 Component:AddInlineFunction( "insideAABox", "v:v,v", "b", "@value 1:WithinAABox( @value 2, @value 3 )" )
 Component:AddFunctionHelper( "insideAABox", "v:v,v", "Returns whenever the given vector is in a box created by the 2 other vectors." )
@@ -368,6 +368,16 @@ Component:AddFunctionHelper( "setX", "v2:n", "Sets the X value of a vector2" )
 
 Component:AddPreparedFunction( "setY", "v2:n", "", "@value 1.y = @value 2" )
 Component:AddFunctionHelper( "setY", "v2:n", "Sets the Y value of a vector2" )
+
+/* --- --------------------------------------------------------------------------------
+    @: General
+   --- */
+
+Component:AddInlineFunction( "dot", "v2:v2", "n", "@value 1:Dot(@value 2)" )
+Component:AddInlineFunction( "normal", "v2:", "v2", "@value 1:Normalize(@value 2)" )
+Component:AddInlineFunction( "length", "v2:", "n", "@value 1:Length(@value 2)" )
+Component:AddInlineFunction( "cross", "v2:v2", "v2", "@value 1:Cross(@value 2)" )
+Component:AddInlineFunction( "distance", "v2:v2", "n", "@value 1:Distance(@value 2)" )
 
 /* --- --------------------------------------------------------------------------------
     @: Loops

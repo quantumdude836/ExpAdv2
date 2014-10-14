@@ -466,7 +466,7 @@ Component:AddFunctionHelper("hasShading", "h:", "Returns true if a hologram has 
 
 Component:AddPreparedFunction("pushClip", "h:n,v,v", "", [[
 if IsValid( @value 1 ) and @value 1.player == Context.player then
-	@value 1:PushClip( @value 2, @value 3, value %4 )
+	@value 1:PushClip( @value 2, @value 3, @value 4 )
 end]] )
 
 /*Component:AddPreparedFunction("removeClip", "h:n", "", [[
@@ -664,7 +664,7 @@ Component:AddFunctionHelper( "boneCount", "h:", "Returns the ammount of bones of
 
 Component:AddPreparedFunction("setAnimation", "h:n,n,n", "", [[
 if IsValid( @value 1 ) and @value 1.player == Context.player then
-	@value 1:SetHoloAnimation(@value 2, @value 3, value %4)
+	@value 1:SetHoloAnimation(@value 2, @value 3, @value 4)
 end]] )
 
 EXPADV.AddFunctionAlias( "setAnimation", "h:n,n" )
@@ -672,7 +672,7 @@ EXPADV.AddFunctionAlias( "setAnimation", "h:n" )
 
 Component:AddPreparedFunction("setAnimation", "h:s,n,n", "", [[
 if IsValid( @value 1 ) and @value 1.player == Context.player then
-	@value 1:SetHoloAnimation(@value 1:LookupSequence( @value 2 ), @value 3, value %4)
+	@value 1:SetHoloAnimation(@value 1:LookupSequence( @value 2 ), @value 3, @value 4)
 end]] )
 
 EXPADV.AddFunctionAlias( "setAnimation", "h:s,n" )
