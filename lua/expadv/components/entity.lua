@@ -536,6 +536,47 @@ end
 ]], "(@Player or $Entity(0))" )
 
 /* --- --------------------------------------------------------------------------------
+	@: Constraints
+   --- */
+
+Component:AddInlineFunction( "totalConstraints", "e:", "n", "(IsValid( @value 1) and #$constraint.GetTable( @value 1 ) or 0)" )
+
+Component:AddInlineFunction( "isConstrained", "e:", "b", "$constraint.HasConstraints( @value 1 )" )
+
+Component:AddVMFunction( "isWeldedTo", "e:", "e",
+	function( Context, Trace, Ent )
+		if !IsValid(Ent) or !constraint.HasConstraints( Ent ) then return Entity(0) end
+		
+		local Constraint = constraint.FindConstraint( Ent, "Weld" )
+		if Constraint and Constraint.Ent1 == Ent then
+			return Constraint.Ent2
+		elseif Constraint then
+			return Constraint.Ent1
+		end	
+
+		return Entity(0)
+	end )
+
+Component:AddVMFunction( "getConstraints", "e:", "ar",
+	function( Context, Trace, Ent )
+		local Array = {__type = "e"}
+		if IsValid(Ent) or !constraint.HasConstraints( Ent ) then return Array end
+		
+		for _, Constraint in pairs( constraint.GetAllConstrainedEntities( Ent ) ) do
+			if IsValid( Constraint ) and Constraint ~= Ent then
+				Array[#Array + 1] = Constraint
+			end
+		end
+
+		return Array
+	end )
+
+Component:AddFunctionHelper( "totalConstraints", "e:", "Returns the total number of contrained entites." )
+Component:AddFunctionHelper( "isConstrained", "e:", "Returns true is the entity has a constraint." )
+Component:AddFunctionHelper( "isWeldedTo", "e:", "Returns the first entity welded to the object." )
+Component:AddFunctionHelper( "getConstraints", "e:", "Returns an array of contrained entities." )
+
+/* --- --------------------------------------------------------------------------------
 	@: Entity Events
    --- */
 
