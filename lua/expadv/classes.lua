@@ -96,6 +96,19 @@ if WireLib then
 		self.Wire_In_Util = Function or WireIn
 	end
 
+	local DefaultWireLink = function( A ) return A end
+	
+	function BaseClassObj:WireLinkOutput( Function )
+		if !self.Wire_Out_Type then return ErrorNoHalt( string.format( "No wiretype defined for class %s.", self.Name ) ) end
+
+		self.Wire_Link_Out = Function or DefaultWireLink
+	end
+
+	function BaseClassObj:WireLinkInput( Function )
+		if !self.Wire_In_Type then return ErrorNoHalt( string.format(  "No wiretype defined for class %s.", self.Name ) ) end
+
+		self.Wire_Link_In = Function or DefaultWireLink
+	end
 end
 
 /* --- --------------------------------------------------------------------------------

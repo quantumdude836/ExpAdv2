@@ -16,6 +16,18 @@ local AngObject = Component:AddClass( "angle", "a" )
 AngObject:DefaultAsLua( Angle(0,0,0) )
 
 /* --- --------------------------------------------------------------------------------
+	@: Wire Support
+   --- */
+
+if WireLib then
+	AngObject:WireInput( "ANGLE" )
+	AngObject:WireOutput( "ANGLE" )
+
+	AngObject:WireLinkOutput( )
+	AngObject:WireLinkInput( )
+end
+
+/* --- --------------------------------------------------------------------------------
 	@: Assignment
    --- */
 

@@ -23,7 +23,10 @@ String:AddAlias( "str" )
 
 if WireLib then
 	String:WireInput( "STRING" ) 
-	String:WireOutput( "STRING" ) 
+	String:WireOutput( "STRING" )
+
+	String:WireLinkOutput( )
+	String:WireLinkInput( )
 end
 
 /* --- --------------------------------------------------------------------------------

@@ -29,18 +29,18 @@ WireLink:DefaultAsLua( Entity(0) )
 
 Component:AddInlineOperator( "entity", "wl", "e", "@value 1" )
 
-/* --- --------------------------------------------------------------------------------
-	@: Acessors
-   --- */
-
 WireLink:AddVMOperator( "=", "n,wl", "", function( Context, Trace, MemRef, Value )
 	Context.Memory[MemRef] = Value
 end )
 
+/* --- --------------------------------------------------------------------------------
+	@: WireLink Get
+   --- */
+
 function Component:OnPostRegisterClass( Name, Class )
 	EXPADV.ServerOperators( )
 
-	if Class.Wire_Out_Type then
+	if Class.Wire_Out_Type and Class.Wire_Link_In then
 
 		WireLink:AddVMOperator( "get", "wl,s," .. Class.Short, Class.Short,
 			function( Context, Trace, WireLink, Index )
@@ -50,13 +50,9 @@ function Component:OnPostRegisterClass( Name, Class )
 					local Output = WireLink.Outputs[Index]
 
 					if Output and Output.Type == Class.Wire_In_Type then
-						Class.Wire_In_Util( Context, 0 )
-						Value = Context.Memory[0]
-						Context.Memory[0] = nil
+						return Class.Wire_Link_In( Output.Value )
 					end
 				end
-
-				if Value ~= nil then return Value end
 
 				if Class.CreateNew then return Class.CreateNew( ) end
 
@@ -64,7 +60,7 @@ function Component:OnPostRegisterClass( Name, Class )
 			end )
 	end
 
-	if Class.Wire_Out_Util then
+	if Class.Wire_Out_Type and Class.Wire_Link_Out then
 
 		WireLink:AddVMOperator( "set", "wl,s," .. Class.Short, "",
 			function( Context, Trace, WireLink, Index, Value )
@@ -72,9 +68,7 @@ function Component:OnPostRegisterClass( Name, Class )
 					local Input = WireLink.Inputs[Index]
 
 					if Input and Input.Type == Class.Wire_Out_Type then
-						Class.Wire_Out_Util( Context, 0, Value )
-						WireLib.TriggerInput( WireLink, Index, Context.Memory[0] )
-						Context.Memory[0] = nil
+						WireLib.TriggerInput( WireLink, Index, Class.Wire_Link_Out( Value ) )
 					end
 				end
 			end )

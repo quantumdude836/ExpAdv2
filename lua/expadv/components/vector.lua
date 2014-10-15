@@ -21,8 +21,11 @@ VectorObj:DefaultAsLua( Vector(0, 0, 0) )
    --- */
 
 if WireLib then
-	VectorObj:WireInput( "VECTOR" )
-	VectorObj:WireOutput( "VECTOR" )
+  VectorObj:WireInput( "VECTOR" )
+  VectorObj:WireOutput( "VECTOR" )
+
+  VectorObj:WireLinkOutput( )
+  VectorObj:WireLinkInput( )
 end
 
 /* --- --------------------------------------------------------------------------------
@@ -270,6 +273,9 @@ if WireLib then
 		local Val = Context.Memory[ MemoryRef ]
 		return {Val.x, Val.y}
 	end )
+
+  Vector2Obj:WireLinkOutput( function( Value ) return { Value.x, Value.y } end )
+  Vector2Obj:WireLinkInput( function( Value ) return Vector2( Value[1], Value[2] ) end )
 end
 
 /* --- --------------------------------------------------------------------------------
