@@ -360,6 +360,13 @@ function EXPADV.LoadClasses( )
  				Class.Wire_In_Util = DeriveClass.Wire_In_Util
  			end
 
+ 			if Class.Wire_Out_Type and !Wire_Link_Out then
+ 				Class.Wire_Link_Out = DeriveClass.Wire_Link_Out
+ 			end
+
+ 			if Class.Wire_In_Type and !Wire_Link_In then
+ 				Class.Wire_Link_In = DeriveClass.Wire_Link_In
+ 			end
  		end
 
 		if !Class.SerializeAsString then

@@ -300,6 +300,22 @@ function EXPADV.AddComponentFile( FileName )
 	AddCSLuaFile( "expadv/components/" .. FileName .. ".lua" )
 end
 
+function EXPADV.LoadCustomComponents( )
+
+	hook.Run( "expadv.components" )
+
+	local Files = file.Find( "expadv/components/custom/*.lua", "LUA" ) 
+	for _, fName in pairs( Files or { } ) do
+		local File = "expadv/components/custom/" .. fName
+		
+		EXPADV.SharedOperators( )
+		EXPADV.Msg( "Loading Custom Component: " .. fName )
+
+		include( File )
+		if SERVER then AddCSLuaFile( File ) end
+	end
+end
+
 function EXPADV.LoadCore( )
 
 	MsgN( "Expression advanced Two - Loading." )
@@ -336,6 +352,8 @@ function EXPADV.LoadCore( )
 	EXPADV.AddComponentFile( "wire" )
 
 	EXPADV.CallHook( "AddComponents" )
+
+	EXPADV.LoadCustomComponents( )
 
 	EXPADV.LoadComponents( )
 
