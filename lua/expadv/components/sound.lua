@@ -10,6 +10,10 @@ Component.Description = "Allows for sound to be played."
 
 Component:CreateSetting("maximumsounds", 10)
 
+function Component:OnRegisterContext(Context) Context.Data.Sound = {} Context.Data.SoundCount = 0 end
+
+function Component:OnUnregisterContext(Context) if(Context.Data.Sound) then for k, v in pairs(Context.Data.Sound) do v:Stop() end end end
+
 local function stopSound(Context, Index, Fade)
 	if(!Context.Data.Sound[Index]) then return end
 	
@@ -22,6 +26,8 @@ local function stopSound(Context, Index, Fade)
 		if(type(Index) == "number") then Index = math.floor(Index) end
 		Context.Data.Sound[Index] = nil
 	end
+	
+	Context.Data.SoundCount = Context.Data.SoundCount + 1
 end
 
 local function playSound(Context, Ent, Duration, Index, Fade, File)
@@ -33,20 +39,18 @@ local function playSound(Context, Ent, Duration, Index, Fade, File)
 	File = File:gsub("\\", "/")
 	if(type(Index) == "number") then Index = math.floor(Index) end
 	
-	Context.Data.Sound = {} or Context.Data.Sound
-	
-	if(#Context.Data.Sound >= maxsounds) then return end
+	if(Context.Data.SoundCount >= maxsounds) then return end
 	
 	if(Context.Data.Sound[Index]) then stopSound(Context, Index, 0) end
 	
 	local newSound = CreateSound(Ent, File)
 	Context.Data.Sound[Index] = newSound
 	newSound:Play()
-	
-	Ent:CallOnRemove("EA2EntDelete_STOPSound", function() stopSound(Context, Index, 0) end)
+	Context.Data.SoundCount = Context.Data.SoundCount + 1
 	
 	if(Duration == 0 and Fade == 0) then return end
 	timer.Create("EA2Gate-" .. Context.entity:EntIndex() .. ";STOPSound_" .. Index, Duration, 0, function() stopSound(Context, Index, Fade) end)
+	
 end
 
 EXPADV.ServerOperators()
@@ -65,18 +69,18 @@ Component:AddVMFunction("soundStop", "n,n", "", function(Context, Trace, Index, 
 Component:AddFunctionHelper("soundStop", "n", "Stop the sound of the given index.")
 Component:AddFunctionHelper("soundStop", "n,n", "Stop the sound of the given index, specifying a fade duration.")
 
-Component:AddPreparedFunction("soundVolume", "n,n", "", "Context.Data.Sound[@value 1]:ChangeVolume(math.Clamp(math.abs(@value 2), 0, 1), 0)")
-Component:AddPreparedFunction("soundVolume", "n,n,n", "", "Context.Data.Sound[@value 1]:ChangeVolume(math.Clamp(math.abs(@value 2), 0, 1), math.abs(@value 3))")
+Component:AddVMFunction("soundVolume", "n,n", "", function(Context, Trace, Index, Volume) if(Context.Data.Sound[Index]) then Context.Data.Sound[Index]:ChangeVolume(math.Clamp(math.abs(Volume), 0, 1), 0) end end)
+Component:AddVMFunction("soundVolume", "n,n,n", "", function(Context, Trace, Index, Volume, Fade) if(Context.Data.Sound[Index]) then Context.Data.Sound[Index]:ChangeVolume(math.Clamp(math.abs(Volume), 0, 1), math.abs(Fade)) end end)
 Component:AddFunctionHelper("soundVolume", "n,n", "Sets the volume of the given sound, 0-1")
 Component:AddFunctionHelper("soundVolume", "n,n,n", "Sets the volume of the given sound, 0-1, specifying a fade duration.")
 
-Component:AddPreparedFunction("soundPitch", "n,n", "", "Context.Data.Sound[@value 1]:ChangePitch(math.Clamp(math.abs(@value 2), 0, 255), 0)")
-Component:AddPreparedFunction("soundPitch", "n,n,n", "", "Context.Data.Sound[@value 1]:ChangePitch(math.Clamp(math.abs(@value 2), 0, 255), math.abs(@value 3))")
+Component:AddVMFunction("soundPitch", "n,n", "", function(Context, Trace, Index, Pitch) if(Context.Data.Sound[Index]) then Context.Data.Sound[Index]:ChangePitch(math.Clamp(math.abs(Pitch), 0, 255), 0) end end)
+Component:AddVMFunction("soundPitch", "n,n,n", "", function(Context, Trace, Index, Pitch, Fade) if(Context.Data.Sound[Index]) then Context.Data.Sound[Index]:ChangePitch(math.Clamp(math.abs(Pitch), 0, 255), math.abs(Fade)) end end)
 Component:AddFunctionHelper("soundPitch", "n,n", "Sets the pitch of the given sound, 0-255")
 Component:AddFunctionHelper("soundPitch", "n,n,n", "Sets the pitch of the given sound, 0-255, specifying a fade duration.")
 
 Component:AddInlineFunction("soundDuration", "s", "n", "$SoundDuration(@value 1)")
 Component:AddFunctionHelper("soundDuration", "s", "Returns the duration of the given sound.")
 
-Component:AddVMFunction("soundStopAll", "", "", function(Context, Trace) for k, v in pairs(Context.Data.Sound) do v:Stop() timer.Remove("EA2Gate-" .. Context.entity:EntIndex() .. ";STOPSound_" .. k) end end)
+Component:AddVMFunction("soundStopAll", "", "", function(Context, Trace) for k, v in pairs(Context.Data.Sound) do v:Stop() timer.Remove("EA2Gate-" .. Context.entity:EntIndex() .. ";STOPSound_" .. k) Context.Data.SoundCount = 0 end end)
 Component:AddFunctionHelper("soundStopAll", "", "Stops all sounds from the chip.")
