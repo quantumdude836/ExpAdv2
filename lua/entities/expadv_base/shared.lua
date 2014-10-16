@@ -203,8 +203,6 @@ function ENT:BuildInstance( Instance, Instruction )
 		Context:StartUp( Compiled( ) )
 
 		self:PostStartUp( Context )
-
-		Context.Enviroment = nil
 	end )
 
 	if !Ok then

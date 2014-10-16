@@ -72,7 +72,6 @@ EXPADV.AddPreparedOperator( nil, "call", "f,s,...", "_vr", [[
 EXPADV.AddPreparedOperator( nil, "while", "b,?", "", [[
 	while( @value 1 ) do
 		@prepare 2
-		@value 2
 	end
 ]] )
 
@@ -99,9 +98,9 @@ Component:AddInlineFunction( "cpuStopWatch", "", "n", "Context.Status.StopWatch"
 
 Component:AddVMFunction( "perf", "", "b",
 	function( Context, Trace )
-		if Context.Status.Perf + Context.Status.Counter >= cv_expadv_hardquota - cv_expadv_tickquota then
+		if Context.Status.Perf + Context.Status.Counter >= expadv_hardquota - expadv_tickquota then
 			return false
-		elseif Context.Status.Perf >= cv_expadv_softquota * 2 then
+		elseif Context.Status.Perf >= expadv_softquota * 2 then
 			return false
 		end
 
@@ -112,7 +111,7 @@ Component:AddVMFunction( "perf", "n", "b",
 	function( Context, Trace, Value )
 		Value = math.Clamp( Value, 0, 100 )
 
-		if Context.Status.Perf + Context.Status.Counter >= (cv_expadv_hardquota - cv_expadv_tickquota) * Value * 0.01 then
+		if Context.Status.Perf + Context.Status.Counter >= (expadv_hardquota - expadv_tickquota) * Value * 0.01 then
 			return false
 		elseif Value == 100 then
 			if Context.Status.Perf >= cv_expadv_softquota * 2 then
@@ -130,7 +129,7 @@ Component:AddVMFunction( "perf", "n", "b",
 Component:AddVMFunction( "minquota", "", "n",
 	function( Context, Trace )
 		if self.prf < e2_softquota then
-			return math.floor(cv_expadv_softquota - Context.Status.Perf)
+			return math.floor(expadv_softquota - Context.Status.Perf)
 		else
 			return 0
 		end
@@ -142,8 +141,8 @@ Component:AddVMFunction( "maxquota", "", "n",
 
 		if Perf >= cv_expadv_tickquota then return 0 end
 
-		local tickquota = cv_expadv_tickquota - Perf
-		local hardquota = cv_expadv_hardquota - Context.Status.Counter - Perf + cv_expadv_softquota
+		local tickquota = expadv_tickquota - Perf
+		local hardquota = expadv_hardquota - Context.Status.Counter - Perf + expadv_softquota
 			
 		if hardquota < tickquota then return math.floor(hardquota) end
 		
@@ -152,12 +151,12 @@ Component:AddVMFunction( "maxquota", "", "n",
 
 Component:AddVMFunction( "softQuota", "", "n",
 	function( Context, Trace )
-		return cv_expadv_softquota
+		return expadv_softquota
 	end )
 
 Component:AddVMFunction( "hardQuota", "", "n",
 	function( Context, Trace )
-		return cv_expadv_hardquota
+		return expadv_hardquota
 	end )
 
 /* --- --------------------------------------------------------------------------------

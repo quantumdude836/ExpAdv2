@@ -51,7 +51,7 @@ local Unpack
 
 function Unpack( Array, Index )
 	if Array[Index] == nil then return end
-	print( "Array", Index, Array[Index], Array.__type )
+	
 	return { Array[Index], Array.__type }, Unpack( Array, Index + 1 )
 end
 

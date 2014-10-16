@@ -612,7 +612,7 @@ function EXPADV.Interprit( Operator, Compiler, Line )
 		for I = #Settings, 1, -1 do
 			local Start, End = unpack( Settings[I] )
 			local Setting = Operator.Component:ReadSetting( string.sub( Line, Start + 9, End - 1 ), nil )
-			Line = string.sub( Line, 1, Start - 1 ) .. EXPADV.ToLua(Setting) .. string.sub( Line, End - 1 )
+			Line = string.sub( Line, 1, Start - 1 ) .. EXPADV.ToLua(Setting) .. string.sub( Line, End )
 		end
 	end
 	
@@ -791,7 +791,7 @@ function EXPADV.BuildLuaOperator( Operator )
 					InputPrepare = ""
 					InputReturn = Input.Return
 				elseif Input.FLAG == EXPADV_PREPARE then
-					InputInline = "nil"
+					InputInline = ""
 					InputPrepare = Input.Prepare
 					InputReturn = Input.Return
 				else
@@ -819,18 +819,18 @@ function EXPADV.BuildLuaOperator( Operator )
 				OpInline = string.gsub( OpInline, "@type " .. I, Format( "%q", InputReturn or Operator.Input[I] ) )
 			end
 
-			if InputPrepare ~= "" then
+			--if InputPrepare ~= "" then
 
 				if Operator.FLAG == EXPADV_PREPARE or Operator.FLAG == EXPADV_INLINEPREPARE then
 					if string.find( OpPrepare, "@prepare " .. I ) then
-						OpPrepare = string.gsub( OpPrepare, "@prepare " .. I, InputPrepare )
+						OpPrepare = string.gsub( OpPrepare, "@prepare " .. I, InputPrepare or "" )
 					else
-						table.insert( Preperation, 1, InputPrepare )
+						table.insert( Preperation, 1, InputPrepare or "" )
 					end
 				else
-					table.insert( Preperation, 1, InputPrepare )
+					table.insert( Preperation, 1, InputPrepare or "" )
 				end
-			end
+			--end
 		end
 
 		-- Now we handel any varargs!

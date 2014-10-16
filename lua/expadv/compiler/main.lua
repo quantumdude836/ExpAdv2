@@ -628,6 +628,7 @@ local function CreateEnviroment( )
 		print = print, MsgN = MsgN, tostring = tostring, tonumber = tonumber,
 		IsValid = IsValid, Entity = Entity,
 		math = math, string = string, table = table,
+		setfenv = setfenv,
 	} 
 end
 

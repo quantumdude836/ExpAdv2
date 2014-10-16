@@ -415,11 +415,6 @@ function Compiler:Compile_SEQ( Trace, Instructions )
 	for I = 1, #Instructions do
 		local Instruction = Instructions[I]
 
-		-- if !istable( Instruction ) then
-		-- 	MsgN(type(Instruction,"----------------"))
-		-- 	debug.Trace()
-		-- end
-
 		local LastLine = Sequence[#Sequence]
 		if LastLine == "break" or LastLine == "continue" or LastLine == "return" then
 			continue -- It wont validate otherwise.

@@ -202,7 +202,7 @@ Component:AddFunctionHelper( "drawTexturedPoly", "ar", "Draws a textured polygon
 	@: Screen
    --- */
 
-Component:AddPreparedFunction( "traceSurfaceColor", "v,v", "c", "@define Value = $render.GetSurfaceColor( @value 1, @value 2 )", "Color(@Value.x, @Value.y, @Value.z, 255)" )
+Component:AddPreparedFunction( "traceSurfaceColor", "v,v", "c", "@define Value = $render.GetSurfaceColor( @value 1, @value 2 )", "Color(@Value.x *255, @Value.y * 255, @Value.z *255, 255)" )
 Component:AddFunctionHelper( "traceSurfaceColor", "v,v", "Performs a render trace and returns the color of the surface hit, this uses a low res version of the texture." )
 
 Component:AddPreparedFunction( "pauseNextFrame", "b", "", [[
