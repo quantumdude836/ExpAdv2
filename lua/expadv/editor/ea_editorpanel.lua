@@ -116,11 +116,7 @@ function PANEL:Init( )
 		local Menu = DermaMenu( ) 
 		
 		Menu:AddOption( "Copy to clipboard", function( )
-			local sError = self:Validate( self:GetCode( ), nil )
-			
-			if sError then 
-				SetClipboardText( sError )
-			end 
+			SetClipboardText( self.ValidateButton:GetText( ) )
 		end )
 		
 		Menu:Open( ) 
@@ -145,19 +141,19 @@ end
 --		NEW VALIDATOR
 ------------------------------------------------------------------------------------------------------
 
-function PANEL:DoValidate( Goto, Code )
+function PANEL:DoValidate( Goto, Code, CallBack )
 	self.ValidationInstance = setmetatable( { }, EXPADV.Compiler )
 	self.ValidationInstance.CoRoutine = coroutine.create( EXPADV.SoftCompile )
 
 	coroutine.resume( self.ValidationInstance.CoRoutine ,self.ValidationInstance, Code or self:GetCode( ), { },
 		function( ErrMsg )
-			self:OnValidateError( ErrMsg, GoTo )
+			self:OnValidateError( ErrMsg, Goto )
 		end, function( Instance, Istr )
 			self:OnValidateSucess( Instance, Istr )
 		end )
 end
 
-function PANEL:OnValidateError( ErrMsg, GoTo )
+function PANEL:OnValidateError( ErrMsg, Goto )
 	if Goto then
 		local Row, Col = ErrMsg:match( "at line ([0-9]+), char ([0-9]+)$" )
 		if not Row then Row, Col = ErrMsg:match( "at line ([0-9]+)$" ), 1 end

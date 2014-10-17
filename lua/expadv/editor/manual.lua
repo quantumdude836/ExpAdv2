@@ -1,28 +1,32 @@
+local function GetAvalibility( Operator )
+	if Operator.LoadOnServer and Operator.LoadOnClient then return "Shared" end
+	if Operator.LoadOnServer then return "Serverside" end
+	if Operator.LoadOnClient then return "Clientside" end
+	return "Unkown"
+end
+
+local function NamePerams( Perams, Count, Varg )
+	local Names = { }
+
+	for I = 1, Count do
+		if Perams[I] == "" or Perams[I] == "..." then break end
+		Names[I] = EXPADV.TypeName( Perams[I] or "" )
+		if Names[I] == "void" then Names[I] = nil; break end
+	end
+		
+	if Varg then table.insert( Names, "..." ) end
+
+	return table.concat( Names, ", " )
+end
+
+
 function EXPADV.Editor.OpenHelper( )
 
-		--------------------------------------------------------------------------
-
-		local function GetAvalibility( Operator )
-			if Operator.LoadOnServer and Operator.LoadOnClient then return "Shared" end
-			if Operator.LoadOnServer then return "Serverside" end
-			if Operator.LoadOnClient then return "Clientside" end
-			return "Unkown"
+		if IsValid( EXPADV.Editor.Manual ) then
+			EXPADV.Editor.Manual:SetVisible( true )
+			return
 		end
 
-		local function NamePerams( Perams, Count, Varg )
-			local Names = { }
-
-			for I = 1, Count do
-				if Perams[I] == "" or Perams[I] == "..." then break end
-				Names[I] = EXPADV.TypeName( Perams[I] or "" )
-				if Names[I] == "void" then Names[I] = nil; break end
-			end
-				
-			if Varg then table.insert( Names, "..." ) end
-
-			return table.concat( Names, ", " )
-		end
-			
 		--------------------------------------------------------------------------
 
 		local Frame = vgui.Create( "DFrame" )
@@ -30,6 +34,16 @@ function EXPADV.Editor.OpenHelper( )
 		Frame:SetSize( ScrW( ) - 50, ScrH( ) - 50 )
 		Frame:Center( )
 		Frame:MakePopup( )
+
+		EXPADV.Editor.Manual = Frame
+
+		--------------------------------------------------------------------------
+
+		function Frame:Close( )
+			self:SetVisible( false )
+		end
+		
+		--------------------------------------------------------------------------
 
 		local TabSheet = Frame:Add( "DPropertySheet" )
 		TabSheet:Dock( FILL )
@@ -320,15 +334,15 @@ function EXPADV.Editor.OpenHelper( )
 			end
 			
 			if Sheet.Operators then
-				if !Sheet.Info_Operators then
-					Sheet.Info_Operators = Sheet:Add( "DLabel" )
-					Sheet.Info_Operators:SetText( "Operators:" )
-					Sheet.Info_Operators:SetTextColor( LabelColor )
+				if !Sheet.Operators_Label then
+					Sheet.Operators_Label = Sheet:Add( "DLabel" )
+					Sheet.Operators_Label:SetText( "Operators:" )
+					Sheet.Operators_Label:SetTextColor( LabelColor )
 				end
 				
-				Sheet.Info_Operators:SetPos( X, Y )
-				Sheet.Info_Operators:SizeToContents( )
-				Y = Y + Sheet.Info_Operators:GetTall( ) + 5
+				Sheet.Operators_Label:SetPos( X, Y )
+				Sheet.Operators_Label:SizeToContents( )
+				Y = Y + Sheet.Operators_Label:GetTall( ) + 5
 
 				Sheet.Operators:SetPos( X, Y )
 				Sheet.Operators:SetSize( W - 30, Sheet.Operators:DataLayout( ) + Sheet.Operators:GetHeaderHeight() )
@@ -337,15 +351,15 @@ function EXPADV.Editor.OpenHelper( )
 			
 			
 			if Sheet.Methods then
-				if !Sheet.Info_Methods then
-					Sheet.Info_Methods = Sheet:Add( "DLabel" )
-					Sheet.Info_Methods:SetText( "Methods:" )
-					Sheet.Info_Methods:SetTextColor( LabelColor )
+				if !Sheet.Methods_Label then
+					Sheet.Methods_Label = Sheet:Add( "DLabel" )
+					Sheet.Methods_Label:SetText( "Methods:" )
+					Sheet.Methods_Label:SetTextColor( LabelColor )
 				end
 				
-				Sheet.Info_Methods:SetPos( X, Y )
-				Sheet.Info_Methods:SizeToContents( )
-				Y = Y + Sheet.Info_Methods:GetTall( ) + 5
+				Sheet.Methods_Label:SetPos( X, Y )
+				Sheet.Methods_Label:SizeToContents( )
+				Y = Y + Sheet.Methods_Label:GetTall( ) + 5
 
 				Sheet.Methods:SetPos( X, Y )
 				Sheet.Methods:SetSize( W - 30, Sheet.Methods:DataLayout( ) + Sheet.Methods:GetHeaderHeight() )
@@ -354,21 +368,20 @@ function EXPADV.Editor.OpenHelper( )
 			
 			
 			if Sheet.Functions then
-				if !Sheet.Info_Functions then
-					Sheet.Info_Functions = Sheet:Add( "DLabel" )
-					Sheet.Info_Functions:SetText( "Functions:" )
-					Sheet.Info_Functions:SetTextColor( LabelColor )
+				if !Sheet.Functions_Label then
+					Sheet.Functions_Label = Sheet:Add( "DLabel" )
+					Sheet.Functions_Label:SetText( "Functions:" )
+					Sheet.Functions_Label:SetTextColor( LabelColor )
 				end
 				
-				Sheet.Info_Functions:SetPos( X, Y )
-				Sheet.Info_Functions:SizeToContents( )
-				Y = Y + Sheet.Info_Functions:GetTall( ) + 5
+				Sheet.Functions_Label:SetPos( X, Y )
+				Sheet.Functions_Label:SizeToContents( )
+				Y = Y + Sheet.Functions_Label:GetTall( ) + 5
 
 				Sheet.Functions:SetPos( X, Y )
 				Sheet.Functions:SetSize( W - 30, Sheet.Functions:DataLayout( ) + Sheet.Functions:GetHeaderHeight() )
 				Y = Y + Sheet.Functions:GetTall( ) + 5
 			end
-			
 			
 			if Sheet.Events then
 				if !Sheet.Events_Label then
@@ -482,7 +495,7 @@ function EXPADV.Editor.OpenHelper( )
 
 		Search( )
 
-		function FunctionPanel:InvalidateLayout( )
+		function FunctionPanel:PerformLayout( )
 			LayOut( Sheet )
 
 			Sheet:SetPos( 5, 5 )

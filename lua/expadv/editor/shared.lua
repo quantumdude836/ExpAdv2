@@ -66,7 +66,7 @@ if SERVER then
 		elseif Session.Invitees[ Invitee ] then
 			return -- Player already invited.
 		else
-			Session.Invitees[ Invitee ] = Invitee
+			Session.Invitees[ Invitee ] = CurTime( ) + 120
 
 			net.Start( "lemon.shared.invite" )
 				net.WriteUInt( Session.ID, 16 )
@@ -266,6 +266,25 @@ if SERVER then
 	concommand.Add( "lemon_editor_refresh_entitys", function( Player, Cmd, Args )
 		RefresEntitys( Player, Args[1] )
 	end ) -- Remove a user from this session.
+
+	timer.Create( "expadv.shared.check", 1, 0, function( )
+		for ID, Session in pairs( SharedSessions ) do
+			
+			if !IsValid( Session.Host ) then
+				SharedSessions[ Session.ID ] = nil
+
+				for _, SendTo in pairs( Session.Users ) do
+					net.Start( "lemon.shared.removed" )
+						net.WriteUInt( Session.ID, 16 )
+					net.Send( SendTo )
+				end
+			end
+
+			for Player, Expire in pairs( Session.Invitees ) do
+				if Expire < CurTime( ) then Session.Invitees[ Player ] = nil end
+			end
+		end	
+	end )
 
 	return -- END OF IF SERVER!
 end
