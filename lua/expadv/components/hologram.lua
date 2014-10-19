@@ -16,7 +16,7 @@ Component.Description = "Adds a holographic object, that is visible in world and
 Component:CreateSetting( "max", 250 )
 Component:CreateSetting( "rate", 50 )
 Component:CreateSetting( "clips", 5 )
-Component:CreateSetting( "Size", 50 )
+Component:CreateSetting( "size", 50 )
 Component:CreateSetting( "model_any", 1 )
 
 /* --- --------------------------------------------------------------------------------

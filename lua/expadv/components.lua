@@ -150,6 +150,10 @@ function EXPADV.AddComponent( Name, Enabled ) -- String, Boolean
 	return Component
 end
 
+function EXPADV.GetComponent( Name ) -- String
+	return Temp_Components[Name]
+end
+
 /* --- --------------------------------------------------------------------------------
 	@: Load Components
    --- */

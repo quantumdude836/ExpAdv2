@@ -13,6 +13,15 @@ ENT.AutomaticFrameAdvance  = true
 ENT.RenderGroup = RENDERGROUP_BOTH
 
 /*==============================================================================================
+	Expression Component Access
+==============================================================================================*/
+local Component
+
+hook.Add( "Expadv.PostLoadComponents", "expadv.hologram.entity", function( )
+	Component = EXPADV.GetComponent( "hologram" )
+end )
+
+/*==============================================================================================
 	First: NW Table Template.
 ==============================================================================================*/
 local function NewInfoTable( )
@@ -656,27 +665,27 @@ if SERVER then
     Scale
 ==============================================================================================*/
 
-	function ENT:SetScale( Vector )
-		local ScaleLimit = GetConVarNumber( "lemon_holograms_Size", 50 )
+	function ENT:SetScale( Scale )
+		local ScaleLimit = Component:ReadSetting( "size", 50 )
 
-		Vector.x = math.Clamp( Vector.x, -ScaleLimit, ScaleLimit )
-		Vector.y = math.Clamp( Vector.y, -ScaleLimit, ScaleLimit )
-		Vector.z = math.Clamp( Vector.z, -ScaleLimit, ScaleLimit )
+		local X = math.Clamp( Scale.x, -ScaleLimit, ScaleLimit )
+		local Y = math.Clamp( Scale.y, -ScaleLimit, ScaleLimit )
+		local Z = math.Clamp( Scale.z, -ScaleLimit, ScaleLimit )
 
-		if self.INFO.SCALEX ~= Vector.x then
-			self.INFO.SCALEX = Vector.x
+		if self.INFO.SCALEX ~= X then
+			self.INFO.SCALEX = X
 			self.SYNC_SCALEX = true
 			SyncQueue[ self ] = true
 		end
 
-		if self.INFO.SCALEY ~= Vector.y then
-			self.INFO.SCALEY = Vector.y
+		if self.INFO.SCALEY ~= Y then
+			self.INFO.SCALEY = Y
 			self.SYNC_SCALEY = true
 			SyncQueue[ self ] = true
 		end
 
-		if self.INFO.SCALEZ ~= Vector.z then
-			self.INFO.SCALEZ = Vector.z
+		if self.INFO.SCALEZ ~= Z then
+			self.INFO.SCALEZ = Z
 			self.SYNC_SCALEZ = true
 			SyncQueue[ self ] = true
 		end
@@ -711,7 +720,7 @@ if SERVER then
 	end
 
 	function ENT:SetClipEnabled( ID, bEnable )
-		if ID < 1 or ID > GetConVarNumber( "lemon_holograms_clips", 5 ) then return end
+		if ID < 1 or ID > Component:ReadSetting( "clips", 5 ) then return end
 		
 		self.CLIPS[ ID ] = self.CLIPS[ ID ] or NewClippingTable( )
 
@@ -721,7 +730,7 @@ if SERVER then
 	end
 
 	function ENT:SetClipOrigin( ID, Vector )
-		if ID < 1 or ID > GetConVarNumber( "lemon_holograms_clips", 5 ) then return end
+		if ID < 1 or ID > Component:ReadSetting( "clips", 5 ) then return end
 		
 		self.CLIPS[ ID ] = self.CLIPS[ ID ] or NewClippingTable( )
 
@@ -747,7 +756,7 @@ if SERVER then
 	end
 
 	function ENT:SetClipNormal( ID, Vector )
-		if ID < 1 or ID > GetConVarNumber( "lemon_holograms_clips", 5 ) then return end
+		if ID < 1 or ID > Component:ReadSetting( "clips", 5 ) then return end
 		
 		self.CLIPS[ ID ] = self.CLIPS[ ID ] or NewClippingTable( )
 
@@ -928,20 +937,17 @@ if SERVER then
 		self.ROTATESPEED = nil
 	end
 
-	function ENT:ScaleTo( Vector, Speed )
-		self.SCALETO = Vector
+	function ENT:ScaleTo( Scale, Speed )
+		local ScaleLimit = Component:ReadSetting( "size", 50 )
+		local NewScale = Vector( math.Clamp( Scale.x, -ScaleLimit, ScaleLimit ), math.Clamp( Scale.y, -ScaleLimit, ScaleLimit ), math.Clamp( Scale.z, -ScaleLimit, ScaleLimit ) )
+
+		self.SCALETO = NewScale
 		self.SCALESPEED = Speed * 0.01
 	end
 
-	function ENT:ScaleToUnits( Vector, Speed )
-		local  OBBSize = self:OBBMaxs( ) - self:OBBMins( )
-
-		Vector.x = Vector.x / OBBSize.x
-		Vector.y = Vector.y / OBBSize.y
-		Vector.z = Vector.z / OBBSize.z
-		
-		self.SCALETO = Vector
-		self.SCALESPEED = Speed * 0.01
+	function ENT:ScaleToUnits( Scale, Speed )
+		local OBBSize = self:OBBMaxs( ) - self:OBBMins( )
+		self:ScaleTo( Vector( Scale.x / OBBSize.x, Scale.y / OBBSize.y, Scale.z / OBBSize.z ), Speed )
 	end
 
 	function ENT:StopScale( )
