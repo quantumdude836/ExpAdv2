@@ -478,12 +478,14 @@ timer.Create( "expadv.propcore", 1, 0, function( )
 end )
 
 function PropComponent:OnRegisterContext( Context )
-	Props[ Context ] = { }
+	local PropList = { }
+	Context.Data.Props = PropList
+	Props[ Context ] = PropList
 end
 
 function PropComponent:OnUnregisterContext( Context )
-	if Props[Context.entity] then
-		for K, V in pairs( Props[Context] ) do if IsValid( V ) then V:Remove( ) end end
+	if Props[Context] then
+		for K, V in pairs( Context.Data.Props ) do if IsValid( V ) then V:Remove( ) end end
 		Props[Context] = nil
 	end
 end
@@ -503,7 +505,7 @@ local function AddProp( Prop, Context )
 	undo.Finish( ) -- Add to undo que.
 
 	Prop:CallOnRemove( "lemon_propcore_remove", function( E )
-		if Props[Context] then Props[Context][E] = nil end
+		Context.Data.Props[E] = nil
 
 		if IsValid( Context.player ) then
 			local Count = (PlayerCount[Context.player] or 1) - 1
@@ -560,7 +562,7 @@ local function PropCoreSpawn ( Context, Trace,  Model, Freeze )
 		Phys:Wake()
 	end
 
-	Props[ Context ][ Prop ] = Prop
+	Context.Data.Props[ Prop ] = Prop
 	PlayerRate[ P ] = PRate + 1
 	PlayerCount[ P ] = PCount + 1
 
