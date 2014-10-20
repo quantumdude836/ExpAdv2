@@ -188,3 +188,14 @@ Component:AddFunctionHelper( "remove", "s:n,n", "Removes nth Char from string." 
 Component:AddInlineFunction( "insert", "s:s,n,n", "s", "(string.sub( @value 1, 1, @value 3 ) .. @value 2 .. string.sub( @value 1, @value 4 or (@value 3 + 1) ))" )
 Component:AddFunctionHelper( "insert", "s:s,n,n", "Inserts into string after nth char." )
 		  EXPADV.AddFunctionAlias( "insert", "s:s,n" )
+
+/* --- --------------------------------------------------------------------------------
+	@: Char and byte
+   --- */
+
+Component:AddInlineFunction( "toByte", "s:", "n", [[(@value 1 ~= "" and string.byte(@value 1) or -1)]]
+Component:AddFunctionHelper( "toByte", "s:", "Returns the ASCII code for a given character." )
+
+Component:AddInlineFunction( "toChar", "n:", "s", [[(@value 1 ~= -1 and string.char(@value 1) or "")]]
+Component:AddFunctionHelper( "toChar", "n:", "Returns the character for a given ASCII code." )
+

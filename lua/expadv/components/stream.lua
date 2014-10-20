@@ -204,7 +204,7 @@ Component:AddFunctionHelper( "readColor", "st:", "Reads a color from the stream 
 local HasQueued, NetQueue = false, { }
 
 Component:AddVMFunction( "transmit", "nst:e,s", "", function( Context, Trace, Stream, Target, Name )
-	if !IsValid( Player ) or !Player:IsPlayer( ) then return end
+	if !IsValid( Target ) then return end
 
 	table.insert( NetQueue, { Context.entity, Name, Stream, Target } ) -- Slow but meh!
 	HasQueued = true
