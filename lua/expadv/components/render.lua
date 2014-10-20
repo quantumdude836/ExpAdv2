@@ -173,30 +173,81 @@ Component:AddInlineFunction( "vert", "n,n,n,n", "vt", "{x = @value 1, y = @value
 /* --- -------------------------------------------------------------------------------
 	@: Polys
    --- */
-Component:AddPreparedFunction( "drawTexturedTriangle", "vt,vt,vt", "", "$surface.DrawPoly( {@value 1, @value 2, @value 3} )" )
-Component:AddPreparedFunction( "drawTexturedTriangle", "v2,v2,v2", "", "$surface.DrawPoly( {@value 1, @value 2, @value 3} )" )
+   
+local function Counterclockwise( a, b, c )
+	local area = (a.x - c.x) * (b.y - c.y) - (b.x - c.x) * (a.y - c.y)
+	return area > 0
+end
+ 
+local function DrawPoly(Array)
+	render.CullMode(Counterclockwise(unpack(Array)) and MATERIAL_CULLMODE_CCW or MATERIAL_CULLMODE_CW )
+	surface.DrawPoly(Array)
+	render.CullMode(MATERIAL_CULLMODE_CCW)
+end
 
-Component:AddPreparedFunction( "drawTriangle", "v2,v2,v2", "", [[
-	$draw.NoTexture()
-	$surface.DrawPoly( {@value 1, @value 2, @value 3} )
-]] )
+local function DrawPolyOutline(Array) 
+	for i=1, #Array do
+		if i==#Array then
+			surface.DrawLine( Array[i].x, Array[i].y, Array[1].x, Array[1].y ) 
+		else
+			surface.DrawLine( Array[i].x, Array[i].y, Array[i+1].x, Array[i+1].y )
+		end
+	end
+end
 
-Component:AddPreparedFunction( "drawPoly", "ar", "", [[
-	if @value 1.__type ~= "_v2" then Context.Throw(@trace, "array", "array type missmatch, vector2 expected got " .. EXPADV.TypeName(@value 1.__type)) end
-	$draw.NoTexture()
-	$surface.DrawPoly( @value 1 )
-]] )
+Component:AddVMFunction( "drawTexturedTriangle", "vt,vt,vt", "", function(Context, Trace, V1, V2, V3) DrawPoly({V1, V2, V3}) end)
 
-Component:AddPreparedFunction( "drawTexturedPoly", "ar", "", [[
-	if @value 1.__type ~= "_vt" and @value 1.__type ~= "_v2" then Context.Throw(@trace, "array", "array type missmatch, vertex expected got " .. EXPADV.TypeName(@value 1.__type)) end
-	$surface.DrawPoly( @value 1 )
-]] )
+Component:AddVMFunction( "drawTexturedTriangle", "v2,v2,v2", "", function(Context, Trace, V1, V2, V3) DrawPoly({V1, V2, V3}) end)
+
+Component:AddVMFunction( "drawTriangle", "v2,v2,v2", "", function(Context, Trace, V1, V2, V3) draw.NoTexture(); DrawPoly({V1, V2, V3}) end)
+ 
+Component:AddVMFunction( "drawPoly", "ar", "", function(Context, Trace, Array)
+	if Array.__type ~= "_vt" and Array.__type ~= "_v2" then Context.Throw(Trace, "array", "array type missmatch, vertex expected got " .. EXPADV.TypeName(Array.__type)) end
+	draw.NoTexture() 
+	DrawPoly(Array)
+end)
+
+Component:AddVMFunction( "drawTexturedPoly", "ar", "", function(Context, Trace, Array)
+	if Array.__type ~= "_vt" and Array.__type ~= "_v2" then Context.Throw(Trace, "array", "array type missmatch, vertex expected got " .. EXPADV.TypeName(Array.__type)) end
+	draw.NoTexture() 
+	DrawPoly(Array)
+end)
+
+Component:AddVMFunction( "drawPolyOutline", "ar", "", function(Context, Trace, Array)
+	if Array.__type ~= "_vt" and Array.__type ~= "_v2" then Context.Throw(Trace, "array", "array type missmatch, vertex expected got " .. EXPADV.TypeName(Array.__type)) end
+	DrawPolyOutline(Array)
+end)
 
 Component:AddFunctionHelper( "drawTriangle", "v2,v2,v2", "Draws a traingle from 3 points." )
 Component:AddFunctionHelper( "drawPoly", "ar", "Draws a polygon using an arry of 2d vectors or vertexs." )
+Component:AddFunctionHelper( "drawPolyOutline", "ar", "Draws an outlined polygon using an arry of 2d vectors or vertexs." )
 Component:AddFunctionHelper( "drawTexturedTriangle", "v2,v2,v2", "Draws a textured traingle from 3 points." )
 Component:AddFunctionHelper( "drawTexturedPoly", "ar", "Draws a textured polygon using an arry of 2d vectors or vertexs." )
 
+/* --- -------------------------------------------------------------------------------
+	@: Circles
+   --- */
+  
+Component:AddVMFunction( "drawCircle", "v2,n", "", function(Context, Trace, Position, Radius)
+	local vertices = { }
+	for i=1, 30 do
+		vertices[i] = Position + Vector2(math.sin(-math.rad(i/30*360)) * Radius, math.cos(-math.rad(i/30*360)) * Radius)
+	end
+	draw.NoTexture()
+	DrawPoly(vertices)
+end)
+
+Component:AddVMFunction( "drawCircleOutline", "v2,n", "", function(Context, Trace, Position, Radius)
+	local vertices = { }
+	for i=1, 30 do
+		vertices[i] = Position + Vector2(math.sin(-math.rad(i/30*360)) * Radius, math.cos(-math.rad(i/30*360)) * Radius)
+	end
+	draw.NoTexture()
+	DrawPolyOutline(vertices)
+end)
+  
+Component:AddFunctionHelper( "drawCircle", "v2,n", "Draws a circle." )
+Component:AddFunctionHelper( "drawCircleOutline", "v2,n", "Draws an outlined circle." )
 
 /* -----------------------------------------------------------------------------------
 	@: Screen
