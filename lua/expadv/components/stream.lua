@@ -204,10 +204,17 @@ Component:AddFunctionHelper( "readColor", "st:", "Reads a color from the stream 
 local HasQueued, NetQueue = false, { }
 
 Component:AddVMFunction( "transmit", "nst:e,s", "", function( Context, Trace, Stream, Target, Name )
-	if !IsValid( Target ) then return end
-
-	table.insert( NetQueue, { Context.entity, Name, Stream, Target } ) -- Slow but meh!
-	HasQueued = true
+	if IsValid(Target) and Target:IsRunning() and Target.Context.Data['str_' .. Name] ~= nil then
+		local VCopy = {}
+		for k,v in pairs(Stream.V) do
+			VCopy[k] = v
+		end
+		local TCopy = {}
+		for k,v in pairs(Stream.T) do
+			TCopy[k] = v
+		end 
+		Target.Context:Execute( "Receive Stream " .. Name, Target.Context.Data['str_' .. Name], { { V = VCopy, T = TCopy, R = 0, W = #TCopy } , "_st" })
+	end
 end )
 
 Component:AddFunctionHelper( "transmit", "nst:e,s", "Sends a stream to another entity and calls the delegate defined using hookStream(string, delegate)." )
