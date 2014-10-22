@@ -103,6 +103,14 @@ end
 
 if SERVER then return end
 
+function ENT:SetFPS( Value )
+	self.__fps = math.Clamp( math.ceil( Value ), 1, 60 )
+end
+
+function ENT:GetFPS( )
+	return self.__fps or 24
+end
+
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: We need the Material and an RT
    --- */
@@ -145,7 +153,7 @@ function ENT:Draw( )
 	if !self:GetRenderingPaused( ) then
 			if !self.NextRender or self.NextRender <= SysTime( ) then
 			self:RenderScreen( )
-			self.NextRender = SysTime( ) + (1/24)
+			self.NextRender = SysTime( ) + (1 / self:GetFPS( ) )
 		end
 	end
 

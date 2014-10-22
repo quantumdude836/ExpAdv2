@@ -193,9 +193,9 @@ Component:AddFunctionHelper( "insert", "s:s,n,n", "Inserts into string after nth
 	@: Char and byte
    --- */
 
-Component:AddInlineFunction( "toByte", "s:", "n", [[(@value 1 ~= "" and string.byte(@value 1) or -1)]]
+Component:AddInlineFunction( "toByte", "s:", "n", [[(@value 1 ~= "" and string.byte(@value 1) or -1)]] )
 Component:AddFunctionHelper( "toByte", "s:", "Returns the ASCII code for a given character." )
 
-Component:AddInlineFunction( "toChar", "n:", "s", [[(@value 1 ~= -1 and string.char(@value 1) or "")]]
+Component:AddInlineFunction( "toChar", "n:", "s", [[(@value 1 ~= -1 and string.char(@value 1) or "")]] )
 Component:AddFunctionHelper( "toChar", "n:", "Returns the character for a given ASCII code." )
 

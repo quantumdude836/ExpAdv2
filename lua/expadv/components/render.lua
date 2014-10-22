@@ -305,6 +305,17 @@ end]], "@value" )
 
 Component:AddFunctionHelper( "screenToWorld", "v2", "Returns the position on screen as a world vector." )
 
+Component:AddPreparedFunction( "setFPS", "n", "", [[if IsValid( Context.entity ) and Context.entity.Screen then Context.entity:SetFPS(@value 1) end]] )
+
+Component:AddFunctionHelper( "setFPS", "n", "sets the fps of the screen, between 1 - 60 frames per second." )
+
+Component:AddPreparedFunction( "getFPS", "", "n", [[if IsValid( Context.entity ) and Context.entity.Screen then 
+	@define fps = Context.entity:GetFPS() 
+end]], "(@fps or 0)" )
+
+Component:AddFunctionHelper( "getFPS", "", "returns the fps of the screen." )
+
+
 /* -----------------------------------------------------------------------------------
 	@: Hud functions
    --- */
