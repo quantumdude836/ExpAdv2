@@ -75,6 +75,10 @@ function ENT:BuildOutputs( Cells, Ports )
 	self.DupeOutPorts = { Names, Types }
 
 	self.Outputs = WireLib.AdjustSpecialOutputs( self, Names, Types )
+
+	if self.extended then
+		WireLib.CreateWirelinkOutput( self.player, self, { true } )
+	end -- ^ Re-attaches the wirelink :D
 end
 
 

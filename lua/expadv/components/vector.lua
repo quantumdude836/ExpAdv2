@@ -159,13 +159,13 @@ Component:AddFunctionHelper( "angle", "v:v", "Returns the angle between two vect
     @: Useful
    --- */
 
-Component:AddInlineFunction( "cross", "v:v", "v", "@value 1:Cross( @value 2 )" )
+Component:AddInlineFunction( "cross", "v:v", "n", "@value 1:Cross( @value 2 )" )
 Component:AddFunctionHelper( "cross", "v:v", "Calculates the cross product of the 2 vectors (The vectors that defined the normal created by the 2 vectors). " )
 
-Component:AddInlineFunction( "distance", "v:v", "v", "@value 1:Distance( @value 2 )" )
+Component:AddInlineFunction( "distance", "v:v", "n", "@value 1:Distance( @value 2 )" )
 Component:AddFunctionHelper( "distance", "v:v", "Returns the pythagorean distance between the vector and the other vector." )
 
-Component:AddInlineFunction( "distanceSqr", "v:v", "v", "@value 1:DistToSqr( @value 2 )" )
+Component:AddInlineFunction( "distanceSqr", "v:v", "n", "@value 1:DistToSqr( @value 2 )" )
 Component:AddFunctionHelper( "distanceSqr", "v:v", "Returns the squared distance of 2 vectors." )
 
 Component:AddInlineFunction( "dot", "v:v", "n", "@value 1:Dot( @value 2 )" )
