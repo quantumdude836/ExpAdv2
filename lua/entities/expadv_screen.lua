@@ -132,7 +132,7 @@ function EXPADV.GetRenderTarget( )
 	EXPADV.RT_ID = EXPADV.RT_ID + 1
 	if EXPADV.RT_ID > 32 then return end
 
-	return GetRenderTarget( "expadv_rt_" .. EXPADV.RT_ID, 512, 512 ), CreateMaterial( "expadv_rt_" .. EXPADV.RT_ID, "UnlitGeneric", { ["$vertexcolor"] = 1, ["$vertexalpha"] = 1, ["$ignorez"] = 1, ["$nolod"] = 1, } )
+	return GetRenderTarget( "expadv_rt_" .. EXPADV.RT_ID, 512+16, 512+16 ), CreateMaterial( "expadv_rt_" .. EXPADV.RT_ID, "UnlitGeneric", { ["$vertexcolor"] = 1, ["$vertexalpha"] = 1, ["$ignorez"] = 1, ["$nolod"] = 1, } )
 end
 
 function EXPADV.CacheRenderTarget( RenderTarget, Material )
@@ -215,7 +215,7 @@ function ENT:RenderScreen( )
 	local _ScrW, _ScrH = ScrW( ), ScrH( )
 	local PreviousRT = render.GetRenderTarget( )
 	render.SetRenderTarget( self.RenderTarget )
-	render.SetViewPort( 0, 0, 512, 512 )
+	render.SetViewPort( 8, 8, 512, 512 )
 	
 
 	if !self:GetNoClearFrame( ) or self.ForceClear then

@@ -55,7 +55,7 @@ function Component.CreateFont( Base, Size )
 		size = Size,
 		weight = 500,
 		antialias = true,
-		additive = true,
+		additive = false,
 	} )
 
 	return FontName
@@ -72,7 +72,7 @@ Component:AddVMFunction( "setFont", "s,n,c", "s",
 		surface.SetTextColor( Color )
 	end )
 
-Component:AddVMFunction( "setFontColor", "c", "","$surface.SetTextColor( @value 1 )" )
+Component:AddPreparedFunction( "setFontColor", "c", "", "$surface.SetTextColor( @value 1 )" )
 
 Component:AddInlineFunction( "getTextWidth", "s", "n", "$surface.GetTextSize( @value 1 )" )
 
