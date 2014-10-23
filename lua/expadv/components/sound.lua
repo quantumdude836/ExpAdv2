@@ -84,3 +84,204 @@ Component:AddFunctionHelper("soundDuration", "s", "Returns the duration of the g
 
 Component:AddVMFunction("soundStopAll", "", "", function(Context, Trace) for k, v in pairs(Context.Data.Sound) do v:Stop() timer.Remove("EA2Gate-" .. Context.entity:EntIndex() .. ";STOPSound_" .. k) Context.Data.SoundCount = 0 end end)
 Component:AddFunctionHelper("soundStopAll", "", "Stops all sounds from the chip.")
+
+/* --- --------------------------------------------------------------------------------
+	@: ClientSide Sound
+	@: Author: Rusketh
+   --- */
+
+EXPADV.ClientOperators()
+
+local SoundObject = Component:AddClass( "audio", "ac" )
+
+SoundObject:AddPreparedOperator( "=", "n,ac", "", "Context.Memory[@value 1] = @value 2" )
+
+SoundObject:MakeClientOnly( )
+
+Component:AddInlineOperator( "is", "ac", "b", "IsValid(@value 1)" )
+
+
+/* --- --------------------------------------------------------------------------------
+	@: Methods
+   --- */
+
+Component:AddPreparedFunction( "hasStopped", "ac:", "b", [[if !IsValid( @value 1) then Context:Trow( @trace, "audio channel", "Recieved invalid audio channel." ) end]], 
+"(@value 1:GetSamplingRate( ) == $GMOD_CHANNEL_STOPPED)" )
+Component:AddFunctionHelper( "isStopped", "ac:", "Returns true is the audio channel has stopped." )
+
+Component:AddPreparedFunction( "isPlaying", "ac:", "b", [[if !IsValid( @value 1) then Context:Trow( @trace, "audio channel", "Recieved invalid audio channel." ) end]], 
+"(@value 1:GetSamplingRate( ) == $GMOD_CHANNEL_PLAYING)" )
+Component:AddFunctionHelper( "isPlaying", "ac:", "Returns true is the audio channel is playing." )
+
+Component:AddPreparedFunction( "isPaused", "ac:", "b", [[if !IsValid( @value 1) then Context:Trow( @trace, "audio channel", "Recieved invalid audio channel." ) end]], 
+"(@value 1:GetSamplingRate( ) == $GMOD_CHANNEL_PAUSED)" )
+Component:AddFunctionHelper( "isPaused", "ac:", "Returns true is the audio channel is paused." )
+
+Component:AddPreparedFunction( "hasStalled", "ac:", "b", [[if !IsValid( @value 1) then Context:Trow( @trace, "audio channel", "Recieved invalid audio channel." ) end]], 
+"(@value 1:GetSamplingRate( ) == $GMOD_CHANNEL_STALLED)" )
+Component:AddFunctionHelper( "hasStalled", "ac:", "Returns true is the audio channel has stalled." )
+
+Component:AddPreparedFunction( "enableLooping", "ac:b", "", [[if !IsValid( @value 1) then Context:Trow( @trace, "audio channel", "Recieved invalid audio channel." ) end
+@value 1:EnableLooping( @value 2)]] )
+Component:AddFunctionHelper( "enableLooping", "ac:b", "Enables or disables looping of audio channel, requires noblock flag." )
+
+Component:AddPreparedFunction( "fft", "ac:n", "ar", [[if !IsValid( @value 1) then Context:Trow( @trace, "audio channel", "Recieved invalid audio channel." ) end
+@define array = { __type = "n" }
+@value 1:FFT( @array, @value 2)]], "@array" )
+Component:AddFunctionHelper( "fft", "ac:n", "Returns the FFT table of the sound channel. This is what used to make visualization for the played sound." )
+
+Component:AddPreparedFunction( "get3DCone", "ac:", "a", [[if !IsValid( @value 1) then Context:Trow( @trace, "audio channel", "Recieved invalid audio channel." ) end]],
+		"Angle(@value 1:Get3DCone( ))" )
+Component:AddFunctionHelper( "get3DCone", "ac:", "a", "Returns 3D cone of the sound channel, ang(The angle of the inside projection cone in degrees, The angle of the outside projection cone in degrees. The delta-volume outside the outer projection cone). " )
+
+Component:AddPreparedFunction( "getMax3DFadeDistance", "ac:", "n", [[if !IsValid( @value 1) then Context:Trow( @trace, "audio channel", "Recieved invalid audio channel." ) end
+	@define min, max = @value 1:Get3DFadeDistance( )]], "@max" )
+Component:AddFunctionHelper( "getMax3DFadeDistance", "ac:", "The channel's volume is at maximum when the listener is within this distance" )
+
+Component:AddPreparedFunction( "getMin3DFadeDistance", "ac:", "n", [[if !IsValid( @value 1) then Context:Trow( @trace, "audio channel", "Recieved invalid audio channel." ) end
+	@define min, max = @value 1:Get3DFadeDistance( )]], "@min" )
+Component:AddFunctionHelper( "getMax3DFadeDistance", "ac:", "The channel's volume stops decreasing when the listener is beyond this distance" )
+
+Component:AddPreparedFunction( "getBitsPerSample", "ac:", "n", [[if !IsValid( @value 1) then Context:Trow( @trace, "audio channel", "Recieved invalid audio channel." ) end]], "@value 1:GetBitsPerSample( )" )
+Component:AddFunctionHelper( "getBitsPerSample", "ac:", "Number of bits per sample, or 0 if unknown." )
+
+Component:AddPreparedFunction( "getURL", "ac:", "s", [[if !IsValid( @value 1) then Context:Trow( @trace, "audio channel", "Recieved invalid audio channel." ) end]], "@value 1:GetURL( )" )
+Component:AddFunctionHelper( "getURL", "ac:", "Gets the url or path of the sound." )
+
+Component:AddPreparedFunction( "getLength", "ac:", "n", [[if !IsValid( @value 1) then Context:Trow( @trace, "audio channel", "Recieved invalid audio channel." ) end]],	"@value 1:GetLength( )" )
+Component:AddFunctionHelper( "getLength", "ac:", "Returns the length of sound played by the sound channel." )
+
+Component:AddPreparedFunction( "getPlaybackRate", "ac:", "n", [[if !IsValid( @value 1) then Context:Trow( @trace, "audio channel", "Recieved invalid audio channel." ) end]],	"@value 1:GetPlaybackRate( )" )
+Component:AddFunctionHelper( "getPlaybackRate", "ac:", "Returns the playback rate of the sound channel." )
+
+Component:AddPreparedFunction( "getPos", "ac:", "v", [[if !IsValid( @value 1) then Context:Trow( @trace, "audio channel", "Recieved invalid audio channel." ) end]], "(@value 1:GetPos( ) or Vector(0,0,0))" )
+Component:AddFunctionHelper( "getPos", "ac:", "Returns positionmof the sound." )
+
+Component:AddPreparedFunction( "getSamplingRate", "ac:", "n", [[if !IsValid( @value 1) then Context:Trow( @trace, "audio channel", "Recieved invalid audio channel." ) end]], "@value 1:GetSamplingRate( )" )
+Component:AddFunctionHelper( "getSamplingRate", "ac:", "Returns the sample rate of the sound." )
+
+Component:AddPreparedFunction( "getTime", "ac:", "n", [[if !IsValid( @value 1) then Context:Trow( @trace, "audio channel", "Recieved invalid audio channel." ) end]], "@value 1:GetTime( )" )
+Component:AddFunctionHelper( "getTime", "ac:", "Returns the current time of the sound channel." )
+
+Component:AddPreparedFunction( "getVolume", "ac:", "n", [[if !IsValid( @value 1) then Context:Trow( @trace, "audio channel", "Recieved invalid audio channel." ) end]], "(@value 1:GetVolume( ) * 100)" )
+Component:AddFunctionHelper( "getVolume", "ac:", "Returns the current volume of the sound channel." )
+
+Component:AddPreparedFunction( "is3D", "ac:", "b", [[if !IsValid( @value 1) then Context:Trow( @trace, "audio channel", "Recieved invalid audio channel." ) end]], "@value 1:Is3D( )" )
+Component:AddFunctionHelper( "is3D", "ac:", "Returns if the sound channel is in 3D mode or not." )
+
+Component:AddPreparedFunction( "isBlockStreamed", "ac:", "b", [[if !IsValid( @value 1) then Context:Trow( @trace, "audio channel", "Recieved invalid audio channel." ) end]], "@value 1:IsBlockStreamed( )" )
+Component:AddFunctionHelper( "isBlockStreamed", "ac:", "Returns whether the audio stream is block streamed or not." )
+
+Component:AddPreparedFunction( "isLooping", "ac:", "b", [[if !IsValid( @value 1) then Context:Trow( @trace, "audio channel", "Recieved invalid audio channel." ) end]], "@value 1:IsLooping( )" )
+Component:AddFunctionHelper( "isLooping", "ac:", "Returns whether the audio stream is looping or not." )
+
+-- Component:AddPreparedFunction( "isOnline", "ac:", "b", [[if !IsValid( @value 1) then Context:Trow( @trace, "audio channel", "Recieved invalid audio channel." ) end]], "@value 1:IsOnline( )" )
+-- Component:AddFunctionHelper( "isOnline", "ac:", "Returns whether the audio stream is streamed online or not." )
+
+Component:AddPreparedFunction( "pause", "ac:", "b", [[if !IsValid( @value 1) then Context:Trow( @trace, "audio channel", "Recieved invalid audio channel." ) end
+@value 1:Pause( )]] )
+Component:AddFunctionHelper( "pause", "ac:", "Pauses the stream." )
+
+Component:AddPreparedFunction( "play", "ac:", "b", [[if !IsValid( @value 1) then Context:Trow( @trace, "audio channel", "Recieved invalid audio channel." ) end
+@value 1:Play( )]] )
+Component:AddFunctionHelper( "play", "ac:", "Starts playing the stream." )
+
+Component:AddPreparedFunction( "stop", "ac:", "b", [[if !IsValid( @value 1) then Context:Trow( @trace, "audio channel", "Recieved invalid audio channel." ) end
+@value 1:Stop( )]] )
+Component:AddFunctionHelper( "stop", "ac:", "Stops playing the stream." )
+
+Component:AddPreparedFunction( "set3DFadeDistance", "ac:n,n", "", [[if !IsValid( @value 1) then Context:Trow( @trace, "audio channel", "Recieved invalid audio channel." ) end
+@value 1:Set3DFadeDistance(@value 2, @value 3)]] )
+Component:AddFunctionHelper( "set3DFadeDistance", "ac:n,n", "Sets minamum and maxamum ,3D fade distances of a sound channel." )
+
+Component:AddPreparedFunction( "set3DCone", "ac:n,n,n", "", [[if !IsValid( @value 1) then Context:Trow( @trace, "audio channel", "Recieved invalid audio channel." ) end
+@value 1:Set3DCone(@value 2, @value 3, @value 4)]] )
+Component:AddFunctionHelper( "set3DCone", "ac:n,n,n", "Sets 3D cone of the sound channel." )
+
+Component:AddPreparedFunction( "setPlaybackRate", "ac:n", "", [[if !IsValid( @value 1) then Context:Trow( @trace, "audio channel", "Recieved invalid audio channel." ) end
+@value 1:SetPlaybackRate(@value 2)]] )
+Component:AddFunctionHelper( "setPlaybackRate", "ac:n", "Sets 3D cone of the sound channel." )
+
+Component:AddPreparedFunction( "setPos", "ac:v,v", "", [[if !IsValid( @value 1) then Context:Trow( @trace, "audio channel", "Recieved invalid audio channel." ) end
+@value 1:SetPos(@value 2, @value 3)]] )
+EXPADV.AddFunctionAlias( "setPos", "ac:v" )
+Component:AddFunctionHelper( "setPos", "ac:v,v", "Sets position of sound channel in case the sound channel has a 3d option set, with optional direction." )
+
+Component:AddPreparedFunction( "setTime", "ac:n", "", [[if !IsValid( @value 1) then Context:Trow( @trace, "audio channel", "Recieved invalid audio channel." ) end
+@value 1:SetTime(@value 2)]] )
+Component:AddFunctionHelper( "setTime", "ac:n", "Sets the sound channel to specified time ( Rewind to that position of the song ). Does not work on online radio streams. Your sound must have 'noblock' parameter for this to work." )
+
+Component:AddPreparedFunction( "setVolume", "ac:n", "", [[if !IsValid( @value 1) then Context:Trow( @trace, "audio channel", "Recieved invalid audio channel." ) end
+@value 1:SetVolume(@value 2 * 0.01)]] )
+Component:AddFunctionHelper( "setVolume", "ac:n", "Sets the volume of a sound channel" )
+
+Component:AddPreparedFunction( "canPlayFromURL", "", "b", "(IsValid(Context.entity) and Context.entity.EnableSoundURL)" )
+Component:AddFunctionHelper( "canPlayFromURL", "", "Returns true if this entity can play audio from url." )
+
+
+if CLIENT then
+	hook.Add( "Expadv.RegisterContext", "expadv.sound", function( Context )
+		Context.Data.Audio = { }
+		Context.Data.AudioCount = 0
+	end )
+
+	hook.Add( "Expadv.UnregisterContext", "expadv.sound", function( Context )
+		if Context.Data.AudioCount <= 0 then return end
+		
+		for _, Channel in pairs( Context.Data.Audio ) do
+			if IsValid( Channel ) then Channel:Stop( ) end
+		end
+	end )
+end
+
+/* --- --------------------------------------------------------------------------------
+	@: Sound from URL
+	@: Author: Rusketh
+   --- */
+
+EXPADV.ClientOperators()
+
+Component:AddVMFunction( "playURL", "s,s,d,d", "", 
+	function( Context, Trace, URL, Flags, Sucess, Fail )
+		if !IsValid(Context.entity) or !Context.entity.EnableSoundURL then return end
+
+		sound.PlayURL( URL, Flags,
+			function( Channel, Er_ID, Er_Name ) 
+				if IsValid( Channel ) then
+					Context.Data.AudioCount = Context.Data.AudioCount + 1
+					Context.Data.Audio[Context.Data.AudioCount] = Channel
+					Context:Execute( "playURL", Sucess, { Channel, "_ac" } )
+				elseif Fail then
+					Context:Execute( "playURL", Fail, { Er_ID, "n" }, { Er_Name, "s" } )
+				end
+			end )
+	end )
+
+EXPADV.AddFunctionAlias( "playURL", "s,s,d" )
+
+/* -----------------------------------------------------------------------------------
+	@: Hooks
+   --- */
+
+if CLIENT then
+
+	function Component:OnOpenContextMenu( Entity, Menu, Trace, Option )
+		if Entity.EnableSoundURL then
+			Menu:AddOption( "Disable sounds from url", function( )
+				Entity.EnableSoundURL = false
+
+				local Context = Entity.Context
+				if !Context or Context.Data.AudioCount <= 0 then return end
+		
+				for _, Channel in pairs( Context.Data.Audio ) do
+					if IsValid( Channel ) then Channel:Stop( ) end
+				end
+
+				Context.Data.Audio = { }
+				Context.Data.AudioCount = 0
+			end )
+		else
+			Menu:AddOption( "Enable sounds from url", function( ) Entity.EnableSoundURL = true end )
+		end
+	end
+end
