@@ -190,7 +190,7 @@ Component:AddFunctionHelper( "passenger", "e:", "Gets the passenger of the given
 
 EXPADV.ServerOperators()
 
-Component:AddPreparedFunction( "lockPod", "e:", "", 
+Component:AddPreparedFunction( "lockPod", "e:b", "", 
 [[if(@value 1:IsValid() && EXPADV.PPCheck(Context.player,@value 1) && @value 1:IsVehicle()) then
 	if(@value 2) then 
 		this:Fire("Lock","",0)
@@ -199,7 +199,7 @@ Component:AddPreparedFunction( "lockPod", "e:", "",
 	end
 end]])
 
-Component:AddFunctionHelper( "lockPod", "e:", "Locks the given vehicle.")
+Component:AddFunctionHelper( "lockPod", "e:b", "Locks/Unlocks the given pod.")
 
 Component:AddPreparedFunction( "ejectPod", "e:", "", 
 [[if(@value 1:IsValid() && EXPADV.PPCheck(Context.player,@value 1) && @value 1:IsVehicle() && @value 1:GetDriver():IsValid()) then
