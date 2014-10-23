@@ -253,7 +253,7 @@ end]], "@vel" )
 
 Component:AddFunctionHelper( "angVel", "e:", "Returns the angular velocity of the given entity.")
 
-Component:AddInlineFunction( "angVelVector", "e:", "a","((@value 1:IsValid() && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType( )== $MOVETYPE_VPHYSICS) and @value 1:GetPhysicsObject():GetAngleVelocity() or Vector(0,0,0))")
+Component:AddInlineFunction( "angVelVector", "e:", "v","((@value 1:IsValid() && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType( )== $MOVETYPE_VPHYSICS) and @value 1:GetPhysicsObject():GetAngleVelocity() or Vector(0,0,0))")
 Component:AddFunctionHelper( "angVelVector", "e:", "Returns the angular velocity of the given entity as a vector.")
 
 Component:AddInlineFunction( "radius", "e:", "n","(@value 1:IsValid() and @value 1:BoundingRadius() or 0)")
