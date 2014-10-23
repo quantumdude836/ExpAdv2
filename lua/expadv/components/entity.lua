@@ -381,7 +381,7 @@ Component:AddFunctionHelper( "health", "e:", "Returns the health of the entity."
 
 Component:AddPreparedFunction( "elevation", "e:v", "n", [[
 	if(IsValid(@value 1)) then
-		@define pos = this:WorldToLocal(@value 2)
+		@define pos = @value 1:WorldToLocal(@value 2)
 		@pos = (180 / math.pi) * math.asin(@pos.z / @pos:Length())
 	end
 ]], "(@pos or 0)" )
@@ -389,7 +389,7 @@ Component:AddFunctionHelper( "elevation", "e:v", "Returns the elevation between 
 
 Component:AddPreparedFunction( "bearing", "e:v", "n", [[
 	if(IsValid(@value 1)) then
-		@define pos = this:WorldToLocal(@value 2)
+		@define pos = @value 1:WorldToLocal(@value 2)
 		@pos = (180 / math.pi) * -math.atan2(@pos.y, @pos.x)
 	end
 ]], "(@pos or 0)" )
@@ -397,7 +397,7 @@ Component:AddFunctionHelper( "bearing", "e:v", "Returns the bearing between the 
 
 Component:AddPreparedFunction( "heading", "e:v", "a", [[
 	if(IsValid(@value 1)) then
-		@define pos = this:WorldToLocal(@value 2)
+		@define pos = @value 1:WorldToLocal(@value 2)
 	
 		@define bearing = (180 / math.pi) * -math.atan2(@pos.y, @pos.x)
 		@define elevation = (180 / math.pi) * math.asin(@pos.z / @pos:Length())
