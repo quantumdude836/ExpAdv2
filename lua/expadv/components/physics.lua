@@ -187,58 +187,56 @@ Component:AddInlineFunction( "isFrozen", "p:", "b", "(IsValid(@value 1) and @val
 
 EXPADV.ServerOperators()
 
-Component:AddVMFunction( "applyForce", "p:v", "", function( Context, Trace, Phys, Pos )
-	if Phys:IsValid() and VectorNotHuge( Pos ) and EXPADV.PPCheck(Context.player, Phys:GetEntity( )) then
-		Phys:ApplyForceCenter(Pos)
+Component:AddPreparedFunction( "applyForce", "p:v", "", [[
+	if @value 1:IsValid() and VectorNotHuge( @value 2 ) and EXPADV.PPCheck(Context.player, @value 1:GetEntity( )) then
+		@value 1:ApplyForceCenter(@value 2)
 	end
-end)
+]])
 
 Component:AddFunctionHelper( "applyForce", "p:v", "Applies a vector of force on the given physics object.")
 
-Component:AddPreparedFunction( "applyOffsetForce", "e:v,v", "", function( Context, Trace, Phys, Pos1, Pos2 )
-	if Phys:IsValid() and VectorNotHuge( Pos1 ) and VectorNotHuge( Pos2 ) and EXPADV.PPCheck(Context.player, Phys:GetEntity( )) then
-		Phys:ApplyForceOffset(Pos1, Pos2)
+Component:AddPreparedFunction( "applyOffsetForce", "p:v,v", "", [[
+	if @value 1:IsValid() and VectorNotHuge( @value 2 ) and VectorNotHuge( @value 3 ) and EXPADV.PPCheck(Context.player, @value 1:GetEntity( )) then
+		@value 1:ApplyForceOffset(@value 2, @value 3)
 	end
-end)
+]])
 
-Component:AddFunctionHelper( "applyForceOffset", "p:v,v", "Applies an offset vector of force on the given physics object.")
+Component:AddFunctionHelper( "applyOffsetForce", "p:v,v", "Applies an offset vector of force on the given physics object.")
 
-Component:AddPreparedFunction( "applyAngForce", "p:a", "",
-	function( Context, Trace, Phys, Angle )
-
-		if Phys:IsValid() and AngleNotHuge(Angle )and EXPADV.PPCheck(Context.player,Phys:GetEntity( )) then
-				if Angle.p != 0 or Angle.y != 0 or Angle.r != 0 then
-					
-					local up = Phys:GetUp()
-					local left = Phys:GetRight() * -1
-					local forward = Phys:GetForward()
-					
-					if Angle.p ~= 0 then
-						local pitch = up * (Angle.p * 0.5)
-						Phys:ApplyForceOffset( forward, pitch )
-						Phys:ApplyForceOffset( forward * -1, pitch * -1 )
-					end
-
-					-- apply yaw force
-					if Angle.y ~= 0  then
-						local yaw = forward * (Angle.y * 0.5)
-						Phys:ApplyForceOffset( left, yaw )
-						Phys:ApplyForceOffset( left * -1, yaw * -1 )
-					end
-
-					-- apply roll force
-					if Angle.r ~= 0 then
-						local roll = left * (Angle.r * 0.5)
-						Phys:ApplyForceOffset( up, roll )
-						Phys:ApplyForceOffset( up * -1, roll * -1 )
-					end
+Component:AddVMFunction( "applyAngForce", "p:a", "", function( Context, Trace, Phys, Ang )
+	if Phys:IsValid() and AngleNotHuge( Ang ) and EXPADV.PPCheck(Context.player, Phys:GetEntity()) then
+			if Ang.p != 0 or Ang.y != 0 or Ang.r != 0 then
+				
+				local up = Phys:GetUp()
+				local left = Phys:GetRight() * -1
+				local forward = Phys:GetForward()
+				
+				if Ang.p ~= 0 then
+					local pitch = up * (Ang.p * 0.5)
+					Phys:ApplyForceOffset( forward, pitch )
+					Phys:ApplyForceOffset( forward * -1, pitch * -1 )
 				end
-		end
-	end )
+
+				-- apply yaw force
+				if Ang.y ~= 0  then
+					local yaw = forward * (Ang.y * 0.5)
+					Phys:ApplyForceOffset( left, yaw )
+					Phys:ApplyForceOffset( left * -1, yaw * -1 )
+				end
+
+				-- apply roll force
+				if Ang.r ~= 0 then
+					local roll = left * (Ang.r * 0.5)
+					Phys:ApplyForceOffset( up, roll )
+					Phys:ApplyForceOffset( up * -1, roll * -1 )
+				end
+			end
+	end
+end )
 
 Component:AddFunctionHelper( "applyAngForce", "p:a", "Applies torque to the given physics object depending on the given angle")
 
-Component:AddPreparedFunction( "applyTorque", "p:v", "", function( Context, Trace, Phys, TQ )
+Component:AddVMFunction( "applyTorque", "p:v", "", function( Context, Trace, Phys, TQ )
 	if Phys:IsValid() and EXPADV.PPCheck(Context.player, Phys:GetEntity( )) then
 		if TQ.x == 0 and TQ.y == 0 and TQ.z == 0 then return end
 
@@ -266,6 +264,8 @@ Component:AddPreparedFunction( "applyTorque", "p:v", "", function( Context, Trac
 		end
 	end
 end)
+
+Component:AddFunctionHelper( "applyTorque", "p:v", "Applies torque on the given axis.")
 
 /* --- --------------------------------------------------------------------------------
 	@: Helper
