@@ -238,11 +238,11 @@ Component:AddPreparedFunction( "applyAngForce", "p:a", "",
 
 Component:AddFunctionHelper( "applyAngForce", "p:a", "Applies torque to the given physics object depending on the given angle")
 
-Component:AddPreparedFunction( "applyTorque", "e:p", "", function( Context, Trace, Phys, TQ )
+Component:AddPreparedFunction( "applyTorque", "p:v", "", function( Context, Trace, Phys, TQ )
 	if Phys:IsValid() and EXPADV.PPCheck(Context.player, Phys:GetEntity( )) then
 		if TQ.x == 0 and TQ.y == 0 and TQ.z == 0 then return end
 
-		if Target:GetMoveType() == MOVETYPE_VPHYSICS then
+		if Phys:GetEntity():GetMoveType() == MOVETYPE_VPHYSICS then
 
 			local torqueamount = TQ:Length()
 
