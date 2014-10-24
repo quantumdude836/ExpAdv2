@@ -278,7 +278,7 @@ end)
 
 Component:AddFunctionHelper( "applyForce", "e:v", "Applies a vector of force on the given entity.")
 
-Component:AddPreparedFunction( "applyOffsetForce", "e:v,v", "", function( Context, Trace, Target, Pos1, Pos2 )
+Component:AddVMFunction( "applyOffsetForce", "e:v,v", "", function( Context, Trace, Target, Pos1, Pos2 )
 	if Target:IsValid() and VectorNotHuge( Pos1 ) and VectorNotHuge( Pos2 ) and EXPADV.PPCheck(Context.player, Target) then
 		local Phys = Target:GetPhysicsObject()
 		if !Phys or !Phys:IsValid( ) then return end
@@ -288,7 +288,7 @@ end)
 
 Component:AddFunctionHelper( "applyForceOffset", "e:v,v", "Applies an offset vector of force on the given entity.")
 
-Component:AddPreparedFunction( "applyAngForce", "e:a", "",
+Component:AddVMFunction( "applyAngForce", "e:a", "",
 	function( Context, Trace, Target, Angle )
 
 		if Target:IsValid() and AngleNotHuge(Angle )and EXPADV.PPCheck(Context.player,Target) then
@@ -328,7 +328,7 @@ Component:AddPreparedFunction( "applyAngForce", "e:a", "",
 
 Component:AddFunctionHelper( "applyAngForce", "e:a", "Applies torque to the given entity depending on the given angle")
 
-Component:AddPreparedFunction( "applyTorque", "e:v", "", function( Context, Trace, Target, TQ )
+Component:AddVMFunction( "applyTorque", "e:v", "", function( Context, Trace, Target, TQ )
 	if Target:IsValid() and EXPADV.PPCheck(Context.player, Target) then
 		local Phys = Target:GetPhysicsObject()
 		if !Phys or !Phys:IsValid( ) then return end
