@@ -73,12 +73,6 @@ Component:AddInlineOperator( "not", "v", "b", "(@value 1 == Vector(0, 0, 0))" )
 Component:AddInlineOperator( "-", "v", "v", "(-@value 1)" )
 
 /* --- --------------------------------------------------------------------------------
-	  @: Casting
-   --- */
-
-Component:AddInlineOperator( "string", "v", "s", "string.format( \"Vec( %i, %i, %i )\", @value 1.x, @value 1.y, @value 1.z)" )
-
-/* --- --------------------------------------------------------------------------------
 	  @: Assignment
    --- */
 
@@ -327,6 +321,9 @@ Component:AddInlineOperator( "-", "v2", "v2", "(-@value 1)" )
    --- */
 
 Component:AddInlineOperator( "string", "v2", "s", "string.format( \"Vec2( %i, %i )\", @value 1.x, @value 1.y)" )
+Component:AddInlineOperator( "string", "v", "s", "string.format( \"Vec( %i, %i, %i )\", @value 1.x, @value 1.y, @value 1.z)" )
+Component:AddInlineOperator( "vector2", "v", "v2", "Vector2(@value 1.x, @value 1.y)" )
+Component:AddInlineOperator( "vector", "v2", "v", "Vector(@value 1.x, @value 1.y,0)" )
 
 /* --- --------------------------------------------------------------------------------
 	  @: Assignment

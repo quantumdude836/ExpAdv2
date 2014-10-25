@@ -24,8 +24,10 @@ function EXPADV.BuildNewContext( Instance, Player, Entity ) -- Table, Player, En
 	Context.Trigger = { }
 	Context.Changed = { }
 
-	Context.Memory = { }
-	Context.Delta = { }
+	Context.RootMemory = { }
+	Context.RootDelta = { }
+	Context.Memory = { __index = Context.RootMemory }
+	Context.Delta = { __index = Context.RootDelta }
 
 	Context.Data = { }
 	Context.Definitions = { }
@@ -68,9 +70,9 @@ function EXPADV.RootContext:Execute( Location, Operation, ... ) -- String, Funct
 
 	-- Memory Instaces
 
-		if Location and Location ~= "Root" then
-			Instance = EXPADV.CloneContext( self )
-		end
+		-- if Location and Location ~= "Root" then
+		-- 	Instance = EXPADV.CloneContext( self )
+		-- end
 
 	-- Ops monitoring:
 
@@ -122,9 +124,9 @@ function EXPADV.RootContext:Execute( Location, Operation, ... ) -- String, Funct
 			return false
 		end
 
-		if Instance then
-			EXPADV.ObsorbContext( self, Instance )
-		end
+		-- if Instance then
+		-- 	EXPADV.ObsorbContext( self, Instance )
+		-- end
 
 		EXPADV.Updates[self] = true
 
@@ -224,45 +226,57 @@ end
 	@: Context Clone Loading.
    --- */
 
-function EXPADV.CloneContext( C )
-	local Clone = setmetatable( {
-		player = C.player,
-		entity = C.entity,
-		Status = C.Status,
-		Trigger = C.Trigger,
-		Online = C.Online,
+-- function EXPADV.CloneContext( C )
+-- 	local Clone = setmetatable( {
+-- 		player = C.player,
+-- 		entity = C.entity,
+-- 		Status = C.Status,
+-- 		Trigger = C.Trigger,
+-- 		Online = C.Online,
+-- 
+-- 		Data = C.Data,
+-- 		Definitions = C.Definitions,
+-- 
+-- 		Cells = C.Cells,
+-- 		Strings = C.Strings,
+-- 		Instructions = C.Instructions,
+-- 		Enviroment = C.Enviroment,
+-- 
+-- 		RootMemory = C.RootMemory,
+-- 		RootDelta = C.RootDelta,
+-- 
+-- 		Changed = { },
+-- 		Memory = { __index = C.RootMemory },
+-- 		Delta = { __index = C.RootDelta },
+-- 	}, EXPADV.RootContext )
+-- 
+-- 	-- for K, _ in pairs( C.Memory ) do
+-- 	-- 	Clone.Memory[K] = C.Memory[K]
+-- 	-- 	Clone.Delta[K] = C.Delta[K]
+-- 	-- 	Clone.Trigger[K] = C.Trigger[K]
+-- 	-- 	Clone.Changed[K] = C.Changed[K]
+-- 	-- end
+-- 
+-- 	return Clone, C
+-- end
 
-		Data = C.Data,
-		Definitions = C.Definitions,
-
-		Cells = C.Cells,
-		Strings = C.Strings,
-		Instructions = C.Instructions,
-		Enviroment = C.Enviroment,
-
-		Changed = { },
-		Memory = { },
-		Delta = { },
-	}, EXPADV.RootContext )
-
-	for K, _ in pairs( C.Memory ) do
-		Clone.Memory[K] = C.Memory[K]
-		Clone.Delta[K] = C.Delta[K]
-		Clone.Trigger[K] = C.Trigger[K]
-		Clone.Changed[K] = C.Changed[K]
-	end
-
-	return Clone, C
-end
-
-function EXPADV.ObsorbContext( C, With )
-	for K, _ in pairs( C.Memory ) do
-		C.Memory[K] = With.Memory[K]
-		C.Delta[K] = With.Delta[K]
-		C.Trigger[K] = With.Trigger[K]
-		C.Changed[K] = With.Changed[K]
-	end
-end
+-- function EXPADV.ObsorbContext( C, With )
+-- 	-- for K, _ in pairs( C.Memory ) do
+-- 	-- 	C.Memory[K] = With.Memory[K]
+-- 	-- 	C.Delta[K] = With.Delta[K]
+-- 	-- 	C.Trigger[K] = With.Trigger[K]
+-- 	-- 	C.Changed[K] = With.Changed[K]
+-- 	-- end
+-- 
+-- 	for Ref, Value in pairs( With.Memory ) do
+-- 		if !C.Memory[Ref] then
+-- 			C.Memory[Ref] = With.Memory[Ref]
+-- 			C.Delta[Ref] = With.Delta[Ref]
+-- 			C.Trigger[Ref] = With.Trigger[Ref]
+-- 			C.Changed[Ref] = With.Changed[Ref]
+-- 		end
+-- 	end
+-- end
 
 /* --- --------------------------------------------------------------------------------
 	@: Context Updating.

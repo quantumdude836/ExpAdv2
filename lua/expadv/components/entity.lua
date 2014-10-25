@@ -107,7 +107,7 @@ Component:AddFunctionHelper( "forward", "e:", "Gets the forward vector of the gi
 Component:AddInlineFunction( "right", "e:", "v", "(@value 1:IsValid() and @value 1:GetRight() or Vector(0,0,0))")
 Component:AddFunctionHelper( "right", "e:", "Gets the right-facing vector of the given entity.")
 
-Component:AddInlineFunction( "up", "e:", "v", "(@value 1:IsValid() and @value 1:GetUp() or Vector(0,0,0)))")
+Component:AddInlineFunction( "up", "e:", "v", "(@value 1:IsValid() and @value 1:GetUp() or Vector(0,0,0))")
 Component:AddFunctionHelper( "up", "e:", "Gets the upwards vector of the given entity.")
 
 Component:AddInlineFunction( "class", "e:", "s", "(@value 1:IsValid() and @value 1:GetClass() or \"worldspawn\")")

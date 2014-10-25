@@ -120,11 +120,11 @@ hook.Add( "Think", "expadv.timers", function( )
 
 			if Timer.Paused then continue end
 
-			if time <= Timer.Next then
+			if time >= Timer.Next then
 
 				Timer.Next = time + Timer.Delay
 
-				if Timer.Reps != 0 then
+				if Timer.Reps ~= 0 then
 					Timer.Count = Timer.Count + 1
 
 					if Timer.Count > Timer.Reps then

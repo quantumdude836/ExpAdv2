@@ -49,9 +49,8 @@ Component:AddInlineOperator( "not", "c", "b", "(@value 1 == Color(0, 0, 0, 0))" 
 	@: Casting
    --- */
 
-Component:AddInlineOperator( "string", "c", "s", "string.format( \"Color( %i, %i, %i, %i )\", @value 1.r, @value 1.g, @value 1.b, @value 1.a )" )
-
 Component:AddInlineOperator( "color", "s", "c", "string.ToColor(@value 1)" )
+Component:AddInlineOperator( "string", "c", "s", "string.format( \"Color( %i, %i, %i, %i )\", @value 1.r or 0, @value 1.g or 0, @value 1.b or 0, @value 1.a or 0)" )
 
 /* --- --------------------------------------------------------------------------------
 	@: Assignment

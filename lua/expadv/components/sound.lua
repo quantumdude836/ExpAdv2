@@ -127,9 +127,9 @@ Component:AddPreparedFunction( "enableLooping", "ac:b", "", [[if !IsValid( @valu
 Component:AddFunctionHelper( "enableLooping", "ac:b", "Enables or disables looping of audio channel, requires noblock flag." )
 
 Component:AddPreparedFunction( "fft", "ac:n", "ar", [[if !IsValid( @value 1) then Context:Throw( @trace, "audio channel", "Recieved invalid audio channel." ) end
-@define array = { __type = "n" }
+@define array = { }
 @value 1:FFT( @array, @value 2)
-$print(@array)]], "@array" )
+@array.__type = "n"]], "@array" )
 Component:AddFunctionHelper( "fft", "ac:n", "Returns the FFT table of the sound channel. This is what used to make visualization for the played sound." )
 
 Component:AddPreparedFunction( "get3DCone", "ac:", "a", [[if !IsValid( @value 1) then Context:Throw( @trace, "audio channel", "Recieved invalid audio channel." ) end]],
@@ -217,7 +217,7 @@ Component:AddPreparedFunction( "setVolume", "ac:n", "", [[if !IsValid( @value 1)
 @value 1:SetVolume(@value 2 * 0.01)]] )
 Component:AddFunctionHelper( "setVolume", "ac:n", "Sets the volume of a sound channel" )
 
-Component:AddPreparedFunction( "canPlayFromURL", "", "b", "(IsValid(Context.entity) and Context.entity.EnableSoundURL)" )
+Component:AddInlineFunction( "canPlayFromURL", "", "b", "(IsValid(Context.entity) and Context.entity.EnableSoundURL)" )
 Component:AddFunctionHelper( "canPlayFromURL", "", "Returns true if this entity can play audio from url." )
 
 

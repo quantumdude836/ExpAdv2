@@ -17,7 +17,7 @@ local Array = Component:AddClass( "array" , "ar" )
 
 Array:DefaultAsLua( function( ) return {__type="void"} end )
 
-Array:StringBuilder( function( A ) return string.format( "array<%s,%i>", EXPADV.TypeName(A._type), #A ) end )
+Array:StringBuilder( function( A ) return string.format( "array<%s,%i>", EXPADV.TypeName(A.__type), #A ) end )
 
 /* ---	--------------------------------------------------------------------------------
 	@: Basic Operators
