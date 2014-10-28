@@ -1,3 +1,278 @@
+local LabelColor = Color(0, 0, 0, 255)
+
+local PANEL = { }
+
+	function PANEL:Init( )
+		self.Expanded = true
+		self.RemomovedChildren = { }
+
+		self.Label = self:Add( "DButton" )
+		self.Contents = vgui.Create( "DListView", self )
+
+		function self.Label.DoClick( )
+			self.Expanded = !self.Expanded
+			self:GetParent( ):PerformLayout( )
+		end
+	end
+
+	function PANEL:SetLabel( Text )
+		self.Label:SetText( Text )
+	end
+
+	function PANEL:Clear( )
+		self.Contents:Clear( )
+	end
+
+	function PANEL:AddColumn( Name, Size )
+		local Colum = self.Contents:AddColumn( Name )
+		if Colum and Size then Colum:SetFixedWidth( Size ) end
+		return Colum
+	end
+
+	function PANEL:AddLine( ... )
+		return self.Contents:AddLine( ... )
+	end
+
+	function PANEL:PerformLayout( )
+		self:SetWide( self:GetParent( ):GetWide( ) )
+
+		self.Label:SetSize( self:GetWide( ), 22 )
+		self.Label:SetPos( 5, 5 )
+
+		if #self.Contents.Lines == 0 then
+			return self:SetSize( 0, 0 )
+		elseif !self.Expanded then
+			self.Contents:SetSize( 0, 0 )
+			self.Contents:SetVisible( true )
+		else
+			self.Contents:PerformLayout( )
+			self.Contents:SetVisible( true )
+			self.Contents:SetPos( 5, 10 + self.Label:GetTall( ) )
+			self.Contents:SetSize( self:GetWide( ), self.Contents:DataLayout( ) + self.Contents:GetHeaderHeight( ) )
+		end
+
+		self:SetTall( self.Label:GetTall( ) + self.Contents:GetTall( ) + 15 )
+	end
+
+	function PANEL:Search( Colum, SearchQuery )
+		local Query
+
+		if SearchQuery and SearchQuery ~= "" then
+			Query = string.lower( SearchQuery )
+		end
+
+		for Key, Line in pairs( self.RemomovedChildren ) do
+			local Value = string.lower( Line:GetColumnText( Colum ) )
+			
+			if Query and !string.find( Value, Query ) then
+				continue
+			end
+
+			local ID = table.insert( self.Contents.Lines, Line )
+
+			Line:SetVisible( true )
+			Line:SetListView( self.Contents ) 
+			Line:SetID( ID )
+
+			local SortID = table.insert( self.Contents.Sorted, Line )
+	
+			if ( SortID % 2 == 1 ) then
+				Line:SetAltLine( true )
+			end
+
+			self.RemomovedChildren[Key] = nil
+		end
+
+		for Key, Line in pairs( self.Contents.Lines ) do
+			local Value = string.lower( Line:GetColumnText( Colum ) )
+			
+			if !Query or string.find( Value, Query ) then
+				continue
+			end
+
+			Line:SetVisible( false )
+			Line:SetListView( nil )
+			
+			local LineID = Line:GetID( )
+			local SelectedID = self.Contents:GetSortedID( LineID )
+			self.Contents.Lines[ LineID ] = nil
+
+			table.remove( self.Contents.Sorted, SelectedID )
+			table.insert( self.RemomovedChildren, Line )
+		end
+		
+		self.Contents:SetDirty( true )
+
+		self:PerformLayout( )
+	end
+
+vgui.Register( "EA_HelpList", PANEL, "DPanel" )
+
+------------------------------------------- ------------------------------------------- -------------------------------------------
+
+local PANEL = { }
+
+function PANEL:MakeInfoSheet( )
+	if IsValid( self.Sheet_Info ) then return end
+	self.Sheet_Info = self:Add( "EA_HelpList" )
+	self.Sheet_Info:SetLabel( "Information" )
+
+	self.Sheet_Info:AddColumn( "", 60 )
+	self.Sheet_Info:AddColumn( "" )
+end
+
+function PANEL:GetInfoSheet( )
+	if !IsValid( self.Sheet_Info ) then self:MakeInfoSheet( ) end
+	return self.Sheet_Info
+end
+
+function PANEL:MakeSettingSheet( )
+	if IsValid( self.Sheet_Setting ) then return end
+	self.Sheet_Setting = self:Add( "EA_HelpList" )
+	self.Sheet_Setting:SetLabel( "Settings" )
+
+	self.Sheet_Setting:AddColumn( "Setting Name" )
+	self.Sheet_Setting:AddColumn( "Value" )
+end
+
+function PANEL:GetSettingSheet( )
+	if !IsValid( self.Sheet_Setting ) then self:MakeSettingSheet( ) end
+	return self.Sheet_Setting
+end
+
+function PANEL:MakeOperatorSheet( )
+	if IsValid( self.Sheet_Operator ) then return end
+	self.Sheet_Operator = self:Add( "EA_HelpList" )
+	self.Sheet_Operator:SetLabel( "Operators" )
+
+	self.Sheet_Operator:AddColumn( "Avalibility", 60 )
+	self.Sheet_Operator:AddColumn( "Operator",  70 )
+	self.Sheet_Operator:AddColumn( "Return",  60 )
+	self.Sheet_Operator:AddColumn( "Example" )
+	self.Sheet_Operator:AddColumn( "Description" )
+end
+
+function PANEL:GetOperatorSheet( )
+	if !IsValid( self.Sheet_Operator ) then self:MakeOperatorSheet( ) end
+	return self.Sheet_Operator
+end
+
+function PANEL:MakeFunctionSheet( )
+	if IsValid( self.Sheet_Function ) then return end
+	self.Sheet_Function = self:Add( "EA_HelpList" )
+	self.Sheet_Function:SetLabel( "Functions" )
+
+	self.Sheet_Function:AddColumn( "Avalibility", 60 )
+	self.Sheet_Function:AddColumn( "Return", 60 )
+	self.Sheet_Function:AddColumn( "Function" )
+	self.Sheet_Function:AddColumn( "Description" )
+end
+
+function PANEL:GetFunctionSheet( )
+	if !IsValid( self.Sheet_Function ) then self:MakeFunctionSheet( ) end
+	return self.Sheet_Function
+end
+
+function PANEL:MakeMethodSheet( )
+	if IsValid( self.Sheet_Method ) then return end
+	self.Sheet_Method = self:Add( "EA_HelpList" )
+	self.Sheet_Method:SetLabel( "Methods" )
+
+	self.Sheet_Method:AddColumn( "Avalibility", 60 )
+	self.Sheet_Method:AddColumn( "Return", 60 )
+	self.Sheet_Method:AddColumn( "Method" )
+	self.Sheet_Method:AddColumn( "Description" )
+end
+
+function PANEL:GetMethodSheet( )
+	if !IsValid( self.Sheet_Method ) then self:MakeMethodSheet( ) end
+	return self.Sheet_Method
+end
+
+function PANEL:MakeEventSheet( )
+	if IsValid( self.Sheet_Event ) then return end
+	self.Sheet_Event = self:Add( "EA_HelpList" )
+	self.Sheet_Event:SetLabel( "Events" )
+
+	self.Sheet_Event:AddColumn( "Avalibility", 60 )
+	self.Sheet_Event:AddColumn( "Return", 60 )
+	self.Sheet_Event:AddColumn( "Event" )
+	self.Sheet_Event:AddColumn( "Description" )
+end
+
+function PANEL:GetEventSheet( )
+	if !IsValid( self.Sheet_Event ) then self:MakeEventSheet( ) end
+	return self.Sheet_Event
+end
+
+function PANEL:Search( SearchQuery )
+	if IsValid( self.Sheet_Function ) then
+		self.Sheet_Function:Search( 3, SearchQuery )
+	end
+
+	if IsValid( self.Sheet_Method ) then
+		self.Sheet_Method:Search( 3, SearchQuery )
+	end
+
+	if IsValid( self.Sheet_Event ) then
+		self.Sheet_Event:Search( 3, SearchQuery )
+	end
+
+end
+
+function PANEL:PerformLayout( )
+	local X, Y = 5, 5
+	self:SetWide( self:GetParent( ):GetWide( ) )
+
+	if IsValid( self.Sheet_Info ) then
+		self.Sheet_Info:PerformLayout( )
+		self.Sheet_Info:SetPos( X, Y )
+		self.Sheet_Info:SetWide( self:GetWide( ) )
+		Y = Y + self.Sheet_Info:GetTall( ) + 5
+	end
+
+	if IsValid( self.Sheet_Setting ) then
+		self.Sheet_Setting:PerformLayout( )
+		self.Sheet_Setting:SetPos( X, Y )
+		self.Sheet_Setting:SetWide( self:GetWide( ) )
+		Y = Y + self.Sheet_Setting:GetTall( ) + 5
+	end
+
+	if IsValid( self.Sheet_Operator ) then
+		self.Sheet_Operator:PerformLayout( )
+		self.Sheet_Operator:SetPos( X, Y )
+		self.Sheet_Operator:SetWide( self:GetWide( ) )
+		Y = Y + self.Sheet_Operator:GetTall( ) + 5
+	end
+
+	if IsValid( self.Sheet_Function ) then
+		self.Sheet_Function:PerformLayout( )
+		self.Sheet_Function:SetPos( X, Y )
+		self.Sheet_Function:SetWide( self:GetWide( ) )
+		Y = Y + self.Sheet_Function:GetTall( ) + 5
+	end
+
+	if IsValid( self.Sheet_Method ) then
+		self.Sheet_Method:PerformLayout( )
+		self.Sheet_Method:SetPos( X, Y )
+		self.Sheet_Method:SetWide( self:GetWide( ) )
+		Y = Y + self.Sheet_Method:GetTall( ) + 5
+	end
+
+	if IsValid( self.Sheet_Event ) then
+		self.Sheet_Event:PerformLayout( )
+		self.Sheet_Event:SetPos( X, Y )
+		self.Sheet_Event:SetWide( self:GetWide( ) )
+		Y = Y + self.Sheet_Event:GetTall( ) + 5
+	end
+
+	self:SetTall( Y + 5 )
+end
+
+vgui.Register( "EA_HelpPage", PANEL, "DPanel" )
+
+------------------------------------------- ------------------------------------------- -------------------------------------------
+
 local function GetAvalibility( Operator )
 	if Operator.LoadOnServer and Operator.LoadOnClient then return "Shared" end
 	if Operator.LoadOnServer then return "Serverside" end
@@ -19,496 +294,382 @@ local function NamePerams( Perams, Count, Varg )
 	return table.concat( Names, ", " )
 end
 
+------------------------------------------- ------------------------------------------- -------------------------------------------
 
 function EXPADV.Editor.OpenHelper( )
 
+	-- INSTANCE:
 		if IsValid( EXPADV.Editor.Manual ) then
 			EXPADV.Editor.Manual:SetVisible( true )
+			EXPADV.Editor.Manual:Center( )
+			EXPADV.Editor.Manual:MakePopup( )
 			return
 		end
 
-		--------------------------------------------------------------------------
+	-- FRAME:
 
-		local Frame = vgui.Create( "DFrame" )
-		Frame:SetTitle( "Expression Advanced 2 - User Manual" )
+		local Frame = vgui.Create( "EA_Frame" )
+		Frame:SetText( "Expression Advanced 2 - User Manual" )
 		Frame:SetSize( ScrW( ) - 50, ScrH( ) - 50 )
+		Frame:DockPadding( 5, 24 + 5, 5, 5 )
+		Frame:SetSizable( true )
 		Frame:Center( )
 		Frame:MakePopup( )
 
 		EXPADV.Editor.Manual = Frame
 
-		--------------------------------------------------------------------------
+	-- CLOSE:
 
 		function Frame:Close( )
 			self:SetVisible( false )
 		end
-		
-		--------------------------------------------------------------------------
+
+	-- TAB'S:
 
 		local TabSheet = Frame:Add( "DPropertySheet" )
 		TabSheet:Dock( FILL )
 
-		--------------------------------------------------------------------------
+		local WikiTabSheet = vgui.Create( "DHTML" )
+		WikiTabSheet:OpenURL( "https://github.com/Rusketh/ExpAdv2/wiki/Syntax" )
+		WikiTabSheet:DockMargin( 5, 5, 5 ,5 )
+		WikiTabSheet:Dock( FILL )
 
-		local WikiPanel = vgui.Create( "DHTML" )
-		WikiPanel:OpenURL( "https://github.com/Rusketh/ExpAdv2/wiki/Syntax" )
-		WikiPanel:DockMargin( 5, 5, 5 ,5 )
-		WikiPanel:Dock( FILL )
+		TabSheet:AddSheet( "Syntax", WikiTabSheet, nil, true, true, "Syntax documentation." )
 
-		TabSheet:AddSheet( "WIKI: Syntax", WikiPanel, nil, true, true, "About our syntax" )
+		local ComponentTabSheet = vgui.Create( "DPanel" )
+		ComponentTabSheet:DockMargin( 5, 5, 5 ,5 )
+		ComponentTabSheet:Dock( FILL )
 
-		--------------------------------------------------------------------------
+		local NodeList = ComponentTabSheet:Add( "DTree" )
+		NodeList:SetWide( 200 )
+		NodeList:DockMargin( 5, 5, 5 ,5 )
+		NodeList:Dock( LEFT )
 
-		local ClassTab = vgui.Create( "DPanel" )
-		ClassTab:DockMargin( 5, 5, 5 ,5 )
-		ClassTab:Dock( FILL )
+		local ComponentCanvas = ComponentTabSheet:Add( "DScrollPanel" )
+		ComponentCanvas:DockMargin( 5, 5, 5 ,5 )
+		ComponentCanvas:Dock( FILL )
 
-		ClassTab.NodeList = ClassTab:Add( "DTree" )
-		ClassTab.NodeList:SetWide( 200 )
-		ClassTab.NodeList:DockMargin( 5, 5, 5 ,5 )
-		ClassTab.NodeList:Dock( LEFT )
+		TabSheet:AddSheet( "Components", ComponentTabSheet, nil, true, true, "Components & Classes" )
 
-		ClassTab.ClassCanvas = ClassTab:Add( "DPanel" )
-		ClassTab.ClassCanvas:DockMargin( 5, 5, 5 ,5 )
-		ClassTab.ClassCanvas:Dock( FILL )
+		local BrowserTabSheet = vgui.Create( "DPanel" )
+		BrowserTabSheet:DockMargin( 5, 5, 5 ,5 )
+		BrowserTabSheet:Dock( FILL )
 
-		TabSheet:AddSheet( "Components", ClassTab, nil, true, true, "Classes" )
+		local BrowserCanvas = BrowserTabSheet:Add( "DScrollPanel" )
+		BrowserCanvas:DockMargin( 5, 5, 5 ,5 )
+		BrowserCanvas:Dock( FILL )
 
-		--------------------------------------------------------------------------
+		local BrowserSheet = BrowserCanvas:Add( "EA_HelpPage" )
+		BrowserSheet:Dock( FILL )
 
-		ClassTab.ClassSheets = { }
-		ClassTab.ComponentNodes = { }
-		ClassTab.ComponentSheets = { }
+		TabSheet:AddSheet( "Browser", BrowserTabSheet, nil, true, true, "Browse" )
 
-		local RootNode = ClassTab.NodeList:AddNode( "Components" )
-		local CoreNode = RootNode:AddNode( "Core" )
-		
-		RootNode:SetExpanded( true )
+	-- COMPONENTS & CLASSES:
 
-		--------------------------------------------------------------------------
+		local ClassPanels = { }
+		local ComponentPanels = { }
 
-		local CoreComponentSheet = ClassTab.ClassCanvas:Add( "DScrollPanel" )
-		CoreComponentSheet:DockPadding( 5, 5, 5 ,5 )
-		CoreComponentSheet:SetVisible( true )
-		CoreComponentSheet:Dock( FILL )
-
-		CoreComponentSheet.Info = CoreComponentSheet:Add( "DListView" )
-		CoreComponentSheet.Info:AddColumn( "" ):SetFixedWidth( 60 )
-		CoreComponentSheet.Info:AddColumn( "" )
+		function Frame:GetComponentPanel( Name, bNoCreate )
+			if !Name then
+				Name = "core"
+			elseif type( Name ) == "table" then
+				Name = Name.Name or "core"
+			end
 			
-		CoreComponentSheet.Info:AddLine( "Component", "Core" )
-		CoreComponentSheet.Info:AddLine( "Author", "Rusketh" ) 
-		CoreComponentSheet.Info:AddLine( "Description", "Primary structure of Expression Advanced 2." )
-		CoreComponentSheet.Info:DataLayout( )
-			
-			function CoreNode:DoClick( )
-				if ClassTab.ActiveCanvas then
-					ClassTab.ActiveCanvas:SetVisible( false )
-				end
-				
-				ClassTab.ActiveCanvas = CoreComponentSheet
-				CoreComponentSheet:SetVisible( true )
+			if ComponentPanels[Name] then
+				return ComponentPanels[Name]
 			end
 
-			CoreNode.DoRightClick = CoreNode.DoClick
+			if !bNoCreate then
+				local Pnl = vgui.Create( "EA_HelpPage" )
+				Pnl:SetVisible( false )
+				ComponentPanels[Name] = Pnl
+				return Pnl
+			end
+		end
 
-		--------------------------------------------------------------------------
+		function Frame:GetClassPanel( Name, bNoCreate )
+			if !Name then return end
+			
+			if ClassPanels[Name] then
+				return ClassPanels[Name]
+			end
+
+			if !bNoCreate then
+				local Pnl = vgui.Create( "EA_HelpPage" )
+				Pnl:SetVisible( false )
+				ClassPanels[Name] = Pnl
+				return Pnl
+			end
+		end
+
+		local SearchQuery = ""
+
+		function Frame:SetActiveComponentPage( Name )
+			if IsValid(self.ActivePage) then
+				self.ActivePage:SetParent( )
+				self.ActivePage:Dock( NODOCK )
+				self.ActivePage:SetVisible( false )
+			end
+
+			local Page = self:GetComponentPanel( Name, true )
+			if !IsValid( Page ) then return end
+
+			Page:SetParent( ComponentCanvas:GetCanvas( ) )
+
+			Page:Dock( FILL )
+			Page:SetVisible( true )
+			Page:Search( SearchQuery )
+
+			ComponentCanvas:PerformLayout( )
+
+			self.ActivePage = Page
+		end
+
+		function Frame:SetActiveClassPage( Name )
+			if IsValid(self.ActivePage) then
+				self.ActivePage:SetParent( )
+				self.ActivePage:Dock( NODOCK )
+				self.ActivePage:SetVisible( false )
+			end
+
+			local Page = self:GetClassPanel( Name, true )
+			if !IsValid( Page ) then return end
+
+			Page:SetParent( ComponentCanvas:GetCanvas( ) )
+
+			Page:Dock( FILL )
+			Page:SetVisible( true )
+
+			ComponentCanvas:PerformLayout( )
+
+			self.ActivePage = Page
+		end
+
+	-- NODES:
+
+		local ComponentNodes = { }
+
+		local RootComponentNode = NodeList:AddNode( "Components" )
+		RootComponentNode:SetExpanded( true )
+
+		function Frame:GetComponentNode( Name, bNoCreate )
+			if !Name then
+				Name = "core"
+			elseif type( Name ) == "table" then
+				Name = Name.Name or "core"
+			end
+			
+			if ComponentNodes[Name] then
+				return ComponentNodes[Name]
+			end
+
+			if !bNoCreate then
+				local Node = RootComponentNode:AddNode( Name )
+				Node:SetIcon( "fugue/document-node.png" )
+				ComponentNodes[Name] = Node
+				return Node
+			end
+		end
+
+	-- COMPONENT PAGES:
+
+		local CoreComponentPage = Frame:GetComponentPanel( "core" )
+		
+		CoreComponentPage:GetInfoSheet( ):AddLine( "Component", "Core" )
+		CoreComponentPage:GetInfoSheet( ):AddLine( "Author", "Rusketh" ) 
+		CoreComponentPage:GetInfoSheet( ):AddLine( "Description", "Primary structure of Expression Advanced 2." )
+		
+		local CoreComponentNode = Frame:GetComponentNode( "core" )
+
+		function CoreComponentNode:DoClick( )
+			Frame:SetActiveComponentPage( "core" )
+		end
 
 		for _, Component in pairs( EXPADV.Components ) do
-			ComponentNode = RootNode:AddNode( Component.Name )
-			ClassTab.ComponentNodes[Component.Name] = ComponentNode
-			
-			local Sheet = ClassTab.ClassCanvas:Add( "DScrollPanel" )
-			Sheet:DockPadding( 5, 5, 5 ,5 )
-			Sheet:SetVisible( false )
-			Sheet:Dock( FILL )
-			
-			---------------------------------------------------------------------
-			
-			Sheet.Info = Sheet:Add( "DListView" )
-			Sheet.Info:AddColumn( "" ):SetFixedWidth( 60 )
-			Sheet.Info:AddColumn( "" )
-			
-			Sheet.Info:AddLine( "Component", Component.Name )
-			Sheet.Info:AddLine( "Author", Component.Author or "Unkown" ) 
-			Sheet.Info:AddLine( "Description", Component.Description or "N/A" )
-			Sheet.Info:DataLayout( )
-			
-			---------------------------------------------------------------------
-			
-			ClassTab.ComponentSheets[Component.Name] = Sheet
-			
-			function ComponentNode:DoClick( )
-				if ClassTab.ActiveCanvas then
-					ClassTab.ActiveCanvas:SetVisible( false )
+			local Page = Frame:GetComponentPanel( Component.Name )
+
+			Page:GetInfoSheet( ):AddLine( "Component", Component.Name )
+			Page:GetInfoSheet( ):AddLine( "Author", Component.Author or "Unkown" ) 
+			Page:GetInfoSheet( ):AddLine( "Status", Component.Enabled and "Enabled" or "Disabled" )
+			Page:GetInfoSheet( ):AddLine( "Description", Component.Description or "N/A" )
+
+			if EXPADV.Config.components[Component.Name] then
+				for Name, Value in pairs( EXPADV.Config.components[Component.Name] ) do
+					if isbool( Value ) or isnumber( Value ) or isstring( Value ) then
+						Page:GetSettingSheet( ):AddLine( Name, tostring( Value ) )
+					end
 				end
-				
-				ClassTab.ActiveCanvas = Sheet
-				Sheet:SetVisible( true )
 			end
-			
-			ComponentNode.DoRightClick = ComponentNode.DoClick
+
+			local Node = Frame:GetComponentNode( Component.Name )
+
+			function Node:DoClick( )
+				Frame:SetActiveComponentPage( Component.Name )
+			end
 		end
 
-		--------------------------------------------------------------------------
+	-- OPERATORS:
 
+		local CLASS_OPERATORS = { }
 
-		for Name, Class in pairs( EXPADV.Classes ) do
-			local Sheet = ClassTab.ClassCanvas:Add( "DScrollPanel" )
-			Sheet:DockPadding( 5, 5, 5 ,5 )
-			Sheet:SetVisible( false )
-			Sheet:Dock( FILL )
+		for Sig, Operator in pairs( EXPADV.Operators ) do
 			
-			ClassTab.ClassSheets[Class.Short] = Sheet
-			
-			local ComponentNode = CoreNode
-			
-			if Class.Component then
-				ComponentNode = ClassTab.ComponentNodes[Class.Component.Name]
-				if !ComponentNode then
-					ComponentNode = RootNode:AddNode( Class.Component.Name )
-					ClassTab.ComponentNodes[Class.Component] = ComponentNode
-				end
-			end
-			
-			if !ComponentNode.ClassNode then
-				ComponentNode.ClassNode = ComponentNode:AddNode( "Classes" )
-			end
-			
-			local ThisNode = ComponentNode.ClassNode:AddNode( Name )
-			
-			function ThisNode:DoClick( )
-				if ClassTab.ActiveCanvas then
-					ClassTab.ActiveCanvas:SetVisible( false )
-				end
-				
-				ClassTab.ActiveCanvas = Sheet
-				Sheet:SetVisible( true )
+			if Operator.InputCount == 0 or !Operator.Example or Operator.Example == "" then
+				continue
 			end
 
-			ThisNode.DoRightClick = ThisNode.DoClick
-
-			---------------------------------------------------------------------
-			
-			Sheet.Info = Sheet:Add( "DListView" )
-			Sheet.Info:AddColumn( "" ):SetFixedWidth( 60 )
-			Sheet.Info:AddColumn( "" )
-			
-			Sheet.Info:AddLine( "Class", Name )
-			Sheet.Info:AddLine( "Extends", Class.DerivedClass and Class.DerivedClass.Name or "generic" ) 
-			Sheet.Info:AddLine( "Component", Class.Component and Class.Component.Name or "Core" )
-			Sheet.Info:AddLine( "Avalibility", GetAvalibility( Class ) )
-			Sheet.Info:DataLayout( )
-			
-			---------------------------------------------------------------------
-			
-			if EXPADV.Class_Operators[Class.Short] then
-				if !Sheet.Operators then
-					Sheet.Operators = Sheet:Add( "DListView" )
-					Sheet.Operators:AddColumn( "Avalibility" ):SetFixedWidth( 60 )
-					Sheet.Operators:AddColumn( "Operator" ):SetFixedWidth( 70 )
-					Sheet.Operators:AddColumn( "Return" ):SetFixedWidth( 60 )
-					Sheet.Operators:AddColumn( "Example" )
-					Sheet.Operators:AddColumn( "Description" )
-				end
-				
-				for _, Operator in pairs( EXPADV.Class_Operators[Class.Short] ) do
-					Sheet.Operators:AddLine( GetAvalibility(Operator), Operator.Type or "", EXPADV.TypeName( Operator.Return or "" ) or "Void", Operator.Example, Operator.Description )
-				end
+			if Operator.AttachedClass then
+				CLASS_OPERATORS[Sig] = Operator
+				continue
 			end
 			
+			local Page = Frame:GetComponentPanel( Operator.Component )
+
+			Page:GetOperatorSheet( ):AddLine( GetAvalibility(Operator), Operator.Type or "", EXPADV.TypeName( Operator.Return or "" ) or "void", Operator.Example, Operator.Description )
+			BrowserSheet:GetOperatorSheet( ):AddLine( GetAvalibility(Operator), Operator.Type or "", EXPADV.TypeName( Operator.Return or "" ) or "void", Operator.Example, Operator.Description )
 		end
 
-		--------------------------------------------------------------------------
+		for Sig, Operator in pairs( CLASS_OPERATORS ) do
+			local Page = Frame:GetClassPanel( Operator.AttachedClass )
 
-		for _, Operator in pairs( EXPADV.Operators ) do
-			if Operator.InputCount == 0 or !Operator.Example or Operator.Example == "" then continue end
-			
-			local Sheet = ClassTab.ClassSheets[Operator.Input[1]]
-			
-			if !Sheet.Operators then
-				Sheet.Operators = Sheet:Add( "DListView" )
-				Sheet.Operators:AddColumn( "Avalibility" ):SetFixedWidth( 60 )
-				Sheet.Operators:AddColumn( "Operator" ):SetFixedWidth( 70 )
-				Sheet.Operators:AddColumn( "Return" ):SetFixedWidth( 60 )
-				Sheet.Operators:AddColumn( "Example" )
-				Sheet.Operators:AddColumn( "Description" )
-			end
-			
-			Sheet.Operators:AddLine( GetAvalibility(Operator), Operator.Type or "", EXPADV.TypeName( Operator.Return or "" ) or "Void", Operator.Example, Operator.Description )
+			Page:GetOperatorSheet( ):AddLine( GetAvalibility(Operator), Operator.Type or "", EXPADV.TypeName( Operator.Return or "" ) or "void", Operator.Example, Operator.Description )
+			BrowserSheet:GetOperatorSheet( ):AddLine( GetAvalibility(Operator), Operator.Type or "", EXPADV.TypeName( Operator.Return or "" ) or "void", Operator.Example, Operator.Description )
 		end
 
-		--------------------------------------------------------------------------
+	-- FUNCTIONS:
 
-		for _, Operator in pairs( EXPADV.Functions ) do
+		local METHOD_QUEUE = { }
+
+		for Sig, Operator in pairs( EXPADV.Functions ) do
+			
 			if Operator.Method then
-				
-				local Sheet = CoreComponentSheet
-				
-				if Operator.Component then
-					Sheet = ClassTab.ClassSheets[ Operator.Input[1] ]
-				end
-				
-				if !Sheet.Methods then
-					Sheet.Methods = Sheet:Add( "DListView" )
-					Sheet.Methods:AddColumn( "Avalibility" ):SetFixedWidth( 60 )
-					Sheet.Methods:AddColumn( "Return" ):SetFixedWidth( 60 )
-					Sheet.Methods:AddColumn( "Method" )
-					Sheet.Methods:AddColumn( "Description" )
-				end
-				
-				local Inputs = table.Copy( Operator.Input )
-				local Signature = string.format( "%s.%s(%s)", EXPADV.TypeName( table.remove( Inputs, 1 ) ), Operator.Name, NamePerams( Inputs, Operator.InputCount, Operator.UsesVarg ) )
-				
-				Sheet.Methods:AddLine( GetAvalibility(Operator), EXPADV.TypeName( Operator.Return or "" ) or "Void", Signature, Operator.Description )
-				
-			else
-				
-				local Sheet = CoreComponentSheet
-				
-				if Operator.Component then
-					Sheet = ClassTab.ComponentSheets[Operator.Component.Name]
-				end
-				
-				if !Sheet.Functions then
-					Sheet.Functions = Sheet:Add( "DListView" )
-					Sheet.Functions:AddColumn( "Avalibility" ):SetFixedWidth( 60 )
-					Sheet.Functions:AddColumn( "Return" ):SetFixedWidth( 60 )
-					Sheet.Functions:AddColumn( "Function" )
-					Sheet.Functions:AddColumn( "Description" )
-				end
-				
-				local Signature = string.format( "%s(%s)", Operator.Name, NamePerams( Operator.Input, Operator.InputCount, Operator.UsesVarg ) )
-				
-				Sheet.Functions:AddLine( GetAvalibility(Operator), EXPADV.TypeName( Operator.Return or "" ) or "Void", Signature, Operator.Description )
+				METHOD_QUEUE[Sig] = Operator
+				continue
 			end
+
+			local Page = Frame:GetComponentPanel( Operator.Component )
+
+			local Signature = string.format( "%s(%s)", Operator.Name, NamePerams( Operator.Input, Operator.InputCount, Operator.UsesVarg ) )
+				
+			Page:GetFunctionSheet( ):AddLine( GetAvalibility(Operator), EXPADV.TypeName( Operator.Return or "" ) or "Void", Signature, Operator.Description )
+			BrowserSheet:GetFunctionSheet( ):AddLine( GetAvalibility(Operator), EXPADV.TypeName( Operator.Return or "" ) or "Void", Signature, Operator.Description )
 		end
 
-		--------------------------------------------------------------------------
+	-- METHODS:
+
+		for Sig, Operator in pairs( METHOD_QUEUE ) do
+			local Page = Frame:GetClassPanel( Operator.Input[1] )
+
+			local Inputs = table.Copy( Operator.Input )
+			
+			local Signature = string.format( "%s.%s(%s)", EXPADV.TypeName( table.remove( Inputs, 1 ) ), Operator.Name, NamePerams( Inputs, Operator.InputCount, Operator.UsesVarg ) )
+				
+			Page:GetMethodSheet( ):AddLine( GetAvalibility(Operator), EXPADV.TypeName( Operator.Return or "" ) or "Void", Signature, Operator.Description )	
+			BrowserSheet:GetMethodSheet( ):AddLine( GetAvalibility(Operator), EXPADV.TypeName( Operator.Return or "" ) or "Void", Signature, Operator.Description )	
+		end
+
+	-- EVENTS:
 
 		for _, Event in pairs( EXPADV.Events ) do
-			local Sheet = CoreComponentSheet
-				
-			if Event.Component then
-				Sheet = ClassTab.ComponentSheets[Event.Component.Name]
-			end
-				
-			if !Sheet then continue end
-				
-			if !Sheet.Events then
-				Sheet.Events = Sheet:Add( "DListView" )
-				Sheet.Events:AddColumn( "Avalibility" ):SetFixedWidth( 60 )
-				Sheet.Events:AddColumn( "Return" ):SetFixedWidth( 60 )
-				Sheet.Events:AddColumn( "Event" )
-				Sheet.Events:AddColumn( "Description" )
-			end
-				
+			local Page = Frame:GetComponentPanel( Event.Component )
+
 			local Signature = string.format( "%s(%s)", Event.Name, NamePerams( Event.Input, Event.InputCount, false ) )
-				
-			Sheet.Events:AddLine( GetAvalibility(Event), EXPADV.TypeName( Event.Return or "" ) or "Void", Signature, Event.Description or "N/A" )
-			
+						
+			Page:GetEventSheet( ):AddLine( GetAvalibility(Event), EXPADV.TypeName( Event.Return or "" ) or "Void", Signature, Event.Description or "N/A" )		
+			BrowserSheet:GetEventSheet( ):AddLine( GetAvalibility(Event), EXPADV.TypeName( Event.Return or "" ) or "Void", Signature, Event.Description or "N/A" )		
 		end
 
-		--------------------------------------------------------------------------
+	-- CLASSES:
 
-		local LabelColor = Color( 0, 0, 0 )
-		
-		local function LayOut( Sheet )
-			local W, H = Sheet:GetParent( ):GetSize( )
-			local X, Y = 5, 5
+		for Short, Panel in pairs( ClassPanels ) do
 
-			if Sheet.Info then
-				if !Sheet.Info_Label then
-					Sheet.Info_Label = Sheet:Add( "DLabel" )
-					Sheet.Info_Label:SetText( "Information:" )
-					Sheet.Info_Label:SetTextColor( LabelColor )
-				end
-				
-				Sheet.Info_Label:SetPos( X, Y )
-				Sheet.Info_Label:SizeToContents( )
-				Y = Y + Sheet.Info_Label:GetTall( ) + 5
+			local Class = EXPADV.GetClass(Short)
+			local Page = Frame:GetClassPanel( Short )
 
-				Sheet.Info:SetPos( X, Y )
-				Sheet.Info:SetSize( W - 30, Sheet.Info:DataLayout( ) + Sheet.Info:GetHeaderHeight() )
-				Y = Y + Sheet.Info:GetTall( ) + 5
+			if !Class or !Page then
+				continue
 			end
-			
-			if Sheet.Operators then
-				if !Sheet.Operators_Label then
-					Sheet.Operators_Label = Sheet:Add( "DLabel" )
-					Sheet.Operators_Label:SetText( "Operators:" )
-					Sheet.Operators_Label:SetTextColor( LabelColor )
-				end
-				
-				Sheet.Operators_Label:SetPos( X, Y )
-				Sheet.Operators_Label:SizeToContents( )
-				Y = Y + Sheet.Operators_Label:GetTall( ) + 5
 
-				Sheet.Operators:SetPos( X, Y )
-				Sheet.Operators:SetSize( W - 30, Sheet.Operators:DataLayout( ) + Sheet.Operators:GetHeaderHeight() )
-				Y = Y + Sheet.Operators:GetTall( ) + 5
-			end
-			
-			
-			if Sheet.Methods then
-				if !Sheet.Methods_Label then
-					Sheet.Methods_Label = Sheet:Add( "DLabel" )
-					Sheet.Methods_Label:SetText( "Methods:" )
-					Sheet.Methods_Label:SetTextColor( LabelColor )
-				end
-				
-				Sheet.Methods_Label:SetPos( X, Y )
-				Sheet.Methods_Label:SizeToContents( )
-				Y = Y + Sheet.Methods_Label:GetTall( ) + 5
+			Page:GetInfoSheet( ):AddLine( "Class", Class.Name )
+			Page:GetInfoSheet( ):AddLine( "Extends", Class.DerivedClass and Class.DerivedClass.Name or "generic" ) 
+			Page:GetInfoSheet( ):AddLine( "Component", Class.Component and Class.Component.Name or "Core" )
+			Page:GetInfoSheet( ):AddLine( "Avalibility", GetAvalibility( Class ) )
 
-				Sheet.Methods:SetPos( X, Y )
-				Sheet.Methods:SetSize( W - 30, Sheet.Methods:DataLayout( ) + Sheet.Methods:GetHeaderHeight() )
-				Y = Y + Sheet.Methods:GetTall( ) + 5
-			end
-			
-			
-			if Sheet.Functions then
-				if !Sheet.Functions_Label then
-					Sheet.Functions_Label = Sheet:Add( "DLabel" )
-					Sheet.Functions_Label:SetText( "Functions:" )
-					Sheet.Functions_Label:SetTextColor( LabelColor )
-				end
-				
-				Sheet.Functions_Label:SetPos( X, Y )
-				Sheet.Functions_Label:SizeToContents( )
-				Y = Y + Sheet.Functions_Label:GetTall( ) + 5
+			local ComponentNode = Frame:GetComponentNode( Class.Component, true )
 
-				Sheet.Functions:SetPos( X, Y )
-				Sheet.Functions:SetSize( W - 30, Sheet.Functions:DataLayout( ) + Sheet.Functions:GetHeaderHeight() )
-				Y = Y + Sheet.Functions:GetTall( ) + 5
+			if !ComponentNode.ClassNode then
+				ComponentNode.ClassNode = ComponentNode:AddNode( "Classes" )
+				ComponentNode.ClassNode:SetIcon( "fugue/rocket-fly.png" )
 			end
-			
-			if Sheet.Events then
-				if !Sheet.Events_Label then
-					Sheet.Events_Label = Sheet:Add( "DLabel" )
-					Sheet.Events_Label:SetText( "Events:" )
-					Sheet.Events_Label:SetTextColor( LabelColor )
-				end
-				
-				Sheet.Events_Label:SetPos( X, Y )
-				Sheet.Events_Label:SizeToContents( )
-				Y = Y + Sheet.Events_Label:GetTall( ) + 5
 
-				Sheet.Events:SetPos( X, Y )
-				Sheet.Events:SetSize( W - 30, Sheet.Events:DataLayout( ) + Sheet.Events:GetHeaderHeight() )
-				Y = Y + Sheet.Events:GetTall( ) + 5
+			local Node = ComponentNode.ClassNode:AddNode( Class.Name )
+
+			function Node:DoClick( )
+				Frame:SetActiveClassPage( Short )
 			end
-			
-			Sheet:SetTall( Y + 5 )
 		end
 
-		function ClassTab.ClassCanvas:PerformLayout( )
-			LayOut( CoreComponentSheet )
-			for I, Sheet in pairs( ClassTab.ClassSheets ) do LayOut( Sheet ) end
-			for I, Sheet in pairs( ClassTab.ComponentSheets ) do LayOut( Sheet ) end
-		end
+	-- SEARCH (Yes Divran, I liked your search box)
 
-		ClassTab.ClassCanvas:InvalidateLayout( )
+		local SearchBox = vgui.Create( "DTextEntry", Frame )
+		SearchBox:SetWide( 150 )
+		SearchBox:SetValue( "Search..." )
+		SearchBox:DockMargin( 2, 2, 2, 0 )
 
-		--------------------------------------------------------------------------
-
-		local FunctionPanel = vgui.Create( "DPanel" )
-		FunctionPanel:DockMargin( 5, 5, 5 ,5 )
-		FunctionPanel:Dock( FILL )
-
-		TabSheet:AddSheet( "Browser", FunctionPanel, nil, true, true, "Browse and search functions." )
-
-		local Sheet = FunctionPanel:Add( "DScrollPanel" )
-
-		Sheet.Methods = Sheet:Add( "DListView" )
-		Sheet.Methods:AddColumn( "Avalibility" ):SetFixedWidth( 60 )
-		Sheet.Methods:AddColumn( "Return" ):SetFixedWidth( 60 )
-		Sheet.Methods:AddColumn( "Method" )
-		Sheet.Methods:AddColumn( "Description" )
-
-		Sheet.Functions = Sheet:Add( "DListView" )
-		Sheet.Functions:AddColumn( "Avalibility" ):SetFixedWidth( 60 )
-		Sheet.Functions:AddColumn( "Return" ):SetFixedWidth( 60 )
-		Sheet.Functions:AddColumn( "Function" )
-		Sheet.Functions:AddColumn( "Description" )
-
-		Sheet.Events = Sheet:Add( "DListView" )
-		Sheet.Events:AddColumn( "Avalibility" ):SetFixedWidth( 60 )
-		Sheet.Events:AddColumn( "Return" ):SetFixedWidth( 60 )
-		Sheet.Events:AddColumn( "Event" )
-		Sheet.Events:AddColumn( "Description" )
-
-		local function Search( Query )
-			
-			Sheet.Methods:Clear( )
-
-			Sheet.Functions:Clear( )
-
-			Sheet.Events:Clear( )
-
-			for _, Operator in pairs( EXPADV.Functions ) do
-				
-				if Query and Query ~= "" and !string.find( Operator.Name, Query ) then continue end
-				
-				if Operator.Method then
-					local Inputs = table.Copy( Operator.Input )
-					local Signature = string.format( "%s.%s(%s)", EXPADV.TypeName( table.remove( Inputs, 1 ) ), Operator.Name, NamePerams( Inputs, Operator.InputCount, Operator.UsesVarg ) )
-					
-					Sheet.Methods:AddLine( GetAvalibility(Operator), EXPADV.TypeName( Operator.Return or "" ) or "Void", Signature, Operator.Description )
-				else
-					local Signature = string.format( "%s(%s)", Operator.Name, NamePerams( Operator.Input, Operator.InputCount, Operator.UsesVarg ) )
-					
-					Sheet.Functions:AddLine( GetAvalibility(Operator), EXPADV.TypeName( Operator.Return or "" ) or "Void", Signature, Operator.Description )
-				end
+		function SearchBox:OnGetFocus( )
+			if self:GetValue() == "Search..." then
+				self:SetValue( "" )
 			end
 
-			for _, Event in pairs( EXPADV.Events ) do
-				if Query and Query ~= "" and !string.find( Event.Name, Query ) then continue end
+			hook.Run( "OnTextEntryGetFocus", self )
+		end
 
-				local Signature = string.format( "%s(%s)", Event.Name, NamePerams( Event.Input, Event.InputCount, false ) )
-					
-				Sheet.Events:AddLine( GetAvalibility(Event), EXPADV.TypeName( Event.Return or "" ) or "Void", Signature, Event.Description or "N/A" )
-				
+		function SearchBox:OnLoseFocus()
+			if self:GetValue() == "" then
+				timer.Simple( 0, function( )
+					self:SetValue( "Search..." )
+				end )
 			end
 
-			FunctionPanel:InvalidateLayout( )
+			hook.Call( "OnTextEntryLoseFocus", nil, self )
 		end
 
-		local SearchPanel = FunctionPanel:Add( "DPanel" )
-		local QueryBox = SearchPanel:Add( "DTextEntry" )
-		QueryBox:SetEnterAllowed( true )
+		local ClearSearch = vgui.Create( "DImageButton", SearchBox )
+		ClearSearch:SetMaterial( "fugue/cross-button.png" )
+		ClearSearch:DockMargin( 2,2,4,2 )
+		ClearSearch:Dock( RIGHT )
+		ClearSearch:SetSize( 14, 10 )
+		ClearSearch:SetVisible( false )
 
-		local SearchButton = SearchPanel:Add( "EA_ImageButton" ) 
-		SearchButton:SetIconFading( false )
-		SearchButton:SetIconCentered( false )
-		SearchButton:SetTextCentered( false )
-		SearchButton:DrawButton( true )
-		SearchButton:SetMaterial( Material( "fugue/magnifier-left.png" ) )
-
-		function SearchButton:DoClick( )
-			Search( QueryBox:GetValue( ) )
+		function ClearSearch:DoClick( )
+			SearchBox:SetValue( "" )
+			SearchBox:OnTextChanged( )
+			SearchBox:SetValue( "Search..." )
 		end
 
-		function SearchButton:OnEnter( )
-			Search( QueryBox:GetValue( ) )
+		function SearchBox:OnTextChanged( )
+			local Query = self:GetValue( )
+
+			SearchQuery = Query
+
+			BrowserSheet:Search( Query )
+
+			if IsValid( Frame.ActivePage ) then
+				Frame.ActivePage:Search( Query )
+			end
+
+			ClearSearch:SetVisible( Query ~= "" )
 		end
 
-		Search( )
+	-- LAYOUT:
 
-		function FunctionPanel:PerformLayout( )
-			LayOut( Sheet )
-
-			Sheet:SetPos( 5, 5 )
-			Sheet:SetSize( self:GetWide( ) - 20, self:GetTall( ) - 50 )
-
-			SearchPanel:SetPos( 5, self:GetTall( ) - 40 )
-			SearchPanel:SetSize( self:GetWide( ) - 20, 30 )
-
-			QueryBox:SetSize( SearchPanel:GetWide( ) - 40, 20 )
-			QueryBox:SetPos( 5, 5 )
-
-			SearchButton:SetSize( 20, 20 )
-			SearchButton:SetPos( SearchPanel:GetWide( ) - 30, 5 )
+		function Frame:PerformLayout( )
+			SearchBox:SetPos( Frame:GetWide( ) - SearchBox:GetWide( ) - 5, 28 )
 		end
+
+	-- INITALIZE
+
+		Frame:SetActiveComponentPage( "core" )
 end
 

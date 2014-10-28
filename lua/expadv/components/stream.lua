@@ -344,7 +344,7 @@ do --- Net component: used to sync from server to client :D
 			for _, Msg in pairs( NetQueue ) do
 				local E, N, S, P = Msg[1], Msg[2], Msg[3], Msg[4]
 
-				if IsValid( E ) and E:IsRunning( ) then
+				if IsValid( E ) and E.ExpAdv and E:IsRunning( ) then
 				
 					net.Start( "expadv.netstream" )
 						net.WriteEntity( E )
@@ -370,7 +370,7 @@ do --- Net component: used to sync from server to client :D
 			local N = net.ReadString( )
 			local T, V = net.ReadTable( ), net.ReadTable( )
 
-			if IsValid( E ) and E:IsRunning( ) then
+			if IsValid( E ) and E.ExpAdv and E:IsRunning( ) then
 				
 				local H = E.Context.Data["net_" .. N]
 

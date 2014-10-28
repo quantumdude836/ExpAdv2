@@ -134,7 +134,7 @@ Component:AddFunctionHelper( "getColor", "e:", "Gets the color of the given enti
 Component:AddInlineFunction( "getColour", "e:", "c", "(@value 1:IsValid() and @value 1:GetColor() or Color(255,255,255,255))") -- Because why not :) ?
 Component:AddFunctionHelper( "getColour", "e:", "Gets the colour of the given entity.")
 
-Component:AddInlineFunction( "owner", "e:", "e", "(@value 1:IsValid() and EXPADV.GetOwner(@value 1) or Context.player)")
+Component:AddInlineFunction( "owner", "e:", "ply", "(@value 1:IsValid() and EXPADV.GetOwner(@value 1) or $Entity(-1))")
 Component:AddFunctionHelper( "owner", "e:", "Gets the owner of the given entity.")
 
 Component:AddInlineFunction( "boxCenter", "e:", "v", "((@value 1:IsValid() && @value 1:GetPhysicsObject():IsValid()) and @value 1:OBBCenter() or Vector(0,0,0))")
@@ -161,7 +161,7 @@ Component:AddFunctionHelper( "setPos", "e:v", "Sets the position of the given en
 Component:AddPreparedFunction( "setAng", "e:a", "", "if(IsValid(@value 1) && EXPADV.PPCheck(Context.player,@value 1)) then @value 1:SetAngles(@value 2) end")
 Component:AddFunctionHelper( "setAng", "e:a", "Sets the angle of the given entity.")
 
-Component:AddPreparedFunction( "setModel", "e:s", "", "if(IsValid(@value 1) && EXPADV.PPCheck(Context.player,@value 1)) then @value 1:SetModel(Model(@value 2)) end")
+Component:AddPreparedFunction( "setModel", "e:s", "", "if(IsValid(@value 1) && EXPADV.PPCheck(Context.player,@value 1)) then @value 1:SetModel(@value 2) end")
 Component:AddFunctionHelper( "setModel", "e:s", "Sets the model of the given entity.")
 
 Component:AddPreparedFunction( "setMaterial", "e:s", "", "if(IsValid(@value 1) && EXPADV.PPCheck(Context.player,@value 1)) then @value 1:SetMaterial(@value 2) end")

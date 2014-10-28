@@ -2,16 +2,16 @@
     @: Math Component
    --- */
 
-local MathComponent = EXPADV.AddComponent( "math" , true )
+local Component = EXPADV.AddComponent( "math" , true )
 
-MathComponent.Author = "Rusketh"
-MathComponent.Description = "Handels basic arithmatic with numbers and adds functions for advanced mathmatics."
+Component.Author = "Rusketh"
+Component.Description = "Handels basic arithmatic with numbers and adds functions for advanced mathmatics."
 
 /* --- --------------------------------------------------------------------------------
     @: Number Object
    --- */
 
-local Number = MathComponent:AddClass( "number" , "n" )
+local Number = Component:AddClass( "number" , "n" )
 Number:StringBuilder( function( Obj ) return tostring( Obj ) end )
 Number:DefaultAsLua( 0 )
 Number:AddAlias( "int" )
@@ -32,41 +32,41 @@ end
     @: Logical and Comparison
    --- */
 
-MathComponent:AddInlineOperator( "==", "n,n", "b", "(@value 1 == @value 2)" )
-MathComponent:AddInlineOperator( "!=", "n,n", "b", "(@value 1 != @value 2)" )
-MathComponent:AddInlineOperator( ">", "n,n", "b", "(@value 1 > @value 2)" )
-MathComponent:AddInlineOperator( "<", "n,n", "b", "(@value 1 < @value 2)" )
-MathComponent:AddInlineOperator( ">=", "n,n", "b", "(@value 1 >= @value 2)" )
-MathComponent:AddInlineOperator( "<=", "n,n", "b", "(@value 1 <= @value 2)" )
+Component:AddInlineOperator( "==", "n,n", "b", "(@value 1 == @value 2)" )
+Component:AddInlineOperator( "!=", "n,n", "b", "(@value 1 != @value 2)" )
+Component:AddInlineOperator( ">", "n,n", "b", "(@value 1 > @value 2)" )
+Component:AddInlineOperator( "<", "n,n", "b", "(@value 1 < @value 2)" )
+Component:AddInlineOperator( ">=", "n,n", "b", "(@value 1 >= @value 2)" )
+Component:AddInlineOperator( "<=", "n,n", "b", "(@value 1 <= @value 2)" )
 
 /* --- --------------------------------------------------------------------------------
     @: Arithmetic
    --- */
 
-MathComponent:AddInlineOperator( "+", "n,n", "n", "(@value 1 + @value 2)" )
-MathComponent:AddInlineOperator( "-", "n,n", "n", "(@value 1 - @value 2)" )
-MathComponent:AddInlineOperator( "*", "n,n", "n", "(@value 1 * @value 2)" )
-MathComponent:AddInlineOperator( "/", "n,n", "n", "(@value 1 / @value 2)" )
-MathComponent:AddInlineOperator( "%", "n,n", "n", "(@value 1 % @value 2)" )
-MathComponent:AddInlineOperator( "^", "n,n", "n", "(@value 1 ^ @value 2)" )
+Component:AddInlineOperator( "+", "n,n", "n", "(@value 1 + @value 2)" )
+Component:AddInlineOperator( "-", "n,n", "n", "(@value 1 - @value 2)" )
+Component:AddInlineOperator( "*", "n,n", "n", "(@value 1 * @value 2)" )
+Component:AddInlineOperator( "/", "n,n", "n", "(@value 1 / @value 2)" )
+Component:AddInlineOperator( "%", "n,n", "n", "(@value 1 % @value 2)" )
+Component:AddInlineOperator( "^", "n,n", "n", "(@value 1 ^ @value 2)" )
  
 /* --- --------------------------------------------------------------------------------
     @: Operators
    --- */
 
-MathComponent:AddInlineOperator( "is", "n", "b", "(@value 1 >= 1)" )
-MathComponent:AddInlineOperator( "not", "n", "b", "(@value 1 < 1)" )
-MathComponent:AddInlineOperator( "-", "n", "n", "(-@value 1)" )
+Component:AddInlineOperator( "is", "n", "b", "(@value 1 >= 1)" )
+Component:AddInlineOperator( "not", "n", "b", "(@value 1 < 1)" )
+Component:AddInlineOperator( "-", "n", "n", "(-@value 1)" )
 
 /* --- --------------------------------------------------------------------------------
     @: Bitwise
    --- */
 
-MathComponent:AddInlineOperator( "&", "n,n", "n", "bit.band(@value 1 , @value 2)" )
-MathComponent:AddInlineOperator( "|", "n,n", "n", "bit.bor(@value 1 , @value 2)" )
-MathComponent:AddInlineOperator( "^^", "n,n", "n", "bit.bxor(@value 1 , @value 2)" )
-MathComponent:AddInlineOperator( ">>", "n,n", "n", "bit.rshift(@value 1 , @value 2)" )
-MathComponent:AddInlineOperator( "<<", "n,n", "n", "bit.lshift(@value 1 , @value 2)" )
+Component:AddInlineOperator( "&", "n,n", "n", "bit.band(@value 1 , @value 2)" )
+Component:AddInlineOperator( "|", "n,n", "n", "bit.bor(@value 1 , @value 2)" )
+Component:AddInlineOperator( "^^", "n,n", "n", "bit.bxor(@value 1 , @value 2)" )
+Component:AddInlineOperator( ">>", "n,n", "n", "bit.rshift(@value 1 , @value 2)" )
+Component:AddInlineOperator( "<<", "n,n", "n", "bit.lshift(@value 1 , @value 2)" )
 
 /* --- --------------------------------------------------------------------------------
     @: Assigment
@@ -126,17 +126,36 @@ end )
     @: Casting
    --- */
 
-MathComponent:AddInlineOperator( "string", "n", "s", "tostring(@value 1)" )
-MathComponent:AddInlineOperator( "boolean", "n", "b", "(@value 1 > 0)" )
-MathComponent:AddInlineOperator( "number", "s", "n", "($tonumber(@value 1) or 0)" )
-MathComponent:AddInlineOperator( "int", "s", "n", "($tonumber(@value 1) or 0)" )
+Component:AddInlineOperator( "string", "n", "s", "tostring(@value 1)" )
+Component:AddInlineOperator( "boolean", "n", "b", "(@value 1 > 0)" )
+Component:AddInlineOperator( "number", "s", "n", "($tonumber(@value 1) or 0)" )
+Component:AddInlineOperator( "int", "s", "n", "($tonumber(@value 1) or 0)" )
 
 /* --- --------------------------------------------------------------------------------
     @: Max Value
    --- */
 
-MathComponent:AddInlineFunction( "max", "n,n,n,n,n", "n", "math.max(@value 1, @value 2, @value 3, @value 4, @value 5)" )
-MathComponent:AddFunctionHelper( "max", "n,n,n,n,n", "returns the higest value out of 3 numbers." )
+Component:AddGeneratedOperator( "max", "n,n,n,n,n", "n", function( Operator, Compiler, Trace, ... )
+  local Inputs, Prep, Values = { ... }, { }, { }
+  
+  for I = 1, #Inputs, 1 do
+    local Input = Inputs[I]
+
+    if Input.FLAG == EXPADV_PREPARE or Input.FLAG == EXPADV_INLINEPREPARE then
+      Prep[#Prep + 1] = Input.Prepare
+    end
+
+    if Input.FLAG == EXPADV_INLINE or Input.FLAG == EXPADV_INLINEPREPARE then
+      Values[I] = Input.Inline
+    end
+  end
+
+  local LuaInline = string.format( "math.max(%s)", Type, table.concat( Values, "," ) )
+
+  return { Trace = Trace, Inline = LuaInline, Prepare = table.concat( Prep, "\n" ), Return = "n", FLAG = EXPADV_INLINEPREPARE }
+end )
+
+Component:AddFunctionHelper( "max", "n,n,n,n,n", "returns the higest value out of 3 numbers." )
 EXPADV.AddFunctionAlias( "max", "n,n,n,n" )
 EXPADV.AddFunctionAlias( "max", "n,n,n" )
 EXPADV.AddFunctionAlias( "max", "n,n" )
@@ -145,8 +164,28 @@ EXPADV.AddFunctionAlias( "max", "n,n" )
     @: Min Value
    --- */
 
-MathComponent:AddInlineFunction( "min", "n,n,n,n,n", "n", "math.min(@value 1, @value 2, @value 3, @value 4, @value 5)" )
-MathComponent:AddFunctionHelper( "min", "n,n,n,n,n", "returns the lowest value out of 3 numbers." )
+Component:AddGeneratedOperator( "min", "n,n,n,n,n", "n", function( Operator, Compiler, Trace, ... )
+  local Inputs, Prep, Values = { ... }, { }, { }
+  
+  for I = 1, #Inputs, 1 do
+    local Input = Inputs[I]
+
+    if Input.FLAG == EXPADV_PREPARE or Input.FLAG == EXPADV_INLINEPREPARE then
+      Prep[#Prep + 1] = Input.Prepare
+    end
+
+    if Input.FLAG == EXPADV_INLINE or Input.FLAG == EXPADV_INLINEPREPARE then
+      Values[I] = Input.Inline
+    end
+  end
+
+  local LuaInline = string.format( "math.min(%s)", Type, table.concat( Values, "," ) )
+
+  return { Trace = Trace, Inline = LuaInline, Prepare = table.concat( Prep, "\n" ), Return = "n", FLAG = EXPADV_INLINEPREPARE }
+end )
+
+Component:AddFunctionHelper( "min", "n,n,n,n,n", "returns the lowest value out of 3 numbers." )
+
 EXPADV.AddFunctionAlias( "min", "n,n,n,n" )
 EXPADV.AddFunctionAlias( "min", "n,n,n" )
 EXPADV.AddFunctionAlias( "min", "n,n" )
@@ -155,202 +194,202 @@ EXPADV.AddFunctionAlias( "min", "n,n" )
     @: General math
    --- */
 
-MathComponent:AddInlineFunction( "floor", "n", "n", "math.floor(@value 1)" )
-MathComponent:AddFunctionHelper( "floor", "n", "Rounds (number) to the nearest integer (lower) " )
+Component:AddInlineFunction( "floor", "n", "n", "math.floor(@value 1)" )
+Component:AddFunctionHelper( "floor", "n", "Rounds (number) to the nearest integer (lower) " )
 
 
-MathComponent:AddInlineFunction( "abs", "n", "n", "((@value 1 >= 0) and @value 1 or -@value 1)" ) ; 
-MathComponent:AddFunctionHelper( "abs", "n", "returns the absolute value of the specified number." )
+Component:AddInlineFunction( "abs", "n", "n", "((@value 1 >= 0) and @value 1 or -@value 1)" ) ; 
+Component:AddFunctionHelper( "abs", "n", "returns the absolute value of the specified number." )
 
 
-MathComponent:AddInlineFunction( "ceil", "n", "n", "@value 1 - @value 1 % -1)" ) ;
-MathComponent:AddFunctionHelper( "ceil", "n", "Rounds (number) to the nearest integer. (Upper) " )
+Component:AddInlineFunction( "ceil", "n", "n", "@value 1 - @value 1 % -1)" ) ;
+Component:AddFunctionHelper( "ceil", "n", "Rounds (number) to the nearest integer. (Upper) " )
 
 
-MathComponent:AddPreparedFunction( "ceil", "n,n", "", [[
+Component:AddPreparedFunction( "ceil", "n,n", "", [[
 @define B = 10 ^ math.floor(@value 2 + 0.5) 
 ]] , "(@value 1 - ((@value 1 * @B) @value -1) / @B))") 
-MathComponent:AddFunctionHelper( "ceil", "n,n", "Rounds (number) to the nearest integer. (Upper)" )
+Component:AddFunctionHelper( "ceil", "n,n", "Rounds (number) to the nearest integer. (Upper)" )
 
 
-MathComponent:AddInlineFunction( "round", "n", "n", "(@value 1 - (@value 1 + 0.5) % 1 + 0.5)" )
-MathComponent:AddFunctionHelper( "round", "n", "Rounds the specified number." )
+Component:AddInlineFunction( "round", "n", "n", "(@value 1 - (@value 1 + 0.5) % 1 + 0.5)" )
+Component:AddFunctionHelper( "round", "n", "Rounds the specified number." )
 
-MathComponent:AddPreparedFunction( "round", "n,n", "", [[
+Component:AddPreparedFunction( "round", "n,n", "", [[
 @define A = 10 ^ math.floor(value @2 + 0.5)
 ]] , "(math.floor(@value 1 * @A + 0.5) / @A)")
-MathComponent:AddFunctionHelper( "round", "n,n", "Rounds the specified number." )
+Component:AddFunctionHelper( "round", "n,n", "Rounds the specified number." )
 
 
-MathComponent:AddInlineFunction( "int", "n", "n", "((@value 1 >= 0) and @value 1 - @value 1 % 1 or @value 1 - @value 1 % -1)" )
-MathComponent:AddFunctionHelper( "int", "n", "Returns (number) to the left of the decimal." )
+Component:AddInlineFunction( "int", "n", "n", "((@value 1 >= 0) and @value 1 - @value 1 % 1 or @value 1 - @value 1 % -1)" )
+Component:AddFunctionHelper( "int", "n", "Returns (number) to the left of the decimal." )
 
 
-MathComponent:AddInlineFunction( "frac", "n", "n", "(@value 1 >= 0 and @value 1 % 1 or @value 1 % -1)" )
-MathComponent:AddFunctionHelper( "frac", "n", "Returns (number) to the right of the decimal." )
+Component:AddInlineFunction( "frac", "n", "n", "(@value 1 >= 0 and @value 1 % 1 or @value 1 % -1)" )
+Component:AddFunctionHelper( "frac", "n", "Returns (number) to the right of the decimal." )
 
-MathComponent:AddInlineFunction( "clamp", "n,n,n", "n", "math.Clamp( @value 1, @value 2, @value 3 )" )
-MathComponent:AddFunctionHelper( "clamp", "n,n,n", "Clamps (number) between min and max." )
+Component:AddInlineFunction( "clamp", "n,n,n", "n", "math.Clamp( @value 1, @value 2, @value 3 )" )
+Component:AddFunctionHelper( "clamp", "n,n,n", "Clamps (number) between min and max." )
 
 
-MathComponent:AddInlineFunction( "inrange", "n,n,n", "n", "((@value 1 < @value 2 or @value 1 > @value 3) and 0 or 1)" )
-MathComponent:AddFunctionHelper( "inrange", "n,n,n", "Returns if (number) is between min and max" )
+Component:AddInlineFunction( "inrange", "n,n,n", "n", "((@value 1 < @value 2 or @value 1 > @value 3) and 0 or 1)" )
+Component:AddFunctionHelper( "inrange", "n,n,n", "Returns if (number) is between min and max" )
 
-MathComponent:AddInlineFunction( "sign", "n", "n", "(@value 1 > %Round and 1 or (@value 1 < -%Round and -1 or 0))" )
-MathComponent:AddFunctionHelper( "sign", "n", "Returns the sign of (number)." )
+Component:AddInlineFunction( "sign", "n", "n", "(@value 1 > %Round and 1 or (@value 1 < -%Round and -1 or 0))" )
+Component:AddFunctionHelper( "sign", "n", "Returns the sign of (number)." )
 
 
 /*==============================================================================================
 Section: Random Numbers
 ==============================================================================================*/
 
-MathComponent:AddInlineFunction( "random", "", "n", "math.random( )" )
-MathComponent:AddFunctionHelper( "random", "", "Returns a floating point between 0 and 1" )
+Component:AddInlineFunction( "random", "", "n", "math.random( )" )
+Component:AddFunctionHelper( "random", "", "Returns a floating point between 0 and 1" )
 
-MathComponent:AddInlineFunction( "random", "n", "n", "(math.random( ) * @value 1)" )
-MathComponent:AddFunctionHelper( "random", "n", "Returns a floating point between 0 and (number max)" )
+Component:AddInlineFunction( "random", "n", "n", "(math.random( ) * @value 1)" )
+Component:AddFunctionHelper( "random", "n", "Returns a floating point between 0 and (number max)" )
 
-MathComponent:AddInlineFunction( "random", "n,n", "n", "(@value 1 + math.random( ) * (@value 2 - @value 1))" )
-MathComponent:AddFunctionHelper( "random", "", "Returns a floating point between min and max)" )
+Component:AddInlineFunction( "random", "n,n", "n", "(@value 1 + math.random( ) * (@value 2 - @value 1))" )
+Component:AddFunctionHelper( "random", "", "Returns a floating point between min and max)" )
 
 
 /*==============================================================================================
 Section: Advanced Math
 ==============================================================================================*/
 
-MathComponent:AddInlineFunction( "sqrt", "n", "n", "(@value 1 ^ (1 / 2))" )
-MathComponent:AddFunctionHelper( "sqrt", "n", "Returns the square root of the specified number." )
+Component:AddInlineFunction( "sqrt", "n", "n", "(@value 1 ^ (1 / 2))" )
+Component:AddFunctionHelper( "sqrt", "n", "Returns the square root of the specified number." )
 
-MathComponent:AddInlineFunction( "cbrt", "n", "n", "(@value 1 ^ (1 / 3))" )
-MathComponent:AddFunctionHelper( "cbrt", "n", "Returns the cube root of the speciried number." )
+Component:AddInlineFunction( "cbrt", "n", "n", "(@value 1 ^ (1 / 3))" )
+Component:AddFunctionHelper( "cbrt", "n", "Returns the cube root of the speciried number." )
 
-MathComponent:AddInlineFunction( "root", "n,n", "n", "(@value 1 ^ (1 / @value 2))" )
-MathComponent:AddFunctionHelper( "root", "n,n", "returns the (number) root of (number)" )
+Component:AddInlineFunction( "root", "n,n", "n", "(@value 1 ^ (1 / @value 2))" )
+Component:AddFunctionHelper( "root", "n,n", "returns the (number) root of (number)" )
 
-MathComponent:AddInlineFunction( "exp", "n", "n", "(math.exp(@value 1))" )
-MathComponent:AddFunctionHelper( "exp", "n", "Returns the constant e (2.71828) power of (number) " )
+Component:AddInlineFunction( "exp", "n", "n", "(math.exp(@value 1))" )
+Component:AddFunctionHelper( "exp", "n", "Returns the constant e (2.71828) power of (number) " )
 
 
 /*==============================================================================================
 Section: Trig
 ==============================================================================================*/
 
-MathComponent:AddInlineFunction( "toRad", "n", "n", "(@value 1 * (math.pi / 180)" )
-MathComponent:AddFunctionHelper( "toRad", "n", "Changes the degree to a radius." )
+Component:AddInlineFunction( "toRad", "n", "n", "(@value 1 * (math.pi / 180)" )
+Component:AddFunctionHelper( "toRad", "n", "Changes the degree to a radius." )
 
-MathComponent:AddInlineFunction( "toDeg", "n", "n", "(@value 1 * (180 / math.pi ))" )
-MathComponent:AddFunctionHelper( "toDeg", "n", "Changes the radius to a degree." )
+Component:AddInlineFunction( "toDeg", "n", "n", "(@value 1 * (180 / math.pi ))" )
+Component:AddFunctionHelper( "toDeg", "n", "Changes the radius to a degree." )
 
-MathComponent:AddInlineFunction( "acos", "n", "n", "(math.acos(@value 1) * (180 / math.pi))" )
-MathComponent:AddFunctionHelper( "acos", "n", "Returns the inverse cosine of (number)." )
+Component:AddInlineFunction( "acos", "n", "n", "(math.acos(@value 1) * (180 / math.pi))" )
+Component:AddFunctionHelper( "acos", "n", "Returns the inverse cosine of (number)." )
 
-MathComponent:AddInlineFunction( "asin", "n", "n", "(math.asin(@value 1) * (180 / math.pi))" )
-MathComponent:AddFunctionHelper( "asin", "n", "Returns the inverse sine of (number)." )
+Component:AddInlineFunction( "asin", "n", "n", "(math.asin(@value 1) * (180 / math.pi))" )
+Component:AddFunctionHelper( "asin", "n", "Returns the inverse sine of (number)." )
 
-MathComponent:AddInlineFunction( "atan", "n", "n", "(math.atan(@value 1) * (180 / math.pi))" )
-MathComponent:AddFunctionHelper( "atan", "n", "Returns the inverse tangent of (number)." )
+Component:AddInlineFunction( "atan", "n", "n", "(math.atan(@value 1) * (180 / math.pi))" )
+Component:AddFunctionHelper( "atan", "n", "Returns the inverse tangent of (number)." )
 
-MathComponent:AddInlineFunction( "atan", "n,n", "n", "(math.atan(@value 1, @value 2) * (180 / math.pi))" )
-MathComponent:AddFunctionHelper( "atan", "n,n", "Returns the inverse tangent of (Radians)" )
+Component:AddInlineFunction( "atan", "n,n", "n", "(math.atan(@value 1, @value 2) * (180 / math.pi))" )
+Component:AddFunctionHelper( "atan", "n,n", "Returns the inverse tangent of (Radians)" )
 
-MathComponent:AddInlineFunction( "cos", "n", "n", "math.cos(@value 1 * (math.pi / 180))" )
-MathComponent:AddFunctionHelper( "cos", "n", "Returns the cosine of (number)." )
+Component:AddInlineFunction( "cos", "n", "n", "math.cos(@value 1 * (math.pi / 180))" )
+Component:AddFunctionHelper( "cos", "n", "Returns the cosine of (number)." )
 
-MathComponent:AddInlineFunction( "sec", "n", "n", "(1 / math.cos(@value 1 * (math.pi / 180)))" )
-MathComponent:AddFunctionHelper( "sec", "n", "Returns the secant of (number)." )
+Component:AddInlineFunction( "sec", "n", "n", "(1 / math.cos(@value 1 * (math.pi / 180)))" )
+Component:AddFunctionHelper( "sec", "n", "Returns the secant of (number)." )
 
-MathComponent:AddInlineFunction( "sin", "n", "n", "math.sin(@value 1 * (math.pi / 180))" )
-MathComponent:AddFunctionHelper( "sin", "n", "Returns the sine of (number)." )
+Component:AddInlineFunction( "sin", "n", "n", "math.sin(@value 1 * (math.pi / 180))" )
+Component:AddFunctionHelper( "sin", "n", "Returns the sine of (number)." )
 
-MathComponent:AddInlineFunction( "csc", "n", "n", "(1 / math.sin(@value 1 * (math.pi / 180)))" )
-MathComponent:AddFunctionHelper( "csc", "n", "Returns the cosecant of (number)" )
+Component:AddInlineFunction( "csc", "n", "n", "(1 / math.sin(@value 1 * (math.pi / 180)))" )
+Component:AddFunctionHelper( "csc", "n", "Returns the cosecant of (number)" )
 
-MathComponent:AddInlineFunction( "tan", "n", "n", "math.tan(@value 1 * (math.pi / 180))" )
-MathComponent:AddFunctionHelper( "tan", "n", "Returns the tangent of (number)." )
+Component:AddInlineFunction( "tan", "n", "n", "math.tan(@value 1 * (math.pi / 180))" )
+Component:AddFunctionHelper( "tan", "n", "Returns the tangent of (number)." )
 
-MathComponent:AddInlineFunction( "cot", "n", "n", "(1 / math.tan(@value 1 * (math.pi / 180)))" )
-MathComponent:AddFunctionHelper( "cot", "n", "returns the cotangent of (number)" )
+Component:AddInlineFunction( "cot", "n", "n", "(1 / math.tan(@value 1 * (math.pi / 180)))" )
+Component:AddFunctionHelper( "cot", "n", "returns the cotangent of (number)" )
 
-MathComponent:AddInlineFunction( "cosh", "n", "n", "math.cosh(@value 1)" )
-MathComponent:AddFunctionHelper( "cosh", "n", "Returns the hyperbolic cosine of (number)." )
+Component:AddInlineFunction( "cosh", "n", "n", "math.cosh(@value 1)" )
+Component:AddFunctionHelper( "cosh", "n", "Returns the hyperbolic cosine of (number)." )
 
-MathComponent:AddInlineFunction( "sech", "n", "n", "(1 / math.cosh(@value 1))" )
-MathComponent:AddFunctionHelper( "sech", "n", "Returns the hyperbolic secant of (number)." )
+Component:AddInlineFunction( "sech", "n", "n", "(1 / math.cosh(@value 1))" )
+Component:AddFunctionHelper( "sech", "n", "Returns the hyperbolic secant of (number)." )
 
-MathComponent:AddInlineFunction( "sinh", "n", "n", "math.sinh(@value 1)" )
-MathComponent:AddFunctionHelper( "sinh", "n", "Returns the hyperbolic sine of (number)." )
+Component:AddInlineFunction( "sinh", "n", "n", "math.sinh(@value 1)" )
+Component:AddFunctionHelper( "sinh", "n", "Returns the hyperbolic sine of (number)." )
 
-MathComponent:AddInlineFunction( "csch", "n", "n", "(1 / math.sinh(@value 1))" )
-MathComponent:AddFunctionHelper( "csch", "n", "Returns the hyperbolic cosecant of (number)." )
+Component:AddInlineFunction( "csch", "n", "n", "(1 / math.sinh(@value 1))" )
+Component:AddFunctionHelper( "csch", "n", "Returns the hyperbolic cosecant of (number)." )
 
-MathComponent:AddInlineFunction( "tanh", "n", "n", "math.tanh(@value 1)" )
-MathComponent:AddFunctionHelper( "tanh", "n", "Returns the hyperbolic tangent of (number)." )
+Component:AddInlineFunction( "tanh", "n", "n", "math.tanh(@value 1)" )
+Component:AddFunctionHelper( "tanh", "n", "Returns the hyperbolic tangent of (number)." )
 
-MathComponent:AddInlineFunction( "coth", "n", "n", "(1 / math.tanh(@value 1))" )
-MathComponent:AddFunctionHelper( "coth", "n", "Retuurns the hyperbolic cotangent of (number)." )
+Component:AddInlineFunction( "coth", "n", "n", "(1 / math.tanh(@value 1))" )
+Component:AddFunctionHelper( "coth", "n", "Retuurns the hyperbolic cotangent of (number)." )
 
-MathComponent:AddInlineFunction( "acosr", "n", "n", "math.acos(@value 1)" )
-MathComponent:AddFunctionHelper( "acosr", "n", "Returns the inverse cosine of (number)." )
+Component:AddInlineFunction( "acosr", "n", "n", "math.acos(@value 1)" )
+Component:AddFunctionHelper( "acosr", "n", "Returns the inverse cosine of (number)." )
 
-MathComponent:AddInlineFunction( "asinr", "n", "n", "math.asin(@value 1)" )
-MathComponent:AddFunctionHelper( "asinr", "n", "Returns the inverse sin of (number)." )
+Component:AddInlineFunction( "asinr", "n", "n", "math.asin(@value 1)" )
+Component:AddFunctionHelper( "asinr", "n", "Returns the inverse sin of (number)." )
 
-MathComponent:AddInlineFunction( "atanr", "n", "n", "math.atan(@value 1)" )
-MathComponent:AddFunctionHelper( "atanr", "n", "returns the inverse tangent of (number)." )
+Component:AddInlineFunction( "atanr", "n", "n", "math.atan(@value 1)" )
+Component:AddFunctionHelper( "atanr", "n", "returns the inverse tangent of (number)." )
 
-MathComponent:AddInlineFunction( "atanr", "n,n", "n", "math.atan(@value 1, @value 2)" )
-MathComponent:AddFunctionHelper( "atanr", "n,n", "Returns the inverse tangent of (number) and (number)." )
+Component:AddInlineFunction( "atanr", "n,n", "n", "math.atan(@value 1, @value 2)" )
+Component:AddFunctionHelper( "atanr", "n,n", "Returns the inverse tangent of (number) and (number)." )
 
-MathComponent:AddInlineFunction( "cosr", "n", "n", "math.cos(@value 1)" )
-MathComponent:AddFunctionHelper( "cosr", "n", "Returns the cosine of (number)." )
+Component:AddInlineFunction( "cosr", "n", "n", "math.cos(@value 1)" )
+Component:AddFunctionHelper( "cosr", "n", "Returns the cosine of (number)." )
 
-MathComponent:AddInlineFunction( "secr", "n", "n", "(1 / math.cos(@value 1))" )
-MathComponent:AddFunctionHelper( "secr", "n", "Returns the hyperbolic secant of (number)." )
+Component:AddInlineFunction( "secr", "n", "n", "(1 / math.cos(@value 1))" )
+Component:AddFunctionHelper( "secr", "n", "Returns the hyperbolic secant of (number)." )
 
-MathComponent:AddInlineFunction( "sinr", "n", "n", "math.sin(@value 1)" )
-MathComponent:AddFunctionHelper( "sinr", "n", "Returns the sine of (number)." )
+Component:AddInlineFunction( "sinr", "n", "n", "math.sin(@value 1)" )
+Component:AddFunctionHelper( "sinr", "n", "Returns the sine of (number)." )
 
-MathComponent:AddInlineFunction( "cscr", "n", "n", "(1 / math.sin(@value 1))" )
-MathComponent:AddFunctionHelper( "cscr", "n", "Returns the cosecant of (number)." )
+Component:AddInlineFunction( "cscr", "n", "n", "(1 / math.sin(@value 1))" )
+Component:AddFunctionHelper( "cscr", "n", "Returns the cosecant of (number)." )
 
-MathComponent:AddInlineFunction( "tanr", "n", "n", "math.tan(@value 1)" )
-MathComponent:AddFunctionHelper( "tanr", "n", "Returns the tangent of (number)." )
+Component:AddInlineFunction( "tanr", "n", "n", "math.tan(@value 1)" )
+Component:AddFunctionHelper( "tanr", "n", "Returns the tangent of (number)." )
 
-MathComponent:AddInlineFunction( "cotr", "n", "n", "(1 / math.tan(@value 1))" )
-MathComponent:AddFunctionHelper( "cotr", "n", "Returns the cotangent of (number)." )
+Component:AddInlineFunction( "cotr", "n", "n", "(1 / math.tan(@value 1))" )
+Component:AddFunctionHelper( "cotr", "n", "Returns the cotangent of (number)." )
 
-MathComponent:AddInlineFunction( "coshr", "n", "n", "math.cosh(@value 1)" )
-MathComponent:AddFunctionHelper( "coshr", "n", "Returns the hyperbolic cosine of (number)." )
+Component:AddInlineFunction( "coshr", "n", "n", "math.cosh(@value 1)" )
+Component:AddFunctionHelper( "coshr", "n", "Returns the hyperbolic cosine of (number)." )
 
-MathComponent:AddInlineFunction( "sechr", "n", "n", "(1 / math.cosh(@value 1))" )
-MathComponent:AddFunctionHelper( "sechr", "n", "Returns the secant of (number)." )
+Component:AddInlineFunction( "sechr", "n", "n", "(1 / math.cosh(@value 1))" )
+Component:AddFunctionHelper( "sechr", "n", "Returns the secant of (number)." )
 
-MathComponent:AddInlineFunction( "sinhr", "n", "n", "math.sinh(@value 1)" )
-MathComponent:AddFunctionHelper( "sinhr", "n", "Returns the hyperbolic sine of (number)." )
+Component:AddInlineFunction( "sinhr", "n", "n", "math.sinh(@value 1)" )
+Component:AddFunctionHelper( "sinhr", "n", "Returns the hyperbolic sine of (number)." )
 
-MathComponent:AddInlineFunction( "cschr", "n", "n", "(1 / math.sinh(@value 1))" )
-MathComponent:AddFunctionHelper( "cschr", "n", "Returns the hyperbolic cosecant of (number)." )
+Component:AddInlineFunction( "cschr", "n", "n", "(1 / math.sinh(@value 1))" )
+Component:AddFunctionHelper( "cschr", "n", "Returns the hyperbolic cosecant of (number)." )
 
-MathComponent:AddInlineFunction( "tanhr", "n", "n", "math.tanh(@value 1)" )
-MathComponent:AddFunctionHelper( "tanhr", "n", "Returns the tangent of (number)." )
+Component:AddInlineFunction( "tanhr", "n", "n", "math.tanh(@value 1)" )
+Component:AddFunctionHelper( "tanhr", "n", "Returns the tangent of (number)." )
 
-MathComponent:AddInlineFunction( "cothr", "n", "n", "(1 / math.tanh(@value 1))" )
-MathComponent:AddFunctionHelper( "cothr", "n", "Returns the hyperbolic cotangent of (number)." )
+Component:AddInlineFunction( "cothr", "n", "n", "(1 / math.tanh(@value 1))" )
+Component:AddFunctionHelper( "cothr", "n", "Returns the hyperbolic cotangent of (number)." )
 
-MathComponent:AddInlineFunction( "ln", "n", "n", "math.log(@value 1)" )
-MathComponent:AddFunctionHelper( "ln", "n", "Returns the logarithm of (number) to base e." )
+Component:AddInlineFunction( "ln", "n", "n", "math.log(@value 1)" )
+Component:AddFunctionHelper( "ln", "n", "Returns the logarithm of (number) to base e." )
 
-MathComponent:AddInlineFunction( "log2", "n", "n", "(math.log(@value 1) * (1 / math.log(2)))" )
-MathComponent:AddFunctionHelper( "log2", "n", "Returns the logarithm of (number) to base 2" )
+Component:AddInlineFunction( "log2", "n", "n", "(math.log(@value 1) * (1 / math.log(2)))" )
+Component:AddFunctionHelper( "log2", "n", "Returns the logarithm of (number) to base 2" )
 
-MathComponent:AddInlineFunction( "log10", "n", "n", "math.log10(@value 1)" )
-MathComponent:AddFunctionHelper( "log10", "n", "Returns the logarithm of (number) to base 10." )
+Component:AddInlineFunction( "log10", "n", "n", "math.log10(@value 1)" )
+Component:AddFunctionHelper( "log10", "n", "Returns the logarithm of (number) to base 10." )
 
-MathComponent:AddInlineFunction( "log", "n,n", "n", "(math.log(@value 1) / math.log(@value 2))" )
-MathComponent:AddFunctionHelper( "log", "n,n", "Returns the logarithm of (number) to base (number)." )
+Component:AddInlineFunction( "log", "n,n", "n", "(math.log(@value 1) / math.log(@value 2))" )
+Component:AddFunctionHelper( "log", "n,n", "Returns the logarithm of (number) to base (number)." )
 
-MathComponent:AddInlineFunction("mix", "n,n,n", "n", "(@value 1 * @value 3 + @value 2 * (1 - @value 3))" )
-MathComponent:AddFunctionHelper( "mix", "n,n,n", "Returns a linear interpolation between three numbers." )
+Component:AddInlineFunction("mix", "n,n,n", "n", "(@value 1 * @value 3 + @value 2 * (1 - @value 3))" )
+Component:AddFunctionHelper( "mix", "n,n,n", "Returns a linear interpolation between three numbers." )
 
 /* --- --------------------------------------------------------------------------------
     @: Loop

@@ -326,6 +326,9 @@ Component:AddFunctionHelper( "toScreen", "v", "Translates the vectors position i
 Component:AddInlineFunction( "isVisible", "v", "b", "@value 1:ToScreen( ).visible" )
 Component:AddFunctionHelper( "isVisible", "v", "Returns true if the vectors position is in clients view." )
 
+Component:AddInlineFunction( "canRenderToHUD", "", "b", "(IsValid(Context.entity) and Context.entity.EnableHUD)" )
+Component:AddFunctionHelper( "canRenderToHUD", "", "Returns true if this entity can render to clientside HUD." )
+
 /* -----------------------------------------------------------------------------------
 	@: Hud Event
    --- */
@@ -334,6 +337,9 @@ EXPADV.ClientEvents( )
 
 Component:AddEvent( "drawScreen", "n,n", "" )
 Component:AddEvent( "drawHUD", "n,n", "" )
+Component:AddEvent( "enableHUDRendering", "", "" )
+Component:AddEvent( "disableHUDRendering", "", "" )
+
 
 if CLIENT then
 	hook.Add( "HUDPaint", "expadv.hudpaint", function( )
@@ -365,9 +371,15 @@ if CLIENT then
 		if !Entity.Context or !Entity.Context.event_drawHUD then return end
 
 		if Entity.EnableHUD then
-			Menu:AddOption( "Disable HUD Rendering", function( ) Entity.EnableHUD = false end )
+			Menu:AddOption( "Disable HUD Rendering", function( )
+				Entity.EnableHUD = false
+				Entity:CallEvent( "disableHUDRendering" )
+			end )
 		else
-			Menu:AddOption( "Enable HUD Rendering", function( ) Entity.EnableHUD = true end )
+			Menu:AddOption( "Enable HUD Rendering", function( )
+				Entity.EnableHUD = true
+				Entity:CallEvent( "enableHUDRendering" )
+			end )
 		end
 	end
 end

@@ -265,25 +265,46 @@ EXPADV.AddFunctionAlias( "playURL", "s,s,d" )
 	@: Hooks
    --- */
 
+EXPADV.ClientEvents( )
+Component:AddEvent( "enableSoundsFromURL", "", "" )
+Component:AddEvent( "disableSoundsFromURL", "", "" )
+
+/* -----------------------------------------------------------------------------------
+	@: Context Menu
+   --- */
+
 if CLIENT then
+
+	local function DisableSounds( Entity )
+		Entity.EnableSoundURL = false
+		Entity:CallEvent( "disableSoundsFromURL" )
+
+		local Context = Entity.Context
+		if !Context or Context.Data.AudioCount <= 0 then return end
+
+		for _, Channel in pairs( Context.Data.Audio ) do
+			if IsValid( Channel ) then Channel:Stop( ) end
+		end
+
+		Context.Data.Audio = { }
+		Context.Data.AudioCount = 0
+	end
+
+	local function EnableSounds( Entity )
+		Entity.EnableSoundURL = true
+		Entity:CallEvent( "enableSoundsFromURL" )
+	end
 
 	function Component:OnOpenContextMenu( Entity, Menu, Trace, Option )
 		if Entity.EnableSoundURL then
 			Menu:AddOption( "Disable sounds from url", function( )
-				Entity.EnableSoundURL = false
-
-				local Context = Entity.Context
-				if !Context or Context.Data.AudioCount <= 0 then return end
-		
-				for _, Channel in pairs( Context.Data.Audio ) do
-					if IsValid( Channel ) then Channel:Stop( ) end
-				end
-
-				Context.Data.Audio = { }
-				Context.Data.AudioCount = 0
+				DisableSounds( Entity )
 			end )
 		else
-			Menu:AddOption( "Enable sounds from url", function( ) Entity.EnableSoundURL = true end )
+			Menu:AddOption( "Enable sounds from url", function( ) 
+				EnableSounds( Entity )
+			end )
 		end
 	end
 end
+

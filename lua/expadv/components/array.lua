@@ -115,7 +115,7 @@ end
 Component:AddGeneratedOperator( "array", "s,...", "ar", function( Operator, Compiler, Trace, Type, ... )
 	local Inputs = { ... }
 	local Preperation = { }
-	local Values=  { }
+	local Values = { }
 	
 	for I = 1, #Inputs, 1 do
 		local Input = Inputs[I]
