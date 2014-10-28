@@ -6,7 +6,7 @@ local PANEL = { }
 		self.Expanded = true
 		self.RemomovedChildren = { }
 
-		self.Label = self:Add( "DButton" )
+		self.Label = self:Add( "EA_Button" )
 		self.Contents = vgui.Create( "DListView", self )
 
 		function self.Label.DoClick( )

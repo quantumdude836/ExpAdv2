@@ -1045,32 +1045,32 @@ function EXPADV.GenerateOperatorDescription( Operator )
 		    if Name == "+" then
 				Operator.Description = string.format( "Adds %s to %s", B, A )
 				Operator.Example = string.format( "%s + %s", A, B )
-				Operator.Type = "arithmatic"
+				Operator.Type = "arithmetic"
 
 			elseif Name == "-" then
 				Operator.Description = string.format( "Subtracts %s from %s", B, A )
 				Operator.Example = string.format( "%s - %s", A, B )
-				Operator.Type = "arithmatic"
+				Operator.Type = "arithmetic"
 
 			elseif Name == "*" then
 				Operator.Description = string.format( "Multiplys %s with %s", A, B )
 				Operator.Example = string.format( "%s * %s", A, B )
-				Operator.Type = "arithmatic"
+				Operator.Type = "arithmetic"
 
 			elseif Name == "/" then
 				Operator.Description = string.format( "Divides %s by %s", A, B )
 				Operator.Example = string.format( "%s / %s", A, B )
-				Operator.Type = "arithmatic"
+				Operator.Type = "arithmetic"
 
 			elseif Name == "%" then
 				Operator.Description = string.format( "Returns the remainder of %s divided by %s", A, B )
 				Operator.Example = string.format( "%s %% %s", A, B )
-				Operator.Type = "arithmatic"
+				Operator.Type = "arithmetic"
 
 			elseif Name == "^" then
 				Operator.Description = string.format( "Returns %s to the power of %s", A, B )
 				Operator.Example = string.format( "%s ^ %s", A, B )
-				Operator.Type = "arithmatic"
+				Operator.Type = "arithmetic"
 
 			elseif Name == "==" then
 				Operator.Description = string.format( "Returns true if %s is equal to %s", A, B )
