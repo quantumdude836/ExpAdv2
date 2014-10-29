@@ -221,7 +221,6 @@ function Ranger:DoTrace( Context, Start, End, Distance )
 	local TraceData = { start = Start, endpos = End, filter = Filter }
 	
 	if !self.FilterFunc then
-		MsgN( "No Filter" )
 		for Entity, _ in pairs( self.Filter ) do
 			Filter[ #Filter + 1 ] = Entity
 		end
