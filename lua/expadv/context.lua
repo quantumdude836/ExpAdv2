@@ -66,20 +66,12 @@ local debug_sethook = debug.sethook
 -- Safely execute a function on this context.
 function EXPADV.RootContext:Execute( Location, Operation, ... ) -- String, Function, ...
 	
-	local Status, Instance = self.Status
-
-	-- Memory Instaces
-
-		-- if Location and Location ~= "Root" then
-		-- 	Instance = EXPADV.CloneContext( self )
-		-- end
+	local Status = self.Status
 
 	-- Ops monitoring:
 
 		local function op_counter( )
 			Status.Perf = Status.Perf + expadv_luahook
-
-			-- Status.Perf = Status.Perf + ((SysTime( ) - Status.BenchMark) * 1000000)
 
 			if Status.Perf > expadv_tickquota then
 				debug.sethook( )
@@ -90,8 +82,7 @@ function EXPADV.RootContext:Execute( Location, Operation, ... ) -- String, Funct
 		end
 
 		Status.BenchMark = SysTime( )
-		-- Status.CounterFunction = op_counter
-
+		
 		debug_sethook( op_counter, "", expadv_luahook )
 
 	-- Execuiton:
@@ -124,19 +115,11 @@ function EXPADV.RootContext:Execute( Location, Operation, ... ) -- String, Funct
 			return false
 		end
 
-		-- if Instance then
-		-- 	EXPADV.ObsorbContext( self, Instance )
-		-- end
-
 		EXPADV.Updates[self] = true
 
 		return true, Result, ResultType
 
 	end
-
-	--if istable( Result ) and Result.Context and Result.Context ~= self then
-	--	self = Result.Context
-	--end
 
 	if !IsValid( self.entity ) then
 		-- Do nothing :P

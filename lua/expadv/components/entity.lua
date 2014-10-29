@@ -137,16 +137,16 @@ Component:AddFunctionHelper( "getColour", "e:", "Gets the colour of the given en
 Component:AddInlineFunction( "owner", "e:", "ply", "(@value 1:IsValid() and EXPADV.GetOwner(@value 1) or $Entity(-1))")
 Component:AddFunctionHelper( "owner", "e:", "Gets the owner of the given entity.")
 
-Component:AddInlineFunction( "boxCenter", "e:", "v", "((@value 1:IsValid() && @value 1:GetPhysicsObject():IsValid()) and @value 1:OBBCenter() or Vector(0,0,0))")
+Component:AddInlineFunction( "boxCenter", "e:", "v", "(@value 1:IsValid() and @value 1:OBBCenter() or Vector(0,0,0))")
 Component:AddFunctionHelper( "boxCenter", "e:", "Gets the collision bounding size for the given entity.")
 
-Component:AddInlineFunction( "boxSize", "e:", "v", "((@value 1:IsValid() && @value 1:GetPhysicsObject():IsValid()) and (@value 1:OBBMaxs() - @value 1:OBBMins()) or Vector(0,0,0))")
+Component:AddInlineFunction( "boxSize", "e:", "v", "(@value 1:IsValid() and (@value 1:OBBMaxs() - @value 1:OBBMins()) or Vector(0,0,0))")
 Component:AddFunctionHelper( "boxSize", "e:", "Gets the collision bounding size for the given entity.")
 
-Component:AddInlineFunction( "boxMax", "e:", "v", "((@value 1:IsValid() && @value 1:GetPhysicsObject():IsValid()) and @value 1:OBBMaxs() or Vector(0,0,0))")
+Component:AddInlineFunction( "boxMax", "e:", "v", "(@value 1:IsValid() and @value 1:OBBMaxs() or Vector(0,0,0))")
 Component:AddFunctionHelper( "boxMax", "e:", "Gets the collision bounding max size for the given entity.")
 
-Component:AddInlineFunction( "boxMin", "e:", "v", "((@value 1:IsValid() && @value 1:GetPhysicsObject():IsValid()) and @value 1:OBBMins() or Vector(0,0,0))")
+Component:AddInlineFunction( "boxMin", "e:", "v", "(@value 1:IsValid() and @value 1:OBBMins() or Vector(0,0,0))")
 Component:AddFunctionHelper( "boxMin", "e:", "Gets the collision bounding min size for the given entity.")
 
 /* --- --------------------------------------------------------------------------------
