@@ -185,7 +185,10 @@ local Ranger = Component:AddClass( "ranger", "rd" )
 
 Ranger:AddPreparedOperator( "=", "n,rd", "", "Context.Memory[@value 1] = @value 2" )
 
-local Ranger = { Default_Zero = false, Ignore_World = false, Hit_Water = false, Ignore_Entities = false, Mins = false, Maxs = false, FilterFunc = false }
+local ZeroVec = Vector( 0, 0 , 0 )
+
+local Ranger = { Start = ZeroVec, End = ZeroVec, Default_Zero = false, Ignore_World = false, Hit_Water = false, Ignore_Entities = false, Mins = false, Maxs = false, FilterFunc = false }
+
 Ranger.Result = { }
 
 Ranger.__index = Ranger
@@ -216,18 +219,21 @@ function Ranger:DoTrace( Context, Start, End, Distance )
 	self.Start = Start
 	self.End = End
 	
-	local Filter = { }
 	local Ignore_World = self.Ignore_World
 	local TraceData = { start = Start, endpos = End, filter = Filter }
 	
 	if !self.FilterFunc then
+		local Filter = { }
+
 		for Entity, _ in pairs( self.Filter ) do
 			Filter[ #Filter + 1 ] = Entity
 		end
+
+		TraceData.filter = Filter
 	else
-		Filter = function( Entity )
-			local Value, Type = self.FilterFunc( Context, {self, "_rd"}, { Entity, "e"} )
-			if Value ~= nil and Type == "b" then return Value end
+		TraceData.filter = function( Entity )
+			local Value, Type = self.FilterFunc( Context, { Entity, "e" }, {self, "_rd" } )
+			if Type == "b" and Value then return true end
 		end
 	end
 	
