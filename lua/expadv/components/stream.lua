@@ -321,12 +321,21 @@ do --- Net component: used to sync from server to client :D
 
 	Component:AddFunctionHelper( "netBroadcast", "nst:s", "Sends a stream to clientside code on all clients." )
 	Component:AddFunctionHelper( "netBroadcast", "nst:ply,s", "Sends a stream to clientside code to client." )
+	
+	EXPADV.ClientOperators( )
+	
+	Component:AddVMFunction( "sendToServer", "nst:s", "", function( Context, Trace, Stream, Name )
+		table.insert( NetQueue, { Context.entity, Name, Stream } ) -- Slow but meh!
+		HasQueued = true
+	end )
+
+	Component:AddFunctionHelper( "sendToServer", "nst:s", "Sends a stream to serverside code on current entity." )
 
 	/* --- --------------------------------------------------------------------------------
 		@: Receiving
 	   --- */
 
-	EXPADV.ClientOperators( )
+	EXPADV.SharedOperators( )
 
 	Component:AddPreparedFunction( "netReceive", "s,d", "", "Context.Data['net_' .. @value 1] = @value 2" )
 	Component:AddFunctionHelper( "netReceive", "s,d", "Calls the function (delegate) when the stream with the matching name is received from the serverside code." )
@@ -358,13 +367,33 @@ do --- Net component: used to sync from server to client :D
 			HasQueued, NetQueue = false, { }
 		end
 	end
+	
+	if CLIENT then
+		function Component:OnThink( )
+			if !HasQueued then return end
+
+			for _, Msg in pairs( NetQueue ) do
+				local E, N, S = Msg[1], Msg[2], Msg[3]
+
+				if IsValid( E ) and E:IsRunning( ) then
+				
+					net.Start( "expadv.netstream" )
+						net.WriteEntity( E )
+						net.WriteString( N )
+						net.WriteTable( S.T )
+						net.WriteTable( S.V )
+					net.SendToServer()
+				end
+			end
+
+			HasQueued, NetQueue = false, { }
+		end
+	end
 
 	/* --- --------------------------------------------------------------------------------
-		@: Receiving from Server
+		@: Receiving
 	   --- */
-
-	if CLIENT then
-
+	   
 		net.Receive( "expadv.netstream", function( )
 			local E = net.ReadEntity( )
 			local N = net.ReadString( )
@@ -379,10 +408,5 @@ do --- Net component: used to sync from server to client :D
 				E.Context:Execute( "Net Receive " .. N, H, { { V = V, T = T, R = 0, W = #V } , "_nst" } )
 			end
 		end )
-	end
 
-
-	/* --- --------------------------------------------------------------------------------
-		@: Receiving from Server
-	   --- */
 end
