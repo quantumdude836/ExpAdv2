@@ -1,5 +1,5 @@
 /* --- --------------------------------------------------------------------------------
-	@: CPPI support - Prop Protection inegration.
+	@: CPPI support - Prop Protection integration.
    --- */
 
 if CPPI then
