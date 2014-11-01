@@ -270,7 +270,10 @@ Component:AddFunctionHelper( "exp", "n", "Returns the constant e (2.71828) power
 Section: Trig
 ==============================================================================================*/
 
-Component:AddInlineFunction( "toRad", "n", "n", "(@value 1 * (math.pi / 180)" )
+Component:AddInlineFunction( "pi", "", "n", "math.pi" )
+Component:AddFunctionHelper( "pi", "", "Returns pi." )
+
+Component:AddInlineFunction( "toRad", "n", "n", "(@value 1 * (math.pi / 180))" )
 Component:AddFunctionHelper( "toRad", "n", "Changes the degree to a radius." )
 
 Component:AddInlineFunction( "toDeg", "n", "n", "(@value 1 * (180 / math.pi ))" )

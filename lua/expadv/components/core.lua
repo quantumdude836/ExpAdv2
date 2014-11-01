@@ -54,6 +54,8 @@ EXPADV.AddInlineOperator( nil, "||", "b,b", "b", "(@value 1 or @value 2)" )
 
 EXPADV.AddInlineOperator( nil, "&&", "b,b", "b", "(@value 1 and @value 2)" )
 
+EXPADV.AddInlineOperator( nil, "string", "b", "s", "(@value 1 and \"true\" or \"false\")" )
+
 EXPADV.AddInlineOperator( nil, "delegate", "f", "d", "@value 1" )
 
 EXPADV.AddInlineOperator( nil, "function", "d", "f", "@value 1" )
