@@ -118,7 +118,7 @@ Component:AddInlineFunction( "find", "s:s,n", "n", "(string.find(@value 1, @valu
 Component:AddFunctionHelper( "find", "s:s,n", "Returns he location of first instance of (string) in a string, starting at location (number)." )
 
 Component:AddInlineFunction( "find", "s:s,n,b", "n", "(string.find(@value 1, @value 2, @value 3, @value 4) or 0)" )
-Component:AddFunctionHelper( "find", "s:s,n", "Returns he location of first instance of (string) in a string, starting at location (number), using stirng patters if bool is true." )
+Component:AddFunctionHelper( "find", "s:s,n,b", "Returns he location of first instance of (string) in a string, starting at location (number), using stirng patters if bool is true." )
 
 Component:AddInlineFunction( "replace", "s:s,s", "s", "(string.Replace(@value 1, @value 2, @value 3) or \"\")" )
 Component:AddFunctionHelper( "replace", "s:s,s", "Finds and replaces every occurrence of the first argument with the second argument." )

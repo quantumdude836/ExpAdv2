@@ -139,6 +139,21 @@ Component:AddPreparedFunction( "rotate", "v:a", "v", [[
 
 Component:AddFunctionHelper( "rotate", "v:a", "Rotates a vector by the given angle." )
 
+Component:AddVMFunction( "rotateAroundAxis", "v:v,n", "v",
+  function( Context, Trace, Pos, Axis, Degrees)
+    local Cos, Sin = math.cos(Degrees * (math.pi / 180)), math.sin(Degrees * (math.pi / 180))
+    local Length = (Axis.x * Axis.x + Axis.y * Axis.y + Axis.z * Axis.z) ^ 0.5
+    local x, y, z = Axis.x / Length, Axis.y / Length, Axis.z / Length
+
+    return Vector(
+      (Cos + (x ^ 2) * (1 - Cos)) * Pos.x + (x * y * (1 - Cos) - z * Sin) * Pos.y + (x * z * (1 - Cos) + y * Sin) * Pos.z,
+      (y * x* (1-Cos) + z * Sin) * Pos.x + (Cos + (y ^ 2)*(1 - Cos)) * Pos.y + (y * z * (1 - Cos) - x * Sin) * Pos.z,
+      (z * x * (1-Cos) - y * Sin) * Pos.x + (z*y*(1 - ca) + x * Sin) * Pos.y + (Cos + (z ^ 2)*(1 - Cos)) * Pos.z
+    )
+  end )
+
+Component:AddFunctionHelper( "rotateAroundAxis", "v:v,n", "Rotates a vector around a direction vector using degres." )
+
 /* --- --------------------------------------------------------------------------------
     @: Angle
    --- */
@@ -165,8 +180,8 @@ Component:AddFunctionHelper( "distanceSqr", "v:v", "Returns the squared distance
 Component:AddInlineFunction( "dot", "v:v", "n", "@value 1:Dot( @value 2 )" )
 Component:AddFunctionHelper( "dot", "v:v", [[The dot product of two vectors is the product of the entries of the two vectors. A dot product returns the cosine of the angle between the two vectors multiplied by the length of both vectors. A dot product returns just the cosine of the angle if both vectors are normalized]] )
 
-Component:AddInlineFunction( "normal", "v", "v", "@value 1:GetNormalized( @value 2 )" )
-Component:AddFunctionHelper( "normal", "v", "Returns a normalized version of the vector. Normalized means vector with same direction but with length of 1." )
+Component:AddInlineFunction( "normal", "v:", "v", "@value 1:GetNormalized()" )
+Component:AddFunctionHelper( "normal", "v:", "Returns a normalized version of the vector. Normalized means vector with same direction but with length of 1." )
 
 Component:AddInlineFunction( "isEqualto", "v:v,n", "b", "@value 1:IsEqualTol( @value 2, @value 3 )" )
 Component:AddFunctionHelper( "isEqualto", "v:v,n", "Returns if the vector is equal to another vector with the given tolerance." )

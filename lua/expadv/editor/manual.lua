@@ -1,3 +1,4 @@
+local CheckSearchFilter
 local LabelColor = Color(0, 0, 0, 255)
 
 local PANEL = { }
@@ -54,57 +55,56 @@ local PANEL = { }
 		self:SetTall( self.Label:GetTall( ) + self.Contents:GetTall( ) + 15 )
 	end
 
-	function PANEL:Search( Colum, SearchQuery )
-		local Query
-
-		if SearchQuery and SearchQuery ~= "" then
-			Query = string.lower( SearchQuery )
-		end
-
+	--[[
+	function PANEL:Search( SearchFunction, Colums )
 		for Key, Line in pairs( self.RemomovedChildren ) do
-			local Value = string.lower( Line:GetColumnText( Colum ) )
-			
-			if Query and !string.find( Value, Query ) then
-				continue
+			Line.SearchOrder = 0
+
+			for I = 1, #Colums do
+
+				if !SearchFunction( Line:GetColumnText( Colums[I] ) ) then continue end
+
+				local ID = table.insert( self.Contents.Lines, Line )
+
+				Line:SetVisible( true )
+				Line:SetListView( self.Contents ) 
+				Line:SetID( ID )
+
+				local SortID = table.insert( self.Contents.Sorted, Line )
+		
+				if ( SortID % 2 == 1 ) then
+					Line:SetAltLine( true )
+				end
+
+				self.RemomovedChildren[Key] = nil
+				Line.SearchOrder = Line.SearchOrder + 1
 			end
-
-			local ID = table.insert( self.Contents.Lines, Line )
-
-			Line:SetVisible( true )
-			Line:SetListView( self.Contents ) 
-			Line:SetID( ID )
-
-			local SortID = table.insert( self.Contents.Sorted, Line )
-	
-			if ( SortID % 2 == 1 ) then
-				Line:SetAltLine( true )
-			end
-
-			self.RemomovedChildren[Key] = nil
 		end
 
 		for Key, Line in pairs( self.Contents.Lines ) do
-			local Value = string.lower( Line:GetColumnText( Colum ) )
-			
-			if !Query or string.find( Value, Query ) then
-				continue
+			Line.SearchOrder = 0
+
+			for I = 1, #Colums do
+				
+				if SearchFunction( Line:GetColumnText( Colums[I] ) ) then continue end
+
+				Line:SetVisible( false )
+				Line:SetListView( nil )
+				
+				local LineID = Line:GetID( )
+				local SelectedID = self.Contents:GetSortedID( LineID )
+				self.Contents.Lines[ LineID ] = nil
+
+				table.remove( self.Contents.Sorted, SelectedID )
+				table.insert( self.RemomovedChildren, Line )
+				Line.SearchOrder = Line.SearchOrder + 1
 			end
-
-			Line:SetVisible( false )
-			Line:SetListView( nil )
-			
-			local LineID = Line:GetID( )
-			local SelectedID = self.Contents:GetSortedID( LineID )
-			self.Contents.Lines[ LineID ] = nil
-
-			table.remove( self.Contents.Sorted, SelectedID )
-			table.insert( self.RemomovedChildren, Line )
 		end
 		
 		self.Contents:SetDirty( true )
 
 		self:PerformLayout( )
-	end
+	end]]
 
 vgui.Register( "EA_HelpList", PANEL, "DPanel" )
 
@@ -205,20 +205,31 @@ function PANEL:GetEventSheet( )
 	return self.Sheet_Event
 end
 
-function PANEL:Search( SearchQuery )
+--[[function PANEL:Search( SearchFunction, Query )
 	if IsValid( self.Sheet_Function ) then
-		self.Sheet_Function:Search( 3, SearchQuery )
+		self.Sheet_Function:Search( SearchFunction, {3, 4} )
 	end
 
 	if IsValid( self.Sheet_Method ) then
-		self.Sheet_Method:Search( 3, SearchQuery )
+		self.Sheet_Method:Search( SearchFunction, {3, 4} )
 	end
 
 	if IsValid( self.Sheet_Event ) then
-		self.Sheet_Event:Search( 3, SearchQuery )
+		self.Sheet_Event:Search( SearchFunction, {3, 4} )
 	end
 
-end
+	if IsValid( self.Sheet_Info ) and Query == "" then
+		self.Sheet_Info.Expanded = false
+	end
+
+	if IsValid( self.Sheet_Info ) and Query == "" then
+		self.Sheet_Info.Expanded = false
+	end
+
+	if IsValid( self.Sheet_Operator ) and Query == "" then
+		self.Sheet_Operator.Expanded = false
+	end
+end]]
 
 function PANEL:PerformLayout( )
 	local X, Y = 5, 5
@@ -419,9 +430,10 @@ function EXPADV.Editor.OpenHelper( )
 
 			Page:Dock( FILL )
 			Page:SetVisible( true )
-			Page:Search( SearchQuery )
+			--Page:Search( CheckSearchFilter )
 
 			ComponentCanvas:PerformLayout( )
+			--Page:PerformLayout( )
 
 			self.ActivePage = Page
 		end
@@ -440,8 +452,10 @@ function EXPADV.Editor.OpenHelper( )
 
 			Page:Dock( FILL )
 			Page:SetVisible( true )
+			--Page:Search( CheckSearchFilter )
 
 			ComponentCanvas:PerformLayout( )
+			--Page:PerformLayout( )
 
 			self.ActivePage = Page
 		end
@@ -582,6 +596,8 @@ function EXPADV.Editor.OpenHelper( )
 
 	-- CLASSES:
 
+		local RootClassNode = NodeList:AddNode( "Classes" )
+
 		for Short, Panel in pairs( ClassPanels ) do
 
 			local Class = EXPADV.GetClass(Short)
@@ -608,10 +624,16 @@ function EXPADV.Editor.OpenHelper( )
 			function Node:DoClick( )
 				Frame:SetActiveClassPage( Short )
 			end
+
+			local Node = RootClassNode:AddNode( Class.Name )
+
+			function Node:DoClick( )
+				Frame:SetActiveClassPage( Short )
+			end
 		end
 
 	-- SEARCH (Yes Divran, I liked your search box)
-
+		--[[Don't like this anymore :D
 		local SearchBox = vgui.Create( "DTextEntry", Frame )
 		SearchBox:SetWide( 150 )
 		SearchBox:SetValue( "Search..." )
@@ -635,6 +657,7 @@ function EXPADV.Editor.OpenHelper( )
 			hook.Call( "OnTextEntryLoseFocus", nil, self )
 		end
 
+		
 		local ClearSearch = vgui.Create( "DImageButton", SearchBox )
 		ClearSearch:SetMaterial( "fugue/cross-button.png" )
 		ClearSearch:DockMargin( 2,2,4,2 )
@@ -648,24 +671,37 @@ function EXPADV.Editor.OpenHelper( )
 			SearchBox:SetValue( "Search..." )
 		end
 
-		function SearchBox:OnTextChanged( )
-			local Query = self:GetValue( )
+		function CheckSearchFilter( Value )
+			if !SearchBox.SearchQuery then return true end
+			if SearchBox.SearchQuery == "" then return true end
 
-			SearchQuery = Query
-
-			BrowserSheet:Search( Query )
-
-			if IsValid( Frame.ActivePage ) then
-				Frame.ActivePage:Search( Query )
+			local Value = string.lower( Value )
+			for I = 1, #SearchBox.QueryTable do
+				if string.find( Value, SearchBox.QueryTable[I], 1, true ) then
+					return true
+				end
 			end
 
-			ClearSearch:SetVisible( Query ~= "" )
+			return false
 		end
+
+		function SearchBox:OnTextChanged( )
+			self.SearchQuery = string.lower( self:GetValue( ) )
+			self.QueryTable = string.Explode(";", self.SearchQuery)
+
+			ClearSearch:SetVisible( self.SearchQuery ~= "" )
+
+			BrowserSheet:Search( CheckSearchFilter, self.SearchQuery )
+
+			if IsValid( Frame.ActivePage ) then
+				Frame.ActivePage:Search( CheckSearchFilter, self.SearchQuery )
+			end
+		end]]
 
 	-- LAYOUT:
 
 		function Frame:PerformLayout( )
-			SearchBox:SetPos( Frame:GetWide( ) - SearchBox:GetWide( ) - 5, 28 )
+			--SearchBox:SetPos( Frame:GetWide( ) - SearchBox:GetWide( ) - 5, 28 )
 		end
 
 	-- INITALIZE
