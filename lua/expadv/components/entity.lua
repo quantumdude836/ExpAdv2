@@ -517,7 +517,7 @@ for _, Ent in pairs( $ents.FindInCone( @value 2, @value 3, @value 4, @value 5)) 
 	end
 end]], "@Results" )
 
-Component:AddPreparedFunction( "sortByDistanceEntitys", "a,v", "", [[
+Component:AddPreparedFunction( "sortByDistanceEntitys", "ar,v", "", [[
 if @value 1.__type ~= "e" then self:Throw( @trace, "invoke", "sortByDistanceEntitys #1, entity array exspected." ) end
 $table.sort( @value 1,
 	function( A, B )

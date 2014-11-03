@@ -21,6 +21,8 @@ WireLink:MakeServerOnly( )
 
 WireLink:WireInput( "WIRELINK" )
 
+WireLink:ExtendClass( "e" )
+
 WireLink:DefaultAsLua( Entity(0) )
 
 /* --- --------------------------------------------------------------------------------

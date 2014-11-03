@@ -1,11 +1,11 @@
-local CheckSearchFilter
+local SearchQuery = ""
 local LabelColor = Color(0, 0, 0, 255)
 
 local PANEL = { }
 
 	function PANEL:Init( )
+		self.Lines = { }
 		self.Expanded = true
-		self.RemomovedChildren = { }
 
 		self.Label = self:Add( "EA_Button" )
 		self.Contents = vgui.Create( "DListView", self )
@@ -17,10 +17,12 @@ local PANEL = { }
 	end
 
 	function PANEL:SetLabel( Text )
+		self.LabelText = Text
 		self.Label:SetText( Text )
 	end
 
 	function PANEL:Clear( )
+		self.Lines = { }
 		self.Contents:Clear( )
 	end
 
@@ -31,6 +33,7 @@ local PANEL = { }
 	end
 
 	function PANEL:AddLine( ... )
+		self.Lines[#self.Lines + 1] = { ... }
 		return self.Contents:AddLine( ... )
 	end
 
@@ -40,9 +43,7 @@ local PANEL = { }
 		self.Label:SetSize( self:GetWide( ), 22 )
 		self.Label:SetPos( 5, 5 )
 
-		if #self.Contents.Lines == 0 then
-			return self:SetSize( 0, 0 )
-		elseif !self.Expanded then
+		if !self.Expanded then
 			self.Contents:SetSize( 0, 0 )
 			self.Contents:SetVisible( true )
 		else
@@ -55,56 +56,35 @@ local PANEL = { }
 		self:SetTall( self.Label:GetTall( ) + self.Contents:GetTall( ) + 15 )
 	end
 
-	--[[
-	function PANEL:Search( SearchFunction, Colums )
-		for Key, Line in pairs( self.RemomovedChildren ) do
-			Line.SearchOrder = 0
+	function PANEL:Search( Query )
+		self.Contents:Clear( )
 
-			for I = 1, #Colums do
+		local TotalResults = 0
 
-				if !SearchFunction( Line:GetColumnText( Colums[I] ) ) then continue end
+		for I = 1, #self.Lines do
+			local AddLine = false
+			local Line = self.Lines[I]
 
-				local ID = table.insert( self.Contents.Lines, Line )
-
-				Line:SetVisible( true )
-				Line:SetListView( self.Contents ) 
-				Line:SetID( ID )
-
-				local SortID = table.insert( self.Contents.Sorted, Line )
-		
-				if ( SortID % 2 == 1 ) then
-					Line:SetAltLine( true )
-				end
-
-				self.RemomovedChildren[Key] = nil
-				Line.SearchOrder = Line.SearchOrder + 1
+			for J = 1, #Line do
+				if Query ~= "" and !string.find( string.lower(Line[J]), Query, 1, true ) then continue end
+				AddLine = true
+				break
 			end
+
+			if !AddLine then continue end
+
+			TotalResults = TotalResults + 1
+			self.Contents:AddLine( Line[1], Line[2], Line[3], Line[4], Line[5], Line[6] )
 		end
 
-		for Key, Line in pairs( self.Contents.Lines ) do
-			Line.SearchOrder = 0
-
-			for I = 1, #Colums do
-				
-				if SearchFunction( Line:GetColumnText( Colums[I] ) ) then continue end
-
-				Line:SetVisible( false )
-				Line:SetListView( nil )
-				
-				local LineID = Line:GetID( )
-				local SelectedID = self.Contents:GetSortedID( LineID )
-				self.Contents.Lines[ LineID ] = nil
-
-				table.remove( self.Contents.Sorted, SelectedID )
-				table.insert( self.RemomovedChildren, Line )
-				Line.SearchOrder = Line.SearchOrder + 1
-			end
+		if TotalResults == 0 then
+			self.Label:SetText( self.LabelText .. " - (No Results)" )
+		elseif TotalResults < #self.Lines then
+			self.Label:SetText( self.LabelText .. " - (" .. TotalResults .. " Results)" )
+		else
+			self.Label:SetText( self.LabelText )
 		end
-		
-		self.Contents:SetDirty( true )
-
-		self:PerformLayout( )
-	end]]
+	end
 
 vgui.Register( "EA_HelpList", PANEL, "DPanel" )
 
@@ -205,31 +185,33 @@ function PANEL:GetEventSheet( )
 	return self.Sheet_Event
 end
 
---[[function PANEL:Search( SearchFunction, Query )
+function PANEL:Search( Query )
 	if IsValid( self.Sheet_Function ) then
-		self.Sheet_Function:Search( SearchFunction, {3, 4} )
+		self.Sheet_Function:Search( Query )
 	end
 
 	if IsValid( self.Sheet_Method ) then
-		self.Sheet_Method:Search( SearchFunction, {3, 4} )
+		self.Sheet_Method:Search( Query )
 	end
 
 	if IsValid( self.Sheet_Event ) then
-		self.Sheet_Event:Search( SearchFunction, {3, 4} )
+		self.Sheet_Event:Search( Query )
 	end
 
-	if IsValid( self.Sheet_Info ) and Query == "" then
-		self.Sheet_Info.Expanded = false
+	if IsValid( self.Sheet_Operator ) then
+		self.Sheet_Operator:Search( Query )
 	end
 
-	if IsValid( self.Sheet_Info ) and Query == "" then
-		self.Sheet_Info.Expanded = false
+	if IsValid( self.Sheet_Info ) then
+		self.Sheet_Info.Expanded = Query == ""
 	end
 
-	if IsValid( self.Sheet_Operator ) and Query == "" then
-		self.Sheet_Operator.Expanded = false
+	if IsValid( self.Sheet_Info ) then
+		self.Sheet_Info.Expanded = Query == ""
 	end
-end]]
+
+	self:PerformLayout( )
+end
 
 function PANEL:PerformLayout( )
 	local X, Y = 5, 5
@@ -430,10 +412,9 @@ function EXPADV.Editor.OpenHelper( )
 
 			Page:Dock( FILL )
 			Page:SetVisible( true )
-			--Page:Search( CheckSearchFilter )
-
+			Page:Search( SearchQuery )
+			Page:PerformLayout( )
 			ComponentCanvas:PerformLayout( )
-			--Page:PerformLayout( )
 
 			self.ActivePage = Page
 		end
@@ -452,10 +433,9 @@ function EXPADV.Editor.OpenHelper( )
 
 			Page:Dock( FILL )
 			Page:SetVisible( true )
-			--Page:Search( CheckSearchFilter )
-
+			Page:Search( SearchQuery )
+			Page:PerformLayout( )
 			ComponentCanvas:PerformLayout( )
-			--Page:PerformLayout( )
 
 			self.ActivePage = Page
 		end
@@ -573,14 +553,18 @@ function EXPADV.Editor.OpenHelper( )
 	-- METHODS:
 
 		for Sig, Operator in pairs( METHOD_QUEUE ) do
-			local Page = Frame:GetClassPanel( Operator.Input[1] )
+			local ClassPage = Frame:GetClassPanel( Operator.Input[1] )
 
 			local Inputs = table.Copy( Operator.Input )
-			
 			local Signature = string.format( "%s.%s(%s)", EXPADV.TypeName( table.remove( Inputs, 1 ) ), Operator.Name, NamePerams( Inputs, Operator.InputCount, Operator.UsesVarg ) )
 				
-			Page:GetMethodSheet( ):AddLine( GetAvalibility(Operator), EXPADV.TypeName( Operator.Return or "" ) or "Void", Signature, Operator.Description )	
+			ClassPage:GetMethodSheet( ):AddLine( GetAvalibility(Operator), EXPADV.TypeName( Operator.Return or "" ) or "Void", Signature, Operator.Description )	
 			BrowserSheet:GetMethodSheet( ):AddLine( GetAvalibility(Operator), EXPADV.TypeName( Operator.Return or "" ) or "Void", Signature, Operator.Description )	
+		
+			if Operator.Component then
+				local Page = Frame:GetComponentPanel( Operator.Component )
+				Page:GetMethodSheet( ):AddLine( GetAvalibility(Operator), EXPADV.TypeName( Operator.Return or "" ) or "Void", Signature, Operator.Description )	
+			end
 		end
 
 	-- EVENTS:
@@ -633,7 +617,7 @@ function EXPADV.Editor.OpenHelper( )
 		end
 
 	-- SEARCH (Yes Divran, I liked your search box)
-		--[[Don't like this anymore :D
+		
 		local SearchBox = vgui.Create( "DTextEntry", Frame )
 		SearchBox:SetWide( 150 )
 		SearchBox:SetValue( "Search..." )
@@ -671,37 +655,22 @@ function EXPADV.Editor.OpenHelper( )
 			SearchBox:SetValue( "Search..." )
 		end
 
-		function CheckSearchFilter( Value )
-			if !SearchBox.SearchQuery then return true end
-			if SearchBox.SearchQuery == "" then return true end
-
-			local Value = string.lower( Value )
-			for I = 1, #SearchBox.QueryTable do
-				if string.find( Value, SearchBox.QueryTable[I], 1, true ) then
-					return true
-				end
-			end
-
-			return false
-		end
-
 		function SearchBox:OnTextChanged( )
-			self.SearchQuery = string.lower( self:GetValue( ) )
-			self.QueryTable = string.Explode(";", self.SearchQuery)
+			SearchQuery = string.lower( self:GetValue( ) )
 
-			ClearSearch:SetVisible( self.SearchQuery ~= "" )
+			ClearSearch:SetVisible( SearchQuery ~= "" )
 
-			BrowserSheet:Search( CheckSearchFilter, self.SearchQuery )
+			BrowserSheet:Search( SearchQuery )
 
 			if IsValid( Frame.ActivePage ) then
-				Frame.ActivePage:Search( CheckSearchFilter, self.SearchQuery )
+				Frame.ActivePage:Search( SearchQuery )
 			end
-		end]]
+		end
 
 	-- LAYOUT:
 
 		function Frame:PerformLayout( )
-			--SearchBox:SetPos( Frame:GetWide( ) - SearchBox:GetWide( ) - 5, 28 )
+			SearchBox:SetPos( Frame:GetWide( ) - SearchBox:GetWide( ) - 5, 28 )
 		end
 
 	-- INITALIZE

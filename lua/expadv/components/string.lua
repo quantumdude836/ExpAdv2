@@ -111,14 +111,11 @@ Component:AddFunctionHelper( "upper", "s:", "Returns an uppercased string." )
 	@: Find and replace
    --- */
 
-Component:AddInlineFunction( "find", "s:s", "n", "(string.find(@value 1, @value 2) or 0)" )
+Component:AddInlineFunction( "find", "s:s", "n", "(string.find(@value 1, @value 2, 1 , true) or 0)" )
 Component:AddFunctionHelper( "find", "s:s", "Returns the location of first instance of (string) in a string." )
 
-Component:AddInlineFunction( "find", "s:s,n", "n", "(string.find(@value 1, @value 2, @value 3) or 0)" )
+Component:AddInlineFunction( "find", "s:s,n", "n", "(string.find(@value 1, @value 2, @value 3, true) or 0)" )
 Component:AddFunctionHelper( "find", "s:s,n", "Returns he location of first instance of (string) in a string, starting at location (number)." )
-
-Component:AddInlineFunction( "find", "s:s,n,b", "n", "(string.find(@value 1, @value 2, @value 3, @value 4) or 0)" )
-Component:AddFunctionHelper( "find", "s:s,n,b", "Returns he location of first instance of (string) in a string, starting at location (number), using stirng patters if bool is true." )
 
 Component:AddInlineFunction( "replace", "s:s,s", "s", "(string.Replace(@value 1, @value 2, @value 3) or \"\")" )
 Component:AddFunctionHelper( "replace", "s:s,s", "Finds and replaces every occurrence of the first argument with the second argument." )
@@ -128,8 +125,7 @@ Component:AddFunctionHelper( "replace", "s:s,s", "Finds and replaces every occur
    --- */
 
 Component:AddPreparedFunction( "explode", "s:s", "ar", "@define Array = string.Explode(@value 2, @value 1)\n@Array.__type = 's'", "@Array" )
-
-Component:AddPreparedFunction( "explode", "s:s,b", "ar", "@define Array = string.Explode(@value 2, @value 1, @value 3)\n@Array.__type = 's'", "@Array" )
+Component:AddFunctionHelper( "explode", "s:s", "Splits the string into an array using a defined seperator." )
 
 Component:AddInlineFunction( "matchPattern", "s:s", "ar", "{__type = 's',string.match(@value 1, @value 2)}" )
 
@@ -162,6 +158,37 @@ Component:AddPreparedFunction( "gmatch", "s:s,n", "ar", [[
 		@array[i] = @values
 	end
 ]], "@array" )
+
+
+/* --- --------------------------------------------------------------------------------
+	@: Regular Expressions
+   --- */
+
+Component:AddException( "string" )
+
+Component:AddPreparedFunction( "findRE", "s:s,n", "n", [[
+	@define Ok, Result = $pcall(string.find, @value 1, @value 2, @value 3 or 0)
+	if !@Ok then Context:Throw( @trace, "string", @Result ) end
+]], "(@Result or 0)" )
+EXPADV.AddFunctionAlias( "findRE", "s:s" )
+Component:AddFunctionHelper( "findRE", "s:s", "Returns he location of first instance of (string) in a string, starting at location (number), using regular expressions." )
+
+Component:AddPreparedFunction( "replaceRE", "s:s,s", "s", [[
+	@define Ok, Result = $pcall(string.gsub, @value 1, @value 2, @value 3)
+	if !@Ok then Context:Throw( @trace, "string", @Result ) end
+]], "(@Result or '')" )
+Component:AddFunctionHelper( "replaceRE", "s:s,s", "Finds and replaces every occurrence of the first argument with the second argument using regular expressions." )
+
+Component:AddPreparedFunction( "explodeRE", "s:s", "ar", [[
+	@define Array = string.Explode(@value 2, @value 1, true)
+	@Array.__type = 's']], "@Array" )
+Component:AddFunctionHelper( "explodeRE", "s:s", "Splits the string into an array using a defined seperator using regular expressions." )
+
+Component:AddPreparedFunction( "explodeRE", "s:s", "ar", [[
+	@define Array = string.Explode(@value 2, @value 1, true)
+	@Array.__type = 's']], "@Array" )
+Component:AddFunctionHelper( "explodeRE", "s:s", "Splits the string into an array using a defined seperator using regular expressions." )
+
 
 /* --- --------------------------------------------------------------------------------
 	@: Format

@@ -169,7 +169,7 @@ Component:AddFunctionHelper( "time", "s", "Returns the current time is unit S." 
 
 EXPADV.SharedOperators( )
 
-Component:AddPreparedFunction( "sortByDistanceVectors", "a,v", "", [[
+Component:AddPreparedFunction( "sortByDistanceVectors", "ar,v", "", [[
 	if @value 1.__type ~= "v" then self:Throw( @trace, "invoke", "sortByDistanceEntitys #1, entity array exspected." ) end
 	$table.sort( @value 1,
 		function( A, B )

@@ -103,22 +103,18 @@ for Name, Enum in pairs( FuncKeys ) do
 	Component:AddInlineFunction( Name, "ply:", "b", "(IsValid(@value 1) and @value 1:KeyDown( " .. Enum .. " ) )" )
 end
 
-Component:AddVMFunction( "players", "", "t", 
+Component:AddVMFunction( "players", "", "ar", 
 	function( Context, Trace )
-		local Data, Types, Look, I = { }, { }, { }, 0
+		local Array = { __type = "_ply" }
 
 		for _, Player in pairs( player.GetAll( ) ) do
-			I = I + 1
-
-			Data[I] = Player
-			Types[I] = "_ply"
-			Look[I] = I
+			Array[#Array +1] = Player
 		end
 
-		return { Data = Data, Types = Types, Look = Look, Size = #Data, Count = #Data, HasChanged = false }
+		return Array
 	end )
 
-Component:AddFunctionHelper( "players", "", "Returns a table of players.")
+Component:AddFunctionHelper( "players", "", "Returns an array of players.")
 
 EXPADV.ClientOperators( )
 
