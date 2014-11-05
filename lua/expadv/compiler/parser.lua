@@ -1294,6 +1294,10 @@ function Compiler:Statement_7( Trace )
 
 		local Sequence = self:GetBlock( Trace, "to close server defintion", FLAG_CB_SCOPE_ONLY )
 
+		if !Sequence then self:TraceError( Trace, "Statment expected to follow server prefix.") end
+
+		self:PrepareInline( Sequence )
+
 		Sequence.Prepare = string.format( "if SERVER then\n%s\nend", Sequence.Prepare )
 
 		self.IsClientScript = true
@@ -1311,6 +1315,10 @@ function Compiler:Statement_7( Trace )
 		self.IsServerScript = false
 
 		local Sequence = self:GetBlock( Trace, "to close server defintion", FLAG_CB_SCOPE_ONLY )
+		
+		if !Sequence then self:TraceError( Trace, "Statment expected to follow server client.") end
+
+		self:PrepareInline( Sequence )
 
 		Sequence.Prepare = string.format( "if CLIENT then\n%s\nend", Sequence.Prepare )
 		

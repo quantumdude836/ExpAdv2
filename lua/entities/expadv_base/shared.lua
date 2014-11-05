@@ -61,7 +61,7 @@ function ENT:ResetStatus( ) end
    --- */
 
 function ENT:UpdateTransmitState( )	
-	return  TRANSMIT_ALWAYS
+	return TRANSMIT_ALWAYS
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -197,7 +197,7 @@ function ENT:BuildInstance( Instance, Instruction )
 		if WireLib and SERVER then
 			self:BuildInputs( self.Cells, Instance.InPorts )
 			self:BuildOutputs( self.Cells, Instance.OutPorts )
-			self:LoadFromInputs( )
+			self:LoadFromInputs( self.Cells )
 		end
 
 		Context:StartUp( Compiled( ) )

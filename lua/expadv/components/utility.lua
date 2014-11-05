@@ -127,7 +127,7 @@ hook.Add( "Think", "expadv.timers", function( )
 				if Timer.Reps ~= 0 then
 					Timer.Count = Timer.Count + 1
 
-					if Timer.Count > Timer.Reps then
+					if Timer.Count >= Timer.Reps then
 						Timers[Name] = nil
 					end
 				end

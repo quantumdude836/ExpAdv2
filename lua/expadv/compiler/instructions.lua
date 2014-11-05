@@ -442,7 +442,30 @@ function Compiler:Compile_SEQ( Trace, Instructions )
 		self:Yield( )
 	end
 
-	return { Trace = Trace, Return = "", Prepare = table.concat( Sequence, "\n" ),FLAG = EXPADV_PREPARE, IsRaw = true }
+	return { Trace = Trace, Return = "", Prepare = table.concat( Sequence, "\n" ),FLAG = EXPADV_PREPARE, IsSequence = true }
+end
+
+function Compiler:PrepareInline( Instruction )
+	if Instruction.IsSequence then return Instruction end
+
+	if Instruction.FLAG == EXPADV_FUNCTION then
+		self:Error( 0, "Compiler failed to build sequence, got vm instruction." )
+	end
+
+	if Instruction.FLAG == EXPADV_INLINE then
+		Instruction.Prepare = Instruction.Prepare or ""
+	end
+
+	if Instruction.FLAG == EXPADV_INLINE or Instruction.FLAG == EXPADV_INLINEPREPARE then
+		if ValidatePreperation( Instruction.Inline ) then
+			Instruction.Prepare = Instruction.Prepare .. "\n" .. Instruction.Inline
+		end
+	end
+
+	Instruction.FLAG = EXPADV_PREPARE
+	Instruction.IsSequence = true
+
+	return Instruction
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------

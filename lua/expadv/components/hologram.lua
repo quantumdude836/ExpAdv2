@@ -464,15 +464,16 @@ Component:AddFunctionHelper("hasShading", "h:", "Returns true if a hologram has 
 ==============================================================================================*/
 
 
-Component:AddPreparedFunction("pushClip", "h:n,v,v", "", [[
+Component:AddPreparedFunction("pushClip", "h:n,v,v,b", "", [[
 if IsValid( @value 1 ) and @value 1.player == Context.player then
-	@value 1:PushClip( @value 2, @value 3, @value 4 )
+	@value 1:PushClip( @value 2, @value 3, @value 4, @value 5 )
 end]] )
+EXPADV.AddFunctionAlias("pushClip", "h:n,v,v,b")
 
-/*Component:AddPreparedFunction("removeClip", "h:n", "", [[
-if IsValid( @value 1 ) and @value 1.player == Context.player and @value 1:RemoveClip( @value 2 ) then
-	%HoloLib.QueueHologram( @value 1 )
-end]] ) Not supported yet*/
+Component:AddPreparedFunction("removeClip", "h:n", "", [[
+if IsValid( @value 1 ) and @value 1.player == Context.player then
+	@value 1:RemoveClip( @value 2 )
+end]] )
 
 Component:AddPreparedFunction("enableClip", "h:n,b", "", [[
 if IsValid( @value 1 ) and @value 1.player == Context.player then

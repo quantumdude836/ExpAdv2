@@ -9,29 +9,22 @@ include( "shared.lua" )
    --- */
 
 local function Shorten( Num )
-    if Num < 1000 then return Num end
+    if Num < 1000 then return math.ceil(Num) end
     if Num < 1000000 then return math.Round(Num / 1000, 3) .. "k" end
     if Num < 1000000000 then return math.Round(Num / 1000000, 3) .. "m" end
     return math.Round(Num / 1000000000, 3) .. "b" -- Lets hope we never reach the billions :D
 end
 
-/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
-	@: Overlay
-    @: Images - Omicron
-    @: Terrible Code: Divran
-   --- */
-   
-local mul = 4
+local Mult = 1.25
+local TextColor = Color( 0, 0, 0 )
 
-local Overlay_BG = Material( "omicron/ea2_overlay_bg.png" )
-local Overlay_ServerRed = Material( "omicron/overlay_serverred.png" )
-local Overlay_ServerGreen = Material( "omicron/overlay_servergreen.png" )
-local Overlay_ClientRed = Material( "omicron/overlay_clientred.png" )
-local Overlay_ClientGreen = Material( "omicron/overlay_clientgreen.png" )
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+    @: Font
+   --- */
 
 surface.CreateFont( "ExpAdv_OverlayFont", {
         font = "Default",
-        size = 10*mul,
+        size = 10 * Mult,
         weight = 500,
         blursize = 0,
         scanlines = 0,
@@ -47,95 +40,87 @@ surface.CreateFont( "ExpAdv_OverlayFont", {
 } )
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
-    @: Draw Overlay
+    @: Derma Overlay
+    @: Images - Omicron
    --- */
 
-function ENT:DrawOverlay( Pos, Ang )
-        cam.Start3D2D( self:LocalToWorld( Pos ), self:LocalToWorldAngles( Ang or Angle(0.1,90,0.1) ), 0.05 / mul )
- 
-                -- BackGround
-                        surface.SetMaterial( Overlay_BG )
-                        surface.SetDrawColor( Color( 255, 255, 255, 100 ) )
-                        surface.DrawTexturedRect( 0, 0, 200 * mul, 100 * mul )
-                
-                -- Client Panel
-                        local CLState = self:GetClientState( ) or 0
+local function PaintClient( X, Y, Entity )
+    local CLState = Entity:GetClientState( ) or 0
 
-                        if CLState >= EXPADV_STATE_CRASHED then
-                            surface.SetMaterial( Overlay_ClientRed )
-                            surface.DrawTexturedRect( 0, 0, 200 * mul, 100 * mul )
-                        elseif CLState >= EXPADV_STATE_ONLINE then
-                            surface.SetMaterial( Overlay_ClientGreen )
-                            surface.DrawTexturedRect( 0, 0, 200 * mul, 100 * mul )
-                        end
+    if CLState >= EXPADV_STATE_CRASHED then
+        surface.SetMaterial( Material( "omicron/overlay_clientred.png" ) )
+        surface.DrawTexturedRect( X, Y, 200 * Mult, 100 * Mult )
+    elseif CLState >= EXPADV_STATE_ONLINE then
+        surface.SetMaterial( Material( "omicron/overlay_clientgreen.png" ) )
+        surface.DrawTexturedRect( X, Y, 200 * Mult, 100 * Mult )
+    end
 
-                -- Server Panel
-                        local SVState = self:GetServerState( ) or 0
-
-                        if SVState >= EXPADV_STATE_CRASHED then
-                            surface.SetMaterial( Overlay_ServerRed )
-                            surface.DrawTexturedRect( 0, 0, 200 * mul, 100 * mul )
-                        elseif SVState >= EXPADV_STATE_ONLINE then
-                            surface.SetMaterial( Overlay_ServerGreen )
-                            surface.DrawTexturedRect( 0, 0, 200 * mul, 100 * mul )
-                        end
-
-                -- Owners Name
-                        draw.SimpleText( self:GetPlayerName( ), "ExpAdv_OverlayFont", 100 * mul, 10 * mul, Color( 255, 255, 255, 255 ), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
- 
-                -- Client Display
-                        draw.SimpleText( "Client:", "ExpAdv_OverlayFont", 50 * mul, 30 * mul, Color( 255, 255, 255, 255 ), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
-                        
-                        local Counter = self.ClientTickQuota or 0
-                        local Line = string.format( "Quota: %s, %i%%", Shorten( Counter ), (Counter / expadv_hardquota) * 100 )
-                        draw.SimpleText( Line, "ExpAdv_OverlayFont", 50 * mul, 40 * mul, Color( 255, 255, 255, 255 ), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
-                           
-                        local Line2 = string.format( "Usage: %s",  Shorten(self.ClientAverage or 0 ))
-                        draw.SimpleText( Line2, "ExpAdv_OverlayFont", 50 * mul, 50 * mul, Color( 255, 255, 255, 255 ), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
-                            
-                        local Line3 = string.format( "CPU: %i us",  self.ClientStopWatch or 0 )
-                        draw.SimpleText( Line3, "ExpAdv_OverlayFont", 50 * mul, 60 * mul, Color( 255, 255, 255, 255 ), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
-                        
-
-                -- Server Display
-                        draw.SimpleText( "Server:", "ExpAdv_OverlayFont", 150 * mul, 30 * mul, Color( 255, 255, 255, 255 ), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
-                            
-                        local Counter = self:GetTickQuota( ) or 0
-                        local Line = string.format( "Quota: %s, %i%%", Shorten( Counter ), (Counter / expadv_hardquota) * 100 )
-                        draw.SimpleText( Line, "ExpAdv_OverlayFont", 150 * mul, 40 * mul, Color( 255, 255, 255, 255 ), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
-                           
-                        local Line2 = string.format( "Usage: %s",  Shorten(self:GetAverage( ) or 0 ))
-                        draw.SimpleText( Line2, "ExpAdv_OverlayFont", 150 * mul, 50 * mul, Color( 255, 255, 255, 255 ), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
-                            
-                        local Line3 = string.format( "CPU: %i us",  self:GetStopWatch( ) or 0 )
-                        draw.SimpleText( Line3, "ExpAdv_OverlayFont", 150 * mul, 60 * mul, Color( 255, 255, 255, 255 ), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
-
-                -- Name
-                    local Name = self:GetGateName( ) or "LemonGate"
-                    draw.SimpleText( "Current Script: " .. Name, "ExpAdv_OverlayFont", 5 * mul, 92 * mul, Color( 255, 255, 255, 255 ), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER )
-
-         cam.End3D2D( )
+    draw.SimpleText( "Client:", "ExpAdv_OverlayFont", X + (50 * Mult), Y + (30 * Mult), TextColor, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
+        
+    local Counter = Entity.ClientTickQuota or 0
+    local Line = string.format( "Quota: %s, %i%%", Shorten( Counter ), (Counter / expadv_hardquota) * 100 )
+    draw.SimpleText( Line, "ExpAdv_OverlayFont", X + (50 * Mult), Y + (40 * Mult), TextColor, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
+       
+    local Line2 = string.format( "Usage: %s",  Shorten(Entity.ClientAverage or 0 ))
+    draw.SimpleText( Line2, "ExpAdv_OverlayFont", X + (50 * Mult), Y + (50 * Mult), TextColor, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
+        
+    local Line3 = string.format( "CPU: %i us",  Entity.ClientStopWatch or 0 )
+    draw.SimpleText( Line3, "ExpAdv_OverlayFont", X + (50 * Mult), Y + (60 * Mult), TextColor, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
 end
 
-/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
-    @: Effects
-   --- */
+local function PaintServer( X, Y, Entity )
+    local SVState = Entity:GetServerState( ) or 0
 
--- Does not work Sad Face :(
+    if SVState >= EXPADV_STATE_CRASHED then
+        surface.SetMaterial( Material( "omicron/overlay_serverred.png" ) )
+        surface.DrawTexturedRect( X, Y, 200 * Mult, 100 * Mult )
+    elseif SVState >= EXPADV_STATE_ONLINE then
+        surface.SetMaterial( Material( "omicron/overlay_servergreen.png" ) )
+        surface.DrawTexturedRect( X, Y, 200 * Mult, 100 * Mult )
+    end
 
-    --[[
-        if State == EXPADV_STATE_ALERT then
-            local Pos = Attachment.Pos
+    draw.SimpleText( "Server:", "ExpAdv_OverlayFont", X + (150 * Mult), Y + (30 * Mult), TextColor, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
+            
+    local Counter = Entity:GetTickQuota( ) or 0
+    local Line = string.format( "Quota: %s, %i%%", Shorten( Counter ), (Counter / expadv_hardquota) * 100 )
+    draw.SimpleText( Line, "ExpAdv_OverlayFont", X + (150 * Mult), Y + (40 * Mult), TextColor, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
+       
+    local Line2 = string.format( "Usage: %s",  Shorten(Entity:GetAverage( ) or 0 ))
+    draw.SimpleText( Line2, "ExpAdv_OverlayFont", X + (150 * Mult), Y + (50 * Mult), TextColor, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
+        
+    local Line3 = string.format( "CPU: %i us",  Entity:GetStopWatch( ) or 0 )
+    draw.SimpleText( Line3, "ExpAdv_OverlayFont", X + (150 * Mult), Y + (60 * Mult), TextColor, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
 
-            if !self.NextSpark or self.NextSpark < CurTime() then
-                local fx_dat = EffectData()
-                fx_dat:SetMagnitude(math.random(0.1,0.3))
-                fx_dat:SetScale(math.random(0.5,1.5))
-                fx_dat:SetRadius(2)
-                fx_dat:SetOrigin(Pos)
-                util.Effect("sparks",fx_dat)
-                self.NextSpark = CurTime() + math.Rand(0.2,1)
-            end
-        end
-    ]]
+end
 
+local function PaintOverlay( X, Y, Entity )
+
+    surface.SetMaterial( Material( "omicron/ea2_overlay_bg.png" ) )
+    surface.SetDrawColor( Color( 255, 255, 255, 100 ) )
+    surface.DrawTexturedRect( X, Y, 200 * Mult, 100 * Mult )
+
+    draw.SimpleText( Entity:GetPlayerName( ), "ExpAdv_OverlayFont", X + (100 * Mult), Y + (10 * Mult), TextColor, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
+
+    local Name = Entity:GetGateName( )
+    if !Name or Name == "" then Name = "LemonGate #2" end
+    draw.SimpleText( "Current Script: " .. Name, "ExpAdv_OverlayFont", X + (5 * Mult), Y + (92 * Mult), TextColor, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER )
+
+    PaintClient( X, Y, Entity )
+    PaintServer( X, Y, Entity )
+end
+
+hook.Add( "HUDPaint", "Expadv.overlay", function( )
+    local Entity = LocalPlayer():GetEyeTrace( ).Entity
+
+    if !IsValid(Entity) or !Entity.ExpAdv then return end
+
+    if ( EyePos():Distance( Entity:GetPos() ) > 156 ) then return end
+
+    local DrawPos = Entity:GetOverlayPos( ):ToScreen( )
+
+    PaintOverlay( DrawPos.x, DrawPos.y, Entity )
+end )
+
+function ENT:GetOverlayPos( )
+    return self:LocalToWorld( Vector( -6,-2, 2 ) )
+end

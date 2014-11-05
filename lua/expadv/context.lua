@@ -24,10 +24,8 @@ function EXPADV.BuildNewContext( Instance, Player, Entity ) -- Table, Player, En
 	Context.Trigger = { }
 	Context.Changed = { }
 
-	Context.RootMemory = { }
-	Context.RootDelta = { }
-	Context.Memory = { __index = Context.RootMemory }
-	Context.Delta = { __index = Context.RootDelta }
+	Context.Memory = {  }
+	Context.Delta = {  }
 
 	Context.Data = { }
 	Context.Definitions = { }

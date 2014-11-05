@@ -192,44 +192,51 @@ if SERVER then
 
 			local Info = self.CLIPS[ID]
 
-			net.WriteBit( Info.ENABLED )
+			if Info then
+				net.WriteBit( true )
 
-			net.WriteBit( Info.SYNC_NORMALX )
-			if Info.SYNC_NORMALX then
-				Info.SYNC_NORMALX = nil
-				net.WriteFloat( Info.NORMALX )
+				net.WriteBit( Info.ENABLED )
+
+				net.WriteBit( Info.Global )
+
+				net.WriteBit( Info.SYNC_NORMALX )
+				if Info.SYNC_NORMALX then
+					Info.SYNC_NORMALX = nil
+					net.WriteFloat( Info.NORMALX )
+				end
+
+				net.WriteBit( Info.SYNC_NORMALY )
+				if Info.SYNC_NORMALY then
+					Info.SYNC_NORMALY = nil
+					net.WriteFloat( Info.NORMALY )
+				end
+
+				net.WriteBit( Info.SYNC_NORMALZ )
+				if Info.SYNC_NORMALZ then
+					Info.SYNC_NORMALZ = nil
+					net.WriteFloat( Info.NORMALZ )
+				end
+
+				net.WriteBit( Info.SYNC_ORIGINX )
+				if Info.SYNC_ORIGINX then
+					Info.SYNC_ORIGINX = nil
+					net.WriteFloat( Info.ORIGINX )
+				end
+
+				net.WriteBit( Info.SYNC_ORIGINY )
+				if Info.SYNC_ORIGINY then
+					Info.SYNC_ORIGINY = nil
+					net.WriteFloat( Info.ORIGINY )
+				end
+
+				net.WriteBit( Info.SYNC_ORIGINZ )
+				if Info.SYNC_ORIGINZ then
+					Info.SYNC_ORIGINZ = nil
+					net.WriteFloat( Info.ORIGINZ )
+				end
+			else
+				net.WriteBit( false )
 			end
-
-			net.WriteBit( Info.SYNC_NORMALY )
-			if Info.SYNC_NORMALY then
-				Info.SYNC_NORMALY = nil
-				net.WriteFloat( Info.NORMALY )
-			end
-
-			net.WriteBit( Info.SYNC_NORMALZ )
-			if Info.SYNC_NORMALZ then
-				Info.SYNC_NORMALZ = nil
-				net.WriteFloat( Info.NORMALZ )
-			end
-
-			net.WriteBit( Info.SYNC_ORIGINX )
-			if Info.SYNC_ORIGINX then
-				Info.SYNC_ORIGINX = nil
-				net.WriteFloat( Info.ORIGINX )
-			end
-
-			net.WriteBit( Info.SYNC_ORIGINY )
-			if Info.SYNC_ORIGINY then
-				Info.SYNC_ORIGINY = nil
-				net.WriteFloat( Info.ORIGINY )
-			end
-
-			net.WriteBit( Info.SYNC_ORIGINZ )
-			if Info.SYNC_ORIGINZ then
-				Info.SYNC_ORIGINZ = nil
-				net.WriteFloat( Info.ORIGINZ )
-			end
-
 		end
 
 		self.SYNC_CLIPS = { }
@@ -242,8 +249,11 @@ if SERVER then
 		for ID, Info in pairs( self.CLIPS ) do
 
 			net.WriteUInt( ID, 16 )
+			net.WriteBit( true )
 
 			net.WriteBit( Info.ENABLED )
+
+			net.WriteBit( Info.Global )
 
 			net.WriteBit( true )
 			net.WriteFloat( Info.NORMALX )
@@ -541,15 +551,21 @@ elseif CLIENT then -- End of <if SERVER>
 
 			local Info = Clips[ID]
 
-			Info.ENABLED = net.ReadBit( ) == 1
+			if net.ReadBit( ) == 1 then
+				Info.ENABLED = net.ReadBit( ) == 1
 
-			if net.ReadBit( ) == 1 then Info.NORMALX = net.ReadFloat( ) end
-			if net.ReadBit( ) == 1 then Info.NORMALY = net.ReadFloat( ) end
-			if net.ReadBit( ) == 1 then Info.NORMALZ = net.ReadFloat( ) end
+				Info.Global = net.ReadBit( ) == 1
 
-			if net.ReadBit( ) == 1 then Info.ORIGINX = net.ReadFloat( ) end
-			if net.ReadBit( ) == 1 then Info.ORIGINY = net.ReadFloat( ) end
-			if net.ReadBit( ) == 1 then Info.ORIGINZ = net.ReadFloat( ) end
+				if net.ReadBit( ) == 1 then Info.NORMALX = net.ReadFloat( ) end
+				if net.ReadBit( ) == 1 then Info.NORMALY = net.ReadFloat( ) end
+				if net.ReadBit( ) == 1 then Info.NORMALZ = net.ReadFloat( ) end
+
+				if net.ReadBit( ) == 1 then Info.ORIGINX = net.ReadFloat( ) end
+				if net.ReadBit( ) == 1 then Info.ORIGINY = net.ReadFloat( ) end
+				if net.ReadBit( ) == 1 then Info.ORIGINZ = net.ReadFloat( ) end
+			else
+				Clips[ID] = nil
+			end
 
 			ID = net.ReadUInt( 16 )
 		end
@@ -714,9 +730,10 @@ if SERVER then
     Clipping
 ==============================================================================================*/
 	
-	function ENT:PushClip( ID, Origin, Normal )
+	function ENT:PushClip( ID, Origin, Normal, Global )
 		self:SetClipOrigin( ID, Origin )
 		self:SetClipNormal( ID, Normal )
+		if Global then self:SetClipGlobal( ID, Global ) end
 	end
 
 	function ENT:SetClipEnabled( ID, bEnable )
@@ -755,6 +772,14 @@ if SERVER then
 		end
 	end
 
+	function ENT:SetClipGlobal( ID, Bool )
+		if !self.CLIPS[ ID ] then return end
+
+		self.SYNC_CLIPS[ ID ] = self.CLIPS[ ID ].Global ~= Bool
+
+		self.CLIPS[ ID ].Global = Bool
+	end
+
 	function ENT:SetClipNormal( ID, Vector )
 		if ID < 1 or ID > Component:ReadSetting( "clips", 5 ) then return end
 		
@@ -779,6 +804,14 @@ if SERVER then
 			Clip.SYNC_NORMALZ = true
 			self.SYNC_CLIPS[ ID ] = true
 		end
+	end
+
+	function ENT:RemoveClip( ID )
+		if !self.CLIPS[ ID ] then return end
+
+		self.CLIPS[ ID ] = nil
+
+		self.SYNC_CLIPS[ ID ] = true
 	end
 
 /*==============================================================================================
@@ -1064,9 +1097,15 @@ function ENT:Draw( )
 			
 			if !Clip.ENABLED then continue end
 
-			local Normal = self:LocalToWorld( Vector( Clip.NORMALX, Clip.NORMALY, Clip.NORMALZ ) ) - self:GetPos( ) 
-					
-			local Origin = self:LocalToWorld( Vector( Clip.ORIGINX, Clip.ORIGINY, Clip.ORIGINZ ) )
+			local Normal = Vector( Clip.NORMALX, Clip.NORMALY, Clip.NORMALZ )
+			
+			local Origin = Vector( Clip.ORIGINX, Clip.ORIGINY, Clip.ORIGINZ )
+
+			if !Clip.Global then
+				Normal = self:LocalToWorld( Normal ) - self:GetPos( ) 
+						
+				Origin = self:LocalToWorld( Origin )
+			end
 					
 			render.PushCustomClipPlane( Normal, Normal:Dot( Origin ) )
 					

@@ -195,7 +195,6 @@ Component:AddVMFunction( "printColor", "...", "",
 
 Component:AddVMFunction( "print", "...", "",
 	function( Context, Trace, ... )
-
 		if CLIENT and Context.player ~= LocalPlayer( ) then return end
 
 		local Values = { ... }

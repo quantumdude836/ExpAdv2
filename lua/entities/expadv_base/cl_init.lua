@@ -26,14 +26,10 @@ end
 
 function ENT:Draw( )
 	self:DrawModel( )
-	
-	if self:BeingLookedAtByLocalPlayer( ) then
-		self:DrawOverlay( Vector(-6,-2, 2 ) )
-	end
 end
 
-function ENT:DrawOverlay( Pos )
-
+function ENT:GetOverlayPos( )
+	return self:GetPos( )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------

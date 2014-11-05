@@ -160,17 +160,6 @@ function ENT:Draw( )
 	self:DrawModel( )
 	self:DrawScreen( )
 
-	if self:BeingLookedAtByLocalPlayer( ) then
-		local Monitor = EXPADV.GetMonitor( self:GetModel( ) )
-		local Position, Angles = Vector(-6,-2, 2 )
-
-		if Monitor then
-			Position = self:ScreenToLocalVector( Vector2( 0, 0 ) )
-			Angles = Monitor.Rot
-		end
-
-		self:DrawOverlay( Position, Angles )
-	end
 end
 
 function ENT:DrawScreen( )
@@ -243,4 +232,12 @@ end
 function ENT:OnRemove( )
 	EXPADV.CacheRenderTarget( self.RenderTarget, self.RenderMat )
 	return self.BaseClass.OnRemove( self )
+end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Overlay
+   --- */
+
+function ENT:GetOverlayPos( )
+	return self:ScreenToWorld( Vector2( 512, 256 ) )
 end

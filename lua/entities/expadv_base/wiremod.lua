@@ -40,6 +40,8 @@ function ENT:BuildInputs( Cells, Ports )
 		Types[I] = Port[2]
 	end
 
+	local OldPorts = self.Inputs
+
 	self.InPorts = Ports
 	self.DupeInPorts = { Names, Types }
 	self.Inputs = WireLib.AdjustSpecialInputs( self, Names, Types )
@@ -70,8 +72,10 @@ function ENT:BuildOutputs( Cells, Ports )
 		Types[I] = Port[2]
 	end
 
+	local OldPorts = self.Outputs
+
 	self.OutPorts = Ports
-	self.OutClick = OutClick
+	self.OutClick = OutClickt
 	self.DupeOutPorts = { Names, Types }
 
 	self.Outputs = WireLib.AdjustSpecialOutputs( self, Names, Types )
@@ -81,21 +85,19 @@ function ENT:BuildOutputs( Cells, Ports )
 	end -- ^ Re-attaches the wirelink :D
 end
 
-
-function ENT:LoadFromInputs( )
+function ENT:LoadFromInputs( Cells )
 	--Note: This will load inports into memory!
-	local Cells = self.Cells
 
-	for Variable, Port in pairs( self.Inputs ) do
-		local Reference = self.InPorts[ Variable ]
+	local Context = self.Context
+	
+	for Name, Port in pairs( self.Inputs ) do
+		local MemRef = self.InPorts[ Name ]
+		if !MemRef then continue end
 
-		if Reference then
-			local Cell = Cells[ Reference ]
+		local Class = Cells[MemRef].ClassObj
+		if Port.Type ~= Class.Wire_In_Type then continue end
 
-			if Cell and Port.Type == Cell.ClassObj.Wire_In_Type then
-				Cell.ClassObj.Wire_In_Util( self.Context, Reference, Port.Value )
-			end
-		end
+		Class.Wire_In_Util( Context, MemRef, Port.Value )
 	end
 end
 

@@ -208,7 +208,7 @@ function Compiler:SkipComments( )
 
 			self:SkipChar( )
 
-			-- TODO: Yeild protection.
+			self:Yield( )
 		end
 
 		self.ReadData = ""
@@ -243,6 +243,7 @@ function Compiler:StringToken( StrChar )
 				self:SkipChar( ) -- Escape Sequence.
 			else
 				self:NextChar( )
+				self:Yield( )
 			end
 
 		elseif self.Char == "\\" then
