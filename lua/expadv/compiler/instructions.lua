@@ -592,7 +592,9 @@ function Compiler:Compile_ASS( Trace, Variable, Expression, DefinedClass, Modifi
 	end
 
 	local Inst = Operator.Compile( self, Trace, Quick( MemRef, "n" ), Expression )
-	if Modifier ~= "static" then return Inst end
+	if Modifier ~= "static" and Modifier ~= "input" then return Inst end
+
+	self:PrepareInline( Inst )
 
 	Inst.Prepare = string.format( "if Context.Memory[%i] == nil then\n%s\nend", MemRef, Inst.Prepare )
 
