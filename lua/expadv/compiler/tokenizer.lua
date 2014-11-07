@@ -207,7 +207,6 @@ function Compiler:SkipComments( )
 			end
 
 			self:SkipChar( )
-
 			self:Yield( )
 		end
 

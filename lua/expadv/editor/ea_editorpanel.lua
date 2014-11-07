@@ -134,60 +134,7 @@ function PANEL:Init( )
 	self.__bVoice = 0
 	self.__nMicAlpha = 0
 
-	hook.Add( "Think", self, self.DoValidationStep )
-end
-
-------------------------------------------------------------------------------------------------------
---		NEW VALIDATOR
-------------------------------------------------------------------------------------------------------
-
-function PANEL:DoValidate( Goto, Code, CallBack )
-	self.ValidationInstance = setmetatable( { }, EXPADV.Compiler )
-	self.ValidationInstance.CoRoutine = coroutine.create( EXPADV.SoftCompile )
-
-	coroutine.resume( self.ValidationInstance.CoRoutine ,self.ValidationInstance, Code or self:GetCode( ), { },
-		function( ErrMsg )
-			self:OnValidateError( ErrMsg, Goto )
-		end, function( Instance, Istr )
-			self:OnValidateSucess( Instance, Istr )
-		end )
-end
-
-function PANEL:OnValidateError( ErrMsg, Goto )
-	if Goto then
-		local Row, Col = ErrMsg:match( "at line ([0-9]+), char ([0-9]+)$" )
-		if not Row then Row, Col = ErrMsg:match( "at line ([0-9]+)$" ), 1 end
-
-		if Row then
-			Row, Col = tonumber( Row ), tonumber( Col )
-			if Row < 1 or Col < 1 then 
-				ErrMsg = string.match( ErrMsg, "^(.-)at line [0-9]+" ) .. "| Invalid trace"
-			else 
-				self:SetCaret( Vector2( Row, Col ) )
-			end 
-		end
-	end
-
-	self.ValidationInstance = nil
-	self.ValidateButton:SetText( ErrMsg )
-	self.ValidateButton:SetColor( Color( 255, 0, 0 ) )
-end
-
-function PANEL:OnValidateSucess( Instance, Istr )
-	self.ValidationInstance = nil
-	self.ValidateButton:SetColor( Color( 0, 255, 0 ) )
-	self.ValidateButton:SetText( "Validation Successful!" )
-end
-
-function PANEL:DoValidationStep( )
-	if not self.ValidationInstance then return end
-
-	coroutine.resume( self.ValidationInstance.CoRoutine )
-
-	if self.ValidationInstance then
-		self.ValidateButton:SetColor( Color( 0, 0, 255 ) )
-		self.ValidateButton:SetText( "Validating: " .. self.ValidationInstance:PercentCompiled( ) .. "% - " .. coroutine.status( self.ValidationInstance.CoRoutine ) )
-	end
+	timer.Create( "expadv.editor.validator", 1, 0, function( ) self:ResumeValidator( ) end )
 end
 
 function PANEL:SetCode( Code, Tab )
@@ -772,6 +719,65 @@ function PANEL:AddSharedInvite( ID, Host, Name )
 	
 	List:InsertAtTop( Pnl, "ownline" )
 	self.ToolBar.pnlSharedView:InvalidateLayout()
+end
+
+------------------------------------------------------------------------------------------------------
+--		NEW VALIDATOR
+------------------------------------------------------------------------------------------------------
+
+function PANEL:DoValidate( Goto, Code )
+	if self.Validator_Instance and self.Validator_Instance.Running then
+		self.Validator_Instance = nil
+		self.ValidateButton:SetColor( Color( 0, 255, 0 ) )
+		self.ValidateButton:SetText( "Click to validate" )
+		return
+	end
+
+	local Instance = EXPADV.CreateCompiler( Code or self:GetCode( ), { },
+		function( Error ) -- Instance.OnError
+			self:OnValidateError( Goto, Error )
+		end, function( Instance, Instruction ) -- Instance.OnSucess
+			self.ValidateButton:SetColor( Color( 0, 255, 0 ) )
+			self.ValidateButton:SetText( "Validation Successful!" )
+		end, function( Status ) -- Instance.OnUpdate
+			self.ValidateButton:SetColor( Color( 0, 0, 255 ) )
+			self.ValidateButton:SetText( "Validating: " .. Status .. "%" )
+		end )
+
+	if !Instance then return end
+
+	self.Validator_Instance = Instance
+
+	self.ValidateButton:SetColor( Color( 0, 0, 255 ) )
+	self.ValidateButton:SetText( "Validating: 0%" )
+end
+
+function PANEL:OnValidateError( Goto, Error )
+	if Goto then
+		local Row, Col = Error:match( "at line ([0-9]+), char ([0-9]+)$" )
+		if not Row then Row, Col = Error:match( "at line ([0-9]+)$" ), 1 end
+
+		if Row then
+			Row, Col = tonumber( Row ), tonumber( Col )
+			if Row < 1 or Col < 1 then 
+				Error = string.match( Error, "^(.-)at line [0-9]+" ) .. "| Invalid trace"
+			else 
+				self:SetCaret( Vector2( Row, Col ) )
+			end 
+		end
+	end
+
+	self.ValidateButton:SetText( Error )
+	self.ValidateButton:SetColor( Color( 255, 0, 0 ) )
+end
+
+function PANEL:ResumeValidator( )
+	if !self.Validator_Instance or !self.Validator_Instance.Running then
+		self.Validator_Instance = nil
+		return
+	end
+
+	self.Validator_Instance:Resume( )
 end
 
 vgui.Register( "EA_EditorPanel", PANEL, "EA_Frame" )

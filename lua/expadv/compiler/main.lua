@@ -651,7 +651,7 @@ end
 /* --- --------------------------------------------------------------------------------
 	@: Compile Code
    --- */
-
+--[[
 local Coroutines = { }
 
 local function SoftCompile( self, Script, Files, OnError, OnSucess )
@@ -695,13 +695,11 @@ local function SoftCompile( self, Script, Files, OnError, OnSucess )
 		self.ReturnOptional = { }
 		self.ReturnTypes = { }
 		self.ReturnDeph = 0
+		self.TimeMark = SysTime( ) + 0.5
 
 	-- Start the Tokenizer:
 		self:StartTokenizer( )
 
-	-- Wait for next tick to begin:
-		self:Yield( true )
-		
 	-- Call hook:
 		EXPADV.CallHook( "PreCompileScript", self, Script, Files )
 
@@ -724,40 +722,44 @@ EXPADV.SoftCompile = SoftCompile
 	@: Compiler Handeler, From now on we will compile over time!
    --- */
 
-local TimeMark, SysTime = 0, SysTime
+function Compiler:Yield( )
+	local Time = SysTime( )
 
-function Compiler:Yield( Force )
-	if Force or SysTime( ) > self.TimeMark then
-		--coroutine.yield( )
-		self.TimeMark = SysTime( ) + 0.001
-	end
+	if Time < self.TimeMark then return end
+
+	print( "Yield:", Time, "vs", self.TimeMark )
+
+	coroutine.yield( )
+
+	self.TimeMark = SysTime( ) + 0.5
 end
 
-hook.Add( "Tick", "ExpAdv.Compile", function( )
-	for Instance, Coroutine in pairs( Coroutines ) do
-
-		EXPADV.COMPILER_ENV = Instance.Enviroment
-
-			coroutine.resume( Coroutine )
-
-		EXPADV.COMPILER_ENV = nil
-	end
-end )
+local CompilerInstances = { }
 
 function EXPADV.Compile( Script, Files, OnError, OnSucess )
-	local self = setmetatable( { }, Compiler )
+	local Instance = setmetatable( { }, Compiler )
 
-	local Coroutine = coroutine.create( SoftCompile )
-	Coroutines[self] = Coroutine
+	CompilerInstances[Instance] = Instance
 
-	coroutine.resume( Coroutine ,self, Script, Files, OnError, OnSucess )
+	Instance.CoRoutine = coroutine.create( SoftCompile )
 
-	return self, Coroutine
+	print( coroutine.resume( Instance.CoRoutine, Instance, Script, Files, OnError, OnSucess ) )
+
+	return Instance
 end
 
-function EXPADV.StopCompiler( Instance )
-	Coroutines[Instance] = nil
-end
+timer.Create( "ExpAdv.TimeCoimpiler", 0, 1,
+	function( )
+		for Instance, _ in pairs( CompilerInstances ) do
+			if !Instance.CoRoutine or coroutine.status( Instance.CoRoutine ) == "dead" then
+				CompilerInstances[Instance] = nil
+				MsgN( "Compiler Finished" )
+				continue
+			end
+
+			print( coroutine.resume( Instance.CoRoutine ) )
+		end
+	end )
 
 /* --- --------------------------------------------------------------------------------
 	@: Some Extra Stuff
@@ -765,8 +767,156 @@ end
 
 function Compiler:PercentCompiled( )
 	if self.Pos <= 0 or self.Len <= 0 then return 0 end
-	return self.Pos / self.Len * 100
+	return (self.Pos / self.Len) * 100
 end
+
+]]
+
+/* --- --------------------------------------------------------------------------------
+	@: Lets Try that AGAIN!
+   --- */
+
+local Instances = { }
+
+Compiler.Instances = { }
+
+function Compiler:SoftCompile( Script, Files )
+
+	-- Client and Server
+		self.IsServerScript = true
+		self.IsClientScript = true
+
+	-- Instance
+		self.Pos = 0
+		self.Len = #Script
+		self.Buffer = Script
+		self.Files = Files or { }
+
+	-- Holders
+		self.DefineID = 0
+		self.Strings = { }
+		self.VMInstructions = { }
+		self.VMLookUp = { }
+		self.NativeLog = { }
+
+	-- Enviroment
+		self.Enviroment = CreateEnviroment( )
+		
+	-- Memory:
+		self:BuildScopes( )
+
+		self.Delta = { }
+		self.Memory = { }
+
+		self.Cells = { }
+		self.InPorts = { }
+		self.OutPorts = { }
+
+		self.FreshMemory = { }
+		self.MemoryDeph = 0
+		self.LambdaDeph = 0
+		self.LoopDeph = 0
+
+		self.ReturnOptional = { }
+		self.ReturnTypes = { }
+		self.ReturnDeph = 0
+
+	-- Exit Softcompiler
+		coroutine.yield( )
+		self.TimeMark = SysTime( ) + 0.05
+
+	-- Start the Tokenizer:
+		self:StartTokenizer( )
+
+	-- Call hook:
+		EXPADV.CallHook( "PreCompileScript", self, Script, Files )
+
+	-- Ok, Run the compiler.
+		local Compiled, Instruction = pcall( self.Sequence, self, { 0, 0 } ) -- self.Main
+
+	-- Finish!
+		setmetatable( self.Enviroment, EXPADV.BaseEnv )
+
+		if !Compiled then
+			if self.OnError then self.OnError( Instruction ) end
+		elseif self.OnSucess then
+			self.OnSucess( self, self:FixPlaceHolders( Instruction ) )
+		end
+
+		self.Running = false
+
+		return
+end
+
+function EXPADV.CreateCompiler( Script, Files, OnError, OnSucess, OnUpdate )
+	local Thread = coroutine.create( Compiler.SoftCompile )
+	local Instance = setmetatable( { Thread = Thread, Running = true, OnError = OnError, OnSucess = OnSucess, OnUpdate = OnUpdate }, Compiler )
+
+	local Ok, Error = coroutine.resume( Thread, Instance, Script, Files )
+
+	if Ok then return Instance end
+
+	if self.OnError then
+		self.OnError( Error )
+	end
+
+	self.Running = false
+end
+
+function Compiler:Yield( )
+	local Time = SysTime( )
+	if Time < self.TimeMark then return end
+
+	coroutine.yield( )
+	self.TimeMark = SysTime( ) + 0.05
+end
+
+function Compiler:GetStatus( )
+	if self.Pos <= 0 or self.Len <= 0 then return 0 end
+	return math.ceil( math.Clamp(self.Pos / self.Len, 0, 1) * 100)
+end
+
+function Compiler:Resume( HandelManual )
+	local Ok, Error = coroutine.resume( self.Thread )
+
+	if Ok then
+		if self.Running and self.OnUpdate then
+			self.OnUpdate( self:GetStatus( ) )
+		end
+
+		return true
+	end
+
+	if HandelManual then
+		return false, Error
+	end
+
+	if self.OnError then
+		self.OnError( Error )
+	end
+
+	self.Running = false
+
+	return false
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 /* --- --------------------------------------------------------------------------------

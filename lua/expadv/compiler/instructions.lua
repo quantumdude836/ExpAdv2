@@ -438,8 +438,6 @@ function Compiler:Compile_SEQ( Trace, Instructions )
 				Sequence[#Sequence + 1] = Instruction.Inline
 			end -- Somtimes the Inline will actually be required preparable code.
 		end
-
-		self:Yield( )
 	end
 
 	return { Trace = Trace, Return = "", Prepare = table.concat( Sequence, "\n" ),FLAG = EXPADV_PREPARE, IsSequence = true }
@@ -661,8 +659,6 @@ function Compiler:Compile_FUNC( Trace, Variable, Expressions )
 			if EXPADV.Functions[ Match ] then BestMatch = EXPADV.Functions[ Match ] end
 
 			Signature = Signature .. Expressions[I].Return
-
-			self:Yield( )
 		end
 
 		local Operator = EXPADV.Functions[ string.format( "%s(%s)", Variable, Signature ) ] or BestMatch
@@ -695,8 +691,6 @@ function Compiler:Compile_METHOD( Trace, Expression, Method, Expressions, bNoErr
 			if EXPADV.Functions[ Match ] then BestMatch = EXPADV.Functions[ Match ] end
 
 			Signature = Signature .. Expressions[I].Return
-
-			self:Yield( )
 		end
 
 		-- MsgN( "Looking for: ", string.format( "%s(%s)", Method, Signature ) )
@@ -768,8 +762,6 @@ function Compiler:Compile_EVENT( Trace, Name, Params, UseVarg, Sequence, Memory 
 		end
 		
 		PreSequence[ #PreSequence + 1 ] = Operator.Compile( self, Trace, Quick( Param[3], "n" ), Quick( Inputs[I], Type ) )
-
-		self:Yield( )
 	end
 	
 	if UseVarg then Inputs[#Inputs + 1] = "..." end
@@ -817,8 +809,6 @@ function Compiler:Build_Function( Trace, Params, UseVarg, Sequence, Memory )
 		
 		PreSequence[ #PreSequence + 1 ] = { Trace = Trace, Return = "", Prepare = Lua, FLAG = EXPADV_PREPARE }
 		PreSequence[ #PreSequence + 1 ] = Operator.Compile( self, Trace, Quick( Param[3], "n" ), Quick( Inputs[I] .. (Param[2] ~= "_vr" and "[1]" or ""), Type ) )
-
-		self:Yield( )
 	end
 	
 	if UseVarg then Inputs[#Inputs + 1] = "..." end

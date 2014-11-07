@@ -153,20 +153,24 @@ function ENT:CompileScript( Root, Files )
 		self.Context:ShutDown( )
 		EXPADV.UnregisterContext( self.Context )
 	end
+	
+	if !Root or Root == "" then return end
 
-	EXPADV.Compile( Root, Files,
+	local Instance = EXPADV.CreateCompiler( Root, Files,
+		function( Error ) -- Instance.OnError
+			self:OnCompileError( Error, Instance )
+		end, function( Instance, Instruction ) -- Instance.OnSucess
+			self:BuildInstance( Instance, Instruction )
+		end, function( Status ) -- Instance.OnUpdate
+			self:OnCompilerUpdate( Status )
+		end )
 
-		function( ErMsg )
-			local Cmp = self.Compiler
+	if !Instance then return end
 
-			return self:OnCompileError( ErMsg, Cmp )
-		end,
-
-		function( Instance, Instruction )
-			return self:BuildInstance( Instance, Instruction )
-		end
-	) -- Now we wait for the callback!
+	self.Compiler_Instance = Instance
 end
+
+function ENT:OnCompilerUpdate( Status ) end
 
 function ENT:OnCompileError( ErMsg, Compiler ) end
 
