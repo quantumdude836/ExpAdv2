@@ -6,14 +6,14 @@ if !EXPADV then return ErrorNoHalt( "Expression Advanced 2, Failed to load tool.
 
 if CLIENT then
 	language.Add( "Tool.expadv2.name", "Expression Advanced 2" )
-	language.Add( "Tool.expadv2.desc", "Creats an ingame scriptable entity." )
-	language.Add( "Tool.expadv2.help", "Place an Expession Advanced Gate or screen." )
+	language.Add( "Tool.expadv2.desc", "Creates an ingame scriptable entity." )
+	language.Add( "Tool.expadv2.help", "Place an Expression Advanced Gate or screen." )
 	language.Add( "Tool.expadv2.0", "Place an Expession Advanced Gate or screen." )
 	
-	language.Add( "limit_expadv", "Expression Advanced entity limit reached." )
+	language.Add( "limit_expadv", "Expression Advanced Entity limit reached." )
 	language.Add( "Undone_expadv", "Expression Advanced - Removed." )
 	language.Add( "Cleanup_expadv", "Expression Advanced - Removed." )
-	language.Add( "Cleaned_expadvs", "Expression Advanced - Removed all entitys." )
+	language.Add( "Cleaned_expadvs", "Expression Advanced - Removed All Entities." )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -184,7 +184,7 @@ function TOOL:LeftClick( Trace )
 	end
 
 	
-	self:GetOwner( ):AddCleanup( "expadv2", ExpAdv )
+	self:GetOwner( ):AddCleanup( "expadv", ExpAdv )
 
 	net.Start( "expadv.request" )
 	net.WriteUInt( ExpAdv:EntIndex( ), 16 )
@@ -224,9 +224,9 @@ if CLIENT then
 		Props:SetConVar( "expadv2_model" )
 		CPanel:AddItem( Props )
 
-		local CheckWeld = CPanel:CheckBox( "Create welded", "expadv2_weld" )
-		local CheckWorld = CPanel:CheckBox( "Weld to world", "expadv2_weldworld" )
-		local CheckFroze = CPanel:CheckBox( "Create frozen", "expadv2_frozen" )
+		local CheckWeld = CPanel:CheckBox( "Create Welded", "expadv2_weld" )
+		local CheckWorld = CPanel:CheckBox( "Weld To World", "expadv2_weldworld" )
+		local CheckFroze = CPanel:CheckBox( "Create Frozen", "expadv2_frozen" )
 
 		local function ShowGateModels( )
 			DScrollPanel.Clear( Props.List )
