@@ -1,6 +1,14 @@
 local Compiler = EXPADV.Compiler
 
 /* --- --------------------------------------------------------------------------------
+	@: Lets speed this up
+   --- */
+ 
+local string_Explode = string.Explode
+local string_sub = string.sub
+local string_find = string.find
+
+/* --- --------------------------------------------------------------------------------
 	@: Chars
    --- */
 
@@ -14,7 +22,7 @@ function Compiler:SkipChar( )
 		end
 
 		self.Pos = self.Pos + 1
-		self.Char = self.Buffer:sub( self.Pos, self.Pos )
+		self.Char = string_sub(self.Buffer, self.Pos, self.Pos )
 	else
 		self.Char = nil
 	end
@@ -31,9 +39,9 @@ end
 
 function Compiler:NextPattern( Pattern, Exact )
 	if self.Char then
-		local Start, End, String = self.Buffer:find( Pattern, self.Pos, Exact )
+		local Start, End, String = string_find(self.Buffer, Pattern, self.Pos, Exact )
 		if Start == self.Pos then
-			String = String or self.Buffer:sub( Start, End )
+			String = String or string_sub(self.Buffer, Start, End )
 
 			self.Pos = End + 1
 			self.PatternMatch = String
@@ -45,7 +53,7 @@ function Compiler:NextPattern( Pattern, Exact )
 				self.Char = self.Buffer[self.Pos]
 			end
 
-			local Lines = string.Explode( "\n", String )
+			local Lines = string_Explode( "\n", String )
 			if #Lines > 1 then
 				self.ReadLine = self.ReadLine + #Lines - 1
 				self.ReadChar = #Lines[ #Lines ] + 1
@@ -61,10 +69,10 @@ function Compiler:NextPattern( Pattern, Exact )
 end
 
 function Compiler:ManualPattern( Pattern, Exact )
-	local Start, End, String = self.Buffer:find( Pattern, self.Pos, Exact )
+	local Start, End, String = string_find(self.Buffer, Pattern, self.Pos, Exact )
 	
 	if Start == self.Pos then
-		return String or self.Buffer:sub( Start, End )
+		return String or string_sub(self.Buffer, Start, End )
 	end
 end
 
@@ -207,7 +215,6 @@ function Compiler:SkipComments( )
 			end
 
 			self:SkipChar( )
-			self:Yield( )
 		end
 
 		self.ReadData = ""
@@ -242,7 +249,6 @@ function Compiler:StringToken( StrChar )
 				self:SkipChar( ) -- Escape Sequence.
 			else
 				self:NextChar( )
-				self:Yield( )
 			end
 
 		elseif self.Char == "\\" then
@@ -294,7 +300,7 @@ function Compiler:StringToken( StrChar )
 	local String = self.ReadData
 
 	if #String > 10 then
-		String = string.sub(self.ReadData, 0, 10) .. "..."
+		String = string_sub(self.ReadData, 0, 10) .. "..."
 	end
 
 	self:Error( 0, "Unterminated string (\"%s)", String )

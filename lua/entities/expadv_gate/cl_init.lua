@@ -118,7 +118,7 @@ end
 local function PaintOverlay( X, Y, Entity )
 
     surface.SetMaterial( Material( "omicron/ea2_overlay_bg.png" ) )
-    surface.SetDrawColor( Color( 255, 255, 255, 100 ) )
+    surface.SetDrawColor( Color( 255, 255, 255, 200 ) )
     surface.DrawTexturedRect( X, Y, 200 * Mult, 100 * Mult )
 
     draw.SimpleText( Entity:GetPlayerName( ), "ExpAdv_OverlayFont", X + (100 * Mult), Y + (10 * Mult), TextColor, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )

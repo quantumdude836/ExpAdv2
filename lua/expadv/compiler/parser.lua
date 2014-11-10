@@ -19,10 +19,7 @@ function Compiler:CurrentToken( Type )
 end
 
 function Compiler:AcceptToken( Type, Type2, ... )
-	self:Yield( )
-
 	if self.PrepToken and ( self.PrepTokenType == Type ) then
-		-- MsgN( "ACCEPTED: ", Type, " - ", self.PrepToken[5] ) 
 		self:NextToken( )
 
 		return true
@@ -34,8 +31,6 @@ function Compiler:AcceptToken( Type, Type2, ... )
 end
 
 function Compiler:AcceptTokenData( Data, Data2, ... )
-	self:Yield( )
-
 	if self.PrepToken and ( self.PrepTokenData == Data ) then
 		self:NextToken( )
 
@@ -48,8 +43,6 @@ function Compiler:AcceptTokenData( Data, Data2, ... )
 end
 
 function Compiler:CheckToken( Type, Type2, ... )
-	self:Yield( )
-
 	if self.PrepToken and ( self.PrepTokenType == Type ) then
 		return true
 	elseif Type2 then
@@ -763,6 +756,10 @@ end -- TODO: ^ This
 
 function Compiler:Statement( Trace )
 	-- MsgN( "Compiler -> Statement" )
+
+	if self.ExitTime < SysTime( ) then
+		self:Error( 0, "Script took longer then %i second to compile!", expadv_maxcompilertime )
+	end
 
 	local _StmtRoot = self.StatmentRoot
 	self.StatmentRoot = self:GetTokenTrace( Trace )

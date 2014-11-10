@@ -468,7 +468,7 @@ Component:AddPreparedFunction("pushClip", "h:n,v,v,b", "", [[
 if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:PushClip( @value 2, @value 3, @value 4, @value 5 )
 end]] )
-EXPADV.AddFunctionAlias("pushClip", "h:n,v,v,b")
+EXPADV.AddFunctionAlias("pushClip", "h:n,v,v")
 
 Component:AddPreparedFunction("removeClip", "h:n", "", [[
 if IsValid( @value 1 ) and @value 1.player == Context.player then

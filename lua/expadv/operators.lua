@@ -106,6 +106,22 @@ function EXPADV.AddGeneratedOperator( Component, Name, Input, Return, Function )
 end
 
 /* --- --------------------------------------------------------------------------------
+	@: Lets speed this up
+   --- */
+ 
+local error = error
+local table_remove = table.remove
+local table_insert = table.insert
+local table_concat = table.concat
+local string_format = string.format
+local string_Explode = string.Explode
+local string_gmatch = string.gmatch
+local string_sub = string.sub
+local string_gsub = string.gsub
+local string_StartWith = string.StartWith
+local string_find = string.find
+
+/* --- --------------------------------------------------------------------------------
 	@: Load our operators
    --- */
 
@@ -126,7 +142,7 @@ function EXPADV.LoadOperators( )
 			local Class = EXPADV.GetClass( Operator.AttachedClass, false, true )
 
 			if !Class then
-				EXPADV.Msg( string.format( "Skipped operator: %s(%s), Attached to invalid class %q.", Operator.Name, Operator.Input, Operator.AttachedClass ) )
+				EXPADV.Msg( string_format( "Skipped operator: %s(%s), Attached to invalid class %q.", Operator.Name, Operator.Input, Operator.AttachedClass ) )
 				continue
 			end
 
@@ -138,7 +154,7 @@ function EXPADV.LoadOperators( )
 			Operator.Return = nil
 
 			if Operator.FLAG == EXPADV_INLINE then
-				EXPADV.Msg( string.format( "Skipped operator: %s(%s), Inline operators can't return void.", Operator.Name, Operator.Input ) )
+				EXPADV.Msg( string_format( "Skipped operator: %s(%s), Inline operators can't return void.", Operator.Name, Operator.Input ) )
 				continue
 			end
 
@@ -150,15 +166,15 @@ function EXPADV.LoadOperators( )
 			local Class = EXPADV.GetClass( Operator.Return, false, true )
 			
 			if !Class then 
-				EXPADV.Msg( string.format( "Skipped operator: %s(%s), Invalid return class %s.", Operator.Name, Operator.Input, Operator.Return ) )
+				EXPADV.Msg( string_format( "Skipped operator: %s(%s), Invalid return class %s.", Operator.Name, Operator.Input, Operator.Return ) )
 				continue
 			end
 
 			if !Class.LoadOnServer and Operator.LoadOnServer then
-				EXPADV.Msg( string.format( "Skipped operator: %s(%s), return class %s is not avalible on server.", Operator.Name, Operator.Input, Operator.Return ) )
+				EXPADV.Msg( string_format( "Skipped operator: %s(%s), return class %s is not avalible on server.", Operator.Name, Operator.Input, Operator.Return ) )
 				continue
 			elseif !Class.LoadOnClient and Operator.LoadOnClient then
-				EXPADV.Msg( string.format( "Skipped operator: %s(%s), return class %s is not avalible on clients.", Operator.Name, Operator.Input, Operator.Return ) )
+				EXPADV.Msg( string_format( "Skipped operator: %s(%s), return class %s is not avalible on clients.", Operator.Name, Operator.Input, Operator.Return ) )
 				continue
 			end
 
@@ -171,14 +187,14 @@ function EXPADV.LoadOperators( )
 		if Operator.Input and Operator.Input ~= "" then
 			local Signature = { }
 
-			for I, Input in pairs( string.Explode( ",", Operator.Input ) ) do //string.gmatch( Operator.Input, "()([%w%?!%*]+)%s*([%[%]]?)()" ) do
+			for I, Input in pairs( string_Explode( ",", Operator.Input ) ) do //string_gmatch( Operator.Input, "()([%w%?!%*]+)%s*([%[%]]?)()" ) do
 
 				-- First lets check for varargs.
 				if Input == "..." then
 					
-					if I ~= #string.Explode( ",", Operator.Input ) then 
+					if I ~= #string_Explode( ",", Operator.Input ) then 
 						ShouldNotLoad = true
-						EXPADV.Msg( string.format( "Skipped operator: %s(%s), vararg (...) must appear as at end of parameters.", Operator.Name, Operator.Input ) )
+						EXPADV.Msg( string_format( "Skipped operator: %s(%s), vararg (...) must appear as at end of parameters.", Operator.Name, Operator.Input ) )
 						break
 					end
 
@@ -194,17 +210,17 @@ function EXPADV.LoadOperators( )
 				local Class = EXPADV.GetClass( Input, false, true )
 				
 				if !Class then 
-					EXPADV.Msg( string.format( "Skipped operator: %s(%s), Invalid class for parameter #%i %s.", Operator.Name, Operator.Input, I, Input ) )
+					EXPADV.Msg( string_format( "Skipped operator: %s(%s), Invalid class for parameter #%i %s.", Operator.Name, Operator.Input, I, Input ) )
 					ShouldNotLoad = true
 					break
 				end
 
 				if !Class.LoadOnServer and Operator.LoadOnServer then
-					EXPADV.Msg( string.format( "Skipped operator: %s(%s), parameter #%i %s is not avalible on server.", Operator.Name, Operator.Input, I, Class.Name ) )
+					EXPADV.Msg( string_format( "Skipped operator: %s(%s), parameter #%i %s is not avalible on server.", Operator.Name, Operator.Input, I, Class.Name ) )
 					ShouldNotLoad = true
 					break
 				elseif !Class.LoadOnClient and Operator.LoadOnClient then
-					EXPADV.Msg( string.format( "Skipped operator: %s(%s), parameter #%i %s is not avalible on clients.", Operator.Name, Operator.Input, I, Class.Name ) )
+					EXPADV.Msg( string_format( "Skipped operator: %s(%s), parameter #%i %s is not avalible on clients.", Operator.Name, Operator.Input, I, Class.Name ) )
 					ShouldNotLoad = true
 					break
 				end
@@ -215,13 +231,13 @@ function EXPADV.LoadOperators( )
 
 			Operator.Input = Signature
 			Operator.InputCount = TotalInputs
-			Operator.Signature = string.format( "%s(%s)", Operator.Name, table.concat( Signature, "" ) )
+			Operator.Signature = string_format( "%s(%s)", Operator.Name, table_concat( Signature, "" ) )
 
 			--if Operator.UsesVarg then Operator.InputCount = Operator.InputCount - 1 end
 		else
 			Operator.Input = { }
 			Operator.InputCount = 0
-			Operator.Signature = string.format( "%s()", Operator.Name )
+			Operator.Signature = string_format( "%s()", Operator.Name )
 		end
 
 		-- Do we still need to load this?
@@ -370,7 +386,7 @@ function EXPADV.LoadFunctions( )
 			Operator.Return = nil
 
 			if Operator.FLAG == EXPADV_INLINE then
-				EXPADV.Msg( string.format( "Skipped operator: %s(%s), Inline operators can't return void.", Operator.Name, Operator.Input ) )
+				EXPADV.Msg( string_format( "Skipped operator: %s(%s), Inline operators can't return void.", Operator.Name, Operator.Input ) )
 				continue
 			end
 
@@ -380,15 +396,15 @@ function EXPADV.LoadFunctions( )
 			local Class = EXPADV.GetClass( Operator.Return, false, true )
 			
 			if !Class then 
-				EXPADV.Msg( string.format( "Skipped function: %s(%s), Invalid return class %s.", Operator.Name, Operator.Input, Operator.Return ) )
+				EXPADV.Msg( string_format( "Skipped function: %s(%s), Invalid return class %s.", Operator.Name, Operator.Input, Operator.Return ) )
 				continue
 			end
 
 			if !Class.LoadOnServer and Operator.LoadOnServer then
-				EXPADV.Msg( string.format( "Skipped function: %s(%s), return class %s is not avalible on server.", Operator.Name, Operator.Input, Operator.Return ) )
+				EXPADV.Msg( string_format( "Skipped function: %s(%s), return class %s is not avalible on server.", Operator.Name, Operator.Input, Operator.Return ) )
 				continue
 			elseif !Class.LoadOnClient and Operator.LoadOnClient then
-				EXPADV.Msg( string.format( "Skipped function: %s(%s), return class %s is not avalible on clients.", Operator.Name, Operator.Input, Operator.Return ) )
+				EXPADV.Msg( string_format( "Skipped function: %s(%s), return class %s is not avalible on clients.", Operator.Name, Operator.Input, Operator.Return ) )
 				continue
 			end
 
@@ -402,28 +418,28 @@ function EXPADV.LoadFunctions( )
 			
 			local Signature = { }
 
-			local Start, End = string.find( Operator.Input, "^()[a-z0-9]+():" )
+			local Start, End = string_find( Operator.Input, "^()[a-z0-9]+():" )
 
 			if Start then
-				local Meta = string.sub( Operator.Input, 1, End - 1 )
+				local Meta = string_sub( Operator.Input, 1, End - 1 )
 
 				Operator.Method = true
 
-				Operator.Input = string.sub( Operator.Input, End + 1 )
+				Operator.Input = string_sub( Operator.Input, End + 1 )
 
 				-- Next, check for valid input classes.
 				local Class = EXPADV.GetClass( Meta, false, true )
 				
 				if !Class then 
-					EXPADV.Msg( string.format( "Skipped function: %s(%s), Invalid class for method %s (%s).", Operator.Name, Operator.Input, Input, Meta ) )
+					EXPADV.Msg( string_format( "Skipped function: %s(%s), Invalid class for method %s (%s).", Operator.Name, Operator.Input, Input, Meta ) )
 					continue
 				end
 
 				if !Class.LoadOnServer and Operator.LoadOnServer then
-					EXPADV.Msg( string.format( "Skipped function: %s(%s), method class %s is not avalible on server.", Operator.Name, Operator.Input, Class.Name ) )
+					EXPADV.Msg( string_format( "Skipped function: %s(%s), method class %s is not avalible on server.", Operator.Name, Operator.Input, Class.Name ) )
 					continue
 				elseif !Class.LoadOnClient and Operator.LoadOnClient then
-					EXPADV.Msg( string.format( "Skipped function: %s(%s), method class %s is not avalible on clients.", Operator.Name, Operator.Input, Class.Name ) )
+					EXPADV.Msg( string_format( "Skipped function: %s(%s), method class %s is not avalible on clients.", Operator.Name, Operator.Input, Class.Name ) )
 					continue
 				end
 
@@ -432,12 +448,12 @@ function EXPADV.LoadFunctions( )
 			end
 
 			if Operator.Input and Operator.Input ~= "" then 
-				for I, Input in pairs( string.Explode( ",", Operator.Input ) ) do
+				for I, Input in pairs( string_Explode( ",", Operator.Input ) ) do
 
 					-- First lets check for varargs.
 					if Input == "..." then
 						
-						if I ~= #string.Explode( ",", Operator.Input ) then 
+						if I ~= #string_Explode( ",", Operator.Input ) then 
 							ShouldNotLoad = true
 							break -- Vararg is in the wrong place =(
 						end
@@ -451,17 +467,17 @@ function EXPADV.LoadFunctions( )
 					local Class = EXPADV.GetClass( Input, false, true )
 					
 					if !Class then 
-						EXPADV.Msg( string.format( "Skipped function: %s(%s), Invalid class for parameter #%i (%s).", Operator.Name, Operator.Input, I, Input ) )
+						EXPADV.Msg( string_format( "Skipped function: %s(%s), Invalid class for parameter #%i (%s).", Operator.Name, Operator.Input, I, Input ) )
 						ShouldNotLoad = true
 						break
 					end
 
 					if !Class.LoadOnServer and Operator.LoadOnServer then
-						EXPADV.Msg( string.format( "Skipped function: %s(%s), parameter #%i %s is not avalible on server.", Operator.Name, Operator.Input, I, Class.Name ) )
+						EXPADV.Msg( string_format( "Skipped function: %s(%s), parameter #%i %s is not avalible on server.", Operator.Name, Operator.Input, I, Class.Name ) )
 						ShouldNotLoad = true
 						break
 					elseif !Class.LoadOnClient and Operator.LoadOnClient then
-						EXPADV.Msg( string.format( "Skipped function: %s(%s), parameter #%i %s is not avalible on clients.", Operator.Name, Operator.Input, I, Class.Name ) )
+						EXPADV.Msg( string_format( "Skipped function: %s(%s), parameter #%i %s is not avalible on clients.", Operator.Name, Operator.Input, I, Class.Name ) )
 						ShouldNotLoad = true
 						break
 					end
@@ -470,8 +486,8 @@ function EXPADV.LoadFunctions( )
 				end
 			end
 			
-			Operator.Signature = string.format( "%s(%s)", Operator.Name, table.concat( Signature, "" ) )
-			if Operator.Method then table.remove( Signature, 2 ) end
+			Operator.Signature = string_format( "%s(%s)", Operator.Name, table_concat( Signature, "" ) )
+			if Operator.Method then table_remove( Signature, 2 ) end
 
 			Operator.Input = Signature
 			Operator.InputCount = #Signature
@@ -480,7 +496,7 @@ function EXPADV.LoadFunctions( )
 		else
 			Operator.Input = { }
 			Operator.InputCount = 0
-			Operator.Signature = string.format( "%s()", Operator.Name )
+			Operator.Signature = string_format( "%s()", Operator.Name )
 		end
 
 		-- Do we still need to load this?
@@ -503,7 +519,7 @@ function EXPADV.LoadFunctions( )
 			
 			if Helper.Component and !Helper.Component.Enabled then continue end
 
-			local Signature = string.format( "%s(%s)", Helper.Name, Helper.Input or "" )
+			local Signature = string_format( "%s(%s)", Helper.Name, Helper.Input or "" )
 
 			local Operator = EXPADV.Functions[Signature]
 
@@ -528,12 +544,12 @@ function EXPADV.LoadFunctionAliases( Operator )
 		
 		if Alias.Input and Alias.Input ~= "" then
 
-			local Start, End = string.find( Alias.Input, "^()[a-z0-9]+():" )
+			local Start, End = string_find( Alias.Input, "^()[a-z0-9]+():" )
 
 			if Start then
-				local Meta = string.sub( Alias.Input, Start, End - 1 )
+				local Meta = string_sub( Alias.Input, Start, End - 1 )
 
-				Alias.Input = string.sub( Alias.Input, End + 1 )
+				Alias.Input = string_sub( Alias.Input, End + 1 )
 
 				local Class = EXPADV.GetClass( Meta, false, true )
 				if !Class then
@@ -547,7 +563,7 @@ function EXPADV.LoadFunctionAliases( Operator )
 				Signature[1] = Class.Short .. ":"
 			end
 
-			for I, Input in pairs( string.Explode( ",", Alias.Input ) ) do
+			for I, Input in pairs( string_Explode( ",", Alias.Input ) ) do
 
 				if Input == "..." then
 					ShouldNotLoad = true
@@ -573,7 +589,7 @@ function EXPADV.LoadFunctionAliases( Operator )
 			end
 		end
 
-		EXPADV.Functions[ string.format( "%s(%s)", Alias.Name, table.concat( Signature, "" ) ) ] = Operator
+		EXPADV.Functions[ string_format( "%s(%s)", Alias.Name, table_concat( Signature, "" ) ) ] = Operator
 	end
 
 	EXPADV.CallHook( "PostLoadAliases" )
@@ -605,28 +621,28 @@ function EXPADV.Interprit( Operator, Compiler, Line )
 	if Operator.Component then
 		local Settings = { }
 
-		for StartPos, EndPos in string.gmatch( Line, "()@setting [a-zA-Z_0-9]+()" ) do
+		for StartPos, EndPos in string_gmatch( Line, "()@setting [a-zA-Z_0-9]+()" ) do
 			Settings[ #Settings + 1 ] = { StartPos, EndPos }
 		end
 
 		for I = #Settings, 1, -1 do
 			local Start, End = unpack( Settings[I] )
-			local Setting = Operator.Component:ReadSetting( string.sub( Line, Start + 9, End - 1 ), nil )
-			Line = string.sub( Line, 1, Start - 1 ) .. EXPADV.ToLua(Setting) .. string.sub( Line, End )
+			local Setting = Operator.Component:ReadSetting( string_sub( Line, Start + 9, End - 1 ), nil )
+			Line = string_sub( Line, 1, Start - 1 ) .. EXPADV.ToLua(Setting) .. string_sub( Line, End )
 		end
 	end
 	
 	local Imports = { }
 
-	for StartPos, EndPos in string.gmatch( Line, "()%$[a-zA-Z0-9_]+()" ) do
+	for StartPos, EndPos in string_gmatch( Line, "()%$[a-zA-Z0-9_]+()" ) do
 		Imports[ #Imports + 1 ] = { StartPos, EndPos }
 	end
 
 	for I = #Imports, 1, -1 do
 		local Start, End = unpack( Imports[I] )
-		local Variable = string.sub( Line, Start + 1, End - 1 )
+		local Variable = string_sub( Line, Start + 1, End - 1 )
 
-		Line = string.sub( Line, 1, Start - 1 ) .. Variable .. string.sub( Line, End )
+		Line = string_sub( Line, 1, Start - 1 ) .. Variable .. string_sub( Line, End )
 		Compiler.Enviroment[Variable] = _G[Variable]
 	end
 
@@ -646,15 +662,16 @@ function EXPADV.BuildVMOperator( Operator )
 
 		for I = 1, Operator.InputCount do
 			local Instruction = Instructions[I]
+			local _type = type( Instruction )
 
 			if !Instruction then
 				Arguments[I] = "nil"
 
-			elseif isstring( Instruction ) then
+			elseif _type == "string" then
 
 				Arguments[I] = "\"" .. Instruction .. "\""
 
-			elseif isnumber( Instruction ) then
+			elseif _type == "number" then
 
 				Arguments[I] = Instruction
 
@@ -683,31 +700,32 @@ function EXPADV.BuildVMOperator( Operator )
 
 			for I = Operator.InputCount + 1, #Instructions do
 				local Instruction = Instructions[I]
+				local _type = type( Instruction )
 
 				if !Instruction then
 					Arguments[I] = "{nil,\"NIL\"}"
 
-				elseif isstring( Instruction ) then
+				elseif _type == "string" then
 
-					Arguments[I] = string.format( "{%q,%q}", Instruction, "s" )
+					Arguments[I] = string_format( "{%q,%q}", Instruction, "s" )
 
-				elseif isnumber( Instruction ) then
+				elseif _type == "number" then
 
-					Arguments[I] = string.format( "{%i,%q}", Instruction, "n" )
+					Arguments[I] = string_format( "{%i,%q}", Instruction, "n" )
 
 				elseif Instruction.FLAG == EXPADV_FUNCTION then
 					error( "Compiler is yet to support virtuals" )
 
 				elseif Instruction.FLAG == EXPADV_INLINE then
 
-					Arguments[I] = string.format( "{%s,%q}", Instruction.Inline, Instruction.Return )
+					Arguments[I] = string_format( "{%s,%q}", Instruction.Inline, Instruction.Return )
 
 				elseif Instruction.FLAG == EXPADV_PREPARE then
 
 					Prepare[ #Prepare + 1 ] = Instruction.Prepare
 
 				else
-					Arguments[I] = string.format( "{%s,%q}", Instruction.Inline, Instruction.Return )
+					Arguments[I] = string_format( "{%s,%q}", Instruction.Inline, Instruction.Return )
 
 					Prepare[ #Prepare + 1 ] = Instruction.Prepare
 				end
@@ -723,11 +741,11 @@ function EXPADV.BuildVMOperator( Operator )
 			Compiler.VMInstructions[ID] = Operator.Function
 		end
 		
-		local InlineArgs = #Arguments >= 1 and table.concat( Arguments, "," ) or "nil"
+		local InlineArgs = #Arguments >= 1 and table_concat( Arguments, "," ) or "nil"
 
-		local Inline = string.format( "Context.Instructions[%i]( Context, %s, %s )", ID, Compiler:CompileTrace( Trace ), InlineArgs )
+		local Inline = string_format( "Context.Instructions[%i]( Context, %s, %s )", ID, Compiler:CompileTrace( Trace ), InlineArgs )
 	
-		local Instruction = Compiler:NewLuaInstruction( Trace, Operator, table.concat( Prepare, "\n" ), Inline )
+		local Instruction = Compiler:NewLuaInstruction( Trace, Operator, table_concat( Prepare, "\n" ), Inline )
 		
 		Instruction.IsRaw = true
 		
@@ -744,10 +762,12 @@ function EXPADV.BuildLuaOperator( Operator )
 		end; return
 	end
 
-	Operator.Compile = function( Compiler, Trace, ... )
-		EXPADV.CanBuildOperator( Compiler, Trace, Operator )
+	Operator.Compile = function( Compiler, _Trace, ... )
+		EXPADV.CanBuildOperator( Compiler, _Trace, Operator )
 
-		local Trace = table.Copy( Trace )
+		local Trace = { }
+		for K, V in pairs( _Trace ) do Trace[K] = V end
+
 		local Inputs, Preperation = { ... }, { }
 
 		local OpPrepare, OpInline = Operator.Prepare, Operator.Inline
@@ -762,12 +782,12 @@ function EXPADV.BuildLuaOperator( Operator )
 				local Uses = 0
 
 				if Operator.FLAG == EXPADV_INLINE or Operator.FLAG == EXPADV_INLINEPREPARE then
-					local _, Add = string.gsub( OpInline, "@value " .. I, "" )
+					local _, Add = string_gsub( OpInline, "@value " .. I, "" )
 					Uses = Add
 				end
 
 				if Operator.FLAG == EXPADV_PREPARE or Operator.FLAG == EXPADV_INLINEPREPARE then
-					local _, Add = string.gsub( OpPrepare, "@value " .. I, "" )
+					local _, Add = string_gsub( OpPrepare, "@value " .. I, "" )
 					Uses = Uses + Add
 				end
 
@@ -776,7 +796,7 @@ function EXPADV.BuildLuaOperator( Operator )
 					InputInline = "nil" -- This should never happen!
 					InputReturn = nil -- This should result in void.
 					
-					if istable(Input) then
+					if type(Input) == "table" then
 						if Input.FLAG == EXPADV_PREPARE or Input.FLAG == EXPADV_INLINEPREPARE then
 							InputPrepare = Input.Prepare
 						end
@@ -801,41 +821,38 @@ function EXPADV.BuildLuaOperator( Operator )
 				end
 
 				-- Lets see if we need to localize the inline
-				if Uses >= 2 and !Input.IsRaw and !string.StartWith( InputInline, "Context.Definitions" ) then
+				if Uses >= 2 and !Input.IsRaw and !string_StartWith( InputInline, "Context.Definitions" ) then
 					local Defined = Compiler:DefineVariable( )
-					InputPrepare = string.format( "%s\n%s = %s", InputPrepare, Defined, InputInline )
+					InputPrepare = string_format( "%s\n%s = %s", InputPrepare, Defined, InputInline )
 					InputInline = Defined
 				end
 			end
 
 			-- Place inputs into generated code
 			if Operator.FLAG == EXPADV_PREPARE or Operator.FLAG == EXPADV_INLINEPREPARE then
-				OpPrepare = string.gsub( OpPrepare, "@value " .. I, InputInline )
-				OpPrepare = string.gsub( OpPrepare, "@type " .. I, Format( "%q", InputReturn or Operator.Input[I] or "void" ) )
+				OpPrepare = string_gsub( OpPrepare, "@value " .. I, InputInline )
+				OpPrepare = string_gsub( OpPrepare, "@type " .. I, Format( "%q", InputReturn or Operator.Input[I] or "void" ) )
 			end
 
 			if Operator.FLAG == EXPADV_INLINE or Operator.FLAG == EXPADV_INLINEPREPARE then
-				OpInline = string.gsub( OpInline, "@value " .. I, InputInline )
-				OpInline = string.gsub( OpInline, "@type " .. I, Format( "%q", InputReturn or Operator.Input[I] ) )
+				OpInline = string_gsub( OpInline, "@value " .. I, InputInline )
+				OpInline = string_gsub( OpInline, "@type " .. I, Format( "%q", InputReturn or Operator.Input[I] ) )
 			end
 
-			--if InputPrepare ~= "" then
-
 				if Operator.FLAG == EXPADV_PREPARE or Operator.FLAG == EXPADV_INLINEPREPARE then
-					if string.find( OpPrepare, "@prepare " .. I ) then
-						OpPrepare = string.gsub( OpPrepare, "@prepare " .. I, InputPrepare or "" )
+					if string_find( OpPrepare, "@prepare " .. I ) then
+						OpPrepare = string_gsub( OpPrepare, "@prepare " .. I, InputPrepare or "" )
 					else
-						table.insert( Preperation, 1, InputPrepare or "" )
+						table_insert( Preperation, 1, InputPrepare or "" )
 					end
 				else
-					table.insert( Preperation, 1, InputPrepare or "" )
+					table_insert( Preperation, 1, InputPrepare or "" )
 				end
-			--end
 		end
 
 		-- Now we handel any varargs!
 		if Operator.UsesVarg and #Inputs > Operator.InputCount then
-			if ( OpPrepare and string.find( OpPrepare, "(@%.%.%.)" ) ) or ( OpInline and string.find( OpInline, "(@%.%.%.)" ) ) then
+			if ( OpPrepare and string_find( OpPrepare, "(@%.%.%.)" ) ) or ( OpInline and string_find( OpInline, "(@%.%.%.)" ) ) then
 				local VAPrepare, VAInline = { }, { }
 
 				for I = Operator.InputCount + 1, #Inputs do
@@ -855,7 +872,7 @@ function EXPADV.BuildLuaOperator( Operator )
 					end
 
 					if Input.Return ~= "..." and Input.Return ~= "_vr" then
-						Inline = string.format( "{%s,%q}", Inline, Input.Return or "NIL" )
+						Inline = string_format( "{%s,%q}", Inline, Input.Return or "NIL" )
 					end
 
 					VAInline[ #VAInline + 1 ] = Inline
@@ -864,44 +881,44 @@ function EXPADV.BuildLuaOperator( Operator )
 
 				-- Preare the varargs preperation statments.
 				if #VAPrepare >= 1 then
-					table.insert( Preperation, table.concat( VAPrepare, "\n" ) )
-					-- OpPrepare = (OpPrepare or "") .. "\n" .. table.concat( VAPrepare, "\n" )
+					table_insert( Preperation, table_concat( VAPrepare, "\n" ) )
+					-- OpPrepare = (OpPrepare or "") .. "\n" .. table_concat( VAPrepare, "\n" )
 				end
 
 				if Operator.FLAG == EXPADV_PREPARE or Operator.FLAG == EXPADV_INLINEPREPARE then
-					OpPrepare = string.gsub( OpPrepare, "(@%.%.%.)", table.concat( VAInline, "," ) )
+					OpPrepare = string_gsub( OpPrepare, "(@%.%.%.)", table_concat( VAInline, "," ) )
 				end
 
 				if Operator.FLAG == EXPADV_INLINE or Operator.FLAG == EXPADV_INLINEPREPARE then
-					OpInline = string.gsub( OpInline, "(@%.%.%.)", table.concat( VAInline, "," ) )
+					OpInline = string_gsub( OpInline, "(@%.%.%.)", table_concat( VAInline, "," ) )
 				end
 
 			end
 		else
 			if Operator.FLAG == EXPADV_PREPARE or Operator.FLAG == EXPADV_INLINEPREPARE then
-				OpPrepare = string.gsub( OpPrepare, "(@%.%.%.)", "nil" )
+				OpPrepare = string_gsub( OpPrepare, "(@%.%.%.)", "nil" )
 			end
 
 			if Operator.FLAG == EXPADV_INLINE or Operator.FLAG == EXPADV_INLINEPREPARE then
-				OpInline = string.gsub( OpInline, "(@%.%.%.)", "nil" )
+				OpInline = string_gsub( OpInline, "(@%.%.%.)", "nil" )
 			end
 		end
 
 		-- Now lets check cpu time, note we will let the trace system below, insert our traces.
 		if Operator.FLAG == EXPADV_PREPARE or Operator.FLAG == EXPADV_INLINEPREPARE then
-			OpPrepare = string.gsub( OpPrepare, "@cpu", "Context:UpdateCPUQuota( @trace )" )
+			OpPrepare = string_gsub( OpPrepare, "@cpu", "Context:UpdateCPUQuota( @trace )" )
 		end
 
 		--Now lets handel traces!
 		local Uses = 0
 
 		if Operator.FLAG == EXPADV_INLINE or Operator.FLAG == EXPADV_INLINEPREPARE then
-			local _, Add = string.gsub( OpInline, "@trace", "" )
+			local _, Add = string_gsub( OpInline, "@trace", "" )
 			Uses = Add
 		end
 
 		if Operator.FLAG == EXPADV_PREPARE or Operator.FLAG == EXPADV_INLINEPREPARE then
-			local _, Add = string.gsub( OpPrepare, "@trace", "" )
+			local _, Add = string_gsub( OpPrepare, "@trace", "" )
 			Uses = Uses + Add
 		end
 
@@ -909,16 +926,16 @@ function EXPADV.BuildLuaOperator( Operator )
 			local Trace = Compiler:CompileTrace( Trace )
 
 			if Uses >= 2 then
-				OpPrepare = string.format( "local Trace = %s\n%s", Trace, OpPrepare or "" )
+				OpPrepare = string_format( "local Trace = %s\n%s", Trace, OpPrepare or "" )
 				Trace = "Trace"
 			end
 
 			if Operator.FLAG == EXPADV_PREPARE or Operator.FLAG == EXPADV_INLINEPREPARE then
-				OpPrepare = string.gsub( OpPrepare, "@trace", Trace )
+				OpPrepare = string_gsub( OpPrepare, "@trace", Trace )
 			end
 
 			if Operator.FLAG == EXPADV_INLINE or Operator.FLAG == EXPADV_INLINEPREPARE then
-				OpInline = string.gsub( OpInline, "@trace", Trace )
+				OpInline = string_gsub( OpInline, "@trace", Trace )
 			end
 		end
 
@@ -928,16 +945,19 @@ function EXPADV.BuildLuaOperator( Operator )
 		if Operator.FLAG == EXPADV_PREPARE or Operator.FLAG == EXPADV_INLINEPREPARE then
 			local DefinedLines = { }
 
-			for StartPos, EndPos, Assigned in string.gmatch( OpPrepare, "()@define [a-zA-Z_0-9%%, \t]+()(=?)" ) do
+			for StartPos, EndPos, Assigned in string_gmatch( OpPrepare, "()@define [a-zA-Z_0-9%%, \t]+()(=?)" ) do
 				DefinedLines[ #DefinedLines + 1 ] = { StartPos, EndPos, Assigned }
 			end
 
 			for I = #DefinedLines, 1, -1 do -- Work backwards, so we dont break our preparation.
 				local NewLine = { }
-				local Start, End, Assigned = unpack( DefinedLines[I] ) -- Oh God unpack, meh.
-				local Line = string.sub( OpPrepare, Start + 8, End - 1  )
 
-				for Name in string.gmatch( Line, "([a-zA-Z0-9_]+)" ) do
+				local DefinedLine = DefinedLines[I]
+				local Start, End, Assigned = DefinedLine[1], DefinedLine[2], DefinedLine[3]
+
+				local Line = string_sub( OpPrepare, Start + 8, End - 1  )
+
+				for Name in string_gmatch( Line, "([a-zA-Z0-9_]+)" ) do
 					local Lua = Compiler:DefineVariable( )
 
 					NewLine[ #NewLine + 1 ] = Lua
@@ -945,12 +965,12 @@ function EXPADV.BuildLuaOperator( Operator )
 					Definitions[ "@" .. Name ] = Lua
 				end
 
-				local Insert = Assigned and table.concat( NewLine, "," ) or " "
+				local Insert = Assigned and table_concat( NewLine, "," ) or " "
 				
-				OpPrepare = string.sub( OpPrepare, 1, Start - 1 ) .. Insert .. string.sub( OpPrepare, End - 1 )
+				OpPrepare = string_sub( OpPrepare, 1, Start - 1 ) .. Insert .. string_sub( OpPrepare, End - 1 )
 			end
 
-			OpPrepare = string.gsub( OpPrepare, "(@[a-zA-Z0-9_]+)", Definitions )
+			OpPrepare = string_gsub( OpPrepare, "(@[a-zA-Z0-9_]+)", Definitions )
 	
 			OpPrepare = EXPADV.Interprit( Operator, Compiler, OpPrepare )
 		end
@@ -958,7 +978,7 @@ function EXPADV.BuildLuaOperator( Operator )
 		-- Now lets format the inline
 		if Operator.FLAG == EXPADV_INLINE or Operator.FLAG == EXPADV_INLINEPREPARE then
 			-- Replace the locals in our prepare!
-			OpInline = string.gsub( OpInline, "(@[a-zA-Z0-9_]+)", Definitions )
+			OpInline = string_gsub( OpInline, "(@[a-zA-Z0-9_]+)", Definitions )
 
 			OpInline = EXPADV.Interprit( Operator, Compiler, OpInline )
 		end
@@ -967,7 +987,7 @@ function EXPADV.BuildLuaOperator( Operator )
 			Preperation[#Preperation + 1] = OpPrepare
 		end
 
-		local PreperedLines = #Preperation >= 1 and table.concat( Preperation, "\n" ) or nil
+		local PreperedLines = #Preperation >= 1 and table_concat( Preperation, "\n" ) or nil
 
 		return Compiler:NewLuaInstruction( Trace, Operator, PreperedLines, OpInline )
 	end
@@ -986,8 +1006,8 @@ function EXPADV.GenerateOperatorDescription( Operator )
 			local ClassName = EXPADV.TypeName( Operator.AttachedClass )
 
 			    if Name == "=" then
-					Operator.Description = string.format( "Creates/Assigns a value to a %s variable.", ClassName )
-					Operator.Example = string.format( "%s var = value", ClassName )
+					Operator.Description = string_format( "Creates/Assigns a value to a %s variable.", ClassName )
+					Operator.Example = string_format( "%s var = value", ClassName )
 					Operator.Type = "assigment"
 			
 			elseif Name == "$" then
@@ -1022,18 +1042,18 @@ function EXPADV.GenerateOperatorDescription( Operator )
 		local InputName = EXPADV.TypeName( Input[1] ) 
 
 		    if Name == "#" then
-				Operator.Description = string.format( "Returns the lengh/size of the %s", InputName )
-				Operator.Example = string.format( "#%s", InputName )
+				Operator.Description = string_format( "Returns the lengh/size of the %s", InputName )
+				Operator.Example = string_format( "#%s", InputName )
 				Operator.Type = "general"
 
 		elseif Name == "-" then
-				Operator.Description = string.format( "Negates a %s", InputName )
-				Operator.Example = string.format( "-%s", InputName )
+				Operator.Description = string_format( "Negates a %s", InputName )
+				Operator.Example = string_format( "-%s", InputName )
 				Operator.Type = "general"
 
 		elseif EXPADV.GetClass( Name, true ) then
-				Operator.Description = string.format( "Casts a %s to a %s", InputName, Name )
-				Operator.Example = string.format( "(%s) %s", Name, InputName )
+				Operator.Description = string_format( "Casts a %s to a %s", InputName, Name )
+				Operator.Example = string_format( "(%s) %s", Name, InputName )
 				Operator.Type = "casting"
 
 		end
@@ -1043,73 +1063,73 @@ function EXPADV.GenerateOperatorDescription( Operator )
 		local B = EXPADV.TypeName( Input[2] ) 
 
 		    if Name == "+" then
-				Operator.Description = string.format( "Adds %s to %s", B, A )
-				Operator.Example = string.format( "%s + %s", A, B )
+				Operator.Description = string_format( "Adds %s to %s", B, A )
+				Operator.Example = string_format( "%s + %s", A, B )
 				Operator.Type = "arithmetic"
 
 			elseif Name == "-" then
-				Operator.Description = string.format( "Subtracts %s from %s", B, A )
-				Operator.Example = string.format( "%s - %s", A, B )
+				Operator.Description = string_format( "Subtracts %s from %s", B, A )
+				Operator.Example = string_format( "%s - %s", A, B )
 				Operator.Type = "arithmetic"
 
 			elseif Name == "*" then
-				Operator.Description = string.format( "Multiplys %s with %s", A, B )
-				Operator.Example = string.format( "%s * %s", A, B )
+				Operator.Description = string_format( "Multiplys %s with %s", A, B )
+				Operator.Example = string_format( "%s * %s", A, B )
 				Operator.Type = "arithmetic"
 
 			elseif Name == "/" then
-				Operator.Description = string.format( "Divides %s by %s", A, B )
-				Operator.Example = string.format( "%s / %s", A, B )
+				Operator.Description = string_format( "Divides %s by %s", A, B )
+				Operator.Example = string_format( "%s / %s", A, B )
 				Operator.Type = "arithmetic"
 
 			elseif Name == "%" then
-				Operator.Description = string.format( "Returns the remainder of %s divided by %s", A, B )
-				Operator.Example = string.format( "%s %% %s", A, B )
+				Operator.Description = string_format( "Returns the remainder of %s divided by %s", A, B )
+				Operator.Example = string_format( "%s %% %s", A, B )
 				Operator.Type = "arithmetic"
 
 			elseif Name == "^" then
-				Operator.Description = string.format( "Returns %s to the power of %s", A, B )
-				Operator.Example = string.format( "%s ^ %s", A, B )
+				Operator.Description = string_format( "Returns %s to the power of %s", A, B )
+				Operator.Example = string_format( "%s ^ %s", A, B )
 				Operator.Type = "arithmetic"
 
 			elseif Name == "==" then
-				Operator.Description = string.format( "Returns true if %s is equal to %s", A, B )
-				Operator.Example = string.format( "%s == %s", A, B )
+				Operator.Description = string_format( "Returns true if %s is equal to %s", A, B )
+				Operator.Example = string_format( "%s == %s", A, B )
 				Operator.Type = "comparason"
 
 			elseif Name == "!=" then
-				Operator.Description = string.format( "Returns true if %s is not equal to %s", A, B )
-				Operator.Example = string.format( "%s != %s", A, B )
+				Operator.Description = string_format( "Returns true if %s is not equal to %s", A, B )
+				Operator.Example = string_format( "%s != %s", A, B )
 				Operator.Type = "comparason"
 
 			elseif Name == ">" then
-				Operator.Description = string.format( "Returns true if %s is greater than %s", A, B )
-				Operator.Example = string.format( "%s > %s", A, B )
+				Operator.Description = string_format( "Returns true if %s is greater than %s", A, B )
+				Operator.Example = string_format( "%s > %s", A, B )
 				Operator.Type = "comparason"
 
 			elseif Name == "<" then
-				Operator.Description = string.format( "Returns true if %s is less than %s", A, B )
-				Operator.Example = string.format( "%s < %s", A, B )
+				Operator.Description = string_format( "Returns true if %s is less than %s", A, B )
+				Operator.Example = string_format( "%s < %s", A, B )
 				Operator.Type = "comparason"
 
 			elseif Name == ">=" then
-				Operator.Description = string.format( "Returns true if %s is greater-than or equal to %s", A, B )
-				Operator.Example = string.format( "%s >= %s", A, B )
+				Operator.Description = string_format( "Returns true if %s is greater-than or equal to %s", A, B )
+				Operator.Example = string_format( "%s >= %s", A, B )
 				Operator.Type = "comparason"
 
 			elseif Name == "<=" then
-				Operator.Description = string.format( "Returns true if %s is less-than or equal to %s", A, B )
-				Operator.Example = string.format( "%s <= %s", A, B )
+				Operator.Description = string_format( "Returns true if %s is less-than or equal to %s", A, B )
+				Operator.Example = string_format( "%s <= %s", A, B )
 				Operator.Type = "comparason"
 
 			elseif Name == "&&" then
 				Operator.Description = "Logic AND" 
-				Operator.Example = string.format( "%s &&&& %s", A, B )
+				Operator.Example = string_format( "%s &&&& %s", A, B )
 				Operator.Type = "logic"
 
 			elseif Name == "||" then
 				Operator.Description = "Logic OR" 
-				Operator.Example = string.format( "%s || %s", A, B )
+				Operator.Example = string_format( "%s || %s", A, B )
 				Operator.Type = "logic"
 
 			end

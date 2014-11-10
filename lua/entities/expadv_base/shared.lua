@@ -177,9 +177,8 @@ function ENT:OnCompileError( ErMsg, Compiler ) end
 function ENT:BuildInstance( Instance, Instruction )
 	
 	local Native = table.concat( {
-		"return function( RootContext )",
-		"setfenv( 1, RootContext.Enviroment )",
-		"local Context = RootContext",
+		"return function( Context )",
+		"setfenv( 1, Context.Enviroment )",
 			Instruction.Prepare or "",
 			Instruction.Inline or "",
 		"end"

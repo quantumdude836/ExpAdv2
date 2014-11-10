@@ -770,7 +770,7 @@ function Compiler:Compile_EVENT( Trace, Name, Params, UseVarg, Sequence, Memory 
 
 	local Sequence = self:Compile_SEQ( Trace, { self:Compile_SEQ( Trace, PreSequence ), Sequence } )
 
-	local Lua = string.format( "RootContext.event_%s = function( %s )\nContext = Context or RootContext\n%s\n%send", Name, table.concat( Inputs, "," ), Sequence.Prepare or "", Sequence.Inline or "" )
+	local Lua = string.format( "Context.event_%s = function( %s )\nif !Context.Online then return end\n%s\n%send", Name, table.concat( Inputs, "," ), Sequence.Prepare or "", Sequence.Inline or "" )
 
 	return { Trace = Trace, Prepare = Lua, FLAG = EXPADV_PREPARE }
 end
@@ -817,7 +817,7 @@ function Compiler:Build_Function( Trace, Params, UseVarg, Sequence, Memory )
 
 	local Sequence = self:Compile_SEQ( Trace, { self:Compile_SEQ( Trace, PreSequence ), Sequence } )
 
-	local Lua = string.format( "function( %s )\nContext = Context or RootContext\n%s\n%send", table.concat( Inputs, "," ), Sequence.Prepare or "", Sequence.Inline or "" )
+	local Lua = string.format( "function( %s )\nif !Context.Online then return end\n%s\n%send", table.concat( Inputs, "," ), Sequence.Prepare or "", Sequence.Inline or "" )
 
 	return { Trace = Trace, Inline = Lua, Return = "f", FLAG = EXPADV_INLINE }
 end

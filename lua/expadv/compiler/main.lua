@@ -651,130 +651,6 @@ end
 /* --- --------------------------------------------------------------------------------
 	@: Compile Code
    --- */
---[[
-local Coroutines = { }
-
-local function SoftCompile( self, Script, Files, OnError, OnSucess )
-
-	-- Client and Server
-		self.IsServerScript = true
-		self.IsClientScript = true
-
-	-- Instance
-		self.Pos = 0
-		self.Len = #Script
-		self.Buffer = Script
-		self.Files = Files or { }
-		self.CL_Files = Files or { }
-
-	-- Holders
-		self.DefineID = 0
-		self.Strings = { }
-		self.VMInstructions = { }
-		self.VMLookUp = { }
-		self.NativeLog = { }
-
-	-- Enviroment
-		self.Enviroment = CreateEnviroment( )
-		
-	-- Memory:
-		self:BuildScopes( )
-
-		self.Delta = { }
-		self.Memory = { }
-
-		self.Cells = { }
-		self.InPorts = { }
-		self.OutPorts = { }
-
-		self.FreshMemory = { }
-		self.MemoryDeph = 0
-		self.LambdaDeph = 0
-		self.LoopDeph = 0
-
-		self.ReturnOptional = { }
-		self.ReturnTypes = { }
-		self.ReturnDeph = 0
-		self.TimeMark = SysTime( ) + 0.5
-
-	-- Start the Tokenizer:
-		self:StartTokenizer( )
-
-	-- Call hook:
-		EXPADV.CallHook( "PreCompileScript", self, Script, Files )
-
-	-- Ok, Run the compiler.
-		local Compiled, Instruction = pcall( self.Sequence, self, { 0, 0 } ) -- self.Main
-
-	-- Finish!
-		setmetatable( self.Enviroment, EXPADV.BaseEnv )
-
-		Coroutines[self] = nil -- Because we compile inside a coroutine now =D
-
-		if !Compiled then return OnError( Instruction ) end
-
-		return OnSucess( self, self:FixPlaceHolders( Instruction ) )
-end
-
-EXPADV.SoftCompile = SoftCompile
-
-/* --- --------------------------------------------------------------------------------
-	@: Compiler Handeler, From now on we will compile over time!
-   --- */
-
-function Compiler:Yield( )
-	local Time = SysTime( )
-
-	if Time < self.TimeMark then return end
-
-	print( "Yield:", Time, "vs", self.TimeMark )
-
-	coroutine.yield( )
-
-	self.TimeMark = SysTime( ) + 0.5
-end
-
-local CompilerInstances = { }
-
-function EXPADV.Compile( Script, Files, OnError, OnSucess )
-	local Instance = setmetatable( { }, Compiler )
-
-	CompilerInstances[Instance] = Instance
-
-	Instance.CoRoutine = coroutine.create( SoftCompile )
-
-	print( coroutine.resume( Instance.CoRoutine, Instance, Script, Files, OnError, OnSucess ) )
-
-	return Instance
-end
-
-timer.Create( "ExpAdv.TimeCoimpiler", 0, 1,
-	function( )
-		for Instance, _ in pairs( CompilerInstances ) do
-			if !Instance.CoRoutine or coroutine.status( Instance.CoRoutine ) == "dead" then
-				CompilerInstances[Instance] = nil
-				MsgN( "Compiler Finished" )
-				continue
-			end
-
-			print( coroutine.resume( Instance.CoRoutine ) )
-		end
-	end )
-
-/* --- --------------------------------------------------------------------------------
-	@: Some Extra Stuff
-   --- */
-
-function Compiler:PercentCompiled( )
-	if self.Pos <= 0 or self.Len <= 0 then return 0 end
-	return (self.Pos / self.Len) * 100
-end
-
-]]
-
-/* --- --------------------------------------------------------------------------------
-	@: Lets Try that AGAIN!
-   --- */
 
 local Instances = { }
 
@@ -823,7 +699,8 @@ function Compiler:SoftCompile( Script, Files )
 
 	-- Exit Softcompiler
 		coroutine.yield( )
-		self.TimeMark = SysTime( ) + 0.05
+		self.ExitTime = SysTime( ) + expadv_maxcompilertime
+		--self.TimeMark = SysTime( ) + 0.05
 
 	-- Start the Tokenizer:
 		self:StartTokenizer( )
@@ -856,20 +733,22 @@ function EXPADV.CreateCompiler( Script, Files, OnError, OnSucess, OnUpdate )
 
 	if Ok then return Instance end
 
-	if self.OnError then
-		self.OnError( Error )
+	if Instance.OnError then
+		Instance.OnError( Error )
 	end
 
-	self.Running = false
+	Instance.Running = false
 end
 
-function Compiler:Yield( )
+local SysTime = SysTime
+
+/*function Compiler:Yield( )
 	local Time = SysTime( )
 	if Time < self.TimeMark then return end
 
 	coroutine.yield( )
 	self.TimeMark = SysTime( ) + 0.05
-end
+end*/
 
 function Compiler:GetStatus( )
 	if self.Pos <= 0 or self.Len <= 0 then return 0 end
@@ -877,7 +756,11 @@ function Compiler:GetStatus( )
 end
 
 function Compiler:Resume( HandelManual )
+	--local _f, _h, _c = debug.sethook( self.Thread, coroutine.yield, "lcr", 500 )
+
 	local Ok, Error = coroutine.resume( self.Thread )
+
+	--debug.sethook( _f, _h, _c )
 
 	if Ok then
 		if self.Running and self.OnUpdate then

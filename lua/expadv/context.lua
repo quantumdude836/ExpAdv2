@@ -93,7 +93,6 @@ function EXPADV.RootContext:Execute( Location, Operation, ... ) -- String, Funct
 		Status.StopWatch = Status.StopWatch + (SysTime( ) - Status.BenchMark)
 
 
-
 	if !Ok and isstring( Result ) then
 		if IsValid( self.entity ) then self.entity:ScriptError( Result ) end
 		
@@ -117,6 +116,10 @@ function EXPADV.RootContext:Execute( Location, Operation, ... ) -- String, Funct
 
 		return true, Result, ResultType
 
+	end
+
+	if Result.Context and Result.Context ~= self then
+		self = Result.Context
 	end
 
 	if !IsValid( self.entity ) then

@@ -624,6 +624,7 @@ hook.Add( "Expadv.PostLoadConfig", "expadv.quota", function( )
 	EXPADV.CreateSetting( "tickquota", 250000 )
 	EXPADV.CreateSetting( "softquota", 100000 )
 	EXPADV.CreateSetting( "hardquota", 1000000 )
+	EXPADV.CreateSetting( "maxcompilertime", 1 )
 end )
 
 timer.Create( "expadv.quota", 1, 0, function( )
@@ -631,6 +632,7 @@ timer.Create( "expadv.quota", 1, 0, function( )
 	expadv_tickquota = EXPADV.ReadSetting( "tickquota", 250000 )
 	expadv_softquota = EXPADV.ReadSetting( "softquota", 100000 )
 	expadv_hardquota = EXPADV.ReadSetting( "hardquota", 1000000 )
+	expadv_maxcompilertime = EXPADV.ReadSetting( "maxcompilertime", 1 )
 end ) 
 
 /* --- --------------------------------------------------------------------------------
@@ -659,12 +661,14 @@ end
 if CLIENT then
 	net.Receive( "expadv.notify", function( )
 		local Msg = net.ReadString( )
+		if !Message or Message == "" then return end
+
 		GAMEMODE:AddNotify( Msg, net.ReadUInt( 8 ), net.ReadFloat( ) )
 		MsgN( Msg )
 	end)
 
 	function EXPADV.Notifi( Player, Message, Type, Duration )
-		if !IsValid( Player ) then return end
+		if !IsValid( Player ) or !Message or Message == "" then return end
 
 		if Player == LocalPlayer( ) then
 			GAMEMODE:AddNotify( Message, Type, Duration )
