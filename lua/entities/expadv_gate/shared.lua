@@ -201,7 +201,7 @@ function ENT:OnCompileError( ErMsg, Compiler )
 		self:NotifiOwner( ErMsg, 1, 3 )
 	elseif CLIENT and self.player == LocalPlayer( ) then
 		self:NotifiOwner( "Expression Advanced 2 - Failed to compile clientside:", 1, 5 )
-		self:NotifiOwner( Msg, 1, 3 )
+		self:NotifiOwner( ErMsg, 1, 3 )
 	end
 end
 

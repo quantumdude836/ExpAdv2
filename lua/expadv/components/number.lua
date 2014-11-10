@@ -135,7 +135,7 @@ Component:AddInlineOperator( "int", "s", "n", "($tonumber(@value 1) or 0)" )
     @: Max Value
    --- */
 
-Component:AddGeneratedOperator( "max", "n,n,n,n,n", "n", function( Operator, Compiler, Trace, ... )
+Component:AddGeneratedFunction( "max", "n,n,n,n,n", "n", function( Operator, Compiler, Trace, ... )
   local Inputs, Prep, Values = { ... }, { }, { }
   
   for I = 1, #Inputs, 1 do
@@ -164,7 +164,7 @@ EXPADV.AddFunctionAlias( "max", "n,n" )
     @: Min Value
    --- */
 
-Component:AddGeneratedOperator( "min", "n,n,n,n,n", "n", function( Operator, Compiler, Trace, ... )
+Component:AddGeneratedFunction( "min", "n,n,n,n,n", "n", function( Operator, Compiler, Trace, ... )
   local Inputs, Prep, Values = { ... }, { }, { }
   
   for I = 1, #Inputs, 1 do
@@ -184,11 +184,11 @@ Component:AddGeneratedOperator( "min", "n,n,n,n,n", "n", function( Operator, Com
   return { Trace = Trace, Inline = LuaInline, Prepare = table.concat( Prep, "\n" ), Return = "n", FLAG = EXPADV_INLINEPREPARE }
 end )
 
-Component:AddFunctionHelper( "min", "n,n,n,n,n", "returns the lowest value out of 3 numbers." )
-
 EXPADV.AddFunctionAlias( "min", "n,n,n,n" )
 EXPADV.AddFunctionAlias( "min", "n,n,n" )
 EXPADV.AddFunctionAlias( "min", "n,n" )
+
+Component:AddFunctionHelper( "min", "n,n,n,n,n", "returns the lowest value out of 3 numbers." )
 
 /* --- --------------------------------------------------------------------------------
     @: General math

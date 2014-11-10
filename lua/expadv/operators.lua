@@ -535,8 +535,6 @@ end
 
 function EXPADV.LoadFunctionAliases( Operator )
 	
-	EXPADV.CallHook( "PreLoadAliases" )
-
 	for _, Alias in pairs( Operator.Aliases ) do
 		local ShouldNotLoad = false
 
@@ -567,6 +565,7 @@ function EXPADV.LoadFunctionAliases( Operator )
 
 				if Input == "..." then
 					ShouldNotLoad = true
+					EXPADV.Msg( string_format( "Skipped function alias: %s(%s) vararg must not be part of an alias", Operator.Name, Operator.Input ) )
 					break
 				end
 
@@ -589,10 +588,12 @@ function EXPADV.LoadFunctionAliases( Operator )
 			end
 		end
 
-		EXPADV.Functions[ string_format( "%s(%s)", Alias.Name, table_concat( Signature, "" ) ) ] = Operator
-	end
+		local AliasOperator = { Name = Alias.Name, Input = Signature }
 
-	EXPADV.CallHook( "PostLoadAliases" )
+		table.Inherit( AliasOperator, Operator )
+
+		EXPADV.Functions[ string_format( "%s(%s)", Alias.Name, table_concat( Signature, "" ) ) ] = AliasOperator
+	end
 end
 
 /* --- --------------------------------------------------------------------------------

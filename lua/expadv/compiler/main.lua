@@ -756,11 +756,7 @@ function Compiler:GetStatus( )
 end
 
 function Compiler:Resume( HandelManual )
-	--local _f, _h, _c = debug.sethook( self.Thread, coroutine.yield, "lcr", 500 )
-
 	local Ok, Error = coroutine.resume( self.Thread )
-
-	--debug.sethook( _f, _h, _c )
 
 	if Ok then
 		if self.Running and self.OnUpdate then

@@ -203,6 +203,8 @@ if !IsValid( @value 1 ) or !@value 1.IsHologram then
 	Context:Throw( %trace, "hologram", "casted none hologram from entity.")
 end ]], "@value 1" )
 
+Component:AddInlineOperator( "entity", "h", "e", "@value 1" )
+
 /*==============================================================================================
     Section: Set Model
 ==============================================================================================*/
@@ -575,7 +577,7 @@ if IsValid( @value 1 ) and @value 1.player == Context.player and IsValid( @value
 	@value 1:SetParent(@value 2)
 end]] )
 
-Component:AddPreparedFunction( "unParent", "h:", "", [[
+Component:AddPreparedFunction( "unparent", "h:", "", [[
 if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:SetParent( nil )
 end]] )
@@ -603,7 +605,7 @@ end]], "(@val or $Entity(0))" )
 Component:AddFunctionHelper( "parent", "h:e", "Sets the parent entity of a hologram." )
 Component:AddFunctionHelper( "parent", "h:h", "Sets the parent hologram of a hologram." )
 Component:AddFunctionHelper( "parent", "h:p", "Sets the parent physics object of a hologram." )
-Component:AddFunctionHelper( "unParent", "h:", "Unparents H from its parent." )
+Component:AddFunctionHelper( "unparent", "h:", "Unparents H from its parent." )
 Component:AddFunctionHelper( "getParentHolo", "h:", "Returns the parent hologram of a hologram." )
 Component:AddFunctionHelper( "getParent", "h:", "Returns the parent entity of a hologram." )
 
@@ -725,27 +727,27 @@ Component:AddFunctionHelper( "remove", "h:", "Removes the hologram." )
 /*==============================================================================================
     Section: Player Blocking, Does not work on the entity.
 ==============================================================================================*/
-Component:AddPreparedFunction( "blockPlayer", "h:e", "", [[
+Component:AddPreparedFunction( "blockPlayer", "h:ply", "", [[
 if IsValid( @value 1 ) and @value 1.player == Context.player then
 	if IsValid( @value 2 ) and @value 2:IsPlayer( ) then
 		@value 1:BlockPlayer( @value 2 )
 	end
 end]] )
 
-Component:AddPreparedFunction( "unblockPlayer", "h:e", "", [[
+Component:AddPreparedFunction( "unblockPlayer", "h:ply", "", [[
 if IsValid( @value 1 ) and @value 1.player == Context.player then
 	if IsValid( @value 2 ) and @value 2:IsPlayer( ) then
 		@value 1:UnblockPlayer( @value 2 )
 	end
 end]] )
 
-Component:AddPreparedFunction( "isBlocked", "h:e", "b", [[
+Component:AddPreparedFunction( "isBlocked", "h:ply", "b", [[
 if IsValid( @value 1 ) and @value 1.player == Context.player then
 	if IsValid( @value 2 ) and @value 2:IsPlayer( ) then
 		@define val = @value 1:IsBlocked( @value 2 )
 	end
 end]], "(@val or false)" )
 
-Component:AddFunctionHelper( "blockPlayer", "h:e", "Blocks a player from seeing the hologram." )
-Component:AddFunctionHelper( "unblockPlayer", "h:e", "Unblocks a player from seeing the hologram, allow them to see it again." )
-Component:AddFunctionHelper( "isBlocked", "h:e", "Returns true is a player is blocked from seeing the hologram." )
+Component:AddFunctionHelper( "blockPlayer", "h:ply", "Blocks a player from seeing the hologram." )
+Component:AddFunctionHelper( "unblockPlayer", "h:ply", "Unblocks a player from seeing the hologram, allow them to see it again." )
+Component:AddFunctionHelper( "isBlocked", "h:ply", "Returns true is a player is blocked from seeing the hologram." )
