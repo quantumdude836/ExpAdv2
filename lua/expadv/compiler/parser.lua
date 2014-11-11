@@ -510,16 +510,12 @@ function Compiler:Expression_Value( Trace )
 		local Perams, UseVarg = self:Util_Perams( Trace )
 		
 		self:RequireToken( "rpa", "Right parenthesis () ) missing, to close delegated function arguments" )
-		
-		self:RequireToken( "lcb", "Left curly bracket ({) missing, to open delegated function" )
 
-		local Sequence = self:Sequence( Trace, "rcb" )
+		local Sequence = self:GetBlock( Trace, "to close delegated function" )
 
 		local Memory = self:PopLambdaDeph( )
 		self:PopReturnDeph( )
 		self:PopScope( )
-
-		self:RequireToken( "rcb", "Right curly bracket (}) missing, to close delegated function" )
 
 		local Instr = self:Build_Function( Trace, Perams, UseVarg, Sequence, Memory )
 		Instr.Return = "d"
@@ -823,7 +819,7 @@ function Compiler:GetBlock( Trace, RCB, Flag )
 
 		self:PopScope( )
 
-		self:RequireToken( "rcb", "Right curly bracket (}) missing, ", RCB, "to close block" )
+		self:RequireToken( "rcb", "Right curly bracket (}) missing, %s", RCB or "to close block" )
 
 		return Sequence
 

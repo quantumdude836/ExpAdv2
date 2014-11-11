@@ -196,29 +196,13 @@ end
    --- */
 
 function Compiler:SkipComments( )
-	local Style
-
-	if self:NextPattern( "//", true ) then
-		Style = "\n"
-	elseif self:NextPattern( "/*", true ) then
-		Style = "*/"
-	end
-
-	if Style then
-		while !self:NextPattern( Style, true ) do
-			if !self.Char then 
-				if Style == "*/" then
-					self:Error( 0, "Un-terminated multi line comment (/*)", 0 )
-				else 
-					break 
-				end 
-			end
-
-			self:SkipChar( )
-		end
-
+	if self:NextPattern( "^/%*.-%*/" ) then
 		self.ReadData = ""
-
+		self.SkipToken = true
+	elseif self:NextPattern( "/*", true ) then
+		self:Error( 0, "Un-terminated multi line comment (/*)", 0 )
+	elseif self:NextPattern( "^//.-\n" ) then
+		self.ReadData = ""
 		self.SkipToken = true
 	end
 end

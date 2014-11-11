@@ -577,6 +577,39 @@ Component:AddFunctionHelper( "isWeldedTo", "e:", "Returns the first entity welde
 Component:AddFunctionHelper( "getConstraints", "e:", "Returns an array of contrained entities." )
 
 /* --- --------------------------------------------------------------------------------
+	@: Trails
+   --- */
+
+Component:AddPreparedFunction( "removeTrails", "e:", "",
+	[[if IsValid(@value 1) and EXPADV.PPCheck(Context.player, @value 1) then
+		$duplicator.EntityModifiers.trail(self.player, this, nil)
+	end]] )
+
+Component:AddFunctionHelper( "removeTrails", "e:", "Removes the trails from an entity." )
+
+Component:AddPreparedFunction( "setTrails", "e:n,n,n,s,c,n,b", "",
+	[[if IsValid(@value 1) and EXPADV.PPCheck(Context.player, @value 1) then
+		if !string.find(@value 5, '"', 1, true) then
+			@define Data = {
+				Color = @value 6,
+				Length = @vlue 4,
+				StartSize = @value 2,
+				EndSize = @value 3,
+				Material = @value 5,
+				AttachmentID = @value 7
+				Additive = @value 8 ~= 0
+			}
+
+			$duplicator.EntityModifiers.trail(self.player, this, @Data)
+		end
+	end]] )
+
+EXPADV.AddFunctionAlias( "setTrails", "e:n,n,n,s,c,n" )
+EXPADV.AddFunctionAlias( "setTrails", "e:n,n,n,s,c" )
+
+Component:AddFunctionHelper( "setTrails", "e:n,n,n,s,c,n,b", "Adds a trail to an entity." )
+
+/* --- --------------------------------------------------------------------------------
 	@: Entity Events
    --- */
 
@@ -584,6 +617,7 @@ EXPADV.ServerEvents( )
 Component:AddEvent( "onKill", "e,e,e", "" )
 Component:AddEvent( "onDamage", "e,e,n,v", "" )
 Component:AddEvent( "propBreak", "e,e", "" )
+Component:AddEvent( "OnEntityCreated", "e,ply,s", "" )
 
 /* --- --------------------------------------------------------------------------------
 	@: Server Hooks
@@ -611,6 +645,30 @@ if SERVER then
 	hook.Add("PropBreak", "Expav.Event", function( Attacker, Ent )
 		local Attacker = Attacker or Entity( 0 )
 		EXPADV.CallEvent( "propBreak", Ent, Attacker )
+	end)
+
+	hook.Add("PlayerSpawnedProp", "Expav.Event", function( Player, Model, Entity )
+		EXPADV.CallEvent( "OnEntityCreated", Entity, Player, "prop" )
+	end)
+
+	hook.Add("PlayerSpawnedRagdoll", "Expav.Event", function( Player, Model, Entity )
+		EXPADV.CallEvent( "OnEntityCreated", Entity, Player, "ragdoll" )
+	end)
+
+	hook.Add("PlayerSpawnedEffect", "Expav.Event", function( Player, Model, Entity )
+		EXPADV.CallEvent( "OnEntityCreated", Entity, Player, "effect" )
+	end)
+
+	hook.Add("PlayerSpawnedNPC", "Expav.Event", function( Player, Entity )
+		EXPADV.CallEvent( "OnEntityCreated", Entity, Player, "npc" )
+	end)
+
+	hook.Add("PlayerSpawnedSENT", "Expav.Event", function( Player, Entity )
+		EXPADV.CallEvent( "OnEntityCreated", Entity, Player, "scripted" )
+	end)
+
+	hook.Add("PlayerSpawnedVehicle", "Expav.Event", function( Player, Entity )
+		EXPADV.CallEvent( "OnEntityCreated", Entity, Player, "vehicle" )
 	end)
 	
 end
