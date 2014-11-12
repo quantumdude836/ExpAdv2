@@ -621,7 +621,7 @@ function EXPADV.Editor.Open_SessionMenu( )
 		Create:SetToolTip( "Create session" )
 		
 		function NameEntry:OnTextChanged( )
-			Create:SetVisible( #NameEntry:GetValue() > 4 )
+			Create:SetVisible( #NameEntry:GetValue() > 3 )
 		end
 
 		function NameEntry:OnGetFocus( )
@@ -645,7 +645,7 @@ function EXPADV.Editor.Open_SessionMenu( )
 		end
 		
 		function NameEntry:OnEnter( )
-			if self:GetValue( ) == "" then return end
+			if #self:GetValue( ) < 3 then return end
 			Create:DoClick( )
 		end
 
