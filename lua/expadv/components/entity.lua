@@ -582,7 +582,7 @@ Component:AddFunctionHelper( "getConstraints", "e:", "Returns an array of contra
 
 Component:AddPreparedFunction( "removeTrails", "e:", "",
 	[[if IsValid(@value 1) and EXPADV.PPCheck(Context.player, @value 1) then
-		$duplicator.EntityModifiers.trail(self.player, this, nil)
+		$duplicator.EntityModifiers.trail(Context.player, @value 1, nil)
 	end]] )
 
 Component:AddFunctionHelper( "removeTrails", "e:", "Removes the trails from an entity." )
@@ -592,15 +592,15 @@ Component:AddPreparedFunction( "setTrails", "e:n,n,n,s,c,n,b", "",
 		if !string.find(@value 5, '"', 1, true) then
 			@define Data = {
 				Color = @value 6,
-				Length = @vlue 4,
+				Length = @value 4,
 				StartSize = @value 2,
 				EndSize = @value 3,
 				Material = @value 5,
-				AttachmentID = @value 7
+				AttachmentID = @value 7,
 				Additive = @value 8 ~= 0
 			}
 
-			$duplicator.EntityModifiers.trail(self.player, this, @Data)
+			$duplicator.EntityModifiers.trail(Context.player, @value 1, @Data)
 		end
 	end]] )
 

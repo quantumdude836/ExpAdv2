@@ -688,6 +688,10 @@ if SERVER then
 		local Y = math.Clamp( Scale.y, -ScaleLimit, ScaleLimit )
 		local Z = math.Clamp( Scale.z, -ScaleLimit, ScaleLimit )
 
+		--MsgN( "Set Scale:")
+		--MsgN( "-Origonal: ", Scale )
+		--MsgN( "-Clamped: ", Vector(X,Y,Z) )
+
 		if self.INFO.SCALEX ~= X then
 			self.INFO.SCALEX = X
 			self.SYNC_SCALEX = true
@@ -1164,35 +1168,28 @@ function ENT:ApplyHoloInfo( )
 
 	if !Info then return end
 
-	local Bones = self:GetBoneCount( ) or -1
-
+	local BoneCount = self:GetBoneCount( ) or -1
 	local Scale = Vector( Info.SCALEX, Info.SCALEY, Info.SCALEZ )
 
-	if Bones > 1 and Info.BONES then 
-		for ID, Bone in pairs( self.BONES ) do
-			
-			local ID = ID - 1
+	if BoneCount > 1 then
+		
+		for I = BoneCount, 0 do
+			local BoneScale = Scale
 
-			self:ManipulateBoneJiggle( ID, Bone.JIGGLE and 1 or 0 )
+			if self.BONES then
 
-			self:ManipulateBonePosition( ID, Vector( Bone.POSX, Bone.POSY, Bone.POSZ ) )
+				local BoneData = self.BONES[I - 1]
 
-			self:ManipulateBoneScale( ID, Vector( Bone.SCALEY, Bone.SCALEX, Bone.SCALEZ ) )
-
-			self:ManipulateBoneAngles( ID, Angle( Bone.ANGLEP, Bone.ANGLEY, Bone.ANGLEY ) )
-		end
-
-		for ID = Bones, 0, -1 do
-			if !self.BONES[ID] then
-				self:ManipulateBoneScale( ID, Scale )
+				if BoneData and BoneData.SCALEX then
+					BoneScale = Vector( Bone.SCALEY, Bone.SCALEX, Bone.SCALEZ )
+				end
 			end
+		
+			self:ManipulateBoneScale( I, BoneScale )
 		end
-
-	elseif Bones > 1 then
-
-		for ID = Bones, 0, -1 do self:ManipulateBoneScale( ID, Scale ) end
 
 	elseif self.EnableMatrix then
+		
 		local ScaleMatrix = Matrix( )
 
 		ScaleMatrix:Scale( Scale )
@@ -1204,6 +1201,18 @@ function ENT:ApplyHoloInfo( )
 	end
 
 	self:SetRenderBounds( Scale * self:OBBMaxs( ), Scale * self:OBBMins( ) )
+
+	if self.BONES then
+
+		for I, BoneData in pairs( self.BONES ) do
+				
+			self:ManipulateBoneJiggle( I - 1, Bone.JIGGLE and 1 or 0 )
+
+			self:ManipulateBonePosition( I - 1, Vector( Bone.POSX, Bone.POSY, Bone.POSZ ) )
+
+			self:ManipulateBoneAngles( I - 1, Angle( Bone.ANGLEP, Bone.ANGLEY, Bone.ANGLEY ) )
+		end
+	end
 
 end
 

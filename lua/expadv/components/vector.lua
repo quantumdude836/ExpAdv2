@@ -318,7 +318,7 @@ Component:AddInlineOperator( "-", "v2,n", "v2", "(@value 1 - Vector2(@value 2, @
 Component:AddInlineOperator( "-", "n,v2", "v2", "(Vector2(@value 1, @value 1) - @value 2)")
 
 Component:AddInlineOperator( "*", "v2,n", "v2", "(@value 1 * Vector2(@value 2, @value 2))")
-Component:AddInlineOperator( "*", "n,v", "v2", "(Vector2(@value 1, @value 1) * @value 2)")
+Component:AddInlineOperator( "*", "n,v2", "v2", "(Vector2(@value 1, @value 1) * @value 2)")
 
 Component:AddInlineOperator( "/", "v2,n", "v2", "(@value 1 / Vector2(@value 2, @value 2))")
 Component:AddInlineOperator( "/", "n,v2", "v2", "(Vector2(@value 1, @value 1) / @value 2)")
