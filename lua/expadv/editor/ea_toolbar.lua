@@ -293,11 +293,16 @@ local function CreateOptions( )
 		EXPADV.Editor.GetInstance( ):ChangeFont( value ) 
 	end
 	
-	--local kinect = vgui.Create( "DCheckBoxLabel" ) 
-	--kinect:SetText( "Use kinect? " ) 
-	--kinect:SetConVar( "lemon_kinect_allow" )
-	--kinect:SizeToContents( )
+	local kinect = vgui.Create( "DCheckBoxLabel" ) 
+	kinect:SetText( "Use kinect? " ) 
+	kinect:SetConVar( "expadv_allow_msensor" )
+	kinect:SizeToContents( )
 	
+	local Talk = vgui.Create( "DCheckBoxLabel" ) 
+	Talk:SetText( "Session Talk " ) 
+	Talk:SetConVar( "expadv_talk_session" )
+	Talk:SizeToContents( )
+
 	--local Console = vgui.Create( "DCheckBoxLabel" ) 
 	--Console:SetText( "Allow Console? " ) 
 	--Console:SetConVar( "lemon_console_allow" ) 
@@ -308,10 +313,11 @@ local function CreateOptions( )
 	--KeyEvents:SetConVar( "lemon_share_keys" ) 
 	--KeyEvents:SizeToContents( )
 	
-	--local Cvars = Panel:Add( "DHorizontalScroller" )
-	--Cvars:Dock( TOP ) 
-	--Cvars:DockMargin( 10, 5, 10, 5 )
-	--Cvars:AddPanel( kinect )
+	local Cvars = Panel:Add( "DHorizontalScroller" )
+	Cvars:Dock( TOP ) 
+	Cvars:DockMargin( 10, 5, 10, 5 )
+	Cvars:AddPanel( kinect )
+	Cvars:AddPanel( Talk )
 	--Cvars:AddPanel( Console )
 	--Cvars:AddPanel( KeyEvents )
 	
@@ -322,120 +328,22 @@ local function CreateOptions( )
 end
 
 function PANEL:AddInviteMenu( )
-	self.pnlSharedView = vgui.Create( "DPanelList", self:GetParent( ) )
-	self.pnlSharedView:SetVisible( false )
-	self.pnlSharedView:SetAutoSize( true )
-	self.pnlSharedView:SetWide( 200 )
-
-	self.pnlSharedList = vgui.Create( "DPanelList" )
-	self.pnlSharedList:SetAutoSize( true )
-	self.pnlSharedList:Dock( TOP )
-	self.pnlSharedList:DockPadding( 5, 5, 5, 5 )
-	self.pnlSharedView:AddItem( self.pnlSharedList, "ownline" )
-
-	local subPnl = vgui.Create( "DPanel" )
-	subPnl:SetTall( 30 )
-	subPnl:Dock( BOTTOM )
-	subPnl:DockPadding( 5, 5, 5, 5 )
-	self.pnlSharedView:AddItem( subPnl, "ownline" )
-
-	local btnSub = self.SetupButton( subPnl, "Create", Material( "fugue/share.png" ), RIGHT )
-	btnSub:DrawButton( false )
-	
-	local txtName = subPnl:Add( "DTextEntry" )
-	txtName:Dock( FILL )
-	
-	function btnSub.DoClick( Btn )
-		RunConsoleCommand( "lemon_editor_host", txtName:GetValue( ) )
-
-		txtName:SetValue( "" )
-		self.pnlSharedView:SetVisible( false )
-	end
-
-	-- Add to toolbar!
-	self.btnShared = self:SetupButton( "Start Session", Material( "fugue/share.png" ), RIGHT )
+	self.btnShared = self:SetupButton( "Shared Session's", Material( "fugue/share.png" ), RIGHT )
 
 	local OldPaint = self.btnShared.Paint
+
 	function self.btnShared.Paint( Btn, W, H )
 		OldPaint( Btn, W, H )
 
-		local Invites = self:GetParent( ).SharedInviteCount
-		if !Invites or Invites == 0 then return end
+		local Invites = #EXPADV.Editor.Session_Invites
+		if Invites == 0 then return end
 
 		draw.SimpleText( tostring( Invites ), "defaultsmall", W - 5, H - 5, Color( 255, 255, 255, 255 ), TEXT_ALIGN_RIGHT, TEXT_ALIGN_TOP )
 	end -- This draws the invite count, ontop of the icon.
 
 	function self.btnShared.DoClick( Btn )
-		local Visible = !self.pnlSharedView:IsVisible( )
-		
-		self.pnlSharedView:SetVisible( Visible )
-
-		if IsValid( self.Edit ) then
-			self.Edit:Remove( )
-			subPnl:Dock( FILL )
-			subPnl:PerformLayout( )
-		end
-
-		if !Visible then return end
-
-		local btnX, btnY = Btn:GetPos( )
-		local tlbX, tlbY = self:GetPos( )
-
-		self.pnlSharedView:SetPos( btnX + tlbX - ((self.pnlSharedView:GetWide( ) - Btn:GetWide( )) / 2 ), btnY + tlbY + Btn:GetTall( ) )
-
-		local Tab = self:GetParent( ).TabHolder:GetActiveTab( )
-		if !IsValid( Tab ) then return end
-		
-		local Session = Tab:GetPanel( ).SharedSession 
-		if !Session then return end
-
-		local IsHost = Session.Host == LocalPlayer( ) 
-
-		self.Edit = self.SetupButton( subPnl, "Current Session", Material( "fugue/globe-network.png" ), LEFT )
-		self.Edit:DrawButton( false )
-		subPnl:PerformLayout( )
-
-		function self.Edit.DoClick( )
-			local Menu = DermaMenu( )
-			
-			Menu:AddOption( IsHost and "End Session" or "Leave Session", function( ) RunConsoleCommand( "lemon_editor_leave", Session.ID ) end )
-
-			if IsHost then
-					Menu:AddSpacer( )
-
-					local Invite, Kick
-
-					for _, Ply in pairs( player.GetAll( ) ) do
-						if Ply == LocalPlayer( ) then continue end
-
-						if !Session.Users[ Ply ] then
-							if !Invite then Invite = Menu:AddSubMenu( "Invite" ) end
-							Invite:AddOption( Ply:Name( ), function( ) RunConsoleCommand( "lemon_editor_invite", Session.ID, Ply:UniqueID( ) ) end )
-						else
-							if !Kick then Kick = Menu:AddSubMenu( "Kick" ) end
-							Kick:AddOption( Ply:Name( ), function( ) RunConsoleCommand( "lemon_editor_kick", Session.ID, Ply:UniqueID( ) ) end )
-						end
-					end
-			end
-
-			for _, Ply in pairs( Session.Users ) do
-				if Ply == LocalPlayer( ) then continue end
-
-				local Option = Menu:AddSubMenu( Ply:Name( ) )
-				
-				if Session.Editor.HiddenSyncedCursors[ Ply:UniqueID( ) ] then
-					Option:AddOption( "Show Cursor", function( ) Session.Editor.HiddenSyncedCursors[ Ply:UniqueID( ) ] = nil end )
-				else
-					Option:AddOption( "Hide Cursor", function( ) Session.Editor.HiddenSyncedCursors[ Ply:UniqueID( ) ] = true end )
-				end
-
-				--TODO: Add more options!
-			end
-
-			Menu:Open()
-		end
-
-	end -- Toggle the invites window.
+		EXPADV.Editor.Open_SessionMenu( )
+	end
 end
 
 function PANEL:OpenOptions( )

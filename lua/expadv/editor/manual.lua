@@ -581,6 +581,7 @@ function EXPADV.Editor.OpenHelper( )
 	-- CLASSES:
 
 		local RootClassNode = NodeList:AddNode( "Classes" )
+		RootClassNode:SetIcon( "fugue/rocket-fly.png" )
 
 		for Short, Panel in pairs( ClassPanels ) do
 
@@ -604,12 +605,14 @@ function EXPADV.Editor.OpenHelper( )
 			end
 
 			local Node = ComponentNode.ClassNode:AddNode( Class.Name )
+			Node:SetIcon( "fugue/block.png" )
 
 			function Node:DoClick( )
 				Frame:SetActiveClassPage( Short )
 			end
 
 			local Node = RootClassNode:AddNode( Class.Name )
+			Node:SetIcon( "fugue/block.png" )
 
 			function Node:DoClick( )
 				Frame:SetActiveClassPage( Short )

@@ -91,6 +91,9 @@ function PANEL:Init( )
 	
 	function self:ChangeTab( Previous, Current )
 		self.ToolBar.pnlName.txt:SetText( Current:GetText( ) )
+
+		local Session = Current:GetPanel( ).SharedSession 
+		RunConsoleCommand( "expadv_open_session", Session and Session.ID or 0 )
 	end
 	
 	self.ToolBar = self:Add( "EA_ToolBar" )
@@ -665,60 +668,6 @@ function PANEL:ToggleVoice( )
 			DrawMic( self, Pnl, -0.01 )
 		end
 	end
-end
-
-/*============================================================================================================================================
-	Tab Sharing, this is not the code you are looking for!
-============================================================================================================================================*/
-function PANEL:AddSharedInvite( ID, Host, Name )
-	self.SharedInviteCount = (self.SharedInviteCount or 0) + 1
-	local List = self.ToolBar.pnlSharedList
-	
-	local Pnl = vgui.Create( "DPanel" )
-	Pnl:SetTall( 20 )
-	
-	local Avt = Pnl:Add( "AvatarImage" )
-	Avt:SetSize( 16, 16 )
-	Avt:SetPos( 3, 3 )
-	Avt:SetPlayer( Host, 16 )
-	
-	local Lbl = Pnl:Add( "DLabel" )
-	Lbl:SetPos( 25, 3 )
-	Lbl:SetText( Name )
-	Lbl:SetTextColor( Color( 0, 0, 0, 255 ) )
-	Lbl:SizeToContents( )
-	
-	local Accept = Pnl:Add( "EA_ImageButton" )
-	Accept:SetPos( 160, 3 )
-	Accept:DrawButton( false )
-	Accept:SetTooltip( "Join Session" ) 
-	Accept:SetMaterial( Material( "fugue/hand-shake.png") )
-	
-	local Reject = Pnl:Add( "EA_ImageButton" )
-	Reject:SetPos( 180, 3 )
-	Reject:DrawButton( false )
-	Reject:SetTooltip( "Decline Session" ) 
-	Reject:SetMaterial( Material( "fugue/cross-button.png") )
-	
-	function Accept.DoClick( Btn )
-		List:RemoveItem( Pnl )
-		self.ToolBar.pnlSharedView:PerformLayout( )
-		self.ToolBar.pnlSharedView:SetVisible( false )
-		self.SharedInviteCount = self.SharedInviteCount - 1
-		
-		RunConsoleCommand( "lemon_editor_join", ID )
-	end
-	
-	function Reject.DoClick( Btn )
-		List:RemoveItem( Pnl )
-		self.ToolBar.pnlSharedView:PerformLayout( )
-		self.SharedInviteCount = self.SharedInviteCount - 1
-
-		RunConsoleCommand( "lemon_editor_decline", ID )
-	end
-	
-	List:InsertAtTop( Pnl, "ownline" )
-	self.ToolBar.pnlSharedView:InvalidateLayout()
 end
 
 ------------------------------------------------------------------------------------------------------

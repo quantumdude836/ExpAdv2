@@ -408,7 +408,6 @@ end
 function EXPADV.LoadEditor( )
 	
 	if CLIENT then
-		include( "expadv/editor/ea_browser.lua" ) -- TODO: Delte this!
 		include( "expadv/editor/ea_filemenu.lua" )
 		include( "expadv/editor/ea_button.lua" )
 		include( "expadv/editor/ea_closebutton.lua" )
@@ -416,7 +415,6 @@ function EXPADV.LoadEditor( )
 		include( "expadv/editor/ea_editorpanel.lua" )
 		include( "expadv/editor/ea_filenode.lua" )
 		include( "expadv/editor/ea_frame.lua" )
-		include( "expadv/editor/ea_helper.lua" )
 		include( "expadv/editor/ea_hscrollbar.lua" )
 		include( "expadv/editor/ea_imagebutton.lua" )
 		include( "expadv/editor/ea_toolbar.lua" )

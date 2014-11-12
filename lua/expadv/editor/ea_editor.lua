@@ -1329,9 +1329,14 @@ function PANEL:PositionIsVisible( pos )
 			pos.y - self.Scroll.y >= 0 and pos.y < self.Scroll.y + self.Size.y + 1
 end
 
+function PANEL:PositionExists( Caret )
+	--if !self.Rows[Caret.x] then return false end
+	--if #self.Rows[Caret.x] < Caret.y then return false end
+	return true
+end
 
 function PANEL:PaintCursor( Caret ) 
-	if self.TextEntry:HasFocus( ) and self:PositionIsVisible( Caret ) then
+	if self.TextEntry:HasFocus( ) and self:PositionIsVisible( Caret ) and self:PositionExists( Caret ) then
 		local width, height = self.FontWidth, self.FontHeight
 		
 		if ( RealTime( ) - self.Blink ) % 0.8 < 0.4 then
@@ -1347,6 +1352,9 @@ end
 
 function PANEL:PaintSelection( selection )
 	local start, stop = self:MakeSelection( selection )
+
+	if ! self:PositionExists( start ) or ! self:PositionExists( stop ) then return end
+
 	local line, char = start.x, start.y 
 	local endline, endchar = stop.x, stop.y 
 	

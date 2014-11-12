@@ -286,12 +286,33 @@ if SERVER then
 		end	
 	end )
 
+	-- Lets prevent Microphone Spam:
+
+	hook.Add( "PlayerCanHearPlayersVoice", "expadv.session", function( Listener, Talker )
+		if !Talker:SetNWBool( "expadv_editor_open" ) then return end
+
+		local SessionID = Talker:GetInfoNum( "expadv_open_session" )
+
+		if !SessionID or SessionID == 0 then return end
+
+		if !tobool( Talker:GetInfoNum( "expadv_talk_session" ) ) then return end
+
+		local Session = GetSession( SessionID )
+
+		if !Session then return end
+
+		return Session.Users[ Talker ] ~= nil
+	end )
+
 	return -- END OF IF SERVER!
 end
 
 /*============================================================================================================================================
 	Shared Tabs, Lets learn together =D
 ============================================================================================================================================*/
+
+CreateClientConVar( "expadv_open_session", 0, true, true )
+CreateClientConVar( "expadv_talk_session", 0, true, true )
 
 local Editor = EXPADV.Editor
 
@@ -458,6 +479,10 @@ end )
 /*============================================================================================================================================
 	Subscriptions
 ============================================================================================================================================*/
+local Invites = { }
+
+EXPADV.Editor.Session_Invites = Invites
+
 local function NewSession( ID, Host, Name )
 	local Session = { ID = ID }
 
@@ -543,7 +568,7 @@ net.Receive( "lemon.shared.invite", function( )
 	
 	if !IsValid( Host ) then return end
 
-	Editor.GetInstance( ):AddSharedInvite( ID, Host, Name )
+	Invites[#Invites + 1] = {ID, Host, Name}
 end )
 
 net.Receive( "lemon.shared.kicked", function( )
@@ -567,3 +592,186 @@ net.Receive( "lemon.shared.entity", function( )
 
 	Session.Entitys[ExpAdv] = ExpAdv
 end )
+
+/*============================================================================================================================================
+	Session Menu
+============================================================================================================================================*/
+
+function EXPADV.Editor.Open_SessionMenu( )
+
+	-- The Frame:
+		local Frame = vgui.Create( "EA_Frame" )
+		Frame:SetText( "ExpAdv2 - Sessions" )
+		Frame:DockPadding( 5, 24 + 5, 5, 5 )
+		Frame:SetSize( 300, 300 )
+		Frame:MakePopup( )
+		Frame:Center( )
+
+	-- New Session Box:
+		local NameEntry = Frame:Add( "DTextEntry" )
+		NameEntry:Dock( BOTTOM )
+		NameEntry:SetValue( "New Session..." )
+		
+		local Create = vgui.Create( "DImageButton", NameEntry )
+		Create:SetMaterial( "fugue/share.png" )
+		Create:DockMargin( 2,2,4,2 )
+		Create:Dock( RIGHT )
+		Create:SetSize( 14, 10 )
+		Create:SetVisible( false )
+		Create:SetToolTip( "Create session" )
+		
+		function NameEntry:OnTextChanged( )
+			Create:SetVisible( #NameEntry:GetValue() > 4 )
+		end
+
+		function NameEntry:OnGetFocus( )
+			if self:GetValue() == "New Session..." then self:SetValue( "" ) end
+			hook.Run( "OnTextEntryGetFocus", self )
+		end
+
+		function NameEntry:OnLoseFocus()
+			if self:GetValue() == "" then
+				timer.Simple( 0, function( ) self:SetValue( "New Session..." ) end )
+			end
+			
+			hook.Call( "OnTextEntryLoseFocus", nil, self )
+		end
+		
+		function Create.DoClick( Btn )
+			RunConsoleCommand( "lemon_editor_host", NameEntry:GetValue( ) )
+			NameEntry:SetValue( "" )
+			NameEntry:OnTextChanged( )
+			Frame:Remove( )
+		end
+		
+		function NameEntry:OnEnter( )
+			if self:GetValue( ) == "" then return end
+			Create:DoClick( )
+		end
+
+	-- Invites:
+		
+		local Invite_List = vgui.Create( "DListView", Frame )
+		Invite_List:AddColumn( "" ):SetFixedWidth( 25 )
+		Invite_List:AddColumn( "Host" ):SetFixedWidth( 100 )
+		Invite_List:AddColumn( "Session" )
+		Invite_List:Dock( FILL )
+
+		for K, Invite in pairs( Invites ) do
+			local Line = Invite_List:AddLine( "", Invite[2]:Name( ), Invite[3] )
+			Line:DockPadding( 5, 0, 5, 0 )
+
+			local Avitar = Line:Add( "AvatarImage" )
+			Avitar:Dock( LEFT )
+			Avitar:SetSize( 16, 16 )
+			Avitar:SetPlayer( Invite[2], 16 )
+
+			local Accept = Line:Add( "EA_ImageButton" )
+			Accept:Dock( RIGHT )
+			Accept:DrawButton( false )
+			Accept:SetTooltip( "Join Session" ) 
+			Accept:SetMaterial( Material( "fugue/hand-shake.png") )
+			
+			local Reject = Line:Add( "EA_ImageButton" )
+			Reject:Dock( RIGHT )
+			Reject:DrawButton( false )
+			Reject:SetTooltip( "Decline Session" ) 
+			Reject:SetMaterial( Material( "fugue/cross-button.png") )
+
+			function Accept.DoClick( Btn )
+				Invites[K] = nil
+				Invite_List:RemoveLine( Line:GetID() )
+				RunConsoleCommand( "lemon_editor_join", Invite[1] )
+			end
+			
+			function Reject.DoClick( Btn )
+				Invites[K] = nil
+				Invite_List:RemoveLine( Line:GetID() )
+				RunConsoleCommand( "lemon_editor_decline", Invite[1] )
+			end
+		end
+
+	-- Current Session:
+
+		local Tab = EXPADV.Editor.Instance.TabHolder:GetActiveTab( )
+		
+		if IsValid( Tab ) then
+			local Session = Tab:GetPanel( ).SharedSession 
+			
+			if Session then
+
+				local IsHost = ( Session.Host == LocalPlayer( ) )
+
+				local Player_List = vgui.Create( "DListView", Frame )
+				Player_List:AddColumn( "Player" )
+				Player_List:Dock( FILL )
+
+				for _, Player in pairs( player.GetAll( ) ) do
+
+					if Player == LocalPlayer( ) then continue end
+
+					local Line = Player_List:AddLine( Player:Name( ) )
+					Line:DockPadding( 5, 0, 5, 0 )
+
+					if !Session.Users[Player] then
+						if !IsHost then continue end
+
+						local Invite = Line:Add( "EA_ImageButton" )
+						Reject:Dock( RIGHT )
+						Reject:DrawButton( false )
+						Reject:SetTooltip( "Invite" ) 
+						Reject:SetMaterial( Material( "fugue/xfn.png") )
+
+						function Accept.DoClick( Btn )
+							Player_List:RemoveLine( Line:GetID() )
+							RunConsoleCommand( "lemon_editor_invite", Session.ID, Player:UniqueID( ) )
+						end
+
+						continue
+					end
+
+					if IsHost then
+						local Kick = Line:Add( "EA_ImageButton" )
+						Kick:Dock( RIGHT )
+						Kick:DrawButton( false )
+						Kick:SetTooltip( "Kick" ) 
+						Kick:SetMaterial( Material( "fugue/headstone-cross.png") )
+
+						function Kick.DoClick( Btn )
+							Player_List:RemoveLine( Line:GetID() )
+							RunConsoleCommand( "lemon_editor_kick", Session.ID, Player:UniqueID( ) )
+						end
+					end
+
+					local Cursor = Line:Add( "EA_ImageButton" )
+					Cursor:Dock( RIGHT )
+					Cursor:DrawButton( false )
+
+					if Session.Editor.HiddenSyncedCursors[ Player:UniqueID( ) ] then
+						Cursor:SetTooltip( "Show Cursor" ) 
+						Cursor:SetMaterial( Material( "fugue/cross-script.png") )
+					else
+						Cursor:SetTooltip( "Hide Cursor" ) 
+						Cursor:SetMaterial( Material( "fugue/tick.png") )
+					end
+
+					function Cursor.DoClick( Btn )
+						if Session.Editor.HiddenSyncedCursors[ Player:UniqueID( ) ] then
+							Cursor:SetTooltip( "Show Cursor" ) 
+							Cursor:SetMaterial( Material( "fugue/cross-script.png") )
+							Session.Editor.HiddenSyncedCursors[ Player:UniqueID( ) ] = nil
+						else
+							Cursor:SetTooltip( "Hide Cursor" ) 
+							Cursor:SetMaterial( Material( "fugue/tick.png") )
+							Session.Editor.HiddenSyncedCursors[ Player:UniqueID( ) ] = true
+						end
+					end
+				end
+
+				local TabSheet = Frame:Add( "DPropertySheet" )
+				TabSheet:AddSheet( "Invites", Invite_List, nil, true, true, "Check invites from other players." )
+				TabSheet:AddSheet( "Manager", Player_List, nil, true, true, "Manage your active session." )
+				TabSheet:Dock( FILL )
+			end
+		end
+end
