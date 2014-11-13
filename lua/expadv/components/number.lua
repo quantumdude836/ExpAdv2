@@ -58,6 +58,12 @@ Component:AddInlineOperator( "is", "n", "b", "(@value 1 >= 1)" )
 Component:AddInlineOperator( "not", "n", "b", "(@value 1 < 1)" )
 Component:AddInlineOperator( "-", "n", "n", "(-@value 1)" )
 
+ Component:AddPreparedOperator( "~", "n", "b", [[
+  @define value = Context.Memory[@value 1]
+  @define changed = Context.Changed[@value 1] ~= @value
+  Context.Changed[@value 1] = @value
+ ]], "@changed" )
+ 
 /* --- --------------------------------------------------------------------------------
     @: Bitwise
    --- */

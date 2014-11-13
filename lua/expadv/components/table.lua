@@ -379,7 +379,7 @@ function Component:OnPostRegisterClass( Name, Class )
 			end )
 
    		Component:AddVMFunction( "insert", "t:n," .. Class.Short, "",
-   			function( Context, Trace, Index, Table, Value )
+   			function( Context, Trace, Table, Index, Value )
 				local Data = Table.Data
 
 				table.insert( Data, Index, Value )

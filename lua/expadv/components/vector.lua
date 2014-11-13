@@ -71,6 +71,11 @@ Component:AddInlineOperator( "/", "n,v", "v", "Vector(@value 1 / @value 2.x, @va
 Component:AddInlineOperator( "is", "v", "b", "(@value 1 ~= Vector(0, 0, 0))" )
 Component:AddInlineOperator( "not", "v", "b", "(@value 1 == Vector(0, 0, 0))" )
 Component:AddInlineOperator( "-", "v", "v", "(-@value 1)" )
+ Component:AddPreparedOperator( "~", "v", "b", [[
+  @define value = Context.Memory[@value 1]
+  @define changed = Context.Changed[@value 1] ~= @value
+  Context.Changed[@value 1] = @value
+ ]], "@changed" )
 
 /* --- --------------------------------------------------------------------------------
 	  @: Assignment
@@ -330,6 +335,12 @@ Component:AddInlineOperator( "/", "n,v2", "v2", "(Vector2(@value 1, @value 1) / 
 Component:AddInlineOperator( "is", "v2", "b", "(@value 1 ~= Vector2(0, 0))" )
 Component:AddInlineOperator( "not", "v2", "b", "(@value 1 == Vector2(0, 0))" )
 Component:AddInlineOperator( "-", "v2", "v2", "(-@value 1)" )
+
+Component:AddPreparedOperator( "~", "v2", "b", [[
+@define value = Context.Memory[@value 1]
+@define changed = Context.Changed[@value 1] ~= @value
+Context.Changed[@value 1] = @value
+]], "@changed" )
 
 /* --- --------------------------------------------------------------------------------
 	  @: Casting

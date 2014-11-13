@@ -19,11 +19,11 @@ Class_Boolean:DefaultAsLua( false )
 Class_Function:DefaultAsLua( "function( ) end" )
 
 if WireLib then
-	Class_Boolean:WireInput( "NUMBER", function( Context, MemoryRef )
+	Class_Boolean:WireOutput( "NORMAL", function( Context, MemoryRef )
 		return Context.Memory[ MemoryRef ] and 1 or 0
 	end ) 
 
-	Class_Boolean:WireOutput( "NUMBER", function( Context, MemoryRef, InValue )
+	Class_Boolean:WireInput( "NORMAL", function( Context, MemoryRef, InValue )
 		Context.Memory[ MemoryRef ] = (InValue ~= 0)
 	end )
 end

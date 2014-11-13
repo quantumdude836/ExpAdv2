@@ -87,6 +87,12 @@ Component:AddInlineOperator( "is", "a", "b", "(@value 1 ~= Angle(0, 0, 0))" )
 Component:AddInlineOperator( "not", "a", "b", "(@value 1 == Angle(0, 0, 0))" )
 Component:AddInlineOperator( "-", "a", "a", "(-@value 1)" )
 
+ Component:AddPreparedOperator( "~", "a", "b", [[
+ 	@define value = Context.Memory[@value 1]
+ 	@define changed = Context.Changed[@value 1] ~= @value
+ 	Context.Changed[@value 1] = @value
+ ]], "@changed" )
+
 /* --- --------------------------------------------------------------------------------
 	@: Constructor
    --- */

@@ -119,25 +119,27 @@ function ENT:TriggerInput( Key, Value )
 end
 
 function ENT:TriggerOutputs( )
-	local Context = self.Context
-	if !self.Context then return end
+		local Context = self.Context
+		if !self.Context then return end
 
-	local Cells = self.Cells
+		local Cells = self.Cells
 
-	for Name, Reference in pairs( self.OutPorts ) do
-		local Class = Cells[ Reference ].ClassObj
+		for Name, Reference in pairs( self.OutPorts ) do
+			local Class = Cells[ Reference ].ClassObj
 
-		if Context.Trigger[ Reference ] then
-			local Value = Class.Wire_Out_Util( Context, Reference )
-			WireLib.TriggerOutput( self, Name, Value )
-		elseif self.OutClick[ Reference ] then
-			local Val = Context.Memory[ Reference ]
-
-			if Val and Val.HasChanged then
-				Val.HasChanged = nil
+			if Context.Memory[ Reference ] == nil then
+				continue
+			elseif Context.Trigger[ Reference ] then
 				local Value = Class.Wire_Out_Util( Context, Reference )
 				WireLib.TriggerOutput( self, Name, Value )
+			elseif Context.OutClick[ Reference ] then
+				local Val = Context.Memory[ Reference ]
+
+				if Val and Val.HasChanged then
+					Val.HasChanged = nil
+					local Value = Class.Wire_Out_Util( Context, Reference )
+					WireLib.TriggerOutput( self, Name, Value )
+				end
 			end
 		end
-	end
 end

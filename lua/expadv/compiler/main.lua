@@ -519,6 +519,8 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier, Comparator )
 
 				self.Cells[ MemRef ] = { Variable = Variable, Memory = MemRef, Scope = 0, Return = ClassObj.Short, ClassObj = ClassObj, Modifier = "output", Server = true, Client = false }
 				self.OutPorts[ Variable ] = MemRef
+
+				if ClassObj.HasUpdateCheck then self.OutClick[ MemRef ] = true end
 			end
 
 			if self.Scope[ Variable ] then
@@ -687,7 +689,8 @@ function Compiler:SoftCompile( Script, Files )
 		self.Cells = { }
 		self.InPorts = { }
 		self.OutPorts = { }
-
+		self.OutClick = { }
+		
 		self.FreshMemory = { }
 		self.MemoryDeph = 0
 		self.LambdaDeph = 0

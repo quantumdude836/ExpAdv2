@@ -55,11 +55,11 @@ String:AddVMOperator( "=", "n,s", "", function( Context, Trace, MemRef, Value )
    Context.Trigger[MemRef] = Context.Trigger[MemRef] or ( Prev ~= Value )
 end )
 
--- Component:AddPreparedOperator( "~", "n", "b", [[
--- 	@define value = Context.Memory[@value 1]
--- 	@define changed = Context.Changed[@value 1] ~= @value
--- 	Context.Changed[@value 1] = @value
--- ]], "@changed" )
+ Component:AddPreparedOperator( "~", "s", "b", [[
+ 	@define value = Context.Memory[@value 1]
+ 	@define changed = Context.Changed[@value 1] ~= @value
+ 	Context.Changed[@value 1] = @value
+ ]], "@changed" )
 
 
 /* --- --------------------------------------------------------------------------------
@@ -226,3 +226,9 @@ Component:AddFunctionHelper( "toByte", "s:", "Returns the ASCII code for a given
 Component:AddInlineFunction( "toChar", "n:", "s", [[(@value 1 ~= -1 and string.char(@value 1) or "")]] )
 Component:AddFunctionHelper( "toChar", "n:", "Returns the character for a given ASCII code." )
 
+/* --- --------------------------------------------------------------------------------
+	@: Index
+   --- */
+
+String:AddVMOperator( "get", "t,n,vr", "s", "@value 1[@value 2]" )
+String:AddVMOperator( "get", "t,n,s", "s", "@value 1[@value 2]" )

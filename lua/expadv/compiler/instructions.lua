@@ -352,6 +352,20 @@ function Compiler:Compile_DELTA( Trace, Variable )
 	return Operator.Compile( self, Trace, Quick( MemRef, "n" ) )
 end
 
+function Compiler:Compile_CHANGED( Trace, Variable )
+	local MemRef, MemScope = self:FindCell( Trace, Variable, true )
+
+	local Class = self.Cells[ MemRef ].Return
+
+	local Operator = self:LookUpOperator( "~", "n" )
+	
+	if !Operator then
+		self:TraceError( Trace, "changed operator (~) does not support '~%s'", self:NiceClass( Class ) )
+	end
+
+	return Operator.Compile( self, Trace, Quick( MemRef, "n" ) )
+end
+
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Type Operators
    --- */

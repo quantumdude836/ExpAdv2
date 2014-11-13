@@ -209,6 +209,7 @@ function ENT:BuildInstance( Instance, Instruction )
 	end )
 
 	if !Ok then
+		MsgN( "ExpAdv2 Statup Error: ", Error )
 		return self:OnCompileError( Error, Instance )
 	end
 
@@ -237,7 +238,7 @@ function ENT:CallEvent( Name, ... )
 
 	return self.Context:Execute( "Event " .. Name, Event, ... )
 end
-
+ 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Context Menu
    --- */

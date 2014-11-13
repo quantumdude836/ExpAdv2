@@ -31,6 +31,7 @@ function EXPADV.BuildNewContext( Instance, Player, Entity ) -- Table, Player, En
 	Context.Definitions = { }
 	
 	Context.Cells = Instance.Cells or { }
+	Context.OutClick = Instance.OutClick or { }
 	Context.Strings = Instance.Strings or { }
 	Context.Instructions = Instance.VMInstructions or { }
 	Context.Enviroment = Instance.Enviroment or error( "No safe guard.", 0 )
@@ -118,9 +119,9 @@ function EXPADV.RootContext:Execute( Location, Operation, ... ) -- String, Funct
 
 	end
 
-	if Result.Context and Result.Context ~= self then
-		self = Result.Context
-	end
+	--if Result.Context and Result.Context ~= self then
+	--	self = Result.Context
+	--end
 
 	if !IsValid( self.entity ) then
 		-- Do nothing :P
