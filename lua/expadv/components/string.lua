@@ -131,11 +131,11 @@ Component:AddInlineFunction( "matchPattern", "s:s", "ar", "{__type = 's',string.
 
 Component:AddInlineFunction( "matchPattern", "s:s,n", "ar", "{__type = 's',string.match(@value 1, @value 2, @value 3)}" )
 
-Component:AddInlineFunction( "matchFirst", "s:s", "s", "{__type = 's',string.match(@value 1, @value 2)}" )
+Component:AddInlineFunction( "matchFirst", "s:s", "s", "string.match(@value 1, @value 2)" )
 Component:AddFunctionHelper( "matchFirst", "s:s", "Returns a string match to (string) starting at the leftmost character." )
 
-Component:AddInlineFunction( "matchFirst", "s:s,n", "s", "{__type = s',string.match(@value 1, @value 2, @value 3)}" )
-Component:AddFunctionHelper( "matchFirst", "s:s,n", "Returns a string match to (string) starting at the leftmost character starting at location (number)." )
+Component:AddInlineFunction( "match", "s:s,n", "ar", "{__type = s',string.match(@value 1, @value 2, @value 3)}" )
+Component:AddFunctionHelper( "match", "s:s,n", "Returns a string match to (string) starting at the leftmost character starting at location (number)." )
 
 Component:CreateSetting( "gmatch_limit", 50 )
 

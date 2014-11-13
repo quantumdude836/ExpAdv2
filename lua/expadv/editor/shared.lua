@@ -717,12 +717,12 @@ function EXPADV.Editor.Open_SessionMenu( )
 						if !IsHost then continue end
 
 						local Invite = Line:Add( "EA_ImageButton" )
-						Reject:Dock( RIGHT )
-						Reject:DrawButton( false )
-						Reject:SetTooltip( "Invite" ) 
-						Reject:SetMaterial( Material( "fugue/xfn.png") )
+						Invite:Dock( RIGHT )
+						Invite:DrawButton( false )
+						Invite:SetTooltip( "Invite" ) 
+						Invite:SetMaterial( Material( "fugue/xfn.png") )
 
-						function Accept.DoClick( Btn )
+						function Invite.DoClick( Btn )
 							Player_List:RemoveLine( Line:GetID() )
 							RunConsoleCommand( "lemon_editor_invite", Session.ID, Player:UniqueID( ) )
 						end
