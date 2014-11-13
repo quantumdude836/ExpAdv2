@@ -172,7 +172,7 @@ function TOOL:LeftClick( Trace )
 	undo.SetPlayer( self:GetOwner( ) ) 
 
 	if self:GetClientNumber( "weld" ) >= 1 then
-		if !IsValid( Trace.Entity ) and WeldWorld then
+		if !IsValid( Trace.Entity ) or WeldWorld then
 			undo.AddEntity( constraint.Weld( ExpAdv, Trace.Entity, 0, Trace.PhysicsBone, 0, 0, WeldWorld ) )
 		end 
 	end
