@@ -165,7 +165,7 @@ function TOOL:LeftClick( Trace )
 
 	ExpAdv:SetPos( Trace.HitPos - Trace.HitNormal * ExpAdv:OBBMins().z )
 
-	local WeldWorld = self:GetClientNumber( "weldworld" )
+	local WeldWorld = self:GetClientNumber( "weldworld" ) >= 1
 
 	undo.Create( "expadv" )
 	undo.AddEntity( ExpAdv )
