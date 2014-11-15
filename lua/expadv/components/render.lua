@@ -385,7 +385,7 @@ if CLIENT then
 				Context:Execute( "Event drawHUD", Context.event_drawHUD, W, H )
 			end
 			
-			if(Context.entity.Enable3D2D && Context.event_draw3d) then
+			if(Context.entity.Enable3D && Context.event_draw3d) then
 				cam.Start3D(EyePos(), EyeAngles())
 					Context:Execute("Event draw3d", Context.event_draw3d)
 				cam.End3D()
@@ -415,14 +415,14 @@ if CLIENT then
 		end
 		
 		if(Entity.Context.event_draw3d) then
-			if(Entity.Enable3D2D) then
+			if(Entity.Enable3D) then
 				Menu:AddOption( "Disable 3D Rendering", function( )
-					Entity.Enable3D2D = false
+					Entity.Enable3D = false
 					Entity:CallEvent( "disable3DRendering" )
 				end )
 			else
 				Menu:AddOption( "Enable 3D Rendering", function( )
-					Entity.Enable3D2D = true
+					Entity.Enable3D = true
 					Entity:CallEvent( "enable3DRendering" )
 				end )
 			end
