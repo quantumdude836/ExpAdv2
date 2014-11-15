@@ -268,7 +268,7 @@ Component:AddFunctionHelper( "radius", "e:", "Returns the bounding radius of the
 
 EXPADV.ServerOperators()
 
-Component:AddPreparedFunction( "setMass", "e:n", "","if(@value 1:IsValid() && EXPADV.PPCheck(Context.player,@value 1) && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType() == $MOVETYPE_VPHYSICS then @value 1:GetPhysicsObject():SetMass(@value 2 or 0) end")
+Component:AddPreparedFunction( "setMass", "e:n", "","if(@value 1:IsValid() && EXPADV.PPCheck(Context.player,@value 1) && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType() == $MOVETYPE_VPHYSICS) then @value 1:GetPhysicsObject():SetMass(@value 2 or 0) end")
 Component:AddFunctionHelper( "setMass", "e:n", "Sets the mass of the given entity.")
 
 Component:AddVMFunction( "applyForce", "e:v", "", function( Context, Trace, Target, Pos )
