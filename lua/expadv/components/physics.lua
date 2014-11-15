@@ -161,6 +161,9 @@ Component:AddInlineFunction( "massCenterWorld", "p:", "v", "(IsValid(@value 1) a
 
 Component:AddInlineFunction( "massCenter", "p:", "v", "(IsValid(@value 1) and ( @value 1:GetMassCenter( ) ) or Vector(0, 0, 0) )")
 
+Component:AddPreparedFunction( "enableDrag", "p:b", "", "if(IsValid(@value 1) && EXPADV.PPCheck(Context.player, @value 1)) then @value 1:EnableDrag(@value 2) end") -- Because why not :) ?
+Component:AddFunctionHelper( "setDrag", "p:b", "Enables/disables drag on an entity.")
+
 /* --- --------------------------------------------------------------------------------
 	@: ABB
    --- */

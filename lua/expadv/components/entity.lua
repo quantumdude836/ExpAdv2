@@ -176,6 +176,9 @@ Component:AddFunctionHelper( "setColor", "e:c", "Sets the color of the given ent
 Component:AddPreparedFunction( "setColour", "e:c", "", "if(IsValid(@value 1) && EXPADV.PPCheck(Context.player,@value 1)) then @value 1:SetColor(@value 2) end") -- Because why not :) ?
 Component:AddFunctionHelper( "setColour", "e:c", "Sets the colour of the given entity.")
 
+Component:AddPreparedFunction( "enableDrag", "e:b", "", "if(IsValid(@value 1) && IsValid(@value 1:GetPhysicsObject()) && EXPADV.PPCheck(Context.player, @value 1)) then @value 1:GetPhysicsObject():EnableDrag(@value 2) end") -- Because why not :) ?
+Component:AddFunctionHelper( "setDrag", "e:b", "Enables/disables drag on an entity.")
+
 /* --- --------------------------------------------------------------------------------
 	@: VEHICLES
    --- */
