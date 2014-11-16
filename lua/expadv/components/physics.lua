@@ -100,8 +100,8 @@ end]], "@Ret" )
 Component:AddPreparedFunction( "angVel", "p:", "a", [[
 @define Ret = Angle(0, 0, 0)
 if IsValid( @value 1 ) then
-	local %GetVel = @value 1:GetAngleVelocity()
-	@Ret = Angle( %GetVel.y, %GetVel.z, %GetVel.x )
+	@define Vel = @value 1:GetAngleVelocity()
+	@Ret = Angle( @Vel.y, @Vel.z, @Vel.x )
 end]], "@Ret" )
 
 Component:AddInlineFunction( "inertia", "p:", "v", "(IsValid(@value 1) and (@value 1:GetInertia( )) or Vector(0, 0, 0) )" )
@@ -132,12 +132,7 @@ if @Ent and @Ent:IsValid( ) then
 	@define Pos = @Ent:WorldToLocal( @value 2 )
 	@define Bearing = (180 / math.pi) * -math.atan2(@Pos.y, @Pos.x)
 	@define Len = @Pos:Length( )
-
-	if @Len > %Round then
-		@Val = Angle((180 / math.pi) * math.asin(@Pos.z / @Len), @Bearing, 0 )
-	else
-		@Val = Angle( 0, @Bearing, 0 )
-	end			
+	@Val = Angle((180 / math.pi) * math.asin(@Pos.z / @Len), @Bearing, 0 )		
 end]], "@Val" )
 
 /* --- --------------------------------------------------------------------------------
