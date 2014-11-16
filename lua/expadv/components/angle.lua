@@ -58,10 +58,10 @@ Component:AddInlineOperator( "<=", "a,a", "b", "(@value 1 <= @value 2)" )
 	@: Arithmetic
    --- */
 
-Component:AddInlineOperator( "+", "a,a", "a", "(@value 1 + @value 2)" )
-Component:AddInlineOperator( "-", "a,a", "a", "(@value 1 - @value 2)" )
-Component:AddInlineOperator( "*", "a,a", "a", "(@value 1 * @value 2)" )
-Component:AddInlineOperator( "/", "a,a", "a", "(@value 1 / @value 2)" )
+Component:AddInlineOperator( "+", "a,a", "a", "(@value 1 + Angle(@value 2.p, @value 2.y, @value 2.r))" )
+Component:AddInlineOperator( "-", "a,a", "a", "(@value 1 - Angle(@value 2.p, @value 2.y, @value 2.r))" )
+Component:AddInlineOperator( "*", "a,a", "a", "(@value 1 * Angle(@value 2.p, @value 2.y, @value 2.r))" )
+Component:AddInlineOperator( "/", "a,a", "a", "(@value 1 / Angle(@value 2.p, @value 2.y, @value 2.r))" )
 
 /* --- --------------------------------------------------------------------------------
 	@: Number Arithmetic

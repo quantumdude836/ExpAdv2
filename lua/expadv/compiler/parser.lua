@@ -936,7 +936,7 @@ function Compiler:Statement_3( Trace )
 
 			else
 				self:RequireToken( "mul", "Exception type or wildcard (*), expected for catch")
-				Wild = true
+				Accepted = nil
 			end
 
 			self:RequireToken( "var", "Variable expected for catch" )

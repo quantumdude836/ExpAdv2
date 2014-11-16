@@ -623,6 +623,7 @@ hook.Add( "Expadv.PostLoadConfig", "expadv.quota", function( )
 	EXPADV.CreateSetting( "tickquota", 250000 )
 	EXPADV.CreateSetting( "softquota", 100000 )
 	EXPADV.CreateSetting( "hardquota", 1000000 )
+	EXPADV.CreateSetting( "memorylimit", 5 )
 	EXPADV.CreateSetting( "maxcompilertime", 1 )
 end )
 
@@ -631,6 +632,7 @@ timer.Create( "expadv.quota", 1, 0, function( )
 	expadv_tickquota = EXPADV.ReadSetting( "tickquota", 250000 )
 	expadv_softquota = EXPADV.ReadSetting( "softquota", 100000 )
 	expadv_hardquota = EXPADV.ReadSetting( "hardquota", 1000000 )
+	expadv_memorylimit = EXPADV.ReadSetting( "memorylimit", 5 ) * 1024
 	expadv_maxcompilertime = EXPADV.ReadSetting( "maxcompilertime", 1 )
 end ) 
 

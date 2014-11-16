@@ -299,6 +299,31 @@ Component:AddPreparedFunction( "entityKeys", "t:", "ar", [[
     Component:AddFunctionHelper( "shift", "t:n", "Removes value at index of table, the removed object is returned as variant." )
 
 /* --- --------------------------------------------------------------------------------
+	@: Copy function too.
+   --- */
+
+	Component:AddVMFunction( "clone", "t:", "t",
+		function( Context, Trace, Table )
+			local New = { Data = { }, Types = { }, Look = { }, Size = Table.Table, Count = Table.Count, HasChanged = false }
+
+			for Key, _ in pairs( Table.Look ) do
+				New.Look[ Key ] = Table.Look[ Key ]
+				New.Data[ Key ] = Table.Data[ Key ]
+				New.Types[ Key ] = Table.Types[ Key ]
+			end
+
+			return New
+		end )
+
+
+
+
+
+
+
+
+
+/* --- --------------------------------------------------------------------------------
 	@: We need to add support for every class :D
    --- */
 

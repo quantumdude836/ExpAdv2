@@ -46,6 +46,29 @@ Component:AddInlineOperator( "is", "c", "b", "(@value 1 ~= Color(0, 0, 0, 0))" )
 Component:AddInlineOperator( "not", "c", "b", "(@value 1 == Color(0, 0, 0, 0))" )
 
 /* --- --------------------------------------------------------------------------------
+	@: Arithmetic
+   --- */
+
+Component:AddInlineOperator( "+", "c,c", "c", "Color( @value 1.r + @value 2.r, @value 1.g + @value 2.g, @value 1.b + @value 2.b, @value 1.a + @value 2.a )" )
+Component:AddInlineOperator( "-", "c,c", "c", "Color( @value 1.r - @value 2.r, @value 1.g - @value 2.g, @value 1.b - @value 2.b, @value 1.a - @value 2.a )" )
+Component:AddInlineOperator( "*", "c,c", "c", "Color( @value 1.r * @value 2.r, @value 1.g * @value 2.g, @value 1.b * @value 2.b, @value 1.a * @value 2.a )" )
+Component:AddInlineOperator( "/", "c,c", "c", "Color( @value 1.r / @value 2.r, @value 1.g / @value 2.g, @value 1.b / @value 2.b, @value 1.a / @value 2.a )" )
+
+/* --- --------------------------------------------------------------------------------
+	@: Number Arithmetic
+   --- */
+
+Component:AddInlineOperator( "+", "c,n", "c", "Color( @value 1.r + @value 2, @value 1.g + @value 2, @value 1.b + @value 2, @value 1.a + @value 2 )" )
+Component:AddInlineOperator( "-", "c,n", "c", "Color( @value 1.r - @value 2, @value 1.g - @value 2, @value 1.b - @value 2, @value 1.a - @value 2 )" )
+Component:AddInlineOperator( "*", "c,n", "c", "Color( @value 1.r * @value 2, @value 1.g * @value 2, @value 1.b * @value 2, @value 1.a * @value 2 )" )
+Component:AddInlineOperator( "/", "c,n", "c", "Color( @value 1.r / @value 2, @value 1.g / @value 2, @value 1.b / @value 2, @value 1.a / @value 2 )" )
+
+Component:AddInlineOperator( "+", "n,c", "c", "Color( @value 1 + @value 2.r, @value 1 + @value 2.g, @value 1 + @value 2.b, @value 1 + @value 2.a )" )
+Component:AddInlineOperator( "-", "n,c", "c", "Color( @value 1 - @value 2.r, @value 1 - @value 2.g, @value 1 - @value 2.b, @value 1 - @value 2.a )" )
+Component:AddInlineOperator( "*", "n,c", "c", "Color( @value 1 * @value 2.r, @value 1 * @value 2.g, @value 1 * @value 2.b, @value 1 * @value 2.a )" )
+Component:AddInlineOperator( "/", "n,c", "c", "Color( @value 1 / @value 2.r, @value 1 / @value 2.g, @value 1 / @value 2.b, @value 1 / @value 2.a )" )
+
+/* --- --------------------------------------------------------------------------------
 	@: Casting
    --- */
 

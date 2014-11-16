@@ -531,15 +531,15 @@ function Compiler:Compile_TRY( Trace, Sequence, Catch, Final )
 
 	local Native = {
 		"local Ok, Result = pcall( Context.Instructions[" .. VM_ID .. "], Context )",
-		"if !Ok and istable( Result) and Result.Exception then",
-		Catch.Prepare,
-		[[elseif !Ok then
-			error( Result, 0 )
-		end]],
+		"if !Ok then",
+			"if istable(Result) and istable(Result) and Result.Exception then",
+				Catch.Prepare,
+			[[else
+				error( Result, 0 )
+			end]],
+		"end",
+
 		Final and Final.Prepare or "",
-		[[if Ok and Result ~= nil then
-			return Result
-		end]]
 	}
 
 	return { Trace = Trace, Return = "", Prepare = table.concat( Native, "\n" ), FLAG = EXPADV_PREPARE }
@@ -551,23 +551,20 @@ function Compiler:Compile_CATCH( Trace, MemRef, Accepted, Sequence, Catch )
 
 	local Condition = "true"
 
-	if Listed then
+	if Accepted then
 		Condition = table.concat( Accepted, " == Result.Exception or " ) .. " == Result.Exception "
 	end -- ^ Creates a conditon for each accepted exception type.
 
+	local Else = Catch and Catch.Prepare or "error( Result, 0 )"
+
 	local Native = {
 		"if (" .. Condition .. ") then",
-		Ass.Prepare,
-		Sequence.Prepare or "",
-		Sequence.Inline or "",
+			Ass.Prepare,
+			Sequence.Prepare or "",
+			Sequence.Inline or "",
+			Catch and "else" .. Catch.Prepare or "",
+		"end"
 	}
-
-	if Catch then
-		Native[ #Native + 1 ] = "else" .. Catch.Prepare
-	else
-		Native[ #Native + 1 ] = [[else error( Result, 0 )end
-		end]]
-	end
 
 	return { Trace = Trace, Return = "", Prepare = table.concat( Native, "\n" ), FLAG = EXPADV_PREPARE }
 end
@@ -604,11 +601,12 @@ function Compiler:Compile_ASS( Trace, Variable, Expression, DefinedClass, Modifi
 	end
 
 	local Inst = Operator.Compile( self, Trace, Quick( MemRef, "n" ), Expression )
-	if Modifier ~= "static" and Modifier ~= "input" then return Inst end
 
-	self:PrepareInline( Inst )
+	if Modifier == "input" or (DefinedClass and Modifier == "static") then
+		self:PrepareInline( Inst )
 
-	Inst.Prepare = string.format( "if Context.Memory[%i] == nil then\n%s\nend", MemRef, Inst.Prepare )
+		Inst.Prepare = string.format( "if Context.Memory[%i] == nil then\n%s\nend", MemRef, Inst.Prepare )
+	end
 
 	return Inst
 end

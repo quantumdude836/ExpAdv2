@@ -40,6 +40,7 @@ function EXPADV.BuildNewContext( Instance, Player, Entity ) -- Table, Player, En
 		Perf = 0,
 		Counter = 0,
 		StopWatch = 0,
+		Memory = 0,
 	}
 
 	Context.Monitor = {
@@ -80,6 +81,7 @@ function EXPADV.RootContext:Execute( Location, Operation, ... ) -- String, Funct
 			Status.BenchMark = SysTime( )
 		end
 
+		Status.MemoryMark = collectgarbage("count")
 		Status.BenchMark = SysTime( )
 		
 		debug_sethook( op_counter, "", expadv_luahook )
@@ -92,7 +94,7 @@ function EXPADV.RootContext:Execute( Location, Operation, ... ) -- String, Funct
 		debug.sethook( )
 
 		Status.StopWatch = Status.StopWatch + (SysTime( ) - Status.BenchMark)
-
+		Status.Memory = Status.Memory + (collectgarbage("count") - Status.MemoryMark)
 
 	if !Ok and isstring( Result ) then
 		if IsValid( self.entity ) then self.entity:ScriptError( Result ) end
@@ -108,6 +110,13 @@ function EXPADV.RootContext:Execute( Location, Operation, ... ) -- String, Funct
 
 			if IsValid( self.entity ) then self.entity:HitHardQuota( ) end
 			
+			self:ShutDown( )
+
+			return false
+
+		elseif Status.Memory > expadv_memorylimit then
+			self.entity:ScriptError( "Memory limit exceeded" )
+
 			self:ShutDown( )
 
 			return false
@@ -251,6 +260,7 @@ hook.Add( "Tick", "ExpAdv2.Performance", function( )
 		if Counter < 0 then Counter = 0 end
 
 		Status.Perf = 0
+		Status.Memory = 0
 		Status.StopWatch = 0
 		Status.Counter = Counter
 		Monitor.Counter = Counter

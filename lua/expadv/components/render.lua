@@ -323,6 +323,15 @@ end]], "(@fps or 0)" )
 
 Component:AddFunctionHelper( "getFPS", "", "returns the fps of the screen." )
 
+/* -----------------------------------------------------------------------------------
+	@: Time functions
+   --- */
+
+Component:AddInlineFunction( "frameTime", "", "n", "$FrameTime( )" )
+Component:AddFunctionHelper( "frameTime", "", "Returns the time in seconds it took to render the games last frame." )
+
+Component:AddInlineFunction( "realFrameTime", "", "n", "$RealFrameTime( )" )
+Component:AddFunctionHelper( "realFrameTime", "", "Returns the real frame-time which is unaffected by host_timescale." )
 
 /* -----------------------------------------------------------------------------------
 	@: Hud functions
