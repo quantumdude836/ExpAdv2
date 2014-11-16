@@ -176,6 +176,9 @@ Component:AddFunctionHelper( "setColor", "e:c", "Sets the color of the given ent
 Component:AddPreparedFunction( "setColour", "e:c", "", "if(IsValid(@value 1) && EXPADV.PPCheck(Context.player,@value 1)) then @value 1:SetColor(@value 2) end") -- Because why not :) ?
 Component:AddFunctionHelper( "setColour", "e:c", "Sets the colour of the given entity.")
 
+Component:AddPreparedFunction( "enableDrag", "e:b", "", "if(IsValid(@value 1) && IsValid(@value 1:GetPhysicsObject()) && EXPADV.PPCheck(Context.player, @value 1)) then @value 1:GetPhysicsObject():EnableDrag(@value 2) end") -- Because why not :) ?
+Component:AddFunctionHelper( "setDrag", "e:b", "Enables/disables drag on an entity.")
+
 /* --- --------------------------------------------------------------------------------
 	@: VEHICLES
    --- */
@@ -248,8 +251,8 @@ Component:AddFunctionHelper( "velL", "e:", "Returns the local velocity of the gi
 Component:AddPreparedFunction( "angVel", "e:", "a",
 [[if(@value 1:IsValid() && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType( )== $MOVETYPE_VPHYSICS) then
 	@define vel = @value 1:GetPhysicsObject():GetAngleVelocity()
-	Angle(@vel.y, @vel.z, @vel.x)
-end]], "@vel" )
+	@define avel = Angle(@vel.y, @vel.z, @vel.x)
+end]], "@avel" )
 
 Component:AddFunctionHelper( "angVel", "e:", "Returns the angular velocity of the given entity.")
 
@@ -265,7 +268,7 @@ Component:AddFunctionHelper( "radius", "e:", "Returns the bounding radius of the
 
 EXPADV.ServerOperators()
 
-Component:AddPreparedFunction( "setMass", "e:n", "","if(@value 1:IsValid() && EXPADV.PPCheck(Context.player,@value 1) && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType() == $MOVETYPE_VPHYSICS then @value 1:GetPhysicsObject():SetMass(@value 2 or 0) end")
+Component:AddPreparedFunction( "setMass", "e:n", "","if(@value 1:IsValid() && EXPADV.PPCheck(Context.player,@value 1) && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType() == $MOVETYPE_VPHYSICS) then @value 1:GetPhysicsObject():SetMass(@value 2 or 0) end")
 Component:AddFunctionHelper( "setMass", "e:n", "Sets the mass of the given entity.")
 
 Component:AddVMFunction( "applyForce", "e:v", "", function( Context, Trace, Target, Pos )

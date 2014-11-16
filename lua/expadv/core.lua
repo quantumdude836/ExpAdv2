@@ -351,6 +351,7 @@ function EXPADV.LoadCore( )
 	EXPADV.AddComponentFile( "co-routine" )
 	EXPADV.AddComponentFile( "utility" )
 	EXPADV.AddComponentFile( "wire" )
+	EXPADV.AddComponentFile( "context" )
 
 	EXPADV.CallHook( "AddComponents" )
 

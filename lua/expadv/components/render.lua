@@ -152,6 +152,14 @@ Component:AddFunctionHelper( "drawTexturedBox", "v2,v2,n", "Draws a rotated text
 Component:AddFunctionHelper( "drawTexturedBox", "v2,v2,n,n,n,n", "Draws a textured box with uv co-ordinates ( Position, Size, U1, V1, U2, V2 )." )
 
 /* -----------------------------------------------------------------------------------
+	@: Sprites
+   --- */
+  
+Component:AddPreparedFunction("drawSprite", "v,n,n,c", "", "$render.DrawSprite(@value 1, @value 2, @value 3, @value 4)")
+Component:AddFunctionHelper("drawSprite", "", "Creates a sprite at the given position.")
+
+
+/* -----------------------------------------------------------------------------------
 	@: UV Object
    --- */
 local Vertex = Component:AddClass( "vertex" , "vt" )
@@ -329,6 +337,20 @@ Component:AddFunctionHelper( "isVisible", "v", "Returns true if the vectors posi
 Component:AddInlineFunction( "canRenderToHUD", "", "b", "(IsValid(Context.entity) and Context.entity.EnableHUD)" )
 Component:AddFunctionHelper( "canRenderToHUD", "", "Returns true if this entity can render to clientside HUD." )
 
+/* --- --------------------------------------------------------------------------------
+	@: 3D
+	@: Author: Ripmax
+   --- */
+   
+EXPADV.ClientOperators()
+
+local _3DObject = Component:AddClass("3d", "3d2d")
+_3DObject:MakeClientOnly()
+
+Component:AddPreparedFunction("setRenderMat", "s", "", [[$render.SetMaterial($Material(@value 1))]])
+Component:AddFunctionHelper("setRenderMat", "", "Sets the material of the rendered objects.")
+
+
 /* -----------------------------------------------------------------------------------
 	@: Hud Event
    --- */
@@ -340,6 +362,10 @@ Component:AddEvent( "drawHUD", "n,n", "" )
 Component:AddEvent( "enableHUDRendering", "", "" )
 Component:AddEvent( "disableHUDRendering", "", "" )
 
+Component:AddEvent( "draw3d", "", "" )
+Component:AddEvent( "enable3DRendering", "", "" )
+Component:AddEvent( "disable3DRendering", "", "" )
+
 
 if CLIENT then
 	hook.Add( "HUDPaint", "expadv.hudpaint", function( )
@@ -350,36 +376,56 @@ if CLIENT then
 		for _, Context in pairs( EXPADV.CONTEXT_REGISTERY ) do
 			if !Context.Online then continue end
 			
-			local Event = Context.event_drawHUD
+			if !IsValid(Context.entity) then continue end
 			
-			if !Event or !IsValid(Context.entity) or !Context.entity.EnableHUD then continue end
+			if(Context.entity.EnableHUD && Context.event_drawHUD) then
+				surface.SetDrawColor( 255, 255, 255, 255 )
+				surface.SetTextColor( 0, 0, 0, 255 )
+				
+				Context:Execute( "Event drawHUD", Context.event_drawHUD, W, H )
+			end
 			
-			surface.SetDrawColor( 255, 255, 255, 255 )
-			surface.SetTextColor( 0, 0, 0, 255 )
-			
-			Context:Execute( "Event drawHUD", Event, W, H )
+			if(Context.entity.Enable3D && Context.event_draw3d) then
+				cam.Start3D(EyePos(), EyeAngles())
+					Context:Execute("Event draw3d", Context.event_draw3d)
+				cam.End3D()
+			end
 		end
 	end )
-end
-
-/* -----------------------------------------------------------------------------------
-	@: Enable Hud Rendering
-   --- */
-
-if CLIENT then
+	
+	/* -----------------------------------------------------------------------------------
+		@: Enable HUD/3D Rendering
+	   --- */
+	
 	function Component:OnOpenContextMenu( Entity, Menu, Trace, Option )
-		if !Entity.Context or !Entity.Context.event_drawHUD then return end
+		if !Entity.Context then return end
 
-		if Entity.EnableHUD then
-			Menu:AddOption( "Disable HUD Rendering", function( )
-				Entity.EnableHUD = false
-				Entity:CallEvent( "disableHUDRendering" )
-			end )
-		else
-			Menu:AddOption( "Enable HUD Rendering", function( )
-				Entity.EnableHUD = true
-				Entity:CallEvent( "enableHUDRendering" )
-			end )
+		if(Entity.Context.event_drawHUD) then
+			if(Entity.EnableHUD) then
+				Menu:AddOption( "Disable HUD Rendering", function( )
+					Entity.EnableHUD = false
+					Entity:CallEvent( "disableHUDRendering" )
+				end )
+			else
+				Menu:AddOption( "Enable HUD Rendering", function( )
+					Entity.EnableHUD = true
+					Entity:CallEvent( "enableHUDRendering" )
+				end )
+			end
+		end
+		
+		if(Entity.Context.event_draw3d) then
+			if(Entity.Enable3D) then
+				Menu:AddOption( "Disable 3D Rendering", function( )
+					Entity.Enable3D = false
+					Entity:CallEvent( "disable3DRendering" )
+				end )
+			else
+				Menu:AddOption( "Enable 3D Rendering", function( )
+					Entity.Enable3D = true
+					Entity:CallEvent( "enable3DRendering" )
+				end )
+			end
 		end
 	end
 end

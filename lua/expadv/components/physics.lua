@@ -140,7 +140,7 @@ end]], "@Val" )
    --- */
 
 Component:AddPreparedFunction( "setMass", "p:n", "", [[
-if IsValid( @value 1 ) and EXPADV.PPCheck( Context.Player, @value 1:GetEntity( ) )
+if IsValid( @value 1 ) and EXPADV.PPCheck( Context.player, @value 1:GetEntity( ) )
 	@value 1:SetMass( math.Clamp( @value 2, 0.001, 50000 ) )
 end]] )
 
@@ -155,6 +155,9 @@ Component:AddInlineFunction( "mass", "p:", "n", "(IsValid(@value 1) and @value 1
 Component:AddInlineFunction( "massCenterWorld", "p:", "v", "(IsValid(@value 1) and ( @value 1:LocalToWorld( @value 1:GetMassCenter( ) ) ) or Vector(0, 0, 0) )")
 
 Component:AddInlineFunction( "massCenter", "p:", "v", "(IsValid(@value 1) and ( @value 1:GetMassCenter( ) ) or Vector(0, 0, 0) )")
+
+Component:AddPreparedFunction( "enableDrag", "p:b", "", "if(IsValid(@value 1) && EXPADV.PPCheck(Context.player, @value 1)) then @value 1:EnableDrag(@value 2) end") -- Because why not :) ?
+Component:AddFunctionHelper( "setDrag", "p:b", "Enables/disables drag on an entity.")
 
 /* --- --------------------------------------------------------------------------------
 	@: ABB

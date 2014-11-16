@@ -297,11 +297,11 @@ if CLIENT then
 
 	function Component:OnOpenContextMenu( Entity, Menu, Trace, Option )
 		if Entity.EnableSoundURL then
-			Menu:AddOption( "Disable sounds from url", function( )
+			Menu:AddOption( "Disable sounds from external sources", function( )
 				DisableSounds( Entity )
 			end )
 		else
-			Menu:AddOption( "Enable sounds from url", function( ) 
+			Menu:AddOption( "Enable sounds from external sources", function( ) 
 				EnableSounds( Entity )
 			end )
 		end
