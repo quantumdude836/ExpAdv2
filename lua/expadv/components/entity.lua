@@ -620,7 +620,7 @@ EXPADV.ServerEvents( )
 Component:AddEvent( "onKill", "e,e,e", "" )
 Component:AddEvent( "onDamage", "e,e,n,v", "" )
 Component:AddEvent( "propBreak", "e,e", "" )
-Component:AddEvent( "OnEntityCreated", "e,ply,s", "" )
+Component:AddEvent( "onEntityCreated", "e,ply,s", "" )
 
 /* --- --------------------------------------------------------------------------------
 	@: Server Hooks
@@ -651,27 +651,27 @@ if SERVER then
 	end)
 
 	hook.Add("PlayerSpawnedProp", "Expav.Event", function( Player, Model, Entity )
-		EXPADV.CallEvent( "OnEntityCreated", Entity, Player, "prop" )
+		EXPADV.CallEvent( "onEntityCreated", Entity, Player, "prop" )
 	end)
 
 	hook.Add("PlayerSpawnedRagdoll", "Expav.Event", function( Player, Model, Entity )
-		EXPADV.CallEvent( "OnEntityCreated", Entity, Player, "ragdoll" )
+		EXPADV.CallEvent( "onEntityCreated", Entity, Player, "ragdoll" )
 	end)
 
 	hook.Add("PlayerSpawnedEffect", "Expav.Event", function( Player, Model, Entity )
-		EXPADV.CallEvent( "OnEntityCreated", Entity, Player, "effect" )
+		EXPADV.CallEvent( "onEntityCreated", Entity, Player, "effect" )
 	end)
 
 	hook.Add("PlayerSpawnedNPC", "Expav.Event", function( Player, Entity )
-		EXPADV.CallEvent( "OnEntityCreated", Entity, Player, "npc" )
+		EXPADV.CallEvent( "onEntityCreated", Entity, Player, "npc" )
 	end)
 
 	hook.Add("PlayerSpawnedSENT", "Expav.Event", function( Player, Entity )
-		EXPADV.CallEvent( "OnEntityCreated", Entity, Player, "scripted" )
+		EXPADV.CallEvent( "onEntityCreated", Entity, Player, "scripted" )
 	end)
 
 	hook.Add("PlayerSpawnedVehicle", "Expav.Event", function( Player, Entity )
-		EXPADV.CallEvent( "OnEntityCreated", Entity, Player, "vehicle" )
+		EXPADV.CallEvent( "onEntityCreated", Entity, Player, "vehicle" )
 	end)
 	
 end

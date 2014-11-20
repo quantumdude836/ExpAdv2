@@ -406,6 +406,8 @@ end
 function Compiler:Expression_12( Trace )
 	-- MsgN( "Compiler -> Expression 2" )
 
+	if self.TimeMark < SysTime( ) then coroutine.yield( ) end
+	
 	if self:AcceptToken( "add" ) then
 		local Trace = self:GetTokenTrace( Trace )
 		self:ExcludeWhiteSpace( "Identity operator (+) must not be succeeded by whitespace" )
@@ -753,9 +755,11 @@ end -- TODO: ^ This
 function Compiler:Statement( Trace )
 	-- MsgN( "Compiler -> Statement" )
 
-	if self.ExitTime < SysTime( ) then
-		self:Error( 0, "Script took longer then %i second to compile!", expadv_maxcompilertime )
-	end
+	--if self.ExitTime < SysTime( ) then
+	--	self:Error( 0, "Script took longer then %i second to compile!", expadv_maxcompilertime )
+	--end
+
+	if self.TimeMark < SysTime( ) then coroutine.yield( ) end
 
 	local _StmtRoot = self.StatmentRoot
 	self.StatmentRoot = self:GetTokenTrace( Trace )

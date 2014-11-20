@@ -702,8 +702,7 @@ function Compiler:SoftCompile( Script, Files )
 
 	-- Exit Softcompiler
 		coroutine.yield( )
-		self.ExitTime = SysTime( ) + expadv_maxcompilertime
-		--self.TimeMark = SysTime( ) + 0.05
+		-- self.ExitTime = SysTime( ) + expadv_maxcompilertime
 
 	-- Start the Tokenizer:
 		self:StartTokenizer( )
@@ -732,6 +731,8 @@ function EXPADV.CreateCompiler( Script, Files, OnError, OnSucess, OnUpdate )
 	local Thread = coroutine.create( Compiler.SoftCompile )
 	local Instance = setmetatable( { Thread = Thread, Running = true, OnError = OnError, OnSucess = OnSucess, OnUpdate = OnUpdate }, Compiler )
 
+	Instance.TimeMark = SysTime( ) + 1
+	
 	local Ok, Error = coroutine.resume( Thread, Instance, Script, Files )
 
 	if Ok then return Instance end
@@ -781,25 +782,6 @@ function Compiler:Resume( HandelManual )
 
 	return false
 end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 /* --- --------------------------------------------------------------------------------
 	@: END OF COMPILER!

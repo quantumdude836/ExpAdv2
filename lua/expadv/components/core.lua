@@ -116,10 +116,10 @@ Component:AddVMFunction( "perf", "n", "b",
 		if Context.Status.Perf + Context.Status.Counter >= (expadv_hardquota - expadv_tickquota) * Value * 0.01 then
 			return false
 		elseif Value == 100 then
-			if Context.Status.Perf >= cv_expadv_softquota * 2 then
+			if Context.Status.Perf >= xpadv_softquota * 2 then
 				return false
 			end
-		elseif Context.Status.Perf >= cv_expadv_softquota * Value * 0.01 then
+		elseif Context.Status.Perf >= expadv_softquota * Value * 0.01 then
 			return false
 		end
 
@@ -141,7 +141,7 @@ Component:AddVMFunction( "maxquota", "", "n",
 	function( Context, Trace )
 		local Perf = Context.Status.Perf
 
-		if Perf >= cv_expadv_tickquota then return 0 end
+		if Perf >= expadv_tickquota then return 0 end
 
 		local tickquota = expadv_tickquota - Perf
 		local hardquota = expadv_hardquota - Context.Status.Counter - Perf + expadv_softquota

@@ -31,7 +31,8 @@ if SERVER then
 		Session.Connected = 1
 		Session.Users = { [Host] = Host }
 		Session.Invitees = { }
-
+		
+		Session.Rows = { }
 		SharedSessions[ Session.ID ] = Session
 
 		net.Start( "lemon.shared.new" )
@@ -303,6 +304,11 @@ if SERVER then
 
 		return Session.Users[ Talker ] ~= nil
 	end )
+
+/*============================================================================================================================================
+	Shared Tabs, Lets learn together =D
+============================================================================================================================================*/
+
 
 	return -- END OF IF SERVER!
 end

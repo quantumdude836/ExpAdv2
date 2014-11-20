@@ -34,6 +34,7 @@ end
    --- */
 
 TOOL.ClientConVar.model 		= "models/lemongate/lemongate.mdl"
+TOOL.ClientConVar.screen 		= 0
 TOOL.ClientConVar.weld		 	= 0
 TOOL.ClientConVar.weldworld 	= 0
 TOOL.ClientConVar.frozen		= 0
@@ -155,7 +156,7 @@ function TOOL:LeftClick( Trace )
 	local Model, ExpAdv = self:GetClientInfo( "model" )
 	local Ang = Trace.HitNormal:Angle( ) + Angle( 90, 0, 0 )
 
-	if EXPADV.GetMonitor( Model ) then
+	if self:GetClientNumber( "screen" ) == 1 then
 		ExpAdv = MakeExpadvScreen( self:GetOwner( ), Trace.HitPos, Ang, Model )
 	else
 		ExpAdv = MakeExpadv( self:GetOwner( ), Trace.HitPos, Ang, Model )
@@ -217,43 +218,44 @@ end
    --- */
 
 if CLIENT then
+
 	function TOOL.BuildCPanel( CPanel )
-		local CheckScreen = CPanel:CheckBox( "Create screen" )
-		
-		local Props = vgui.Create( "PropSelect" )
-		Props:SetConVar( "expadv2_model" )
-		CPanel:AddItem( Props )
 
-		local CheckWeld = CPanel:CheckBox( "Create Welded", "expadv2_weld" )
-		local CheckWorld = CPanel:CheckBox( "Weld To World", "expadv2_weldworld" )
+		local PropList = vgui.Create( "PropSelect" )
+		PropList:SetConVar( "expadv2_model" )
+		CPanel:AddItem( PropList )
+
+		local Screen = CPanel:CheckBox( "Create screen", "expadv2_screen" )
+		local CheckWeld  = CPanel:CheckBox( "Create Welded", "expadv2_weld" )
 		local CheckFroze = CPanel:CheckBox( "Create Frozen", "expadv2_frozen" )
+		local CheckWorld = CPanel:CheckBox( "Create Welded to World", "expadv2_weldworld" )
 
-		local function ShowGateModels( )
-			DScrollPanel.Clear( Props.List )
+		local function AddModel( Mdl, IsScreen )
+			local Icon = vgui.Create( "SpawnIcon", PropList )
+			Icon:SetModel( Mdl )
+			Icon:SetToolTip( Mdl )
+			Icon.Model = Mdl
 
-			RunConsoleCommand( "expadv2_model", "models/lemongate/lemongate.mdl" )
-
-			for _, Mdl in pairs( GateModels ) do
-				Props:AddModel( Mdl )
+			Icon.DoClick = function( ) 			
+				RunConsoleCommand( "expadv2_screen", IsScreen and 1 or 0 )
+				RunConsoleCommand( "expadv2_model", Mdl )
+				Screen:SetValue( IsScreen )
 			end
+
+			PropList.List:AddItem( Icon )
+			table.insert( PropList.Controls, Icon )
 		end
 
-		local function ShowScreenModels( )
-			DScrollPanel.Clear( Props.List )
-
-			RunConsoleCommand( "expadv2_model", "models/hunter/plates/plate1x1.mdl" )
-
-			for Mdl, _ in pairs( EXPADV.GetMonitors( ) ) do
-				Props:AddModel( Mdl )
-			end
+		for _, Model in pairs( GateModels ) do
+			AddModel( Model, false )
 		end
 
-		function CheckScreen:OnChange( Val )
-			if !Val then ShowGateModels( ) else ShowScreenModels( ) end
+		for Model, _ in pairs( EXPADV.GetMonitors( ) ) do
+			AddModel( Model, true )
 		end
 
-		ShowGateModels( )
 	end
+
 end
 
 

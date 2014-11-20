@@ -206,6 +206,10 @@ function ENT:BuildInstance( Instance, Instruction )
 		Context:StartUp( Compiled( ) )
 
 		self:PostStartUp( Context )
+
+		if SERVER and self.PastedFromDupe then
+			self:CallEvent( "dupePasted" )
+		end
 	end )
 
 	if !Ok then

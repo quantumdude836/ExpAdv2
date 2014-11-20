@@ -124,6 +124,7 @@ function ENT:PostEntityPaste( Player, Entity, CreatedEntities  )
 	if !DupeTable then return end
 
 	self.player = Player
+	self.PastedFromDupe = true
 	self:SetGateName( DupeTable.GateName )
 	self:LoadCodeFromPackage( DupeTable.Root, DupeTable.Files )
 
@@ -134,8 +135,6 @@ function ENT:PostEntityPaste( Player, Entity, CreatedEntities  )
 	end
 	
 	EXPADV.CallHook( "PasteDupeInfo", self, DupeTable, FromID )
-
-	self:CallEvent( "dupePasted" )
 end
 
 function ENT:ApplyDupePorts( InPorts, OutPorts )
