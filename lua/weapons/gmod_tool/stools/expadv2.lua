@@ -166,21 +166,21 @@ function TOOL:LeftClick( Trace )
 
 	ExpAdv:SetPos( Trace.HitPos - Trace.HitNormal * ExpAdv:OBBMins().z )
 
-	local WeldWorld = self:GetClientNumber( "weldworld" ) >= 1
-
 	undo.Create( "expadv" )
 	undo.AddEntity( ExpAdv )
 	undo.SetPlayer( self:GetOwner( ) ) 
 
-	if self:GetClientNumber( "weld" ) >= 1 then
-		if !IsValid( Trace.Entity ) or WeldWorld then
+	if self:GetClientNumber( "weld" ) == 1 then
+		local WeldWorld = self:GetClientNumber( "weldworld"  ) == 1
+
+		if IsValid( Trace.Entity ) or WeldWorld then
 			undo.AddEntity( constraint.Weld( ExpAdv, Trace.Entity, 0, Trace.PhysicsBone, 0, 0, WeldWorld ) )
 		end 
 	end
 
 	undo.Finish( )
 
-	if self:GetClientNumber("frozen") >= 1 then
+	if self:GetClientNumber("frozen") == 1 then
 		ExpAdv:GetPhysicsObject( ):EnableMotion( false )
 	end
 

@@ -194,6 +194,7 @@ end
 
 function ENT:OnCompileError( ErMsg, Compiler )
 	MsgN( "Compiler Error: ", ErMsg )
+
 	self:SetState( EXPADV_STATE_CRASHED )
 
 	if SERVER then
@@ -210,9 +211,7 @@ function ENT:ShutDown( )
 end
 
 function ENT:NotifiOwner( Message, Type, Duration )
-	local Owner = self.player
-
-	if !IsValid( self.player ) and self.Context then Owner = self.Context.player end
-
-	EXPADV.Notifi( Owner, Message, Type, Duration )
+	if !IsValid( self.player ) then return end
+	
+	EXPADV.Notifi( self.player, Message, Type, Duration )
 end

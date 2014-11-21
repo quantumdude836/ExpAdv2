@@ -128,10 +128,6 @@ function EXPADV.RootContext:Execute( Location, Operation, ... ) -- String, Funct
 
 	end
 
-	--if Result.Context and Result.Context ~= self then
-	--	self = Result.Context
-	--end
-
 	if !IsValid( self.entity ) then
 		-- Do nothing :P
 	elseif Result.Quota then

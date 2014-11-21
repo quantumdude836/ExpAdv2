@@ -731,8 +731,6 @@ function EXPADV.CreateCompiler( Script, Files, OnError, OnSucess, OnUpdate )
 	local Thread = coroutine.create( Compiler.SoftCompile )
 	local Instance = setmetatable( { Thread = Thread, Running = true, OnError = OnError, OnSucess = OnSucess, OnUpdate = OnUpdate }, Compiler )
 
-	Instance.TimeMark = SysTime( ) + 1
-	
 	local Ok, Error = coroutine.resume( Thread, Instance, Script, Files )
 
 	if Ok then return Instance end
@@ -746,20 +744,15 @@ end
 
 local SysTime = SysTime
 
-/*function Compiler:Yield( )
-	local Time = SysTime( )
-	if Time < self.TimeMark then return end
-
-	coroutine.yield( )
-	self.TimeMark = SysTime( ) + 0.05
-end*/
-
 function Compiler:GetStatus( )
 	if self.Pos <= 0 or self.Len <= 0 then return 0 end
 	return math.ceil( math.Clamp(self.Pos / self.Len, 0, 1) * 100)
 end
 
 function Compiler:Resume( HandelManual )
+
+	self.TimeMark = SysTime( ) + 0.1
+	
 	local Ok, Error = coroutine.resume( self.Thread )
 
 	if Ok then

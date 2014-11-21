@@ -230,20 +230,32 @@ Component:AddVMFunction( "setModel", "h:s", "", SetModel )
     Section: ID Emulation
     	-- Don't worry, they are still objects!
 ==============================================================================================*/
+Component:AddVMFunction( "setID", "h:n", "",
+	function( Context, Trace, Entity, ID )
+		if ID > 0 then
+			
+			if !IsValid( Entity ) or !Entity.IsHologram then
+				return
+			end
 
-local function SetID( Context, Trace, Entity, ID )
-	if ID < 1 or !Entity.IsHologram then return end
+			local Old = Context.Data.Holograms[ ID ]
 
-	Context.Data.Holograms[ Entity.ID or -1 ] = nil
+			if IsValid( Old ) then 
+				Old.ID = -1
+			end
 
-	Context.Data.Holograms[ ID ] = Entity
+			if Entity.ID then
+				Context.Data.Holograms[ Entity.ID ] = nil
+			end
 
-	Entity.ID = ID
-end
+			Context.Data.Holograms[ ID ] = Entity
 
-Component:AddVMFunction( "setID", "h:n", "", SetID )
+			Entity.ID = ID
+		end
+	end )
+
 Component:AddInlineFunction( "getID", "h:", "n", "(@value 1.ID or -1)" )
-Component:AddInlineFunction( "hologram", "n", "h", "(Context.Data.Holograms[ @value 1] or $Entity(0))" )
+Component:AddInlineFunction( "hologram", "n", "h", "(Context.Data.Holograms[@value 1] or $Entity(0))" )
 
 Component:AddFunctionHelper( "setID", "h:n", "Sets the id of a hologram for use with hologram(N), the ID is specific to the Gate." )
 Component:AddFunctionHelper( "getID", "h:", "Returns the current ID of hologram H." )
@@ -291,7 +303,7 @@ local function NewHolo( Context, Trace, Model, Position, Angle )
 	Context.Data.Holograms = Context.Data.Holograms or { }
 
 	local ID = #Context.Data.Holograms + 1
-	Context.Data.Holograms[ ID ] = ID
+	Context.Data.Holograms[ ID ] = Entity
 
 	--if !Model then return Entity end
 	SetModel( Context, Trace, Entity, Model or "sphere" )

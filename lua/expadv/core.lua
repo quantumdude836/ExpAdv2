@@ -662,7 +662,7 @@ end
 if CLIENT then
 	net.Receive( "expadv.notify", function( )
 		local Msg = net.ReadString( )
-		if !Message or Message == "" then return end
+		if !Msg or Msg == "" then return end
 
 		GAMEMODE:AddNotify( Msg, net.ReadUInt( 8 ), net.ReadFloat( ) )
 		MsgN( Msg )

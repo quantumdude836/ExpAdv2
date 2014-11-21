@@ -169,9 +169,8 @@ end]], "(@Val or Vector(0, 0, 0))" )
 
 Component:AddPreparedFunction( "aabbMax", "p:", "v", [[
 if IsValid( @value 1 ) then
-	@define _, Abb = @value 1:GetAABB( )
-	@define Val = ( @Abb )
-end]], "(Val or Vector(0, 0, 0))" )
+	@define _, Val = @value 1:GetAABB( )
+end]], "(@Val or Vector(0, 0, 0))" )
 
 /* --- --------------------------------------------------------------------------------
 	@: Frozen

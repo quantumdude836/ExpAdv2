@@ -260,6 +260,12 @@ end
 
 local function MenuOpen( ContextMenu, Option, Entity, Trace )
 	local SubMenu = Option:AddSubMenu( )
+
+	SubMenu:AddOption( "Restart Client",
+		function( )
+			Entity:CompileScript( Entity.root, Entity.files )
+		end )
+
 	EXPADV.CallHook( "OpenContextMenu", Entity, SubMenu, Trace, Option )
 end
 
