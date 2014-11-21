@@ -107,6 +107,21 @@ Component:AddFunctionHelper( "lower", "s:", "Returns a lower-cased (string)." )
 Component:AddInlineFunction( "upper", "s:", "s", "string.upper(@value 1)" )
 Component:AddFunctionHelper( "upper", "s:", "Returns an uppercased string." )
 
+Component:AddInlineFunction( "trim", "s:", "s", "string.Trim(@value 1)" )
+Component:AddInlineFunction( "trim", "s:s", "s", "string.Trim(@value 1, @value 2)" )
+Component:AddFunctionHelper( "trim", "s:", "Removes leading matches from a string." )
+Component:AddFunctionHelper( "trim", "s:s", "Removes leading and trailing matches of a string." )
+
+Component:AddInlineFunction( "triml", "s:", "s", "string.TrimLeft(@value 1)" )
+Component:AddInlineFunction( "triml", "s:s", "s", "string.TrimLeft(@value 1, @value 2)" )
+Component:AddFunctionHelper( "triml", "s:", "Removes leading matches from a string." )
+Component:AddFunctionHelper( "triml", "s:s", "Removes leading and trailing matches of a string." )
+
+Component:AddInlineFunction( "trimr", "s:", "s", "string.TrimRight(@value 1)" )
+Component:AddInlineFunction( "trimr", "s:s", "s", "string.TrimRight(@value 1, @value 2)" )
+Component:AddFunctionHelper( "trimr", "s:", "Removes leading matches from a string." )
+Component:AddFunctionHelper( "trimr", "s:s", "Removes leading and trailing matches of a string." )
+
 /* --- --------------------------------------------------------------------------------
 	@: Find and replace
    --- */

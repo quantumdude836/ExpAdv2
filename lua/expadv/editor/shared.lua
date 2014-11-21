@@ -780,4 +780,6 @@ function EXPADV.Editor.Open_SessionMenu( )
 				TabSheet:Dock( FILL )
 			end
 		end
+		
+		EXPADV.Editor.SessionMenu = Frame
 end

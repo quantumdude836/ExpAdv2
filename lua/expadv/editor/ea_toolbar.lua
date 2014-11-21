@@ -342,7 +342,15 @@ function PANEL:AddInviteMenu( )
 	end -- This draws the invite count, ontop of the icon.
 
 	function self.btnShared.DoClick( Btn )
-		EXPADV.Editor.Open_SessionMenu( )
+		if(!EXPADV.Editor.SessionMenu || !IsValid(EXPADV.Editor.SessionMenu)) then
+			EXPADV.Editor.Open_SessionMenu( )
+		else
+			if(EXPADV.Editor.Close) then 
+				EXPADV.Editor.SessionMenu:Close()
+			else
+				EXPADV.Editor.SessionMenu:Remove()
+			end
+		end
 	end
 end
 
