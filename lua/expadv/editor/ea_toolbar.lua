@@ -345,7 +345,7 @@ function PANEL:AddInviteMenu( )
 		if(!EXPADV.Editor.SessionMenu || !IsValid(EXPADV.Editor.SessionMenu)) then
 			EXPADV.Editor.Open_SessionMenu( )
 		else
-			if(EXPADV.Editor.Close) then 
+			if(EXPADV.Editor.SessionMenu.Close) then 
 				EXPADV.Editor.SessionMenu:Close()
 			else
 				EXPADV.Editor.SessionMenu:Remove()
