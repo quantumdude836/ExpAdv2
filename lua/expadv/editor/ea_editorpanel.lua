@@ -561,6 +561,10 @@ function PANEL:Close( )
 		self:ToggleVoice( )
 		self.__nMicAlpha = 0
 	end
+	
+	if Editor then
+		Editor:CloseCodeCompletionWindow()
+	end
 end
 
 /*============================================================================================================================================
