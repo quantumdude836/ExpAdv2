@@ -52,6 +52,13 @@ function PANEL:Init( )
 
 	self:AddInviteMenu( )
 	
+	if WireLib then
+		self.btnSoundBrowser = self:SetupButton( "Wire sound browser.", Material( "fugue/speaker-volume.png" ), RIGHT )
+		function self.btnSoundBrowser:DoClick( )
+			RunConsoleCommand( "wire_sound_browser_open" )
+		end
+	end
+	
 	self.btnFontPlus = self:SetupButton( "Increase font size.", Material( "fugue/edit-size-up.png" ), RIGHT )
 	self.btnFontMinus = self:SetupButton( "Decrease font size.", Material( "fugue/edit-size-down.png" ), RIGHT )
 	
@@ -96,7 +103,7 @@ function PANEL:Init( )
 	end 
 	
 	function self.btnWiki:DoClick( )
-		gui.OpenURL( "https://github.com/Rusketh/ExpAdv2/wiki" )
+		gui.OpenURL( "http://github.com/Rusketh/ExpAdv2/wiki" )
 	end
 
 	function self.btnFontPlus:DoClick( )
