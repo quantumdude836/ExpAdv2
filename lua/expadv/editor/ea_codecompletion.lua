@@ -60,7 +60,8 @@ function PANEL:Update()
 	if string.sub(string.sub(Line, string.len(Line) - (Pos or string.len(Line)) - 1, string.len(Line) - (Pos or string.len(Line))), 0, 1) == "." then Comma = true end
 	Line = string.sub(Line, string.len(Line) - (Pos or string.len(Line)))
 	
-	if string.len(Line) == 0 then self:CloseAll(); return end
+	local firstLetter = string.sub(Line, 1, 1) // engage hacky methods..... GO!
+	if string.len(Line) == 0 || firstLetter == string.upper(firstLetter) then self:CloseAll(); return end
 
 	for Index, Operator in pairsByKeys( EXPADV.Functions ) do
 		if #self.Functions > self.MaxFunctions then break end
