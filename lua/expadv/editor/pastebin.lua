@@ -19,16 +19,22 @@ local function CreatePasteFail( sError )
 	notification.AddLegacy( "Failed to upload paste!", NOTIFY_ERROR, 3 ) 
 	notification.AddLegacy( "Error: " .. sError, NOTIFY_ERROR, 5 ) 
 	surface.PlaySound( "buttons/button15.wav" ) 
-end 
+end
 
 local function CreatePasteSuccess( sUrl, nLength, tHeaders, nCode ) 
 	notification.AddLegacy( "Paste uploaded!", NOTIFY_GENERIC, 3 ) 
-	notification.AddLegacy( "Url saved to clipboard!", NOTIFY_GENERIC, 5 ) 
+	notification.AddLegacy( "URL saved to clipboard!", NOTIFY_GENERIC, 5 ) 
 	surface.PlaySound( "buttons/button15.wav" ) 
 	SetClipboardText( sUrl ) 
 end 
 
 function Pastebin.CreatePaste( sCode, sName, sUser, fCallback ) 
+	// i'll convert this to string patterns later.
+	local trimmedCode = string.Replace(sCode, " ", "") // Remove ALL spaces.
+	local trimmedCode = string.Replace(trimmedCode, "\n", "") // Remove ALL newlines.
+	local trimmedCode = string.Replace(trimmedCode, "\t", "") // Remove ALL tabs.
+	if(string.len(trimmedCode) == 0) then return false end
+	
 	local params = {
 		api_dev_key = api_dev_key,
 		api_option = "paste", 

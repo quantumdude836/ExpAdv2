@@ -89,9 +89,18 @@ function PANEL:Init( )
 		surface.PlaySound( "buttons/button15.wav" ) 
 	end 
 	
+	local function CreatePasteEmpty()
+		self:GetParent().ValidateButton:SetColor(Color(255, 0, 0))
+		self:GetParent().ValidateButton:SetText("Failed to upload - Code was empty.")
+		surface.PlaySound("buttons/button11.wav") 
+	end 
+	
 	function self.btnUploadPaste:DoClick( ) 
 		local Code, Path = self:GetParent( ):GetParent( ):GetCode( )
-		Pastebin.CreatePaste( Code, "ExpAdv2 Script", nil, CreatePasteSuccess ) 
+		local res = Pastebin.CreatePaste( Code, "ExpAdv2 Script", nil, CreatePasteSuccess )
+		if(res == false) then
+			CreatePasteEmpty()
+		end
 	end
 	
 	function self.btnOptions:DoClick( ) 
