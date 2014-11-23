@@ -31,8 +31,8 @@ end
 function Pastebin.CreatePaste( sCode, sName, sUser, fCallback ) 
 	// i'll convert this to string patterns later.
 	local trimmedCode = string.Replace(sCode, " ", "") // Remove ALL spaces.
-	local trimmedCode = string.Replace(trimmedCode, "\n", "") // Remove ALL newlines.
-	local trimmedCode = string.Replace(trimmedCode, "\t", "") // Remove ALL tabs.
+	trimmedCode = string.Replace(trimmedCode, "\n", "") // Remove ALL newlines.
+	trimmedCode = string.Replace(trimmedCode, "\t", "") // Remove ALL tabs.
 	if(string.len(trimmedCode) == 0) then return false end
 	
 	local params = {
