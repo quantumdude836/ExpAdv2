@@ -439,8 +439,6 @@ function Syntaxer:Parse( Row )
 					self.tokendata = ""
 				end 
 				
-				print(string.sub(self.line, self.position, #self.line))
-				
 				if self:NextPattern( "^[a-zA-Z][a-zA-Z0-9_]*" ) then 
 					self:AddUserFunction( Row, self.tokendata )
 					addToken( "userfunction", self.tokendata ) 
