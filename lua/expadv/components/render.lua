@@ -217,7 +217,6 @@ end)
 
 Component:AddVMFunction( "drawTexturedPoly", "ar", "", function(Context, Trace, Array)
 	if Array.__type ~= "_vt" and Array.__type ~= "_v2" then Context.Throw(Trace, "array", "array type missmatch, vertex expected got " .. EXPADV.TypeName(Array.__type)) end
-	draw.NoTexture() 
 	DrawPoly(Array)
 end)
 
@@ -329,6 +328,8 @@ Component:AddFunctionHelper( "getFPS", "", "returns the fps of the screen." )
 
 Component:AddInlineFunction( "frameTime", "", "n", "$FrameTime( )" )
 Component:AddFunctionHelper( "frameTime", "", "Returns the time in seconds it took to render the games last frame." )
+
+EXPADV.ClientOperators()
 
 Component:AddInlineFunction( "realFrameTime", "", "n", "$RealFrameTime( )" )
 Component:AddFunctionHelper( "realFrameTime", "", "Returns the real frame-time which is unaffected by host_timescale." )
