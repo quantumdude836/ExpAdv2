@@ -76,6 +76,8 @@ function PANEL:Update()
 	
 	self:SetSize(self.Width, self.FontHeight * math.Clamp(#self.Functions, 3, PANEL.MaxFunctions))
 	
+	if self.Info and self.Info:IsVisible() then self:OpenInfo() end
+	
 	if self.Functions[self.Selected] == nil and self.Selected != 0 then self.Selected = 1 end
 	if #self.Functions == 0 then self:CloseAll() end
 end
@@ -158,18 +160,6 @@ function PANEL:Paint(w, h)
 		surface.SetTextPos(5, (I-1) * self.FontHeight) 
 		surface.DrawText((self.Functions[I].Method and EXPADV.TypeName(table.remove(table.Copy(self.Functions[I].Input), 1)) .. "." or "") .. self.Functions[I].Name)		
 	end
-	
-	----- Info ----- 
-	
-	--[[if self.Functions[self.Selected] == nil then return end
-	
-	surface.SetDrawColor( 90, 90, 90, 150 )
-	surface.DrawRect(300, 0, 300, h)
-	self:DrawText((self.Functions[self.Selected].Method and EXPADV.TypeName(table.remove(table.Copy(self.Functions[self.Selected].Input), 1)) .. "." or "")  
-	.. self.Functions[self.Selected].Name .. "(" .. self:NamePerams(self.Functions[self.Selected].Input, self.Functions[self.Selected].InputCount, self.Functions[self.Selected].UsesVarg) .. ")\n" 
-	.. "Returns " .. (EXPADV.TypeName(self.Functions[self.Selected].Return or "") or "void") .. "\n\n" 
-	.. , 305, 5, 300) 
-	]]--
 end
 
 function PANEL:CreateInfo()
@@ -183,7 +173,6 @@ function PANEL:CreateInfo()
 	self.Info.Text = vgui.Create("RichText", self.Info)
 	self.Info.Text:Dock(FILL)
 	self.Info.Text:SetVerticalScrollbarEnabled(true)
-	self.Info.Text:SetFGColor(Color(255,255,255,255))
 end
 
 function PANEL:OpenInfo( )
@@ -194,16 +183,16 @@ function PANEL:OpenInfo( )
 	local x, y = self:GetPos()
 	local w, h = self:GetSize()
 	self.Info:SetPos(x + w, y)
-	self.Info:SetVisible(true)
 	self.Info:SetSize(300, math.Clamp(h, 100, 500))
 	
+	--TODO: Fix default style when using first time
 	self.Info.Text:SetFontInternal("TargetIDSmall")
 	self.Info.Text:SetFGColor(Color(255, 255, 255, 255))
+	self.Info:SetVisible(true)
 	self.Info.Text:SetText((self.Functions[self.Selected].Method and EXPADV.TypeName(table.remove(table.Copy(self.Functions[self.Selected].Input), 1)) .. "." or "")  
 	.. self.Functions[self.Selected].Name .. "(" .. self:NamePerams(self.Functions[self.Selected].Input, self.Functions[self.Selected].InputCount, self.Functions[self.Selected].UsesVarg, self.Functions[self.Selected].Method == true) .. ")\n"
 	.. "Returns " .. (EXPADV.TypeName(self.Functions[self.Selected].Return or "") or "void") 
 	.. "\n\n" .. (self.Functions[self.Selected].Description or "No description"))
-	
 end
 
 function PANEL:CloseInfo()

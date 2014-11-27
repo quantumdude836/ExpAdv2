@@ -191,6 +191,8 @@ local keywords = {
 	["true"]     = { true, false },
 	["false"]    = { true, false },
 	["method"]   = { true, false },
+	["client"]   = { true, false },
+	["server"]   = { true, false },
 }
 
 -- fallback for nonexistant entries:
@@ -431,6 +433,11 @@ function Syntaxer:Parse( Row )
 				
 				addToken( "keyword", self.tokendata  ) 
 				self.tokendata = ""
+				
+				if self:NextPattern( "^[a-zA-Z][a-zA-Z0-9_]* " ) then 
+					addToken( "typename", self.tokendata ) 
+					self.tokendata = ""
+				end 
 				
 				if self:NextPattern( "^[a-zA-Z][a-zA-Z0-9_]*" ) then 
 					self:AddUserFunction( Row, self.tokendata )
