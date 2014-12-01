@@ -561,7 +561,7 @@ function Compiler:Compile_TRY( Trace, Sequence, Catch, Final )
 	local Native = {
 		"local Ok, Result = pcall( Context.Instructions[" .. VM_ID .. "], Context )",
 		"if !Ok then",
-			"if istable(Result) and istable(Result) and Result.Exception then",
+			"if type(Result) == \"table\" and Result.Exception then",
 				Catch.Prepare,
 			[[else
 				error( Result, 0 )
@@ -576,7 +576,7 @@ end
 
 function Compiler:Compile_CATCH( Trace, MemRef, Accepted, Sequence, Catch )
 	local Operator = self:LookUpClassOperator( "_ex", "=", "n", "_ex" )
-	local Ass = Operator.Compile( self, Trace, { Trace = Trace, Inline = "Result", Return = "_ex", FLAG = EXPADV_INLINE, IsRaw = true } )
+	local Ass = Operator.Compile( self, Trace, Quick( MemRef, "n" ), Quick( "Result", "_ex" ) )
 
 	local Condition = "true"
 
