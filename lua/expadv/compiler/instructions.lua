@@ -26,12 +26,15 @@ end
 	@: Operators
    --- */
 
-function Compiler:Compile_IS( Trace, Expression1 )
+function Compiler:Compile_IS( Trace, Expression1, bNoError )
 	if Expression1.Return == "b" then return Expression1 end
 
 	local Operator = self:LookUpOperator( "is", Expression1.Return )
 
-	if !Operator then self:TraceError( Trace, "%s can not be used as condition", self:NiceClass( Expression1.Return ) ) end
+	if !Operator then
+		if bNoError then return end
+		self:TraceError( Trace, "%s can not be used as condition", self:NiceClass( Expression1.Return ) )
+	end
 
 	return Operator.Compile( self, Trace, Expression1 )
 end
@@ -73,17 +76,43 @@ end
 function Compiler:Compile_OR( Trace, Expression1, Expression2 )
 	local Operator = self:LookUpOperator( "||", Expression1.Return, Expression2.Return )
 
-	if !Operator then self:TraceError( Trace, "Logic operator (or) does not support '%s || %s'", self:NiceClass( Expression1.Return, Expression2.Return ) ) end
+	if Operator then
+		return Operator.Compile( self, Trace, Expression1, self:MakeVirtual( Expression2 ) )
+	end
 
-	return Operator.Compile( self, Trace, Expression1, self:MakeVirtual( Expression2 ) )
+	local Is1 = self:Compile_IS( Trace, Expression1, true )
+	local Is2 = self:Compile_IS( Trace, Expression2, true )
+
+	if Is1 and Is2 then
+		local Operator = self:LookUpOperator( "||", Is1.Return, Is2.Return )
+
+		if Operator then
+			return Operator.Compile( self, Trace, Is1, self:MakeVirtual( Is2 ) )
+		end
+	end
+
+	self:TraceError( Trace, "Logic operator (or) does not support '%s || %s'", self:NiceClass( Expression1.Return, Expression2.Return ) )
 end
 
 function Compiler:Compile_AND( Trace, Expression1, Expression2 )
 	local Operator = self:LookUpOperator( "&&", Expression1.Return, Expression2.Return )
 
-	if !Operator then self:TraceError( Trace, "Logic operator (and) does not support '%s && %s'", self:NiceClass( Expression1.Return, Expression2.Return ) ) end
+	if Operator then
+		return Operator.Compile( self, Trace, Expression1, self:MakeVirtual( Expression2 ) )
+	end
 
-	return Operator.Compile( self, Trace, Expression1, self:MakeVirtual( Expression2 ) )
+	local Is1 = self:Compile_IS( Trace, Expression1, true )
+	local Is2 = self:Compile_IS( Trace, Expression2, true )
+
+	if Is1 and Is2 then
+		local Operator = self:LookUpOperator( "&&", Is1.Return, Is2.Return )
+
+		if Operator then
+			return Operator.Compile( self, Trace, Is1, self:MakeVirtual( Is2 ) )
+		end
+	end
+
+	self:TraceError( Trace, "Logic operator (and) does not support '%s && %s'", self:NiceClass( Expression1.Return, Expression2.Return ) )
 end
 
 function Compiler:Compile_BOR( Trace, Expression1, Expression2 )

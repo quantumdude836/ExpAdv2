@@ -134,9 +134,11 @@ function ENT:CreateContext( Instance, Player )
 end
 
 function ENT:OnRemove( )
-	if self:IsRunning( ) then
-		self.Context:ShutDown( )
-	end
+	hook.Remove( "PlayerInitialSpawn", self )
+
+	if !self:IsRunning( ) then return end
+	
+	self.Context:ShutDown( )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------

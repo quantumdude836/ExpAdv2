@@ -44,6 +44,8 @@ end
 function EXPADV.LoadEvents( )
 	EXPADV.Events = { }
 
+	EXPADV.CallHook( "PreLoadEvents" )
+
 	for I = 1, #Temp_Events do
 		local Event = Temp_Events[I]
 

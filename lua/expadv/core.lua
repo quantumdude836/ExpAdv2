@@ -271,8 +271,11 @@ function EXPADV.CleanCore( )
 	EXPADV.Operators = nil
 	EXPADV.Class_Operators = nil
 	EXPADV.Functions = nil
+	EXPADV.Events = nil
+	EXPADV.Features = nil
 	EXPADV.Directives = nil
 	EXPADV.Events = nil
+	EXPADV.Editor = nil
 	EXPADV.Compiler = nil
 end
 
@@ -281,6 +284,7 @@ function EXPADV.IncludeCore( )
 	include( "expadv/classes.lua" )
 	include( "expadv/operators.lua" )
 	include( "expadv/events.lua" )
+	include( "expadv/features.lua" )
 	include( "expadv/directives.lua" )
 	include( "expadv/context.lua" )
 	include( "expadv/cppi.lua" )
@@ -365,6 +369,8 @@ function EXPADV.LoadCore( )
 
 	EXPADV.LoadFunctions( )
 
+	EXPADV.LoadFeatures( )
+	
 	EXPADV.LoadEvents( )
 
 	EXPADV.LoadDirectives( )

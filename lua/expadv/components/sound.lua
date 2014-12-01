@@ -308,3 +308,8 @@ if CLIENT then
 	end
 end
 
+/* -----------------------------------------------------------------------------------
+	@: WIP Features.
+   --- */
+
+Component:AddFeature( "Sounds from url", "Stream audio via url feeds." )

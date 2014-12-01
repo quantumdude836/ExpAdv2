@@ -439,3 +439,10 @@ if CLIENT then
 		end
 	end
 end
+
+/* -----------------------------------------------------------------------------------
+	@: WIP Features.
+   --- */
+
+Component:AddFeature( "HUD rendering", "Drawing directly onto your heads up display." )
+Component:AddFeature( "3d rendering", "Rendering 3d objects such as sprites in world." )

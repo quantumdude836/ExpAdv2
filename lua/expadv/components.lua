@@ -93,6 +93,15 @@ function BaseComponent:AddEvent( Name, Input, Return ) -- String, String, String
 end
 
 /* --- --------------------------------------------------------------------------------
+	@: Features
+   --- */
+
+-- Registers a new Feature on this component.
+function BaseComponent:AddFeature( Name, Description ) -- String, String
+	EXPADV.AddFeature( self, Name, Description )
+end
+
+/* --- --------------------------------------------------------------------------------
 	@: Directives Support
    --- */
 
