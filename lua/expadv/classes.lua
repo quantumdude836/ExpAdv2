@@ -17,9 +17,16 @@ function BaseClassObj:DefaultAsLua( Default ) -- Object / function( )
 	local DefaultObject = Default
 	
 	if istable( Default ) then
-		DefaultObject = function( ) return setmetatable( table.Copy( Default ), getmetatable( Default ) ) end
+		self.MetaTable = getmetatable( Default )
+
+		DefaultObject = function( )
+			return setmetatable( table.Copy( Default ), self.MetaTable )
+		end
+
 	elseif !isfunction( Default ) then
-		DefaultObject = function( ) return Default end
+		DefaultObject = function( )
+			return Default
+		end
 	end
 
 	self.CreateNew = DefaultObject
@@ -109,44 +116,6 @@ if WireLib then
 
 		self.Wire_Link_In = Function or DefaultWireLink
 	end
-end
-
-/* --- --------------------------------------------------------------------------------
-	@: Serialization Support
-   --- */
-
-require( "von" )
-
-if von then
-	-- Not yet supported, please do not use this method.
-	function BaseClassObj:Serialize( Function ) -- function( table Context, obj Value )
-		self.SerializeAsString = Function
-	end
-
-	-- Not yet supported, please do not use this method.
-	function BaseClassObj:Deserialize( Function ) -- function( table Context, String seralized )
-		self.DeserializeFromString = Function
-	end
-
-	-- Not yet supported, please do not use this method.
-	function EXPADV.Serialize( Context, Short, Obj ) -- Table, String, Obj
-		-- Assigned: Vercas
-		-- Todo: return serialized
-
-		--	This is an initial attempt to check behaviour.
-		return von.serialize({Short, Obj})
-	end
-
-	-- Not yet supported, please do not use this method.
-	function EXPADV.Deserialize( Context, Seralized ) -- Table, String
-		-- Assigned: Vercas
-		-- Todo: return Short, Obj
-
-		local res = von.deserialize(serialized)
-
-		return res[2], res[1]
-	end
-
 end
 
 /* --- --------------------------------------------------------------------------------
@@ -246,6 +215,61 @@ local ToStringLookUp = { }
 -- Used during execution to translate class objects to strings.
 function EXPADV.ToString( Short, Obj ) -- String, Obj
 	return ToStringLookUp[Short]( Obj )
+end
+
+/* --- --------------------------------------------------------------------------------
+	@: Serialization Support
+   --- */
+
+require( "von" )
+
+if von then
+
+	function BaseClassObj:AddSerializer( Function )
+		self.VON_Can = true
+		self.VON_Serialize = Function
+	end
+
+	function BaseClassObj:AddDeserializer( Function )
+		self.VON_Can = true
+		self.VON_Deserialize = Function
+	end
+
+	function BaseClassObj:CanSerialize( bBool )
+		self.VON_Can = bBool
+	end
+
+	function EXPADV.CanSerialize( Type )
+		return EXPADV.GetClass( Type ).VON_Can
+	end
+
+	function EXPADV.Serialize( Type, Object )
+		local Class = EXPADV.GetClass( Type )
+
+		if Class.VON_Serialize then
+			Object = Class.VON_Serialize( Object )
+		elseif !Class.VON_Can then
+			return nil
+		end
+
+		return Object
+	end
+
+	function EXPADV.Deserialize( Type, Object )
+		local Class = EXPADV.GetClass( Type )
+
+		if Class.VON_Deserialize then
+			Object = Class.VON_Deserialize( Object )
+		elseif !Class.VON_Can then
+			return nil
+		end
+
+		if Class.MetaTable then
+			setmetatable( Object, Class.MetaTable )
+		end
+
+		return Object
+	end
 end
 
 /* --- --------------------------------------------------------------------------------
@@ -360,26 +384,36 @@ function EXPADV.LoadClasses( )
  				Class.Wire_In_Util = DeriveClass.Wire_In_Util
  			end
 
- 			if Class.Wire_Out_Type and !Wire_Link_Out then
+ 			if Class.Wire_Out_Type and !Class.Wire_Link_Out then
  				Class.Wire_Link_Out = DeriveClass.Wire_Link_Out
  			end
 
- 			if Class.Wire_In_Type and !Wire_Link_In then
+ 			if Class.Wire_In_Type and !Class.Wire_Link_In then
  				Class.Wire_Link_In = DeriveClass.Wire_Link_In
  			end
  		end
 
-		if !Class.SerializeAsString then
-			Class.SerializeAsString = DeriveClass.SerializeAsString
+		if von then
+			if !Class.VON_Serialize then
+				Class.VON_Serialize = DeriveClass.VON_Serialize
+			end
+
+			if !Class.VON_Deserialize then
+				Class.VON_Deserialize = DeriveClass.VON_Deserialize
+			end
+
+			if !Class.VON_Can then
+				Class.VON_Can = DeriveClass.VON_Can
+			end
 		end
 
-		if !Class.DeserializeFromString then
-			Class.DeserializeFromString = DeriveClass.DeserializeFromString
+		if Class.MetaTable ~= DeriveClass.MetaTable then
+			Class.MetaTable = DeriveClass.MetaTable
 		end
-
  	end
 
  	for Name, Class in pairs( EXPADV.Classes ) do
  		EXPADV.CallHook( "PostRegisterClass", Name, Class )
  	end
 end
+

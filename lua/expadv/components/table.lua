@@ -304,7 +304,7 @@ Component:AddPreparedFunction( "entityKeys", "t:", "ar", [[
 
 	Component:AddVMFunction( "clone", "t:", "t",
 		function( Context, Trace, Table )
-			local New = { Data = { }, Types = { }, Look = { }, Size = Table.Table, Count = Table.Count, HasChanged = false }
+			local New = { Data = { }, Types = { }, Look = { }, Size = Table.Size, Count = Table.Count, HasChanged = false }
 
 			for Key, _ in pairs( Table.Look ) do
 				New.Look[ Key ] = Table.Look[ Key ]
@@ -314,14 +314,6 @@ Component:AddPreparedFunction( "entityKeys", "t:", "ar", [[
 
 			return New
 		end )
-
-
-
-
-
-
-
-
 
 /* --- --------------------------------------------------------------------------------
 	@: We need to add support for every class :D
@@ -489,3 +481,43 @@ end
 
 		return { Trace = Trace, Inline = LuaInline, Prepare = table.concat( Preperation, "\n" ), Return = "t", FLAG = EXPADV_INLINEPREPARE }
 	end )
+
+/* ---	--------------------------------------------------------------------------------
+	@: VON Support
+	---	*/
+
+Table:AddSerializer( function( Table )
+
+	local Clone = { Data = { }, Types = { }, Look = { }, Size = Table.Size, Count = Table.Count, HasChanged = false }
+
+	for Key, _ in pairs( Table.Look ) do
+		if EXPADV.CanSerialize( Table.Types[Key] ) then
+			local Value = EXPADV.Serialize( Table.Types[Key], Table.Data[Key] )
+
+			if Value then
+				Clone.Data[Key] = Value
+				Clone.Look[Key] = Table.Look[Key]
+				Clone.Types[Key] = Table.Types[Key]
+			end
+		end
+	end
+
+	return Clone
+end )
+
+Table:AddDeserializer( function( Table )
+
+	local Clone = { Data = { }, Types = { }, Look = { }, Size = Table.Size, Count = Table.Count, HasChanged = false }
+
+	for Key, _ in pairs( Table.Look ) do
+		local Value = EXPADV.Deserialize( Table.Types[Key], Table.Data[Key] )
+
+		if Value then
+			Clone.Data[Key] = Value
+			Clone.Look[Key] = Table.Look[Key]
+			Clone.Types[Key] = Table.Types[Key]
+		end
+	end
+
+	return Clone
+end )

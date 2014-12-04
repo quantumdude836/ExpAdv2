@@ -15,6 +15,7 @@ local ColorObj = Component:AddClass( "color", "c" )
 
 ColorObj:StringBuilder( function( Color) return string.format( "Color( %i, %i, %i, %i )", Color.r, Color.g, Color.b, Color.a ) end )
 ColorObj:DefaultAsLua( Color(255, 255, 255, 255) )
+ColorObj:CanSerialize( true )
 
 if WireLib then
 	ColorObj:WireInput( "VECTOR",

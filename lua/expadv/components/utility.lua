@@ -798,13 +798,13 @@ if IsValid( @value 1 ) and EXPADV.PPCheck( Context.player, @value 1 ) then
 	$construct.SetPhysProp( Context.player, @value 1, 0, nil, { GravityToggle = @value 3, Material = @value 2 } )
 end]] )
 
-PropComponent:AddPreparedFunction( "destroy", "e:", "",[[
+PropComponent:AddPreparedFunction( "destroy", "e:", "", [[
 if IsValid( @value 1 ) and EXPADV.PPCheck( Context.player, @value 1 ) then
 	@value 1:GibBreakClient( Vector() )
 	@value 1:Remove( )
 end]] )
 
-PropComponent:AddPreparedFunction( "destroy", "e:v,b", "",[[
+PropComponent:AddPreparedFunction( "destroy", "e:v,b", "", [[
 if IsValid( @value 1 ) and @value 2:IsNotHuge( ) and EXPADV.PPCheck( Context.player, @value 1 ) then
 	if !( @value 2.x ~= @value 2.x and @value 2.y ~= @value 2.y and @value 2.z ~= @value 2.z ) then
 		@value 1:GibBreakClient( @value 2 )
@@ -836,3 +836,55 @@ PropComponent:AddFunctionHelper( "spawn", "s,b", "Creates and returns a new prop
 PropComponent:AddFunctionHelper( "remove", "e:", "Removes entity E." )
 PropComponent:AddFunctionHelper( "dealDamage", "e:n", "Deals damage to an entity." )
 PropComponent:AddFunctionHelper( "enableGravity", "p:b", "Enable gravity on physics object P." )
+
+/* --- --------------------------------------------------------------------------------
+	@: VON support
+   --- */
+
+EXPADV.SharedOperators( )
+
+Component:AddException( "von" )
+
+Component:AddVMFunction( "serialize", "vr", "s", function(Context, Trace, Variant)
+	local Serialized = EXPADV.Serialize( "vr", Variant )
+
+	if !Serialized then return "" end
+
+	return von.serialize( Serialized ) 
+end )
+
+Component:AddVMFunction( "deserialize", "s", "vr", function(Context, Trace, VON)
+	local Ok, Obj = pcall(von.deserialize, VON)
+
+	if Ok then 
+		Obj = EXPADV.Deserialize( "vr", Obj )
+
+		if Obj then return Obj end
+	end
+
+	Context:Throw( Trace, "von", "failed to deserialize to valid object." )
+end )
+
+function Component:OnPostRegisterClass( Name, Class )
+
+	EXPADV.SharedOperators( )
+
+	if Name == "generic" or Name == "variant" then return end
+
+	if Class.VON_Can then
+
+		Component:AddVMFunction( "serialize", Class.Short, "s", function(Context, Trace, Array)
+			local Obj = EXPADV.Serialize( "vr", {Array, Class.Short} )
+
+			if Obj then
+				MsgN( "Serialized :", Class.Short)
+
+				local Ok, Serialized = pcall( von.serialize, Obj )
+				if Ok then return Serialized end
+			end
+			
+			Context:Throw( Trace, "von", "failed to serialize object." )
+		end )
+
+	end
+end

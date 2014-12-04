@@ -13,6 +13,7 @@ Component.Description = "Handels basic arithmatic with numbers and adds function
 
 local Number = Component:AddClass( "number" , "n" )
 Number:StringBuilder( function( Obj ) return tostring( Obj ) end )
+Number:CanSerialize( true )
 Number:DefaultAsLua( 0 )
 Number:AddAlias( "int" )
 

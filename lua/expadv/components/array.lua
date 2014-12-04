@@ -120,6 +120,7 @@ function Component:OnPostRegisterClass( Name, Class )
    			@prepare 2
    		end]] )
 end
+
 /* ---	--------------------------------------------------------------------------------
 	@: Now for a way to build a filled table
 	---	*/
@@ -144,4 +145,36 @@ Component:AddGeneratedOperator( "array", "s,...", "ar", function( Operator, Comp
 	local LuaInline = string.format( "{ __type = %q, %s }", Type, table.concat( Values, "," ) )
 
 	return { Trace = Trace, Inline = LuaInline, Prepare = table.concat( Preperation, "\n" ), Return = "_ar", FLAG = EXPADV_INLINEPREPARE }
+end )
+
+/* ---	--------------------------------------------------------------------------------
+	@: VON Support
+	---	*/
+
+Array:AddSerializer( function( Array )
+
+	if !EXPADV.CanSerialize(Array.__type) then return end
+
+	local Clone = { __type = Array.__type }
+
+	for Key, Value in pairs( Array ) do
+		if Key == "__type" then continue end
+
+		Clone[Key] = EXPADV.Serialize( Array.__type, Value )
+	end
+
+	return Clone
+end )
+
+Array:AddDeserializer( function( Array )
+
+	local Clone = { __type = Array.__type }
+
+	for Key, Value in pairs( Array ) do
+		if Key == "__type" then continue end
+
+		Clone[Key] = EXPADV.Deserialize( Array.__type, Value )
+	end
+
+	return Clone
 end )

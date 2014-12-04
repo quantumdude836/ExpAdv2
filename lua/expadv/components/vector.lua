@@ -14,6 +14,7 @@ Component.Description = "Adds a 3d and a 2d vector object."
 local VectorObj = Component:AddClass( "vector", "v" )
 
 VectorObj:StringBuilder( function( Vector ) return string.format( "Vec( %f, %f, %f )", Vector.x, Vector.y, Vector.z ) end )
+VectorObj:CanSerialize( true )
 VectorObj:DefaultAsLua( Vector(0, 0, 0) )
 
 /* --- --------------------------------------------------------------------------------
@@ -285,6 +286,7 @@ local Vector2Obj = Component:AddClass( "vector2", "v2" )
 
 Vector2Obj:StringBuilder( function( Vector ) return string.format( "Vec2( %f, %f )", Vector.x, Vector.y ) end )
 Vector2Obj:DefaultAsLua( Vector2(0, 0) )
+Vector2Obj:CanSerialize( true )
 
 /* --- --------------------------------------------------------------------------------
 	  @: Wire Support

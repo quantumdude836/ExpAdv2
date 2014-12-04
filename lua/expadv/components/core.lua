@@ -15,6 +15,7 @@ local Class_Delgate   = EXPADV.AddClass( nil, "delegate", "d" )
 local Class_Exception = EXPADV.AddClass( nil, "exception", "ex" )
 
 Class_Boolean:AddAlias( "bool" )
+Class_Boolean:CanSerialize( true )
 Class_Boolean:DefaultAsLua( false )
 Class_Function:DefaultAsLua( "function( ) end" )
 
@@ -283,6 +284,20 @@ function Component:OnPostRegisterClass( Name, Class )
 end
 
 Component:AddInlineFunction( "type", "vr:", "s", "EXPADV.TypeName(@value 1[2])" )
+
+/* --- --------------------------------------------------------------------------------
+	@: Variant VON support
+   --- */
+
+Class_Variant:AddSerializer( function( Variant )
+	if !EXPADV.CanSerialize(Variant[2]) then return end
+
+	return { EXPADV.Serialize( Variant[2], Variant[1] ), Variant[2] }
+end )
+
+Class_Variant:AddDeserializer( function( Variant )
+	return { EXPADV.Deserialize( Variant[2], Variant[1] ), Variant[2] }
+end )
 
 /* --- --------------------------------------------------------------------------------
 	@: Debug

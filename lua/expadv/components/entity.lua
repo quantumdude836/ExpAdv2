@@ -28,6 +28,7 @@ end
 
 local EntObject = Component:AddClass( "entity", "e" )
 
+EntObject:CanSerialize( true )
 EntObject:DefaultAsLua( Entity(0) )
 
 /* --- --------------------------------------------------------------------------------

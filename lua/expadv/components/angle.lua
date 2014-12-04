@@ -13,6 +13,7 @@ Component.Description = "Adds an eluler angle object."
 
 local AngObject = Component:AddClass( "angle", "a" )
 
+AngObject:CanSerialize( true )
 AngObject:DefaultAsLua( Angle(0,0,0) )
 
 /* --- --------------------------------------------------------------------------------

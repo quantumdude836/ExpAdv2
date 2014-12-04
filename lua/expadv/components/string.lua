@@ -14,6 +14,7 @@ Component.Description = "Added basic and advanced functions to do with strings."
 local String = Component:AddClass( "string" , "s" )
 
 String:StringBuilder( function( Obj ) return Obj end )
+String:CanSerialize( true )
 String:DefaultAsLua( "" )
 String:AddAlias( "str" )
 
