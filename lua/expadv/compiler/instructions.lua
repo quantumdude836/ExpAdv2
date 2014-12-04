@@ -900,7 +900,7 @@ function Compiler:Compile_FOR( Trace, Class, AssInstr, Memory, Start, End, Step,
 	local Operator = self:LookUpClassOperator( Class.Short, "for", Start.Return, End.Return, Step.Return )
 
 	if !Operator then
-		self:TraceError( Trace, "No such loop 'for(%s = %s, %s, %s)'", self:NiceClass( Class.Short, Start.Return, End.Return, Step.Return ) )
+		self:TraceError( Trace, "No such loop 'for(%s = %s; %s; %s)'", self:NiceClass( Class.Short, Start.Return, End.Return, Step.Return ) )
 	end
 
 	local Lua = string.format( "%s\n%s\n%s\n%s", AssInstr.Prepare or "", AssInstr.Inline or "", Sequence.Prepare or "", Sequence.Inline or "" )
@@ -915,6 +915,17 @@ function Compiler:Compile_WHILE( Trace, Exp, Sequence )
 	local Operator = self:LookUpOperator( "while", "b" )
 
 	return Operator.Compile( self, Trace, Exp, Sequence )
+end
+
+function Compiler:Compile_FOREACH( Trace, ItorClass, AssItor, ValueClass, AssValue, Expression, Sequence )
+	local Operator = self:LookUpClassOperator( Expression.Return, "foreach", Expression.Return, ItorClass.Short, ValueClass.Short )
+
+	if !Operator then
+		self:TraceError( Trace, "No such loop 'foreach(%s; %s: %s)'", self:NiceClass( ItorClass.Short, ValueClass.Short, Expression.Return ) )
+	end
+
+	return Operator.Compile( self, Trace, Expression, self:Compile_SEQ( Trace, {  AssItor, AssValue, Sequence } ) )
+
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------

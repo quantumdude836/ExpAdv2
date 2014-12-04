@@ -107,6 +107,18 @@ function Component:OnPostRegisterClass( Name, Class )
 	Component:AddPreparedFunction( "insert", "ar," .. Class.Short, "", string.format([[
 		if @value 1.__type ~= %q then Context.Throw(@trace, "array", "array type missmatch, %s expected got " .. EXPADV.TypeName(@value 1.__type)) end
 		]], Class.Short, Class.Name), "$table.insert(@value 1, @value 2)")
+
+/* ---	--------------------------------------------------------------------------------
+	@: Foreach Loop
+   ---	*/
+
+   Array:AddPreparedOperator( "foreach", Array.Short .. ",n," .. Class.Short, "", [[
+   		if @value 1.__type ~= "]] ..Class.Short .. [[" then Context.Throw(@trace, "array", "array type missmatch, ]] .. Class.Name .. [[ expected got " .. EXPADV.TypeName(@value 1.__type)) end
+
+   		for i = 1, #@value 1 do
+   			local value = @value 1[i]
+   			@prepare 2
+   		end]] )
 end
 /* ---	--------------------------------------------------------------------------------
 	@: Now for a way to build a filled table

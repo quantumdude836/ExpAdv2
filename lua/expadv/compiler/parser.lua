@@ -1057,7 +1057,7 @@ function Compiler:Statement_5( Trace )
 		self:ExcludeVarArg( )
 
 		if self.LoopDeph <= 0 then
-			self:TraceError( Trace, "return must no appear outside of a loop" )
+			self:TraceError( Trace, "continue must no appear outside of a loop" )
 		end
 
 		self.BreakOut = "continue"
@@ -1364,6 +1364,48 @@ function Compiler:Statement_8( Trace )
 		self:PopScope( )
 		
 		return self:Compile_WHILE( Trace, Exp, Sequence )
+	elseif self:AcceptToken( "each" ) then
+		local Trace = self:GetTokenTrace( Trace )
+
+		self:PushScope( )
+		self:PushLoopDeph( )
+
+			self:RequireToken( "lpa", "Left parenthesis (( ) missing, after foreach" )
+	
+			self:RequireToken( "var", "Variable type expected for loop iterator." )
+			
+			local ItorClass = self:GetClass( Trace, self.TokenData )
+
+			self:RequireToken( "var", "Variable expected for loop iterator." )
+
+			local Quick = { Trace = Trace, Inline = "i", Return = ItorClass.Short, FLAG = EXPADV_INLINE, IsRaw = true }
+
+			local AssItor = self:Compile_ASS( Trace, self.TokenData, Quick, ItorClass.Name )
+
+		self:RequireToken( "sep", "Semicolon (;) exspected after loop iterator." )
+
+			self:RequireToken( "var", "Variable type expected for loop value." )
+			
+			local ValueClass = self:GetClass( Trace, self.TokenData )
+
+			self:RequireToken( "var", "Variable expected for loop value." )
+
+			local Quick = { Trace = Trace, Inline = "value", Return = ValueClass.Short, FLAG = EXPADV_INLINE, IsRaw = true }
+
+			local AssValue = self:Compile_ASS( Trace, self.TokenData, Quick, ValueClass.Name )
+
+		self:RequireToken( "col", "Colon (:) exspected after loop value." )
+
+			local Expression = self:Expression( Trace )
+
+		self:RequireToken( "rpa", "Right parenthesis ( )) missing, after foreach decleration loop" )
+
+			local Sequence = self:GetBlock( Trace, "to close foreach loop" )
+
+		local Memory = self:PopLoopDeph( )
+		self:PopScope( )
+		
+		return self:Compile_FOREACH( Trace, ItorClass, AssItor, ValueClass, AssValue, Expression, Sequence )
 	end
 
 	return self:Statement_9( Trace )
