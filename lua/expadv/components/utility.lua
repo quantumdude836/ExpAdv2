@@ -877,8 +877,6 @@ function Component:OnPostRegisterClass( Name, Class )
 			local Obj = EXPADV.Serialize( "vr", {Array, Class.Short} )
 
 			if Obj then
-				MsgN( "Serialized :", Class.Short)
-
 				local Ok, Serialized = pcall( von.serialize, Obj )
 				if Ok then return Serialized end
 			end
