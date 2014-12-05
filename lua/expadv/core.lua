@@ -3,8 +3,11 @@
    --- */
 
 EXPADV = { }
+MsgN( "Expression advanced Two - Installing..." )
 
-MsgN( "Expression advanced Two - Installing." )
+
+EXPADV.VER = tonumber(file.Read("expadv/ver.lua", "LUA")) or 0
+MsgN( "\tVER: ", EXPADV.VER )
 
 /* --- --------------------------------------------------------------------------------
 	@: Debugging Stuff

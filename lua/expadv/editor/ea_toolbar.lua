@@ -53,6 +53,7 @@ function PANEL:Init( )
 	self:AddInviteMenu( )
 	
 	if WireLib then
+		//@Comment: Rusketh doesn't like this
 		self.btnSoundBrowser = self:SetupButton( "Wire sound browser.", Material( "fugue/speaker-volume.png" ), RIGHT )
 		function self.btnSoundBrowser:DoClick( )
 			RunConsoleCommand( "wire_sound_browser_open" )
