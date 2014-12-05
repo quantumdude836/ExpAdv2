@@ -748,6 +748,8 @@ end
 
 EXPADV.Ver = tonumber(file.Read("expadv/ver.lua", "LUA")) or 0
 
+if SERVER then CreateConVar( "expadv2_ver", EXPADV.Ver, FCVAR_NOTIFY ) end
+
 function EXPADV.CheckForUpdates(ShowStatus)
 	http.Fetch( "https://raw.githubusercontent.com/Rusketh/ExpAdv2/master/lua/expadv/ver.lua", function( Ver )
 		EXPADV.GitVer = tonumber(Ver) or 0
