@@ -395,6 +395,19 @@ Component:AddInlineFunction( "randVec2", "n,n", "v2", "Vector2( $math.random(@va
 Component:AddFunctionHelper( "randVec2", "n,n", "Creates a random vector2 constrained to the given values" )
 
 /* --- --------------------------------------------------------------------------------
+    @: Functions
+   --- */
+
+Component:AddInlineFunction( "ceil", "v2:", "v2", "Vector2(math.ceil(@value 1.x), math.ceil(@value 1.y))" )
+Component:AddFunctionHelper( "ceil", "v2:", "Returns ceiled vector." )
+
+Component:AddInlineFunction( "floor", "v2:", "v2", "Vector2(math.floor(@value 1.x), math.floor(@value 1.y))" )
+Component:AddFunctionHelper( "floor", "v2:", "Returns floored vector." )
+
+Component:AddInlineFunction( "round", "v2:", "v2", "Vector2((@value 1.x - (@value 1.x + 0.5) @modulus 1 + 0.5), (@value 1.y - (@value 1.y + 0.5) @modulus 1 + 0.5))" )
+Component:AddFunctionHelper( "round", "v2:", "Returns rounded vector." )
+
+/* --- --------------------------------------------------------------------------------
 	  @: Accessors
    --- */
 

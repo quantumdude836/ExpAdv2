@@ -5,10 +5,6 @@
 EXPADV = { }
 MsgN( "Expression advanced Two - Installing..." )
 
-
-EXPADV.VER = tonumber(file.Read("expadv/ver.lua", "LUA")) or 0
-MsgN( "\tVER: ", EXPADV.VER )
-
 /* --- --------------------------------------------------------------------------------
 	@: Debugging Stuff
    --- */
@@ -745,6 +741,38 @@ if CLIENT then
 			end
 		end )
 end
+
+/* --- --------------------------------------------------------------------------------
+	@: Updates.
+   --- */
+
+EXPADV.Ver = tonumber(file.Read("expadv/ver.lua", "LUA")) or 0
+
+function EXPADV.CheckForUpdates(ShowStatus)
+	http.Fetch( "https://raw.githubusercontent.com/Rusketh/ExpAdv2/master/lua/expadv/ver.lua", function( Ver )
+		EXPADV.GitVer = tonumber(Ver) or 0
+
+		if !ShowStatus then return end
+
+		Msg( "\nExpression Advanced 2" )
+		Msg( "\n\tCurrent Ver: ", EXPADV.Ver )
+		Msg( "\n\t Latest Ver: ", EXPADV.GitVer or "Unkown" )
+
+		if EXPADV.GitVer == 0 then
+			MsgN( "\n\tCould not check for updates.\n")
+		elseif EXPADV.GitVer == 0 then
+			MsgN( "\n\tCould not check for updates.\n")
+		elseif EXPADV.GitVer == EXPADV.Ver then
+			MsgN( "\n\tNo updates avalible.\n")
+		elseif EXPADV.GitVer > EXPADV.Ver then
+			MsgN( "\n\t", EXPADV.GitVer - EXPADV.Ver," updates avalible.\n")
+		end
+	end )
+end
+
+hook.Add( "Expadv.PostLoadCore", "expadv.updates", function( )
+	EXPADV.CheckForUpdates( true )
+end )
 
 /* --- --------------------------------------------------------------------------------
 	@: API.
