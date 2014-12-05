@@ -936,9 +936,9 @@ function Compiler:Compile_GET( Trace, Expression1, Expression2, ClassShort )
 	local Operator = self:LookUpClassOperator( Expression1.Return, "get", Expression1.Return, Expression2.Return, ClassShort or "_vr" )
 
 	if !Operator and ClassShort then
-		self:TraceError( Trace, "Get operator (%s[%s,%s]) does not support %s", self:NiceClass( Expression1.Return, Expression2.Return, ClassShort, Expression1.Return ) )
+		self:TraceError( Trace, "No such operator (%s[%s,%s])", self:NiceClass( Expression1.Return, Expression2.Return, ClassShort, Expression1.Return ) )
 	elseif !Operator then
-		self:TraceError( Trace, "Get operator (%s[%s]) does not support %s", self:NiceClass( Expression1.Return, Expression2.Return, Expression1.Return ) )
+		self:TraceError( Trace, "No such operator (%s[%s])", self:NiceClass( Expression1.Return, Expression2.Return, Expression1.Return ) )
 	end
 
 	return Operator.Compile( self, Trace, Expression1, Expression2, ClassShort )
@@ -952,9 +952,9 @@ function Compiler:Compile_SET( Trace, Expression1, Expression2, Expression3, Cla
 	local Operator = self:LookUpClassOperator( Expression1.Return, "set", Expression1.Return, Expression2.Return, Expression3.Return )
 
 	if !Operator and ClassShort then
-		self:TraceError( Trace, "Set operator (%s[%s,%s]=) does not support %s", self:NiceClass( Expression1.Return, Expression2.Return, Expression3.Return ) )
+		self:TraceError( Trace, "No such operator (%s[%s,%s]=)", self:NiceClass( Expression1.Return, Expression2.Return, Expression3.Return ) )
 	elseif !Operator then
-		self:TraceError( Trace, "Get operator (%s[%s]=) does not support %s", self:NiceClass( Expression1.Return, Expression2.Return, Expression3.Return ) )
+		self:TraceError( Trace, "No such operator (%s[%s]=)", self:NiceClass( Expression1.Return, Expression2.Return, Expression3.Return ) )
 	end
 
 	return Operator.Compile( self, Trace, Expression1, Expression2, Expression3 )

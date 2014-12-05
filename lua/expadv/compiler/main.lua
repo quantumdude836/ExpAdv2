@@ -129,7 +129,7 @@ function Compiler:Error( Offset, Message, A, ... )
 		debug.Trace( )
 		return self:Error( 0, "Unknown Error, see console!" )
 	end
-
+	
 	if A then Message = Format( Message, A, ... ) end
 	error( Format( "%s at line %i, char %i", Message, self.ReadLine, self.ReadChar + Offset ), 0 )
 end
