@@ -418,6 +418,12 @@ function Compiler:Expression_12( Trace )
 		self:ExcludeWhiteSpace( "Negation operator (-) must not be succeeded by whitespace" )
 		return self:Compile_NEG( Trace, self:Expression_1( Trace ) )
 	
+	elseif self:AcceptToken( "mul" ) then
+		local Trace = self:GetTokenTrace( Trace )
+		
+		self:RequireToken( "var", "pointing operator (*) must not be succeeded by whitespace" )
+		return self:Compile_POINT_CLASS( Trace, self.TokenData )
+
 	elseif self:AcceptToken( "not" ) then
 		local Trace = self:GetTokenTrace( Trace )
 		self:ExcludeWhiteSpace( "Logical not operator (!) must not be succeeded by whitespace" )

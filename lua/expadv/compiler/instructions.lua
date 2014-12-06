@@ -22,6 +22,11 @@ function Compiler:Compile_STR( Trace, String )
 	return { Trace = Trace, Inline = "Context.Strings[" .. ID .. "]", Return = "s", FLAG = EXPADV_INLINE, IsRaw = true }
 end
 
+function Compiler:Compile_POINT_CLASS( Trace, ClassName )
+	local Class = self:GetClass( Trace, ClassName, false ) --Not to be used as an actual operator or object.
+	return { Trace = Trace, Inline = string.format("%q",Class.Short), Return = "_cls", FLAG = EXPADV_INLINE, PointClass = Class.Short, IsRaw = true }
+end
+
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Operators
    --- */
@@ -825,7 +830,7 @@ function Compiler:Build_Function( Trace, Params, UseVarg, Sequence, Memory )
 
 	for I, Param in pairs( Params ) do
 		local Type = Param[2]
-
+		print("Peram " .. I, unpack(Param))
 		Inputs[I] = "IN_" .. I
 
 		local Operator = self:LookUpClassOperator( Type, "=", "n", Type )

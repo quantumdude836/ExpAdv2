@@ -20,7 +20,7 @@ local function stopSound(Context, Index, Fade)
 	local sound = Context.Data.Sound[Index]
 	if(Fade > 0) then
 		sound:FadeOut(Fade)
-		timer.Simple(Fade, function() stopSound(Index, 0) end)
+		timer.Simple(Fade, function() stopSound(Context, Index, 0) end)
 	else
 		sound:Stop()
 		if(type(Index) == "number") then Index = math.floor(Index) end

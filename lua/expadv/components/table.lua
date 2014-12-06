@@ -323,7 +323,7 @@ function Component:OnPostRegisterClass( Name, Class )
 
 	EXPADV.SharedOperators( )
 
-	if Name == "generic" or Name == "variant" or Name == "function" then return end
+	if Name == "generic" or Name == "variant" or Name == "function" or Name == "class" then return end
 
 	/* --- --------------------------------------------------------------------------------
 		@: Get Operators

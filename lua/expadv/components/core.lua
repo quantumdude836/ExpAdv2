@@ -13,6 +13,7 @@ local Class_Boolean   = EXPADV.AddClass( nil, "boolean", "b" )
 local Class_Function  = EXPADV.AddClass( nil, "function", "f" )
 local Class_Delgate   = EXPADV.AddClass( nil, "delegate", "d" )
 local Class_Exception = EXPADV.AddClass( nil, "exception", "ex" )
+local Class_Class = EXPADV.AddClass( nil, "class", "cls" ) --Nope: Not what you think it is.
 
 Class_Boolean:AddAlias( "bool" )
 Class_Boolean:CanSerialize( true )
@@ -67,6 +68,42 @@ EXPADV.AddPreparedOperator( nil, "call", "f,s,...", "_vr", [[
 		Context:Throw( @trace, "invoke", string.format( "Invalid return value, %s expected got %s", @value 2, @Type ) )
 	end
 ]], "@Return" )
+
+EXPADV.AddGeneratedFunction( nil, "invoke", "cls,d,...", "",
+	function( Operator, Compiler, Trace, ... )
+		
+		local Inputs = { ... }
+		local Preperation = { }
+		local Variants = { }
+		
+		for I = 1, #Inputs, 1 do
+			local Input = Inputs[I]
+
+			if Input.FLAG == EXPADV_PREPARE or Input.FLAG == EXPADV_INLINEPREPARE then
+				Preperation[#Preperation + 1] = Input.Prepare
+			end
+
+			if I > 2 then
+				if Input.FLAG == EXPADV_INLINE or Input.FLAG == EXPADV_INLINEPREPARE then
+					if Input.Return == "_vr" then
+						Variants[#Variants + 1] = Input.Inline
+					else
+						Variants[#Variants + 1] = string.format("{%s,%q}", Input.Inline, Input.Return)
+					end
+				end
+			end
+		end
+
+		local Function, Return, Type = Compiler:DefineVariable( ), Compiler:DefineVariable( ), Compiler:DefineVariable( )
+		local Arguments = table.concat(Variants, ",")
+		if #Variants > 0 then Arguments = "," .. Arguments end
+		
+		Preperation[#Preperation + 1] = string.format("%s = %s", Function, Inputs[2].Inline )
+		Preperation[#Preperation + 1] = string.format("%s, %s = %s( Context %s )", Return, Type, Function, Arguments )
+		Preperation[#Preperation + 1] = string.format("if %s ~= %s then Context:Throw(%s,%q,%q) end", Inputs[1].Inline, Type, Compiler:CompileTrace(Trace), "invoke", "This is not the exception, youre looking for." )
+
+		return { Trace = Trace, Inline = Return, Prepare = table.concat( Preperation, "\n" ), Return = Inputs[1].PointClass, FLAG = EXPADV_INLINEPREPARE }
+	end ); EXPADV.AddFunctionAlias("invoke", "cls,d")
 
 /* --- -------------------------------------------------------------------------------
 	@: Loops
