@@ -2,6 +2,7 @@
 	@: Context Component
 	@: Author: Ripmax
 	@: Comment: Rusketh doesn't like this.
+	@: Comment: k
    --- */
 
 local Component = EXPADV.AddComponent( "context", true )
@@ -21,6 +22,7 @@ Component:AddFunctionHelper("removeContextMenu", "s", "Removes a custom option f
 
 function Component:OnOpenContextMenu( Entity, Menu, Trace, Option )
 	local Context = Entity.Context
+	if !Context then return end
 	for k, v in pairs(Context.Data.CustomMenus) do
 		Menu:AddOption(v.Name, function() v.Callback(Context) end)
 	end
