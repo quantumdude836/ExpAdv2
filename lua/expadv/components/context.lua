@@ -2,6 +2,7 @@
 	@: Context Component
 	@: Author: Ripmax
 	@: Comment: Rusketh doesn't like this.
+	@: Comment: k
    --- */
 
 local Component = EXPADV.AddComponent( "context", true )
