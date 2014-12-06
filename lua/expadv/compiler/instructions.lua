@@ -830,7 +830,7 @@ function Compiler:Build_Function( Trace, Params, UseVarg, Sequence, Memory )
 
 	for I, Param in pairs( Params ) do
 		local Type = Param[2]
-		print("Peram " .. I, unpack(Param))
+		
 		Inputs[I] = "IN_" .. I
 
 		local Operator = self:LookUpClassOperator( Type, "=", "n", Type )
