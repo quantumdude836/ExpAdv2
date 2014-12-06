@@ -354,12 +354,37 @@ Component:AddFunctionHelper( "canRenderToHUD", "", "Returns true if this entity 
    
 EXPADV.ClientOperators()
 
-local _3DObject = Component:AddClass("3d", "3d2d")
-_3DObject:MakeClientOnly()
+Component:AddInlineFunction("fov", "", "n", "$LocalPlayer():GetFOV()")
+Component:AddFunctionHelper("fov", "n", "Gets FOV of local player.")
 
 Component:AddPreparedFunction("setRenderMat", "s", "", [[$render.SetMaterial($Material(@value 1))]])
 Component:AddFunctionHelper("setRenderMat", "", "Sets the material of the rendered objects.")
 
+Component:AddPreparedFunction("draw3DLine", "v,v,c", "", "$render.DrawLine(@value 1, @value 2, @value 3, true)")
+Component:AddFunctionHelper("draw3DLine", "", "Draws 3D line (start, end, color).")
+
+Component:AddPreparedFunction("draw3DBox", "v,a,v,v,c", "", "$render.DrawBox(@value 1, @value 2, @value 3, @value 4, @value 5, true)")
+Component:AddFunctionHelper("draw3DBox", "", "Draws 3D box (position, angle, mins, maxs, color).")
+
+Component:AddPreparedFunction("draw3DSphere", "v,n,n,n,c", "", "$render.DrawSphere(@value 1, @value 2, @value 3, @value 4, @value 5)")
+Component:AddFunctionHelper("draw3DSphere", "", "Draws 3D sphere.")
+
+Component:AddPreparedFunction("draw3DQuadEasy", "v,v,n,n,c,n", "", "$render.DrawQuadEasy(@value 1, @value 2, @value 3, @value 4, @value 5, @value 6)")
+Component:AddFunctionHelper("draw3DQuadEasy", "", "Draws 3D quad.")
+
+Component:AddPreparedFunction("draw3DQuad", "v,v,v,v,c", "", "$render.DrawQuad(@value 1, @value 2, @value 3, @value 4, @value 5)")
+Component:AddFunctionHelper("draw3DQuad", "", "Draws 3D quad.")
+
+Component:AddPreparedFunction("draw3DBeam", "v,v,n,n,n,c", "", "$render.DrawBeam(@value 1, @value 2, @value 3, @value 4, @value 5, @value 6)")
+Component:AddFunctionHelper("draw3DBeam", "", "Draws 3D beam.")
+
+Component:AddPreparedFunction("draw3DModel", "s,v,a", "", "$render.Model({['model'] = @value 1, ['pos'] = @value 2, ['angle'] = @value 3})")
+Component:AddFunctionHelper("draw3DModel", "", "Draws 3D model.")
+
+Component:AddPreparedFunction("start3D2D", "v,a", "", "$cam.Start3D2D(@value 1, @value 2, 1)")
+Component:AddPreparedFunction("start3D2D", "v,a,n", "", "$cam.Start3D2D(@value 1, @value 2, @value 3)")
+
+Component:AddPreparedFunction("end3D2D", "", "", "$cam.End3D2D()")
 
 /* -----------------------------------------------------------------------------------
 	@: Hud Event
@@ -372,7 +397,8 @@ Component:AddEvent( "drawHUD", "n,n", "" )
 Component:AddEvent( "enableHUDRendering", "", "" )
 Component:AddEvent( "disableHUDRendering", "", "" )
 
-Component:AddEvent( "draw3d", "", "" )
+Component:AddEvent( "draw3DOverlay", "", "" )
+Component:AddEvent( "draw3D", "", "" )
 Component:AddEvent( "enable3DRendering", "", "" )
 Component:AddEvent( "disable3DRendering", "", "" )
 
@@ -395,13 +421,27 @@ if CLIENT then
 				Context:Execute( "Event drawHUD", Context.event_drawHUD, W, H )
 			end
 			
-			if(Context.entity.Enable3D && Context.event_draw3d) then
+			if(Context.entity.Enable3D && Context.event_draw3DOverlay) then
 				cam.Start3D(EyePos(), EyeAngles())
-					Context:Execute("Event draw3d", Context.event_draw3d)
+					Context:Execute("Event draw3DOverlay", Context.event_draw3DOverlay)
 				cam.End3D()
 			end
 		end
 	end )
+	
+	hook.Add( "PostDrawOpaqueRenderables", "expadv.postdraw", function( DrawingDepth, DrawingSkybox )
+		if !EXPADV.IsLoaded or bDrawingDepth or bDrawingSkybox then return end
+
+		for _, Context in pairs( EXPADV.CONTEXT_REGISTERY ) do
+			if !Context.Online then continue end
+			
+			if !IsValid( Context.entity ) then continue end
+			
+			if(Context.entity.Enable3D && Context.event_draw3D) then
+				Context:Execute( "Event draw3D", Context.event_draw3D )
+			end
+		end
+	end)
 	
 	/* -----------------------------------------------------------------------------------
 		@: Enable HUD/3D Rendering
@@ -424,7 +464,7 @@ if CLIENT then
 			end
 		end
 		
-		if(Entity.Context.event_draw3d) then
+		if(Entity.Context.event_draw3D || Entity.Context.event_draw3DOverlay) then
 			if(Entity.Enable3D) then
 				Menu:AddOption( "Disable 3D Rendering", function( )
 					Entity.Enable3D = false
