@@ -53,7 +53,7 @@ local function playSound(Context, Ent, Duration, Index, Fade, File)
 	
 end
 
-EXPADV.ServerOperators()
+EXPADV.SharedOperators()
 
 Component:AddVMFunction("soundPlay", "n,n,s", "", function(Context, Trace, Index, Duration, File) playSound(Context, Context.entity, math.abs(Duration), math.abs(Index), 0, File) end)
 Component:AddVMFunction("soundPlay", "e:n,n,s", "", function(Context, Trace, Ent, Index, Duration, File) playSound(Context, Ent, math.abs(Duration), math.abs(Index), 0, File) end)
@@ -313,3 +313,4 @@ end
    --- */
 
 Component:AddFeature( "Sounds from url", "Stream audio via url feeds." )
+
