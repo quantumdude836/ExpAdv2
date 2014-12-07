@@ -171,10 +171,10 @@ Component:AddFunctionHelper( "setMaterial", "e:s", "Sets the material of the giv
 Component:AddPreparedFunction( "setPhysProp", "e:s", "", "if(IsValid(@value 1) && EXPADV.PPCheck(Context.player,@value 1)) then @value 1:GetPhysicsObject():SetMaterial(@value 2) end")
 Component:AddFunctionHelper( "setPhysProp", "e:s", "Sets the physical properties of the given entity.")
 
-Component:AddPreparedFunction( "setColor", "e:c", "", "if(IsValid(@value 1) && EXPADV.PPCheck(Context.player,@value 1)) then @value 1:SetColor(@value 2) end")
+Component:AddPreparedFunction( "setColor", "e:c", "", "if(IsValid(@value 1) && EXPADV.PPCheck(Context.player,@value 1)) then @value 1:SetColor(@value 2); @value 1:SetRenderMode(@value 2.a == 255 and 0 or 4) end")
 Component:AddFunctionHelper( "setColor", "e:c", "Sets the color of the given entity.")
 
-Component:AddPreparedFunction( "setColour", "e:c", "", "if(IsValid(@value 1) && EXPADV.PPCheck(Context.player,@value 1)) then @value 1:SetColor(@value 2) end") -- Because why not :) ?
+Component:AddPreparedFunction( "setColour", "e:c", "", "if(IsValid(@value 1) && EXPADV.PPCheck(Context.player,@value 1)) then @value 1:SetColor(@value 2); @value 1:SetRenderMode(@value 2.a == 255 and 0 or 4) end") -- Because why not :) ?
 Component:AddFunctionHelper( "setColour", "e:c", "Sets the colour of the given entity.")
 
 Component:AddPreparedFunction( "enableDrag", "e:b", "", "if(IsValid(@value 1) && IsValid(@value 1:GetPhysicsObject()) && EXPADV.PPCheck(Context.player, @value 1)) then @value 1:GetPhysicsObject():EnableDrag(@value 2) end") -- Because why not :) ?
