@@ -65,7 +65,7 @@ Component:AddInlineOperator( "+", "a,a", "a", "Angle( @value 1.p + @value 2.p, @
 
 Component:AddInlineOperator( "-", "a,n", "a", "Angle( @value 1.p - @value 2, @value 1.y - @value 2, @value 1.r - @value 2)")
 Component:AddInlineOperator( "-", "n,a", "a", "Angle( @value 1 - @value 2.p, @value 1 - @value 2.y, @value 1 - @value 2.r)")
-Component:AddInlineOperator( "-", "an,a", "a", "Angle( @value 1.p - @value 2.p, @value 1.y - @value 2.y, @value 1.r - @value 2.r)")
+Component:AddInlineOperator( "-", "a,a", "a", "Angle( @value 1.p - @value 2.p, @value 1.y - @value 2.y, @value 1.r - @value 2.r)")
 
 Component:AddInlineOperator( "*", "a,n", "a", "Angle( @value 1.p * @value 2, @value 1.y * @value 2, @value 1.r * @value 2)")
 Component:AddInlineOperator( "*", "n,a", "a", "Angle( @value 1 * @value 2.p, @value 1 * @value 2.y, @value 1 * @value 2.r)")

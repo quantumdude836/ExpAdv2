@@ -365,6 +365,9 @@ end)
 
 Component:AddFunctionHelper( "applyTorque", "e:v", "Applies a vector torque force to an entity." )
 
+Component:AddPreparedFunction( "noCollideAll", "e:b", "", "if(@value 1:IsValid() && EXPADV.PPCheck(Context.player,@value 1)) then @value 1:SetCollisionGroup(@value 2 and $COLLISION_GROUP_WORLD or $COLLISION_GROUP_NONE) end")
+Component:AddFunctionHelper( "noCollideAll", "e:b", "Disables all collisions." )
+
 /* --- --------------------------------------------------------------------------------
 	@: Misc
    --- */
