@@ -429,8 +429,24 @@ if CLIENT then
 		end
 	end )
 	
+
+	Component.InRender = false
+	Component.DrawingSkybox = false
+	
+	hook.Add( "PreDrawSkyBox", "expadv.skyboxfix", function( )
+		Component.DrawingSkybox = true
+	end )
+
+	hook.Add( "PostDrawSkyBox", "expadv.skyboxfix.", function( )
+		Component.DrawingSkybox = false
+	end )
+
 	hook.Add( "PostDrawOpaqueRenderables", "expadv.postdraw", function( DrawingDepth, DrawingSkybox )
 		if !EXPADV.IsLoaded or bDrawingDepth or bDrawingSkybox then return end
+
+		if Component.InRender or Component.DrawingSkybox then return end
+
+		Component.InRender= true
 
 		for _, Context in pairs( EXPADV.CONTEXT_REGISTERY ) do
 			if !Context.Online then continue end
@@ -441,6 +457,8 @@ if CLIENT then
 				Context:Execute( "Event draw3D", Context.event_draw3D )
 			end
 		end
+
+		Component.InRender = false
 	end)
 	
 	/* -----------------------------------------------------------------------------------

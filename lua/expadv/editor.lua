@@ -53,8 +53,7 @@ end )
 ---------------------------------------------------------------------------*/
 local HomeScreen = [[
 /*----------------------------------------------------
-    Welcome to Expression Advanced 2 - Alpha:
- Your old Lemon-Gate code is outdated and won't work.
+ Expression Advanced 2:
 ----------------------------------------------------*/
  
 //Define Variables:
@@ -74,7 +73,7 @@ local HomeScreen = [[
     }
  
 /*----------------------------------------------------
-    Your code now runs on the server and client.
+    Code now runs on the server and client.
 ----------------------------------------------------*/
  
 //Define serverside code:
