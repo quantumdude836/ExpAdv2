@@ -50,10 +50,10 @@ Component:AddPreparedOperator( "*", "q,q", "q", [[
 	@define BR, BI, BJ, BK = @value 2.r, @value 2.i, @value 2.j, @value 2.k
 
 	@define Quat = Quaternion(
-		@value 1R * @BR - @value 1I * @BI - @value 1J * @BJ - @value 1K * @BK,
-		@value 1R * @BI + @value 1I * @BR + @value 1J * @BK - @value 1K * @BJ,
-		@value 1R * @BJ + @value 1J * @BR + @value 1K * @BI - @value 1I * @BK,
-		@value 1R * @BK + @value 1K * @BR + @value 1I * @BJ - @value 1J * @BI
+		@AR * @BR - @AI * @BI - @AJ * @BJ - @AK * @BK,
+		@AR * @BI + @AI * @BR + @AJ * @BK - @AK * @BJ,
+		@AR * @BJ + @AJ * @BR + @AK * @BI - @AI * @BK,
+		@AR * @BK + @AK * @BR + @AI * @BJ - @AJ * @BI
 	)
 ]], "@Quat" )
 
@@ -62,10 +62,10 @@ Component:AddPreparedOperator( "*", "q,v", "q", [[
 	@define BI, BJ, BK = @value 2.x, @value 2.y, @value 2.z
 
 	@define Quat = Quaternion(
-		-@value 1I * @BI - @value 1J * @BJ - @value 1K * @BK,
-		 @value 1R * @BI + @value 1J * @BK - @value 1K * @BJ,
-		 @value 1R * @BJ + @value 1K * @BI - @value 1I * @BK,
-		 @value 1R * @BK + @value 1I * @BJ - @value 1J * @BI
+		-@AI * @BI - @AJ * @BJ - @AK * @BK,
+		 @AR * @BI + @AJ * @BK - @AK * @BJ,
+		 @AR * @BJ + @AK * @BI - @AI * @BK,
+		 @AR * @BK + @AI * @BJ - @AJ * @BI
 	)
 ]], "@Quat" )
 
@@ -74,10 +74,10 @@ Component:AddPreparedOperator( "*", "v,q", "q", [[
 	@define BI, BJ, BK = @value 1.x, @value 1.y, @value 1.z
 
 	@define Quat = Quaternion(
-		-@value 1I * @BI - @value 1J * @BJ - @value 1K * @BK,
-		 @value 1R * @BI + @value 1J * @BK - @value 1K * @BJ,
-		 @value 1R * @BJ + @value 1K * @BI - @value 1I * @BK,
-		 @value 1R * @BK + @value 1I * @BJ - @value 1J * @BI
+		-@value 1.i * @BI - @value 1.j * @BJ - @value 1.k * @BK,
+		 @value 1.r * @BI + @value 1.j * @BK - @value 1.k * @BJ,
+		 @value 1.r * @BJ + @value 1.k * @BI - @value 1.i * @BK,
+		 @value 1.r * @BK + @value 1.i * @BJ - @value 1.j * @BI
 	)
 ]], "@Quat" )
 
@@ -86,10 +86,10 @@ Component:AddPreparedOperator( "/", "n,q", "q", [[
 	@define Div = @value 1R * @value 1R + @value 1I * @value 1I + @value 1J * @value 1J + @value 1K * @value 1K
 
 	@define Quat = Quaternion(
-		(@value 1 / @value 1R) / @Div, 
-		(-@value 1 / @value 1I) / @Div, 
-		(-@value 1 / @value 1J) / @Div, 
-		(-@value 1 / @value 1K) / @Div
+		(@value 1 / @value 1.r) / @Div, 
+		(-@value 1 / @value 1.i) / @Div, 
+		(-@value 1 / @value 1.j) / @Div, 
+		(-@value 1 / @value 1.k) / @Div
 	)
 ]], "@Quat" )
 
@@ -99,10 +99,10 @@ Component:AddPreparedOperator( "/", "q,q", "q", [[
 	@define Div = @BR * @BR + @BI * @BI + @BJ * @BJ + @BK * @BK
 
 	@define Quat = Quaternion(
-		( @value 1R * @BR + @value 1I * @BI + @value 1J * @BJ + @value 1K * @BK) / @Div,
-		(-@value 1R * @BI + @value 1I * @BR - @value 1J * @BK + @value 1K * @BJ) / @Div,
-		(-@value 1R * @BJ + @value 1J * @BR - @value 1K * @BI + @value 1I * @BK) / @Div,
-		(-@value 1R * @BK + @value 1K * @BR - @value 1I * @BJ + @value 1J * @BI) / @Div
+		( @value 1.r * @BR + @value 1.i * @BI + @value 1.j * @BJ + @value 1.k * @BK) / @Div,
+		(-@value 1.r * @BI + @value 1.i * @BR - @value 1.j * @BK + @value 1.k * @BJ) / @Div,
+		(-@value 1.r * @BJ + @value 1.j * @BR - @value 1.k * @BI + @value 1.i * @BK) / @Div,
+		(-@value 1.r * @BK + @value 1.k * @BR - @value 1.i * @BJ + @value 1.j * @BI) / @Div
 	)
 ]], "@Quat" )
 
