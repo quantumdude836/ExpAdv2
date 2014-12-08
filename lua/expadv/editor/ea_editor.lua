@@ -403,8 +403,8 @@ function PANEL:SetArea( selection, text, isundo, isredo, before, after )
 end
 
 function PANEL:SelectAll( )
-	self.Caret = Vector2( #self.Rows, #self.Rows[#self.Rows] + 1 )
-	self.Start = Vector2( 1, 1 )
+	self.Start = Vector2( #self.Rows, #self.Rows[#self.Rows] + 1 )
+	self.Caret = Vector2( 1, 1 )
 	self:ScrollCaret( )
 end
 
@@ -1105,6 +1105,42 @@ function PANEL:OnMouseReleased( code )
 			Menu:AddOption( "Paste", function( ) 
 				self.TextEntry:Paste( ) 
 			end ) 
+			
+			if self:HasSelection() then 
+				Menu:AddSpacer( )
+				
+				Menu:AddOption( "Comment", function( ) 
+					local minPos = nil
+					for i = (self.Caret.x > self.Start.x and self.Start.x or self.Caret.x), (self.Start.x > self.Caret.x and self.Start.x or self.Caret.x) do
+						local pos = string.find( self.Rows[i], "[!-}]" )
+						if !pos then continue end
+						if !minPos || minPos > pos then minPos = pos end
+						self.Rows[i] = string.sub( self.Rows[i], 0, minPos-1 ) .. "//" .. string.sub(self.Rows[i], minPos)
+					end
+					local caret, scroll = self.Caret, self.Scroll
+					self:SetCode( self:GetCode() )
+					self.Caret = caret
+					self.Start = caret
+					self.Scroll = scroll
+					self.ScrollBar:SetScroll( self.Scroll.x - 1 )
+					self.hScrollBar:SetScroll( self.Scroll.y - 1 )
+				end )
+				
+				Menu:AddOption( "Uncomment", function( ) 
+					for i = (self.Caret.x > self.Start.x and self.Start.x or self.Caret.x), (self.Start.x > self.Caret.x and self.Start.x or self.Caret.x) do
+						local pos = string.find( self.Rows[i], "//" )
+						if !pos then continue end
+						self.Rows[i] = string.sub( self.Rows[i], 0, pos-1 ) .. string.sub( self.Rows[i], pos + 2 )
+					end
+					local caret, scroll = self.Caret, self.Scroll
+					self:SetCode( self:GetCode() )
+					self.Caret = caret
+					self.Start = caret
+					self.Scroll = scroll
+					self.ScrollBar:SetScroll( self.Scroll.x - 1 )
+					self.hScrollBar:SetScroll( self.Scroll.y - 1 )
+				end )
+			end
 			
 			Menu:AddSpacer( ) 
 			

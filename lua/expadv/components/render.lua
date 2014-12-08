@@ -349,7 +349,7 @@ Component:AddFunctionHelper( "canRenderToHUD", "", "Returns true if this entity 
 
 /* --- --------------------------------------------------------------------------------
 	@: 3D
-	@: Author: Ripmax
+	@: Author: Ripmax, Szymekk
    --- */
    
 EXPADV.ClientOperators()
@@ -378,7 +378,11 @@ Component:AddFunctionHelper("draw3DQuad", "", "Draws 3D quad.")
 Component:AddPreparedFunction("draw3DBeam", "v,v,n,n,n,c", "", "$render.DrawBeam(@value 1, @value 2, @value 3, @value 4, @value 5, @value 6)")
 Component:AddFunctionHelper("draw3DBeam", "", "Draws 3D beam.")
 
-Component:AddPreparedFunction("draw3DModel", "s,v,a", "", "$render.Model({['model'] = @value 1, ['pos'] = @value 2, ['angle'] = @value 3})")
+Component:AddPreparedFunction("draw3DModel", "s,v,a", "", [[
+if $string.sub(@value 1, 0, 1) != "*" then
+	$render.Model({['model'] = @value 1, ['pos'] = @value 2, ['angle'] = @value 3})
+end
+]])
 Component:AddFunctionHelper("draw3DModel", "", "Draws 3D model.")
 
 Component:AddPreparedFunction("start3D2D", "v,a", "", "$cam.Start3D2D(@value 1, @value 2, 1)")
