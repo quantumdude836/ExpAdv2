@@ -24,11 +24,11 @@ if CPPI then
 
 		if Friend == Player then return true end
 
-		local Friends = Owner:CPPIGetFriends( )
+		local Friends = Player:CPPIGetFriends( )
 
 		if type( Friends ) == "table" then 
-			for _, Friend in pairs( Friends ) do
-				if Friend == Player then return true end
+			for _, _Friend in pairs( Friends ) do
+				if _Friend == Friend then return true end
 			end
 		end
 
