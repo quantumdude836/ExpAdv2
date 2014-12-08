@@ -199,3 +199,11 @@ function Editor.Validate( Script )
 		return Editor.Instance:DoValidate( nil, nil, Script )
 	end
 end
+
+/*---------------------------------------------------------------------------
+	Reset position command
+---------------------------------------------------------------------------*/ 
+concommand.Add( "expadv_editor_repos", function( )
+	Editor.GetInstance( ):SetPos(10, 10)
+	Editor.GetInstance( ):SetSize(ScrW() - 20, ScrH() - 20)
+end )

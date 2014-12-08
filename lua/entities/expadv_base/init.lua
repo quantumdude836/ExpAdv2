@@ -43,7 +43,7 @@ function ENT:LoadCodeFromPackage( Root, Files )
 	self:SendClientPackage( nil, self.root, self.files )
 	
 	hook.Add( "PlayerInitialSpawn", self, function( self, Ply )
-		self:SendClientPackage( Ply, self.root, self.files )
+		timer.Simple(5, function( ) self:SendClientPackage( Ply, self.root, self.files ) end)
 	end )
 end
 
