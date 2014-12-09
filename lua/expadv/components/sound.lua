@@ -27,7 +27,7 @@ local function stopSound(Context, Index, Fade)
 		Context.Data.Sound[Index] = nil
 	end
 	
-	Context.Data.SoundCount = Context.Data.SoundCount + 1
+	Context.Data.SoundCount = Context.Data.SoundCount - 1
 end
 
 local function playSound(Context, Ent, Duration, Index, Fade, File)
