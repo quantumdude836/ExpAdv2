@@ -24,7 +24,6 @@ AddCSLuaFile( "expadv/compiler/main.lua" )
 AddCSLuaFile( "expadv/compiler/tokenizer.lua" )
 AddCSLuaFile( "expadv/compiler/parser.lua" )
 AddCSLuaFile( "expadv/compiler/instructions.lua" )
-
 AddCSLuaFile( "expadv/api/gcompute.lua" )
 
 AddCSLuaFile( "includes/modules/von.lua" )
@@ -52,4 +51,5 @@ AddCSLuaFile( "expadv/editor.lua" )
 AddCSLuaFile( "expadv/editor/shared.lua" )
 AddCSLuaFile( "expadv/editor/manual.lua" )
 
+AddCSLuaFile( "expadv/ver.lua" )
 resource.AddWorkshop( "323792126" )

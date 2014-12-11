@@ -746,7 +746,7 @@ end
 	@: Updates.
    --- */
 
-EXPADV.Ver = tonumber(file.Read("expadv/ver.lua", "LUA")) or 0
+EXPADV.Ver = tonumber(file.Read("expadv/ver.lua", "LUA") or 0) or 0
 
 if SERVER then CreateConVar( "expadv2_ver", EXPADV.Ver, FCVAR_NOTIFY ) end
 
