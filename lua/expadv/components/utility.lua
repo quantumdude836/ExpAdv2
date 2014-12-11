@@ -278,11 +278,11 @@ Component:AddVMFunction( "convertUnit", "s,s,n", "n",
 
 EXPADV.SharedOperators( )
 
-Component:AddPreparedFunction( "sortByDistanceVectors", "ar,v", "", [[
-	if @value 1.__type ~= "v" then self:Throw( @trace, "invoke", "sortByDistanceEntitys #1, entity array exspected." ) end
+Component:AddPreparedFunction( "sortVectorsByDistance", "ar,v", "", [[
+	if @value 1.__type ~= "v" then self:Throw( @trace, "invoke", "sortVectorsByDistance #1, entity array exspected." ) end
 	$table.sort( @value 1,
 		function( A, B )
-			return A:Distance( @value2 ) < B:Distance( @value2 )
+			return A:Distance( @value 2 ) < B:Distance( @value 2 )
 		end )
 	]])
 

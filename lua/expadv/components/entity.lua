@@ -524,11 +524,11 @@ for _, Ent in pairs( $ents.FindInCone( @value 2, @value 3, @value 4, @value 5)) 
 	end
 end]], "@Results" )
 
-Component:AddPreparedFunction( "sortByDistanceEntitys", "ar,v", "", [[
-if @value 1.__type ~= "e" then self:Throw( @trace, "invoke", "sortByDistanceEntitys #1, entity array exspected." ) end
+Component:AddPreparedFunction( "sortEntitiesByDistance", "ar,v", "", [[
+if @value 1.__type ~= "e" then self:Throw( @trace, "invoke", "sortEntitiesByDistance #1, entity array exspected." ) end
 $table.sort( @value 1,
 	function( A, B )
-		return A:GetPos():Distance( @value2 ) < B:GetPos():Distance( @value2 )
+		return A:GetPos():Distance( @value 2 ) < B:GetPos():Distance( @value 2 )
 	end )
 ]])
 

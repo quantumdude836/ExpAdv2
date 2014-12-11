@@ -217,7 +217,16 @@ function ENT:RenderScreen( )
 		surface.SetDrawColor( 255, 255, 255, 255 )
 		surface.SetTextColor( 0, 0, 0, 255 )
 		
+		Context.In2DRender = true
+		Context.Matrixes = 0
+
 		Context:Execute( "Event drawScreen", Event, 512, 512 )
+
+		for i=1, Context.Matrixes do
+			cam.PopModelMatrix( )
+		end
+
+		Context.In2DRender = false
 
 	cam.End2D( )
 
