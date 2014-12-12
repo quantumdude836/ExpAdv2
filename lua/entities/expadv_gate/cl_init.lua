@@ -15,6 +15,8 @@ local function Shorten( Num )
     return math.Round(Num / 1000000000, 3) .. "b" -- Lets hope we never reach the billions :D
 end
 
+EXPADV.Shorten = Shorten
+
 local Mult = 1.25
 local TextColor = Color( 0, 0, 0 )
 

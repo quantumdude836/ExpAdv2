@@ -97,8 +97,8 @@ end
    --- */
 
 -- Registers a new Feature on this component.
-function BaseComponent:AddFeature( Name, Description ) -- String, String
-	EXPADV.AddFeature( self, Name, Description )
+function BaseComponent:AddFeature( Name, Description, Icon ) -- String, String
+	EXPADV.AddFeature( self, Name, Description, Icon )
 end
 
 /* --- --------------------------------------------------------------------------------

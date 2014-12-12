@@ -49,3 +49,28 @@ function ENT:OnClientLoaded( Ply )
 		end
 	-- end )
 end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Pod Connectivity
+   --- */
+
+function ENT:LinkPod(Pod)
+	if !IsValid(Pos) or !Pod:IsVehicle() then return end
+
+	--if IsValid(self:GetLinkedPod()) then
+	--	self:UnlinkPod()
+	--end
+
+	self:SetLinkedPod(Pod)
+end
+
+hook.Add( "Expadv.BuildDupeInfo", "expadv.pod", function( Ent, DupeTable )
+	if !Ent.GetLinkedPod then return end
+	DupeTable.Pod = Ent:GetLinkedPod()
+end )
+
+hook.Add( "Expadv.PasteDupeInfo", "expadv.pod", function( Ent, DupeTable, FromID )
+	if !Ent.SetLinkedPod then return end
+	if !DupeTable.Pod then return end
+	Ent:LinkPod(FromID(DupeTable.Pod))
+end )

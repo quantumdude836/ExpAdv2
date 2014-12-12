@@ -9,6 +9,7 @@ if CLIENT then
 	language.Add( "Tool.expadv2.desc", "Creates an ingame scriptable entity." )
 	language.Add( "Tool.expadv2.help", "Place an Expression Advanced Gate or screen." )
 	language.Add( "Tool.expadv2.0", "Place an Expession Advanced Gate or screen." )
+	language.Add( "Tool.expadv2.1", "Pod selected. Right click an Expression advanced entity to link it." )
 	
 	language.Add( "limit_expadv", "Expression Advanced Entity limit reached." )
 	language.Add( "Undone_expadv", "Expression Advanced - Removed." )
@@ -139,6 +140,8 @@ duplicator.RegisterEntityClass( "expadv_screen", MakeExpadvScreen, "Pos", "Ang",
    --- */
 
 function TOOL:LeftClick( Trace )
+	
+
 	if IsValid( Trace.Entity ) then -- and EXPADV.IsFriend( Trace.Entity, self:GetOwner( ) ) then
 		if Trace.Entity.ExpAdv and SERVER then
 			net.Start( "expadv.request" )
@@ -199,17 +202,28 @@ end
    --- */
 
 function TOOL:RightClick( Trace )
-	if CLIENT then return false end
-
-	if IsValid( Trace.Entity ) and Trace.Entity.ExpAdv then -- and EXPADV.IsFriend( Trace.Entity, self:GetOwner( ) ) then
+	if CLIENT then
+		return
+	elseif !IsValid(Trace.Entity) or self:GetOwner():EyePos():Distance( Trace.Entity:GetPos() ) > 156 then
+		-- Do nothing.
+	elseif self:GetStage() == 0 and Trace.Entity:IsVehicle() then
+		self:SetStage(1)
+		self.TargetPod = Trace.Entity
+		return true
+	elseif self:GetStage() == 0 and Trace.Entity.ExpAdv then
 		net.Start( "expadv.download" )
 		net.WriteUInt( Trace.Entity:EntIndex( ), 16 )
 		net.WriteString( Trace.Entity:GetGateName( ) )
 		net.Send( self:GetOwner( ) )
 		return true
+	elseif self:GetStage() == 1 and Trace.Entity.ExpAdv then
+		Trace.Entity:LinkPod(self.TargetPod)
+		self:SetStage(0)
+		return true
 	end
 
 	self:GetOwner( ):SendLua( "EXPADV.Editor.Open( )" )
+
 	return false
 end
 

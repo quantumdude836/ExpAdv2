@@ -245,7 +245,7 @@ EXPADV.ClientOperators()
 
 Component:AddVMFunction( "playURL", "s,s,d,d", "", 
 	function( Context, Trace, URL, Flags, Sucess, Fail )
-		if !IsValid(Context.entity) or !Context.entity.EnableSoundURL then return end
+		if !IsValid(Context.entity) or !EXPADV.CanAccessFeature(Context.entity, "Sounds from url") then return end
 
 		sound.PlayURL( URL, Flags,
 			function( Channel, Er_ID, Er_Name ) 
@@ -270,13 +270,14 @@ Component:AddEvent( "enableSoundsFromURL", "", "" )
 Component:AddEvent( "disableSoundsFromURL", "", "" )
 
 /* -----------------------------------------------------------------------------------
-	@: Context Menu
+	@: WIP Features.
    --- */
+
+Component:AddFeature( "Sounds from url", "Stream audio via url feeds.", "fugue/speaker-volume.png" )
 
 if CLIENT then
 
 	local function DisableSounds( Entity )
-		Entity.EnableSoundURL = false
 		Entity:CallEvent( "disableSoundsFromURL" )
 
 		local Context = Entity.Context
@@ -290,27 +291,17 @@ if CLIENT then
 		Context.Data.AudioCount = 0
 	end
 
-	local function EnableSounds( Entity )
-		Entity.EnableSoundURL = true
-		Entity:CallEvent( "enableSoundsFromURL" )
-	end
-
-	function Component:OnOpenContextMenu( Entity, Menu, Trace, Option )
-		if Entity.EnableSoundURL then
-			Menu:AddOption( "Disable sounds from external sources", function( )
-				DisableSounds( Entity )
-			end )
+	function Component:OnChangeFeatureAccess(Entity, Feature, Value)
+		if Feature ~= "Sounds from url" then return end
+		
+		if Value then
+			Entity:CallEvent( "enableSoundsFromURL" )
 		else
-			Menu:AddOption( "Enable sounds from external sources", function( ) 
-				EnableSounds( Entity )
-			end )
+			DisableSounds( Entity )
 		end
 	end
+
+	hook.Add( "Expadv.UnregisterContext", "expadv.soundurl", function( Context )
+		DisableSounds(Context.entity)
+	end )
 end
-
-/* -----------------------------------------------------------------------------------
-	@: WIP Features.
-   --- */
-
-Component:AddFeature( "Sounds from url", "Stream audio via url feeds." )
-

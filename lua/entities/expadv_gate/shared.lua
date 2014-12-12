@@ -30,6 +30,8 @@ function ENT:SetupDataTables( )
 	self:NetworkVar( "Float", 4, "ServerCompletion" )
 
 	self:NetworkVar( "String", 0, "GateName" )
+
+	self:NetworkVar( "Entity", 0, "LinkedPod" )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------

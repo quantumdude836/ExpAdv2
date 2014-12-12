@@ -43,8 +43,12 @@ function ENT:LoadCodeFromPackage( Root, Files )
 	self:SendClientPackage( nil, self.root, self.files )
 	
 	hook.Add( "PlayerInitialSpawn", self, function( self, Ply )
-		timer.Simple(5, function( ) self:SendClientPackage( Ply, self.root, self.files ) end)
+		timer.Simple(5, function( ) self:InitPlayer(Ply) end)
 	end )
+end
+
+function ENT:InitPlayer(Ply)
+	self:SendClientPackage( Ply, self.root, self.files ) 
 end
 
 function ENT:ReceivePackage( Package )
