@@ -136,24 +136,21 @@ Component:AddFunctionHelper( "canAccessFiles", "", "Returns true if this entity 
 	@: WIP Features.
    --- */
 
-Component:AddFeature( "file access", "Read and save files." )
+Component:AddFeature( "file access", "Read and save files.", "fugue/blue-folder-horizontal-open.png" )
 
 EXPADV.SharedEvents( )
 Component:AddEvent( "disableFileAccess", "", "" )
 Component:AddEvent( "enableFileAccess", "", "" )
 
 if CLIENT then
-	function Component:OnOpenContextMenu( Entity, Menu, Trace, Option )
-			if Entity.EnableFileAccess then
-				Menu:AddOption( "Disable clientside file access.", function( )
-					Entity.EnableFileAccess = false
-					Entity:CallEvent( "disableFileAccess" )
-				end )
+	function Component:OnChangeFeatureAccess(Entity, Feature, Value)
+		if Feature == "file access" then
+			if Value then
+				Entity:CallEvent( "enableFileAccess" )
 			else
-				Menu:AddOption( "Enable clientside file access.", function( ) 
-					Entity.EnableFileAccess = true
-					Entity:CallEvent( "enableFileAccess" )
-				end )
+				Entity:CallEvent( "disableFileAccess" )
 			end
+		end
 	end
 end
+

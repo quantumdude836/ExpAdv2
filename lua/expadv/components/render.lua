@@ -347,48 +347,108 @@ Component:AddFunctionHelper( "isVisible", "v", "Returns true if the vectors posi
 Component:AddInlineFunction( "canRenderToHUD", "", "b", "(IsValid(Context.entity) and Context.entity.EnableHUD)" )
 Component:AddFunctionHelper( "canRenderToHUD", "", "Returns true if this entity can render to clientside HUD." )
 
-/* --- --------------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------------
+	@: Matrix class
+	@: Author: Szymekk
+   --- */
+
+
+local Class = Component:AddClass("matrix", "mx")
+
+Class:AddPreparedOperator("=", "n,mx", "", "Context.Memory[@value 1] = @value 2")
+
+Class:MakeClientOnly( )
+
+Component:AddInlineFunction("matrix", "", "mx", "$Matrix()")
+Component:AddFunctionHelper("matrix", "", "Returns new matrix object.")
+
+Component:AddPreparedFunction("matrix", "v,a,v", "mx", [[
+@define Matrix = $Matrix()
+@Matrix:SetTranslation(@value 1 or $Vector(0,0,0))
+@Matrix:SetAngles(@value 2 or $Angle(0,0,0))
+@Matrix:Scale(@value 3 or $Vector(1,1,1))
+]], "@Matrix")
+EXPADV.AddFunctionAlias("matrix", "v")
+EXPADV.AddFunctionAlias("matrix", "v,a")
+EXPADV.AddFunctionAlias("matrix", "v,a,v")
+Component:AddFunctionHelper("matrix", "v", "Returns new matrix object (translation).")
+Component:AddFunctionHelper("matrix", "v,a", "Returns new matrix object (translation, angles).")
+Component:AddFunctionHelper("matrix", "v,a,v", "Returns new matrix object (translation, angles, scale).")
+
+Component:AddPreparedFunction("translate", "mx:v", "", "@value 1:Translate(@value 2)")
+Component:AddPreparedFunction("setTranslation", "mx:v", "", "@value 1:SetTranslation(@value 2)")
+
+Component:AddPreparedFunction("rotate", "mx:a", "", "@value 1:Rotate(@value 2)")
+Component:AddPreparedFunction("setAngles", "mx:a", "", "@value 1:SetAngles(@value 2)")
+
+Component:AddPreparedFunction("scale", "mx:v", "", "@value 1:Scale(@value 2)")
+Component:AddPreparedFunction("setScale", "mx:v", "", "@value 1:SetScale(@value 2)")
+
+
+Component:AddPreparedFunction("pushMatrix", "mx", "", [[
+if Context.In2DRender || Context.In3DRender then
+	Context.Matrixes = Context.Matrixes + 1
+	$cam.PushModelMatrix(@value 1)
+end
+]])
+
+Component:AddPreparedFunction("popMatrix", "", "", [[
+if (Context.In2DRender || Context.In3DRender) && Context.Matrixes > 0 then
+	Context.Matrixes = Context.Matrixes - 1
+	$cam.PopModelMatrix()
+end
+]])
+
+/* -----------------------------------------------------------------------------------
 	@: 3D
 	@: Author: Ripmax, Szymekk
    --- */
-   
-EXPADV.ClientOperators()
 
 Component:AddInlineFunction("fov", "", "n", "$LocalPlayer():GetFOV()")
-Component:AddFunctionHelper("fov", "n", "Gets FOV of local player.")
+Component:AddFunctionHelper("fov", "", "Gets FOV of local player.")
 
 Component:AddPreparedFunction("setRenderMat", "s", "", [[$render.SetMaterial($Material(@value 1))]])
-Component:AddFunctionHelper("setRenderMat", "", "Sets the material of the rendered objects.")
+Component:AddFunctionHelper("setRenderMat", "s", "Sets the material of the rendered objects.")
 
 Component:AddPreparedFunction("draw3DLine", "v,v,c", "", "$render.DrawLine(@value 1, @value 2, @value 3, true)")
-Component:AddFunctionHelper("draw3DLine", "", "Draws 3D line (start, end, color).")
+Component:AddFunctionHelper("draw3DLine", "v,v,c", "Draws 3D line (start, end, color).")
 
 Component:AddPreparedFunction("draw3DBox", "v,a,v,v,c", "", "$render.DrawBox(@value 1, @value 2, @value 3, @value 4, @value 5, true)")
-Component:AddFunctionHelper("draw3DBox", "", "Draws 3D box (position, angle, mins, maxs, color).")
+Component:AddFunctionHelper("draw3DBox", "v,a,v,v,c", "Draws 3D box (position, angle, mins, maxs, color).")
 
 Component:AddPreparedFunction("draw3DSphere", "v,n,n,n,c", "", "$render.DrawSphere(@value 1, @value 2, @value 3, @value 4, @value 5)")
-Component:AddFunctionHelper("draw3DSphere", "", "Draws 3D sphere.")
+Component:AddFunctionHelper("draw3DSphere", "v,n,n,n,c", "Draws 3D sphere.")
 
 Component:AddPreparedFunction("draw3DQuadEasy", "v,v,n,n,c,n", "", "$render.DrawQuadEasy(@value 1, @value 2, @value 3, @value 4, @value 5, @value 6)")
-Component:AddFunctionHelper("draw3DQuadEasy", "", "Draws 3D quad.")
+Component:AddFunctionHelper("draw3DQuadEasy", "v,v,n,n,c,n", "Draws 3D quad.")
 
 Component:AddPreparedFunction("draw3DQuad", "v,v,v,v,c", "", "$render.DrawQuad(@value 1, @value 2, @value 3, @value 4, @value 5)")
-Component:AddFunctionHelper("draw3DQuad", "", "Draws 3D quad.")
+Component:AddFunctionHelper("draw3DQuad", "v,v,v,v,c", "Draws 3D quad.")
 
 Component:AddPreparedFunction("draw3DBeam", "v,v,n,n,n,c", "", "$render.DrawBeam(@value 1, @value 2, @value 3, @value 4, @value 5, @value 6)")
-Component:AddFunctionHelper("draw3DBeam", "", "Draws 3D beam.")
+Component:AddFunctionHelper("draw3DBeam", "v,v,n,n,n,c", "Draws 3D beam (startPos, endPos, width, height, texStart, texEnd, color).")
 
 Component:AddPreparedFunction("draw3DModel", "s,v,a", "", [[
 if $string.sub(@value 1, 0, 1) != "*" then
 	$render.Model({['model'] = @value 1, ['pos'] = @value 2, ['angle'] = @value 3})
 end
 ]])
-Component:AddFunctionHelper("draw3DModel", "", "Draws 3D model.")
+Component:AddFunctionHelper("draw3DModel", "s,v,a", "Draws 3D model (model, position, angle).")
 
-Component:AddPreparedFunction("start3D2D", "v,a", "", "$cam.Start3D2D(@value 1, @value 2, 1)")
-Component:AddPreparedFunction("start3D2D", "v,a,n", "", "$cam.Start3D2D(@value 1, @value 2, @value 3)")
+Component:AddPreparedFunction("start3D2D", "v,a,n", "", [[
+if Context.In3DRender then
+	Context.Cams = Context.Cams + 1
+	$cam.Start3D2D(@value 1, @value 2, @value 3 or 1)
+end
+]])
+EXPADV.AddFunctionAlias("start3D2D", "v,a")
 
-Component:AddPreparedFunction("end3D2D", "", "", "$cam.End3D2D()")
+Component:AddPreparedFunction("end3D2D", "", "", [[
+if Context.In3DRender && Context.Cams > 0 then
+	Context.Cams = Context.Cams - 1
+	$cam.End3D2D()
+end
+]])
 
 /* -----------------------------------------------------------------------------------
 	@: Hud Event
@@ -418,14 +478,14 @@ if CLIENT then
 			
 			if !IsValid(Context.entity) then continue end
 			
-			if(Context.entity.EnableHUD && Context.event_drawHUD) then
+			if(Context.event_drawHUD && EXPADV.CanAccessFeature(Context.entity, "HUD rendering")) then
 				surface.SetDrawColor( 255, 255, 255, 255 )
 				surface.SetTextColor( 0, 0, 0, 255 )
 				
 				Context:Execute( "Event drawHUD", Context.event_drawHUD, W, H )
 			end
 			
-			if(Context.entity.Enable3D && Context.event_draw3DOverlay) then
+			if(Context.event_draw3DOverlay && EXPADV.CanAccessFeature(Context.entity, "3D Overlay")) then
 				cam.Start3D(EyePos(), EyeAngles())
 					Context:Execute("Event draw3DOverlay", Context.event_draw3DOverlay)
 				cam.End3D()
@@ -457,7 +517,7 @@ if CLIENT then
 			
 			if !IsValid( Context.entity ) then continue end
 			
-			if(Context.entity.Enable3D && Context.event_draw3D) then
+			if(Context.event_draw3D && EXPADV.CanAccessFeature(Context.entity, "3d rendering")) then
 				Context:Execute( "Event draw3D", Context.event_draw3D )
 			end
 		end
@@ -465,46 +525,29 @@ if CLIENT then
 		Component.InRender = false
 	end)
 	
-	/* -----------------------------------------------------------------------------------
-		@: Enable HUD/3D Rendering
-	   --- */
-	
-	function Component:OnOpenContextMenu( Entity, Menu, Trace, Option )
-		if !Entity.Context then return end
-
-		if(Entity.Context.event_drawHUD) then
-			if(Entity.EnableHUD) then
-				Menu:AddOption( "Disable HUD Rendering", function( )
-					Entity.EnableHUD = false
-					Entity:CallEvent( "disableHUDRendering" )
-				end )
-			else
-				Menu:AddOption( "Enable HUD Rendering", function( )
-					Entity.EnableHUD = true
-					Entity:CallEvent( "enableHUDRendering" )
-				end )
-			end
-		end
-		
-		if(Entity.Context.event_draw3D || Entity.Context.event_draw3DOverlay) then
-			if(Entity.Enable3D) then
-				Menu:AddOption( "Disable 3D Rendering", function( )
-					Entity.Enable3D = false
-					Entity:CallEvent( "disable3DRendering" )
-				end )
-			else
-				Menu:AddOption( "Enable 3D Rendering", function( )
-					Entity.Enable3D = true
-					Entity:CallEvent( "enable3DRendering" )
-				end )
-			end
-		end
-	end
 end
 
 /* -----------------------------------------------------------------------------------
 	@: WIP Features.
    --- */
 
-Component:AddFeature( "HUD rendering", "Drawing directly onto your heads up display." )
-Component:AddFeature( "3d rendering", "Rendering 3d objects such as sprites in world." )
+Component:AddFeature( "HUD rendering", "Drawing directly onto your heads up display.", "fugue/monitor-window-3d.png" )
+Component:AddFeature( "3d rendering", "Rendering 3d objects such as sprites in world.", "fugue/fire.png" )
+
+if CLIENT then
+	function Component:OnChangeFeatureAccess(Entity, Feature, Value)
+		if Feature == "HUD rendering" then
+			if Value then
+				Entity:CallEvent( "enableHUDRendering" )
+			else
+				Entity:CallEvent( "disableHUDRendering" )
+			end
+		elseif Feature == "3d rendering" then
+			if Value then
+				Entity:CallEvent( "enable3DRendering" )
+			else
+				Entity:CallEvent( "disable3DRendering" )
+			end
+		end
+	end
+end
