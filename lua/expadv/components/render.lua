@@ -352,12 +352,11 @@ Component:AddFunctionHelper( "canRenderToHUD", "", "Returns true if this entity 
 	@: Author: Szymekk
    --- */
 
+EXPADV.SharedOperators()
 
 local Class = Component:AddClass("matrix", "mx")
 
 Class:AddPreparedOperator("=", "n,mx", "", "Context.Memory[@value 1] = @value 2")
-
-Class:MakeClientOnly( )
 
 Component:AddInlineFunction("matrix", "", "mx", "$Matrix()")
 Component:AddFunctionHelper("matrix", "", "Returns new matrix object.")
@@ -370,31 +369,51 @@ Component:AddPreparedFunction("matrix", "v,a,v", "mx", [[
 ]], "@Matrix")
 EXPADV.AddFunctionAlias("matrix", "v")
 EXPADV.AddFunctionAlias("matrix", "v,a")
-EXPADV.AddFunctionAlias("matrix", "v,a,v")
 Component:AddFunctionHelper("matrix", "v", "Returns new matrix object (translation).")
 Component:AddFunctionHelper("matrix", "v,a", "Returns new matrix object (translation, angles).")
 Component:AddFunctionHelper("matrix", "v,a,v", "Returns new matrix object (translation, angles, scale).")
 
+Component:AddPreparedFunction("matrix", "v2,n,v2", "mx", [[
+@define Matrix = $Matrix()
+@Matrix:SetTranslation($Vector(@value 1.x,@value 1.y,0))	
+@Matrix:SetAngles($Angle(0,@value 2 or 0,0))
+@define Vec = @value 3 or $Vector2(1,1)
+@Matrix:Scale($Vector(@Vec.x,@Vec.y,1))
+]], "@Matrix")
+EXPADV.AddFunctionAlias("matrix", "v2") 	
+EXPADV.AddFunctionAlias("matrix", "v2,n")
+Component:AddFunctionHelper("matrix", "v2,a,v2", "Returns new matrix object (translation, angle, scale).")
+
 Component:AddPreparedFunction("translate", "mx:v", "", "@value 1:Translate(@value 2)")
+Component:AddPreparedFunction("translate", "mx:v2", "", "@value 1:Translate($Vector(@value 2.x,@value 2.y,1))")
 Component:AddPreparedFunction("setTranslation", "mx:v", "", "@value 1:SetTranslation(@value 2)")
+Component:AddPreparedFunction("setTranslation", "mx:v2", "", "@value 1:SetTranslation($Vector(@value 2.x,@value 2.y,1))")
+Component:AddInlineFunction("getTranslation", "mx:", "v", "@value 1:GetTranslation()")
 
 Component:AddPreparedFunction("rotate", "mx:a", "", "@value 1:Rotate(@value 2)")
+Component:AddPreparedFunction("rotate", "mx:n", "", "@value 1:Rotate($Angle(0,@value 2,0))")
 Component:AddPreparedFunction("setAngles", "mx:a", "", "@value 1:SetAngles(@value 2)")
+Component:AddPreparedFunction("setAngle", "mx:n", "", "@value 1:SetAngles($Angle(0,@value 2,0))")
+Component:AddInlineFunction("getAngles", "mx:", "a", "@value 1:GetAngles()")
 
 Component:AddPreparedFunction("scale", "mx:v", "", "@value 1:Scale(@value 2)")
+Component:AddPreparedFunction("scale", "mx:v2", "", "@value 1:Scale($Vector(@value 2.x,@value 2.y,1))")
 Component:AddPreparedFunction("setScale", "mx:v", "", "@value 1:SetScale(@value 2)")
+Component:AddPreparedFunction("setScale", "mx:v2", "", "@value 1:SetScale($Vector(@value 2.x,@value 2.y,1))")
+Component:AddInlineFunction("getScale", "mx:", "v", "@value 1:GetScale()")
 
+EXPADV.ClientOperators()
 
 Component:AddPreparedFunction("pushMatrix", "mx", "", [[
 if Context.In2DRender || Context.In3DRender then
-	Context.Matrixes = Context.Matrixes + 1
+	Context.Matrices = Context.Matrices + 1
 	$cam.PushModelMatrix(@value 1)
 end
 ]])
 
 Component:AddPreparedFunction("popMatrix", "", "", [[
-if (Context.In2DRender || Context.In3DRender) && Context.Matrixes > 0 then
-	Context.Matrixes = Context.Matrixes - 1
+if (Context.In2DRender || Context.In3DRender) && Context.Matrices > 0 then
+	Context.Matrices = Context.Matrices - 1
 	$cam.PopModelMatrix()
 end
 ]])
@@ -479,15 +498,33 @@ if CLIENT then
 			if !IsValid(Context.entity) then continue end
 			
 			if(Context.event_drawHUD && EXPADV.CanAccessFeature(Context.entity, "HUD rendering")) then
+				Context.In2DRender = true
+				Context.Matrices = 0
+
 				surface.SetDrawColor( 255, 255, 255, 255 )
 				surface.SetTextColor( 0, 0, 0, 255 )
 				
 				Context:Execute( "Event drawHUD", Context.event_drawHUD, W, H )
+
+				for i=1, Context.Matrices do
+					cam.PopModelMatrix( )
+				end
+
+				Context.In2DRender = false
 			end
 			
-			if(Context.event_draw3DOverlay && EXPADV.CanAccessFeature(Context.entity, "3D Overlay")) then
+			if(Context.event_draw3DOverlay && EXPADV.CanAccessFeature(Context.entity, "3D rendering")) then
 				cam.Start3D(EyePos(), EyeAngles())
+					Context.In2DRender = true
+					Context.Matrices = 0
+
 					Context:Execute("Event draw3DOverlay", Context.event_draw3DOverlay)
+
+					for i=1, Context.Matrices do
+						cam.PopModelMatrix( )
+					end
+
+					Context.In2DRender = false
 				cam.End3D()
 			end
 		end
@@ -517,8 +554,22 @@ if CLIENT then
 			
 			if !IsValid( Context.entity ) then continue end
 			
-			if(Context.event_draw3D && EXPADV.CanAccessFeature(Context.entity, "3d rendering")) then
+			if(Context.event_draw3D && EXPADV.CanAccessFeature(Context.entity, "3D rendering")) then
+				Context.In3DRender = true
+				Context.Matrices = 0
+				Context.Cams = 0
+
 				Context:Execute( "Event draw3D", Context.event_draw3D )
+
+				for i=1, Context.Matrices do
+					cam.PopModelMatrix( )
+				end
+
+				for i=1, Context.Cams do
+					cam.End3D2D()
+				end
+
+				Context.In3DRender = false
 			end
 		end
 
@@ -532,7 +583,7 @@ end
    --- */
 
 Component:AddFeature( "HUD rendering", "Drawing directly onto your heads up display.", "fugue/monitor-window-3d.png" )
-Component:AddFeature( "3d rendering", "Rendering 3d objects such as sprites in world.", "fugue/fire.png" )
+Component:AddFeature( "3D rendering", "Rendering 3D objects such as sprites in world.", "fugue/fire.png" )
 
 if CLIENT then
 	function Component:OnChangeFeatureAccess(Entity, Feature, Value)
@@ -542,7 +593,7 @@ if CLIENT then
 			else
 				Entity:CallEvent( "disableHUDRendering" )
 			end
-		elseif Feature == "3d rendering" then
+		elseif Feature == "3D rendering" then
 			if Value then
 				Entity:CallEvent( "enable3DRendering" )
 			else

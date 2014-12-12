@@ -218,11 +218,11 @@ function ENT:RenderScreen( )
 		surface.SetTextColor( 0, 0, 0, 255 )
 		
 		Context.In2DRender = true
-		Context.Matrixes = 0
+		Context.Matrices = 0
 
 		Context:Execute( "Event drawScreen", Event, 512, 512 )
 
-		for i=1, Context.Matrixes do
+		for i=1, Context.Matrices do
 			cam.PopModelMatrix( )
 		end
 

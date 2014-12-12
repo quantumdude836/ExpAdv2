@@ -217,7 +217,7 @@ Component:AddPreparedFunction( "setVolume", "ac:n", "", [[if !IsValid( @value 1)
 @value 1:SetVolume(@value 2 * 0.01)]] )
 Component:AddFunctionHelper( "setVolume", "ac:n", "Sets the volume of a sound channel" )
 
-Component:AddInlineFunction( "canPlayFromURL", "", "b", "(IsValid(Context.entity) and Context.entity.EnableSoundURL)" )
+Component:AddInlineFunction( "canPlayFromURL", "", "b", [[EXPADV.CanAccessFeature(Context.entity, "Sounds from url")]] )
 Component:AddFunctionHelper( "canPlayFromURL", "", "Returns true if this entity can play audio from url." )
 
 
