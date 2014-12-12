@@ -418,14 +418,14 @@ if CLIENT then
 			
 			if !IsValid(Context.entity) then continue end
 			
-			if(Context.event_drawHUD && EXPADV.CanAccessFeature(Context.entity, "HUD rendering")) then
+			if(Context.entity.EnableHUD && Context.event_drawHUD) then
 				surface.SetDrawColor( 255, 255, 255, 255 )
 				surface.SetTextColor( 0, 0, 0, 255 )
 				
 				Context:Execute( "Event drawHUD", Context.event_drawHUD, W, H )
 			end
 			
-			if(Context.event_draw3DOverlay && EXPADV.CanAccessFeature(Context.entity, "3D Overlay")) then
+			if(Context.entity.Enable3D && Context.event_draw3DOverlay) then
 				cam.Start3D(EyePos(), EyeAngles())
 					Context:Execute("Event draw3DOverlay", Context.event_draw3DOverlay)
 				cam.End3D()
@@ -457,7 +457,7 @@ if CLIENT then
 			
 			if !IsValid( Context.entity ) then continue end
 			
-			if(Context.event_draw3D && EXPADV.CanAccessFeature(Context.entity, "3d rendering")) then
+			if(Context.entity.Enable3D && Context.event_draw3D) then
 				Context:Execute( "Event draw3D", Context.event_draw3D )
 			end
 		end
@@ -465,6 +465,41 @@ if CLIENT then
 		Component.InRender = false
 	end)
 	
+	/* -----------------------------------------------------------------------------------
+		@: Enable HUD/3D Rendering
+	   --- */
+	
+	function Component:OnOpenContextMenu( Entity, Menu, Trace, Option )
+		if !Entity.Context then return end
+
+		if(Entity.Context.event_drawHUD) then
+			if(Entity.EnableHUD) then
+				Menu:AddOption( "Disable HUD Rendering", function( )
+					Entity.EnableHUD = false
+					Entity:CallEvent( "disableHUDRendering" )
+				end )
+			else
+				Menu:AddOption( "Enable HUD Rendering", function( )
+					Entity.EnableHUD = true
+					Entity:CallEvent( "enableHUDRendering" )
+				end )
+			end
+		end
+		
+		if(Entity.Context.event_draw3D || Entity.Context.event_draw3DOverlay) then
+			if(Entity.Enable3D) then
+				Menu:AddOption( "Disable 3D Rendering", function( )
+					Entity.Enable3D = false
+					Entity:CallEvent( "disable3DRendering" )
+				end )
+			else
+				Menu:AddOption( "Enable 3D Rendering", function( )
+					Entity.Enable3D = true
+					Entity:CallEvent( "enable3DRendering" )
+				end )
+			end
+		end
+	end
 end
 
 /* -----------------------------------------------------------------------------------
@@ -473,11 +508,3 @@ end
 
 Component:AddFeature( "HUD rendering", "Drawing directly onto your heads up display." )
 Component:AddFeature( "3d rendering", "Rendering 3d objects such as sprites in world." )
-
-if CLIENT then
-	function Component:OnChangeFeatureAccess(Entity, Feature, Value)
-		if Feature == "HUD rendering" then
-			
-		end
-	end
-end
