@@ -74,3 +74,4 @@ hook.Add( "Expadv.PasteDupeInfo", "expadv.pod", function( Ent, DupeTable, FromID
 	if !DupeTable.Pod then return end
 	Ent:LinkPod(FromID(DupeTable.Pod))
 end )
+
