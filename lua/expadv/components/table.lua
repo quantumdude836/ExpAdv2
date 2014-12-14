@@ -68,6 +68,15 @@ Component:AddInlineFunction( "type", "t:n", "s", "EXPADV.TypeName(@value 1.Types
 Component:AddInlineFunction( "type", "t:s", "s", "EXPADV.TypeName(@value 1.Types[@value 2])" )
 Component:AddInlineFunction( "type", "t:e", "s", "EXPADV.TypeName(@value 1.Types[@value 2])" )
 
+Component:AddPreparedFunction("connect", "t:t", "t", [[
+@value 1.Size = @value 1.Size + @value 2.Size
+@value 1.Count = @value 1.Count + @value 2.Count
+for I=1,#@value 1.Data,1 do
+	@value 1.Data[#@value 1.Data+1] = @value 2.Data[I]
+	@value 1.Types[#@value 1.Types+1] = @value 2.Types[I]
+end
+]],"@value 1")
+
 Component:AddFunctionHelper( "type", "t:n", "Returns the type of obect stored in table at index." )
 Component:AddFunctionHelper( "type", "t:s", "Returns the type of obect stored in table at index." )
 Component:AddFunctionHelper( "type", "t:e", "Returns the type of obect stored in table at index." )
@@ -79,6 +88,8 @@ Component:AddInlineFunction( "exists", "t:e", "b", "(@value 1.Types[@value 2] ~=
 Component:AddFunctionHelper( "exists", "t:n", "Returns true if obect stored in table at index is not void." )
 Component:AddFunctionHelper( "exists", "t:s", "Returns true if obect stored in table at index is not void." )
 Component:AddFunctionHelper( "exists", "t:e", "Returns true if obect stored in table at index is not void." )
+
+Component:AddFunctionHelper("connect", "t:t", "Connects one table with another table.")
 
 /* --- --------------------------------------------------------------------------------
 	@: Unpack to vararg

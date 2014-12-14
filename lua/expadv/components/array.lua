@@ -43,6 +43,16 @@ Component:AddPreparedFunction( "remove", "ar:n", "vr", [[
 if @value 1[@value 2] == nil then Context.Throw(@trace, "array", "array reach index " .. @value 2 .. " returned void" ) end
 ]], "{$table.remove(@value 1, @value 2), @value 1.__type}" )
 
+Component:AddPreparedFunction("connect", "ar:ar", "ar", [[
+if @value 1.__type == @value 2.__type then
+	for k,v in pairs(@value 2) do
+		if v == @value 2.__type then continue end
+		@value 1[#@value 1+1] = v
+	end
+else Context.Throw(@trace, "array", "array type missmatch, " .. EXPADV.TypeName(@value 1.__type) .. " expected got " .. EXPADV.TypeName(@value 2.__type)) end
+]],"@value 1")
+Component:AddFunctionHelper("connect", "ar:ar", "Connects one array with another array.")
+
 /* --- --------------------------------------------------------------------------------
 	@: Unpack to vararg
    --- */

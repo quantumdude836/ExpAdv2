@@ -344,7 +344,7 @@ Component:AddFunctionHelper( "toScreen", "v", "Translates the vectors position i
 Component:AddInlineFunction( "isVisible", "v", "b", "@value 1:ToScreen( ).visible" )
 Component:AddFunctionHelper( "isVisible", "v", "Returns true if the vectors position is in clients view." )
 
-Component:AddInlineFunction( "canRenderToHUD", "", "b", "(IsValid(Context.entity) and Context.entity.EnableHUD)" )
+Component:AddInlineFunction( "canRenderToHUD", "", "b", [[EXPADV.CanAccessFeature(Context.entity, "HUD rendering")]] )
 Component:AddFunctionHelper( "canRenderToHUD", "", "Returns true if this entity can render to clientside HUD." )
 
 /* -----------------------------------------------------------------------------------
@@ -385,7 +385,7 @@ EXPADV.AddFunctionAlias("matrix", "v2,n")
 Component:AddFunctionHelper("matrix", "v2,a,v2", "Returns new matrix object (translation, angle, scale).")
 
 Component:AddPreparedFunction("translate", "mx:v", "", "@value 1:Translate(@value 2)")
-Component:AddPreparedFunction("translate", "mx:v2", "", "@value 1:Translate($Vector(@value 2.x,@value 2.y,1))")
+Component:AddPreparedFunction("translate", "mx:v2", "", "@value 1:Translate($Vector(@value 2.x,@value 2.y,0))")
 Component:AddPreparedFunction("setTranslation", "mx:v", "", "@value 1:SetTranslation(@value 2)")
 Component:AddPreparedFunction("setTranslation", "mx:v2", "", "@value 1:SetTranslation($Vector(@value 2.x,@value 2.y,1))")
 Component:AddInlineFunction("getTranslation", "mx:", "v", "@value 1:GetTranslation()")
@@ -422,6 +422,9 @@ end
 	@: 3D
 	@: Author: Ripmax, Szymekk
    --- */
+
+Component:AddInlineFunction( "canRender3D", "", "b", [[EXPADV.CanAccessFeature(Context.entity, "3D rendering")]] )
+Component:AddFunctionHelper( "canRender3D", "", "Returns true if this entity can render clientside 3D." )
 
 Component:AddInlineFunction("fov", "", "n", "$LocalPlayer():GetFOV()")
 Component:AddFunctionHelper("fov", "", "Gets FOV of local player.")
