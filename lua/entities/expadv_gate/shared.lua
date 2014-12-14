@@ -217,3 +217,13 @@ function ENT:NotifiOwner( Message, Type, Duration )
 	
 	EXPADV.Notifi( self.player, Message, Type, Duration )
 end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Pod Connectivity
+   --- */
+
+hook.Add( "Expadv.PreLoadFunctions", "expadv.features",
+	function( )
+		EXPADV.SharedOperators( )
+		EXPADV.AddInlineFunction( nil, "getLinkedPod", "", "e", "(Context.entity:GetLinkedPod() or $Entity(0))")
+	end )

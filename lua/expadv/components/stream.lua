@@ -70,6 +70,13 @@ Component:AddVMFunction( "writeVector", "st:v", "", function( Context, Trace, St
 	Stream.T[Stream.W] = "v"
 end )
 
+Component:AddVMFunction( "writeVector2", "st:v2", "", function( Context, Trace, Stream, Obj )
+	Stream.W = Stream.W + 1
+	if Stream.W >= 128 then Context:Throw( Trace, "stream", "Failed to write vector to stream, maxamum stream size achived (128)" ) end
+	Stream.V[Stream.W] = {Obj.x, Obj.y}
+	Stream.T[Stream.W] = "v2"
+end )
+
 Component:AddVMFunction( "writeAngle", "st:a", "", function( Context, Trace, Stream, Obj )
 	Stream.W = Stream.W + 1
 	if Stream.W >= 128 then Context:Throw( Trace, "stream", "Failed to write angle to stream, maxamum stream size achived (128)" ) end
@@ -161,6 +168,19 @@ Component:AddVMFunction( "readVector", "st:", "v", function( Context, Trace, Str
 	end
 
 	return Stream.V[Stream.R]
+end )
+
+Component:AddVMFunction( "readVector2", "st:", "v2", function( Context, Trace, Stream )
+	Stream.R = Stream.R + 1
+	
+	if !Stream.T[Stream.R] then
+		Context:Throw( Trace, "stream", "Failed to read vector2 from stream, stream returned void." )
+	elseif Stream.T[Stream.R] ~= "v2" then
+		Context:Throw( Trace, "stream", "Failed to read vector2 from stream, stream returned " .. EXPADV.TypeName( Stream.T[Stream.R] )  .. "." )
+	end
+
+	local Obj = Stream.V[Stream.R]
+	return Vector2(Obj[1], Obj[2])
 end )
 
 Component:AddVMFunction( "readAngle", "st:", "a", function( Context, Trace, Stream )
