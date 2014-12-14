@@ -43,7 +43,7 @@ function ENT:LoadCodeFromPackage( Root, Files )
 	self:SendClientPackage( nil, self.root, self.files )
 	
 	hook.Add( "PlayerInitialSpawn", self, function( self, Ply )
-		timer.Simple(5, function( ) self:InitPlayer(Ply) end)
+		timer.Simple(5, function( ) if IsValid(Ply) then self:InitPlayer(Ply) end end)
 	end )
 end
 
@@ -69,7 +69,7 @@ function ENT:SendClientPackage( Player, Root, Files )
 
 	-- Package:String( self:GetGateName( ) )
 
-	if IsValid(Player) then
+	if Player then
 		Package:AddTargets( { Player } ) 
 
 		Package:Send( )
