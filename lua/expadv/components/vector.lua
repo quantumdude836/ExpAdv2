@@ -225,6 +225,13 @@ Component:AddFunctionHelper( "round", "v:", "Returns rounded vector." )
 Component:AddInlineFunction( "abs", "v:", "v", "Vector(math.abs(@value 1.x), math.abs(@value 1.y), math.abs(@value 1.z))" )
 Component:AddFunctionHelper( "abs", "v:", "Returns vector with absolute values." )
 
+Component:AddInlineFunction( "clamp", "v:n,n", "v", "Vector(math.Clamp(@value 1.x, @value 2, @value 3), math.Clamp(@value 1.y, @value 2, @value 3), math.Clamp(@value 1.z, @value 2, @value 3))" )
+Component:AddFunctionHelper( "clamps", "v:n,n", "Clamps a vector." )
+
+Component:AddInlineFunction( "clamp", "v:v,v", "v", "Vector(math.Clamp(@value 1.x, @value 2.x, @value 3.x), math.Clamp(@value 1.y, @value 2.y, @value 3.y), math.Clamp(@value 1.z, @value 2.z, @value 3.z))" )
+Component:AddFunctionHelper( "clamps", "v:v,v", "Clamps a vector." )
+
+
 /* --- --------------------------------------------------------------------------------
     @: Headings
    --- */
@@ -406,6 +413,12 @@ Component:AddFunctionHelper( "floor", "v2:", "Returns floored vector." )
 
 Component:AddInlineFunction( "round", "v2:", "v2", "Vector2((@value 1.x - (@value 1.x + 0.5) @modulus 1 + 0.5), (@value 1.y - (@value 1.y + 0.5) @modulus 1 + 0.5))" )
 Component:AddFunctionHelper( "round", "v2:", "Returns rounded vector." )
+
+Component:AddInlineFunction( "clamp", "v2:n,n", "v2", "Vector2(math.Clamp(@value 1.x, @value 2, @value 3), math.Clamp(@value 1.y, @value 2, @value 3))" )
+Component:AddFunctionHelper( "clamps", "v2:n,n", "Clamps a vector." )
+
+Component:AddInlineFunction( "clamp", "v2:v2,v2", "v2", "Vector2(math.Clamp(@value 1.x, @value 2.x, @value 3.x), math.Clamp(@value 1.y, @value 2.y, @value 3.y))" )
+Component:AddFunctionHelper( "clamps", "v2:v2,v2", "Clamps a vector." )
 
 /* --- --------------------------------------------------------------------------------
 	  @: Accessors
