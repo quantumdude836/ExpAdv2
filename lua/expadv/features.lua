@@ -313,20 +313,6 @@ if CLIENT then
 			EntBtn:SetTooltip(string.format("%s: %s", Feature, Info.Description or ""))
 			EntBtn:Dock(RIGHT)
 
-			if Owner ~= LocalPlayer() then
-				local PlyBtn = PlayerPanel:Add("DImageButton")
-				PlyBtn:SetSize(20,20)
-				PlyBtn:SetImage(EXPADV.GetAccessToFeature( Owner, Feature ) and "fugue/tick.png" or "fugue/cross-script.png")
-				PlyBtn:SetTooltip(string.format("%s: %s", Feature, Info.Description or ""))
-				PlyBtn:Dock(RIGHT)
-			end
-
-			local GlobBtn = GlobalPanel:Add("DImageButton")
-			GlobBtn:SetSize(20,20)
-			GlobBtn:SetImage(EXPADV.GetGlobalAccessToFeature( Feature ) and "fugue/tick.png" or "fugue/cross-script.png")
-			GlobBtn:SetTooltip(string.format("%s: %s", Feature, Info.Description or ""))
-			GlobBtn:Dock(RIGHT)
-
 			function EntBtn.DoClick()
 				local Value = !EXPADV.GetAcessToFeatureForEntity( Entity, Feature )
 				EXPADV.SetAcessToFeatureForEntity( Entity, Feature, Value )
@@ -335,6 +321,12 @@ if CLIENT then
 			end
 
 			if Owner ~= LocalPlayer() then
+				local PlyBtn = PlayerPanel:Add("DImageButton")
+				PlyBtn:SetSize(20,20)
+				PlyBtn:SetImage(EXPADV.GetAccessToFeature( Owner, Feature ) and "fugue/tick.png" or "fugue/cross-script.png")
+				PlyBtn:SetTooltip(string.format("%s: %s", Feature, Info.Description or ""))
+				PlyBtn:Dock(RIGHT)
+
 				function PlyBtn.DoClick()
 					local Value = !EXPADV.GetAccessToFeature( Owner, Feature )
 					EXPADV.SetAccessToFeature( Owner, Feature, Value )
@@ -347,6 +339,12 @@ if CLIENT then
 					end
 				end
 			end
+
+			local GlobBtn = GlobalPanel:Add("DImageButton")
+			GlobBtn:SetSize(20,20)
+			GlobBtn:SetImage(EXPADV.GetGlobalAccessToFeature( Feature ) and "fugue/tick.png" or "fugue/cross-script.png")
+			GlobBtn:SetTooltip(string.format("%s: %s", Feature, Info.Description or ""))
+			GlobBtn:Dock(RIGHT)
 
 			function GlobBtn.DoClick()
 				local Value = !EXPADV.GetGlobalAccessToFeature( Feature )
