@@ -157,7 +157,7 @@ Component:AddGeneratedFunction( "max", "n,n,n,n,n", "n", function( Operator, Com
     end
   end
 
-  local LuaInline = string.format( "math.max(%s)", Type, table.concat( Values, "," ) )
+  local LuaInline = string.format( "math.max(%s)", table.concat( Values, "," ) )
 
   return { Trace = Trace, Inline = LuaInline, Prepare = table.concat( Prep, "\n" ), Return = "n", FLAG = EXPADV_INLINEPREPARE }
 end )
@@ -186,7 +186,7 @@ Component:AddGeneratedFunction( "min", "n,n,n,n,n", "n", function( Operator, Com
     end
   end
 
-  local LuaInline = string.format( "math.min(%s)", Type, table.concat( Values, "," ) )
+  local LuaInline = string.format( "math.min(%s)", table.concat( Values, "," ) )
 
   return { Trace = Trace, Inline = LuaInline, Prepare = table.concat( Prep, "\n" ), Return = "n", FLAG = EXPADV_INLINEPREPARE }
 end )
