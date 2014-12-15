@@ -704,7 +704,13 @@ function Compiler:Compile_FUNC( Trace, Variable, Expressions )
 
 			if EXPADV.Functions[ Match ] then BestMatch = EXPADV.Functions[ Match ] end
 
-			Signature = Signature .. Expressions[I].Return
+			local Return = Expressions[I].Return
+
+			if !Return then
+				self:TraceError( Trace, "Invalid argument #%i value is void", I )
+			end
+
+			Signature = Signature .. Return
 		end
 
 		local Operator = EXPADV.Functions[ string.format( "%s(%s)", Variable, Signature ) ] or BestMatch
@@ -736,7 +742,13 @@ function Compiler:Compile_METHOD( Trace, Expression, Method, Expressions, bNoErr
 
 			if EXPADV.Functions[ Match ] then BestMatch = EXPADV.Functions[ Match ] end
 
-			Signature = Signature .. Expressions[I].Return
+			local Return = Expressions[I].Return
+
+			if !Return then
+				self:TraceError( Trace, "Invalid argument #%i value is void", I )
+			end
+
+			Signature = Signature .. Return
 		end
 
 		-- MsgN( "Looking for: ", string.format( "%s(%s)", Method, Signature ) )
@@ -770,14 +782,15 @@ function Compiler:Compile_RETURN( Trace, Expression )
 	local Optional = self.ReturnOptional[ self.ReturnDeph ]
 	local Expected = self.ReturnTypes[ self.ReturnDeph ]
 
-	if !Expression then
-		if Optional or !Expected then return Quick( "return nil, \"void\"" ) end
-		self:TraceError( Trace, "Can not return void here, %s expected.", self:NiceClass( Expected ) )
-	end
+	if Expected and Expected == "void" then Expected = nil end
 
-	if Expected and Expression.Return ~= Expected then
+	if (Optional or !Expected) and !Expression then
+		return Quick( "return nil, \"void\"" )
+	elseif !Expression then
+		self:TraceError( Trace, "Can not return %s here, void expected.", self:NiceClass( Expected ) )
+	elseif Expected and Expression.Return ~= Expected then
 		self:TraceError( Trace, "Can not return %s here, %s expected.", self:NiceClass( Expression.Return, Expected ) )
-	end
+	end 
 
 	--if !Expected and Expression.Return ~= "_vr" then
 	--	Expression = self:Compile_CAST( Trace, "variant", Expression )

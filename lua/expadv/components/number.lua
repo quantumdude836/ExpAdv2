@@ -222,8 +222,8 @@ Component:AddFunctionHelper( "ceil", "n,n", "Rounds (number) to the nearest inte
 Component:AddInlineFunction( "round", "n", "n", "(@value 1 - (@value 1 + 0.5) @modulus 1 + 0.5)" )
 Component:AddFunctionHelper( "round", "n", "Rounds the specified number." )
 
-Component:AddPreparedFunction( "round", "n,n", "", [[
-@define A = 10 ^ math.floor(value @2 + 0.5)
+Component:AddPreparedFunction( "round", "n,n", "n", [[
+@define A = 10 ^ math.floor(@value 2 + 0.5)
 ]] , "(math.floor(@value 1 * @A + 0.5) / @A)")
 Component:AddFunctionHelper( "round", "n,n", "Rounds the specified number." )
 
