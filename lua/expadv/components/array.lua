@@ -74,9 +74,15 @@ Component:AddFunctionHelper( "unpack", "ar,n", "Unpacks an array to a vararg, st
 
 function Component:OnPostRegisterClass( Name, Class )
 
-	EXPADV.SharedOperators( )
-
 	if Name == "generic" or Name == "function" or Name == "class" then return end
+
+	if Class.LoadOnServer and Class.LoadOnClient then
+		EXPADV.SharedOperators( )
+	elseif Class.LoadOnServer then
+		EXPADV.LoadOnClient( )
+	elseif Class.LoadOnServer then
+		EXPADV.ClientOperators( )
+	end
 
 /* ---	--------------------------------------------------------------------------------
 	@: Get Operator

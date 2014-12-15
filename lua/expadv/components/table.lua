@@ -336,6 +336,14 @@ function Component:OnPostRegisterClass( Name, Class )
 
 	if Name == "generic" or Name == "variant" or Name == "function" or Name == "class" then return end
 
+	if Class.LoadOnServer and Class.LoadOnClient then
+		EXPADV.SharedOperators( )
+	elseif Class.LoadOnServer then
+		EXPADV.LoadOnClient( )
+	elseif Class.LoadOnServer then
+		EXPADV.ClientOperators( )
+	end
+	
 	/* --- --------------------------------------------------------------------------------
 		@: Get Operators
    	   --- */

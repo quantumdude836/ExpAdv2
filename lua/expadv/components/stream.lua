@@ -326,13 +326,31 @@ do --- Net component: used to sync from server to client :D
 
 	EXPADV.ServerOperators( )
 
+	Component:CreateSetting( "queuesize", 5 )
+
 	Component:AddVMFunction( "netBroadcast", "nst:s", "", function( Context, Trace, Stream, Name )
+		local NetMessages = (Context.Data.NetMessages or 0)
+		
+		if NetMessages + 1 > Component:ReadSetting("queuesize", 5) then
+			Context:Throw(Trace, "stream", "Maxamum queue size reached.")
+		end
+
+		Context.Data.NetMessages = NetMessages + 1
+
 		table.insert( NetQueue, { Context.entity, Name, Stream } ) -- Slow but meh!
 		HasQueued = true
 	end )
 
 	Component:AddVMFunction( "netBroadcast", "nst:ply,s", "", function( Context, Trace, Stream, Player, Name )
 		if !IsValid( Player ) or !Player:IsPlayer( ) then return end
+
+		local NetMessages = (Context.Data.NetMessages or 0)
+		
+		if NetMessages + 1 > Component:ReadSetting("queuesize", 5) then
+			Context:Throw(Trace, "stream", "Maxamum queue size reached.")
+		end
+
+		Context.Data.NetMessages = NetMessages + 1
 
 		table.insert( NetQueue, { Context.entity, Name, Stream, { Player } } ) -- Slow but meh!
 		HasQueued = true
@@ -345,6 +363,15 @@ do --- Net component: used to sync from server to client :D
 	EXPADV.ClientOperators( )
 	
 	Component:AddVMFunction( "sendToServer", "nst:s", "", function( Context, Trace, Stream, Name )
+
+		local NetMessages = (Context.Data.NetMessages or 0)
+		
+		if NetMessages + 1 > Component:ReadSetting("queuesize", 5) then
+			Context:Throw(Trace, "stream", "Maxamum queue size reached.")
+		end
+
+		Context.Data.NetMessages = NetMessages + 1
+
 		table.insert( NetQueue, { Context.entity, Name, Stream } ) -- Slow but meh!
 		HasQueued = true
 	end )
@@ -381,6 +408,8 @@ do --- Net component: used to sync from server to client :D
 						net.WriteTable( S.T )
 						net.WriteTable( S.V )
 					if !P then net.Broadcast( ) else net.Send( P ) end
+
+					E.Context.Data.NetMessages = nil
 				end
 			end
 
@@ -403,6 +432,8 @@ do --- Net component: used to sync from server to client :D
 						net.WriteTable( S.T )
 						net.WriteTable( S.V )
 					net.SendToServer()
+
+					E.Context.Data.NetMessages = nil
 				end
 			end
 
