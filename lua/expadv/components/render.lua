@@ -33,7 +33,11 @@ Component.ValidFonts = {
 	["TargetID"] = true,
 	["TargetIDSmall"] = true,
 	["HL2MPTypeDeath"] = true,
-	["BudgetLabel"] = true
+	["BudgetLabel"] = true,
+	["HL2MPTypeDeath"] = true,
+	["DermaDefault"] = true,
+	["DermaDefaultBold"] = true,
+	["DermaLarge"] = true
 }
 
 Component.CreatedFonts = { }
@@ -42,8 +46,8 @@ function Component.CreateFont( Base, Size )
 	local FontName = string.format( "expadv_%s_%i", Base, Size )
 	if Component.CreatedFonts[FontName] then return FontName end
 	
-	if !Component.ValidFonts[BaseFont] then
-		BaseFont = "default"
+	if !Component.ValidFonts[Base] then
+		Base = "default"
 		FontName = string.format( "expadv_default_%i", Size )
 		if Component.CreatedFonts[FontName] then return FontName end
 	end

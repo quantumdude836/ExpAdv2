@@ -62,12 +62,22 @@ EXPADV.AddInlineOperator( nil, "delegate", "f", "d", "@value 1" )
 
 EXPADV.AddInlineOperator( nil, "function", "d", "f", "@value 1" )
 
-EXPADV.AddPreparedOperator( nil, "call", "f,s,...", "_vr", [[
-	@define Return, Type = @value 1( Context, @...)
-	if @value 2 and @Type ~= @value 2 and !(@value 2 == "void" and !@Return) then
-		Context:Throw( @trace, "invoke", string.format( "Invalid return value, %s expected got %s", @value 2, @Type ) )
-	end
-]], "@Return" )
+EXPADV.AddVMOperator( nil, "call", "f,s,...", "_vr",
+	function(Context, Trace, Function, rExpect, ...)
+		local rType, rValue = Function(Context, ...)
+
+		if (!rExpect or rExpect == "void") and (!rType or rType == "void") then
+			return -- VOID!
+		elseif rExpect == "void" then
+			Context:Throw( Rrace, "invoke", "Invalid return value, void expected got " .. EXPADV.TypeName(rType))
+		elseif rType == "void" then
+			Context:Throw( Rrace, "invoke", "Invalid return value, " .. EXPADV.TypeName(rExpect) .. " expected got void")
+		elseif rExpect ~= rType then
+			Context:Throw( Rrace, "invoke", string.format("Invalid return value, %s expected got %s", EXPADV.TypeName(rExpect, rType)))
+		end
+
+		return rValue
+	end)
 
 EXPADV.AddGeneratedFunction( nil, "invoke", "cls,d,...", "",
 	function( Operator, Compiler, Trace, ... )
