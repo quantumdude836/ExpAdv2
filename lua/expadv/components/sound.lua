@@ -98,6 +98,8 @@ SoundObject:AddPreparedOperator( "=", "n,ac", "", "Context.Memory[@value 1] = @v
 
 SoundObject:MakeClientOnly( )
 
+SoundObject:DefaultAsLua( nil )
+
 Component:AddInlineOperator( "is", "ac", "b", "IsValid(@value 1)" )
 Component:AddInlineOperator( "not", "ac", "b", "!IsValid(@value 1)" )
 
@@ -106,20 +108,22 @@ Component:AddInlineOperator( "not", "ac", "b", "!IsValid(@value 1)" )
 	@: Methods
    --- */
 
+Component:AddInlineFunction( "isValid", "ac:", "b", "IsValid(@value 1)" )
+
 Component:AddPreparedFunction( "hasStopped", "ac:", "b", [[if !IsValid( @value 1) then Context:Throw( @trace, "audio channel", "Recieved invalid audio channel." ) end]], 
-"(@value 1:GetSamplingRate( ) == $GMOD_CHANNEL_STOPPED)" )
+"(@value 1:GetState( ) == $GMOD_CHANNEL_STOPPED)" )
 Component:AddFunctionHelper( "isStopped", "ac:", "Returns true is the audio channel has stopped." )
 
 Component:AddPreparedFunction( "isPlaying", "ac:", "b", [[if !IsValid( @value 1) then Context:Throw( @trace, "audio channel", "Recieved invalid audio channel." ) end]], 
-"(@value 1:GetSamplingRate( ) == $GMOD_CHANNEL_PLAYING)" )
+"(@value 1:GetState( ) == $GMOD_CHANNEL_PLAYING)" )
 Component:AddFunctionHelper( "isPlaying", "ac:", "Returns true is the audio channel is playing." )
 
 Component:AddPreparedFunction( "isPaused", "ac:", "b", [[if !IsValid( @value 1) then Context:Throw( @trace, "audio channel", "Recieved invalid audio channel." ) end]], 
-"(@value 1:GetSamplingRate( ) == $GMOD_CHANNEL_PAUSED)" )
+"(@value 1:GetState( ) == $GMOD_CHANNEL_PAUSED)" )
 Component:AddFunctionHelper( "isPaused", "ac:", "Returns true is the audio channel is paused." )
 
 Component:AddPreparedFunction( "hasStalled", "ac:", "b", [[if !IsValid( @value 1) then Context:Throw( @trace, "audio channel", "Recieved invalid audio channel." ) end]], 
-"(@value 1:GetSamplingRate( ) == $GMOD_CHANNEL_STALLED)" )
+"(@value 1:GetState( ) == $GMOD_CHANNEL_STALLED)" )
 Component:AddFunctionHelper( "hasStalled", "ac:", "Returns true is the audio channel has stalled." )
 
 Component:AddPreparedFunction( "enableLooping", "ac:b", "", [[if !IsValid( @value 1) then Context:Throw( @trace, "audio channel", "Recieved invalid audio channel." ) end

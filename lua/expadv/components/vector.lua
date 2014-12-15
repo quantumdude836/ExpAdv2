@@ -443,8 +443,8 @@ Component:AddFunctionHelper( "setY", "v2:n", "Sets the Y value of a vector2" )
    --- */
 
 Component:AddInlineFunction( "dot", "v2:v2", "n", "@value 1:Dot(@value 2)" )
-Component:AddInlineFunction( "normal", "v2:", "v2", "@value 1:Normalize(@value 2)" )
-Component:AddInlineFunction( "length", "v2:", "n", "@value 1:Length(@value 2)" )
+Component:AddInlineFunction( "normal", "v2:v2", "v2", "@value 1:Normalize(@value 2)" )
+Component:AddInlineFunction( "length", "v2:v2", "n", "@value 1:Length(@value 2)" )
 Component:AddInlineFunction( "cross", "v2:v2", "v2", "@value 1:Cross(@value 2)" )
 Component:AddInlineFunction( "distance", "v2:v2", "n", "@value 1:Distance(@value 2)" )
 

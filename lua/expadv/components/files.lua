@@ -39,7 +39,7 @@ local function GetValidPath( Context, Path )
 
 	if CLIENT and Context.player == LocalPlayer() then
 		Root = "expadv2/files"
-	elseif SERVER or Context.entity.EnableFileAccess then
+	elseif EXPADV.CanAccessFeature(Context.entity, "File access") then
 		Root = "expadv2/userfiles/" .. string.gsub(Context.player:SteamID(), ":", "_")
 	else
 		return false
@@ -129,14 +129,14 @@ Component:AddVMFunction( "findFolders", "s,s", "ar",
 	end )
 
 EXPADV.ClientOperators()
-Component:AddInlineFunction( "canAccessFiles", "", "b", "(IsValid(Context.entity) and (Context.entity.EnableFileAccess or context.player == LocalPlayer()))" )
+Component:AddInlineFunction( "canAccessFiles", "", "b", [[EXPADV.CanAccessFeature(Context.entity, "File access")]] )
 Component:AddFunctionHelper( "canAccessFiles", "", "Returns true if this entity can access files." )
 
 /* -----------------------------------------------------------------------------------
 	@: WIP Features.
    --- */
 
-Component:AddFeature( "file access", "Read and save files.", "fugue/blue-folder-horizontal-open.png" )
+Component:AddFeature( "File access", "Read and save files.", "fugue/blue-folder-horizontal-open.png" )
 
 EXPADV.SharedEvents( )
 Component:AddEvent( "disableFileAccess", "", "" )
@@ -144,7 +144,7 @@ Component:AddEvent( "enableFileAccess", "", "" )
 
 if CLIENT then
 	function Component:OnChangeFeatureAccess(Entity, Feature, Value)
-		if Feature == "file access" then
+		if Feature == "File access" then
 			if Value then
 				Entity:CallEvent( "enableFileAccess" )
 			else
