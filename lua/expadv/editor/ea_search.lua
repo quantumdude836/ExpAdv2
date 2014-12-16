@@ -11,8 +11,11 @@ function PANEL:Init( )
 
 	self:SetSize( 280, 50 )
 	self.Extended = false
+	self.Expanded = false
+
 	self.Y = -55
-	
+	self.T = 50
+
 	-- Close Button:
 		self.btnClose = self:Add( "EA_CloseButton" )
 		self.btnClose:SetOffset( -5, 5 )
@@ -82,7 +85,52 @@ function PANEL:Init( )
 		self.btnDown.DoClick = function( )
 			self:FindQuery( false )
 		end
+	
+	--TODO: Replace
+
+	-- Replace Box:
+		self.txtReplace = self:Add( "DTextEntry" )
+		self.txtReplace:SetPos( 30, 50 )
+		self.txtReplace:SetSize( 200, 20 )
+		self.txtReplace:SetMultiline( false )
 		
+		function self.txtReplace:Paint( )
+			local W, H = self:GetSize( )
+			derma.SkinHook( "Paint", "TextEntry", self, W, H )
+			
+			if self.bgCol then
+				surface.SetDrawColor( self.bgCol )
+				surface.DrawRect( 2, 2, W - 4, H - 4 )
+			end
+		end
+		
+		function self.txtReplace.OnEnter( )
+			self:Replace( self:GetValue(), self.txtReplace:GetValue(), false )
+		end
+		
+	-- Replace:
+		self.btnReplace = self:Add( "EA_ImageButton" )
+		self.btnReplace:SetPos( 235, 50 )
+		self.btnReplace:SetIconCentered( true )
+		self.btnReplace:SetIconFading( false ) 
+		self.btnReplace.Expanded = true 
+		self.btnReplace:SetToolTip( "Replace." ) 
+		self.btnReplace:SetMaterial( Material( "fugue/quill.png" ) ) 
+		self.btnReplace.DoClick = function( )
+			self:Replace( self:GetValue(), self.txtReplace:GetValue(), false )
+		end
+		
+-- ReplaceAll:		
+		self.btnReplaceAll = self:Add( "EA_ImageButton" )
+		self.btnReplaceAll:SetPos( 255, 50 )
+		self.btnReplaceAll:SetIconCentered( true )
+		self.btnReplaceAll:SetIconFading( false ) 
+		self.btnReplaceAll.Expanded = true 
+		self.btnReplaceAll:SetToolTip( "Replace All." ) 
+		self.btnReplaceAll:SetMaterial( Material( "fugue/asterisk-small.png" ) )
+		self.btnReplaceAll.DoClick = function( )
+			self:ReplaceAll( self:GetValue(), self.txtReplace:GetValue(), false )
+		end
 end
 
 /*---------------------------------------------------------------------------
@@ -134,6 +182,7 @@ function PANEL:OpenMenu( )
 	self.Menu:SetSize( 150, 100 )
 	self.Menu:MakePopup( )
 end
+
 /*---------------------------------------------------------------------------
 Controls
 ---------------------------------------------------------------------------*/
@@ -141,7 +190,7 @@ Controls
 function PANEL:Toggle( Bool )
 	self.Extended = Bool or !self.Extended
 	
-	if Bool then
+	if self.Extended then
 		self.txtFind:RequestFocus( )
 		self.txtFind:SetCaretPos( self:GetValue( ):len( ) )
 	else
@@ -154,11 +203,29 @@ function PANEL:GetValue( )
 end
 
 function PANEL:Think( )
-	local Dest = self.Extended and 5 or -55
+	local Tall = self.Expanded and 75 or 50
+
+	self.T = self.T + math.Clamp( Tall - self.T, -2, 2 )
+	self:SetTall( self.T )
+
+	local Dest = self.Extended and 5 or -(self:GetTall() + 5)
+	
 	self.Y = self.Y + math.Clamp( Dest - self.Y, -2, 2 )
 	self:SetPos( self:GetPos( ), self.Y )
 end
 
+/*---------------------------------------------------------------------------
+Replace
+---------------------------------------------------------------------------*/
+function PANEL:ToggleReplace(Bool)
+	self.Expanded = Bool or !self.Expanded
+	
+	if self.Expanded then
+		self.txtReplace:RequestFocus( )
+	else
+		self.txtReplace:KillFocus( )
+	end
+end
 
 /*---------------------------------------------------------------------------
 Util
@@ -176,7 +243,24 @@ function PANEL:ValidQuery( )
 	end
 end
 
-function PANEL:FunctionKey( )
+function PANEL:ValidReplaceWith( )
+	local Value = self.txtReplace:GetValue( )
+	
+	if self.Extended and self.Expanded and Value then
+		
+		if !self.AllowRegex:GetBool( ) then
+			Value = string.gsub( Value, "[%-%^%$%(%)%%%.%[%]%*%+%?]", "%%%1" )
+		end
+		
+		return Value
+	end
+end
+
+function PANEL:FindKey( )
+	if self.Expanded then
+		self:ToggleReplace( false )
+	end
+
 	if self.Extended then
 		self.txtFind:RequestFocus( )
 	elseif self:GetParent( ):HasSelection( ) then
@@ -214,6 +298,24 @@ function PANEL:GetArea( start, stop )
 	end
 end
 
+function PANEL:ReplaceKey( )
+	if !self.Extended then
+		if self:GetParent( ):HasSelection( ) then
+			local Selected = self:GetParent( ):GetSelection( )
+			self.txtFind:SetText( Selected:split( "\n" )[1] or "" )
+			self:Toggle( true )
+		end
+
+		self:Toggle( true )
+	end
+
+	if !self.Expanded then
+		self:ToggleReplace( true )
+	else
+		self:Replace( self:GetValue(), self.txtReplace:GetValue(), false )
+	end
+end
+
 /*---------------------------------------------------------------------------
 Find
 ---------------------------------------------------------------------------*/
@@ -221,14 +323,14 @@ Find
 function PANEL:FindQuery( Up )
 	if self:GetValue( ) == "" then
 		self.txtFind.bgCol = nil
-	elseif self:DoFind( Up, Looped ) then
+	elseif self:DoFind( self:GetValue( ), Up, Looped ) then
 		self.txtFind.bgCol = Color( 0, 255, 128, 100 )
 	else
 		self.txtFind.bgCol = Color( 255, 0, 128, 100 )
 	end
 end
 
-function PANEL:DoFind( Up, Looped )
+function PANEL:DoFind( Query, Up, Looped )
 	local Looped = Looped or 0
 	if Looped >= 2 then return false end
 	
@@ -243,8 +345,6 @@ function PANEL:DoFind( Up, Looped )
 		End = Editor.Caret
 	end
 	
-	
-	local Query = self:GetValue( )
 	local Temp = Editor:GetCode( )
 	
 	if !self.CaseSensative:GetBool( ) then
@@ -303,7 +403,7 @@ function PANEL:DoFind( Up, Looped )
 		
 		if self.Wrap:GetBool( ) and !self.CaseSensative:GetBool( ) then
 			Editor:SetCaret( Vector2( 1, 1 ) )
-			return self:DoFind( Up, Looped + 1 )
+			return self:DoFind( Query, Up, Looped + 1 )
 		end
 				
 	else
@@ -376,12 +476,47 @@ function PANEL:DoFind( Up, Looped )
 		
 		if self.Wrap:GetBool( ) and !self.CaseSensative:GetBool( ) then
 			Editor:SetCaret( CaretMax )
-			return self:DoFind( Up, Looped + 1 )
+			return self:DoFind( Query, Up, Looped + 1 )
 		end
 		
 	end
 	
 	return false
+end
+
+/*---------------------------------------------------------------------------
+Replace
+---------------------------------------------------------------------------*/
+function PANEL:Replace( Query, With, Up )
+	if (Query == "" or Query == With) then return end
+
+	local RealQuery = Query
+	local Editor = self:GetParent()
+	local Selection = Editor:GetSelection()
+
+	if !self.AllowRegex:GetBool( ) then
+		RealQuery = RealQuery:gsub( "[%-%^%$%(%)%%%.%[%]%*%+%-%?]", "%%%1" )
+		With = With:gsub( "%%", "%%%1" )
+	end
+
+	if Selection:match( Query ) != nil then
+		Editor:SetSelection( Selection:gsub( Query, With ) )
+		return self:DoFind( RealQuery, Up, false )
+	else
+		return self:DoFind( RealQuery, Up, false )
+	end
+end
+
+function PANEL:ReplaceAll( Query, With, Up )
+	
+	if !self.AllowRegex:GetBool( ) then
+		Query = Query:gsub( "[%-%^%$%(%)%%%.%[%]%*%+%-%?]", "%%%1" )
+		With = With:gsub( "%%", "%%%1" )
+	end
+
+	while self:Replace( Query, With, Up ) do
+		-- Do nothing :D
+	end
 end
 
 vgui.Register( "EA_Search", PANEL, "DPanel" )

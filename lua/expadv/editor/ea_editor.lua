@@ -713,7 +713,9 @@ function PANEL:_OnKeyCodeTyped( code )
 			local Start, End = self:MakeSelection( self:Selection( ) ) 
 			self.Bookmarks[Start.x]:DoClick( )
 		elseif code == KEY_F then
-			self.Search:FunctionKey( )
+			self.Search:FindKey( )
+		elseif code == KEY_H then
+			self.Search:ReplaceKey( )
 		elseif code == KEY_B then
 			self:GetParent( ):GetParent( ):ToggleVoice( )
 		end
@@ -1493,6 +1495,7 @@ function PANEL:PaintRowUnderlay( Row, LinePos )
 	
 	-- Search Box Highlighting.
 	local FindQuery = self.Search:ValidQuery( )
+
 	if FindQuery then
 		local Row = self.Rows[ Row ]
 		
@@ -1514,7 +1517,31 @@ function PANEL:PaintRowUnderlay( Row, LinePos )
 			end
 		end )
 	end
+	
+	local ReplaceWith = self.Search:ValidReplaceWith( )
+
+	if ReplaceWith then
+		local Row = self.Rows[ Row ]
 		
+		if !self.Search.CaseSensative:GetBool( ) then
+			ReplaceWith = ReplaceWith:lower( )
+			Row = Row:lower( )
+		end
+		
+		surface_SetDrawColor( 255, 128, 0, 50 )
+		
+		pcall( function( ) -- For now untill we fix the invalid pattern bug.
+			for overS, overE in string_gmatch( Row, "()" .. ReplaceWith .. "()" ) do
+				surface_DrawRect( 
+					( overS - 1 ) * self.FontWidth + self.BookmarkWidth + self.LineNumberWidth + self.FoldingWidth, 
+					( LinePos ) * self.FontHeight, 
+					self.FontWidth * ( overE - overS ), 
+					self.FontHeight 
+				)
+			end
+		end )
+	end
+
 	if self:HasSelection( ) then 
 		-- Section Reference Highlighting
 		local overHighlight = self:HiglightedWord( )
