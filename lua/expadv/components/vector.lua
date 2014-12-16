@@ -210,7 +210,7 @@ Component:AddFunctionHelper( "lengthSqr", "v:", "Returns the squared length of t
 Component:AddInlineFunction( "insideAABox", "v:v,v", "b", "@value 1:WithinAABox( @value 2, @value 3 )" )
 Component:AddFunctionHelper( "insideAABox", "v:v,v", "Returns whenever the given vector is in a box created by the 2 other vectors." )
 
-Component:AddInlineFunction( "zero", "v:", "", "@value 1:zero( )" )
+Component:AddInlineFunction( "zero", "v:", "", "@value 1:Zero( )" )
 Component:AddFunctionHelper( "zero", "v:v,v", "Sets a vectors x, y and z to 0." )
 
 Component:AddInlineFunction( "ceil", "v:", "v", "Vector(math.ceil(@value 1.x), math.ceil(@value 1.y), math.ceil(@value 1.z))" )
@@ -226,10 +226,10 @@ Component:AddInlineFunction( "abs", "v:", "v", "Vector(math.abs(@value 1.x), mat
 Component:AddFunctionHelper( "abs", "v:", "Returns vector with absolute values." )
 
 Component:AddInlineFunction( "clamp", "v:n,n", "v", "Vector(math.Clamp(@value 1.x, @value 2, @value 3), math.Clamp(@value 1.y, @value 2, @value 3), math.Clamp(@value 1.z, @value 2, @value 3))" )
-Component:AddFunctionHelper( "clamps", "v:n,n", "Clamps a vector." )
+Component:AddFunctionHelper( "clamp", "v:n,n", "Clamps a vector." )
 
 Component:AddInlineFunction( "clamp", "v:v,v", "v", "Vector(math.Clamp(@value 1.x, @value 2.x, @value 3.x), math.Clamp(@value 1.y, @value 2.y, @value 3.y), math.Clamp(@value 1.z, @value 2.z, @value 3.z))" )
-Component:AddFunctionHelper( "clamps", "v:v,v", "Clamps a vector." )
+Component:AddFunctionHelper( "clamp", "v:v,v", "Clamps a vector." )
 
 
 /* --- --------------------------------------------------------------------------------
@@ -402,25 +402,6 @@ Component:AddInlineFunction( "randVec2", "n,n", "v2", "Vector2( $math.random(@va
 Component:AddFunctionHelper( "randVec2", "n,n", "Creates a random vector2 constrained to the given values" )
 
 /* --- --------------------------------------------------------------------------------
-    @: Functions
-   --- */
-
-Component:AddInlineFunction( "ceil", "v2:", "v2", "Vector2(math.ceil(@value 1.x), math.ceil(@value 1.y))" )
-Component:AddFunctionHelper( "ceil", "v2:", "Returns ceiled vector." )
-
-Component:AddInlineFunction( "floor", "v2:", "v2", "Vector2(math.floor(@value 1.x), math.floor(@value 1.y))" )
-Component:AddFunctionHelper( "floor", "v2:", "Returns floored vector." )
-
-Component:AddInlineFunction( "round", "v2:", "v2", "Vector2((@value 1.x - (@value 1.x + 0.5) @modulus 1 + 0.5), (@value 1.y - (@value 1.y + 0.5) @modulus 1 + 0.5))" )
-Component:AddFunctionHelper( "round", "v2:", "Returns rounded vector." )
-
-Component:AddInlineFunction( "clamp", "v2:n,n", "v2", "Vector2(math.Clamp(@value 1.x, @value 2, @value 3), math.Clamp(@value 1.y, @value 2, @value 3))" )
-Component:AddFunctionHelper( "clamps", "v2:n,n", "Clamps a vector." )
-
-Component:AddInlineFunction( "clamp", "v2:v2,v2", "v2", "Vector2(math.Clamp(@value 1.x, @value 2.x, @value 3.x), math.Clamp(@value 1.y, @value 2.y, @value 3.y))" )
-Component:AddFunctionHelper( "clamps", "v2:v2,v2", "Clamps a vector." )
-
-/* --- --------------------------------------------------------------------------------
 	  @: Accessors
    --- */
 
@@ -439,7 +420,7 @@ Component:AddPreparedFunction( "setY", "v2:n", "", "@value 1.y = @value 2" )
 Component:AddFunctionHelper( "setY", "v2:n", "Sets the Y value of a vector2" )
 
 /* --- --------------------------------------------------------------------------------
-    @: General
+    @: Functions
    --- */
 
 Component:AddInlineFunction( "dot", "v2:v2", "n", "@value 1:Dot(@value 2)" )
@@ -447,6 +428,27 @@ Component:AddInlineFunction( "normal", "v2:v2", "v2", "@value 1:Normalize(@value
 Component:AddInlineFunction( "length", "v2:v2", "n", "@value 1:Length(@value 2)" )
 Component:AddInlineFunction( "cross", "v2:v2", "v2", "@value 1:Cross(@value 2)" )
 Component:AddInlineFunction( "distance", "v2:v2", "n", "@value 1:Distance(@value 2)" )
+
+Component:AddInlineFunction( "ceil", "v2:", "v2", "Vector2(math.ceil(@value 1.x), math.ceil(@value 1.y))" )
+Component:AddFunctionHelper( "ceil", "v2:", "Returns ceiled vector." )
+
+Component:AddInlineFunction( "floor", "v2:", "v2", "Vector2(math.floor(@value 1.x), math.floor(@value 1.y))" )
+Component:AddFunctionHelper( "floor", "v2:", "Returns floored vector." )
+
+Component:AddInlineFunction( "round", "v2:", "v2", "Vector2((@value 1.x - (@value 1.x + 0.5) @modulus 1 + 0.5), (@value 1.y - (@value 1.y + 0.5) @modulus 1 + 0.5))" )
+Component:AddFunctionHelper( "round", "v2:", "Returns rounded vector." )
+
+Component:AddInlineFunction( "clamp", "v2:n,n", "v2", "Vector2(math.Clamp(@value 1.x, @value 2, @value 3), math.Clamp(@value 1.y, @value 2, @value 3))" )
+Component:AddFunctionHelper( "clamp", "v2:n,n", "Clamps a vector." )
+
+Component:AddInlineFunction( "clamp", "v2:v2,v2", "v2", "Vector2(math.Clamp(@value 1.x, @value 2.x, @value 3.x), math.Clamp(@value 1.y, @value 2.y, @value 3.y))" )
+Component:AddFunctionHelper( "clamp", "v2:v2,v2", "Clamps a vector." )
+
+Component:AddInlineFunction( "abs", "v2:", "v2", "Vector2(math.abs(@value 1.x), math.abs(@value 1.y))" )
+Component:AddFunctionHelper( "abs", "v2:", "Returns vector with absolute values." )
+
+Component:AddInlineFunction( "insideAABox", "v2:v2,v2", "b", "(!(@value 1.x < @value 2.x or @value 1.x > @value 3.x or @value 1.y < @value 2.y or @value 1.y > @value 3.y))" )
+Component:AddFunctionHelper( "insideAABox", "v2:v2,v2", "Returns whenever the given vector is in a box created by the 2 other vectors." )
 
 /* --- --------------------------------------------------------------------------------
     @: Loops

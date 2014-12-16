@@ -1112,35 +1112,28 @@ function PANEL:OnMouseReleased( code )
 				Menu:AddSpacer( )
 				
 				Menu:AddOption( "Comment", function( ) 
-					local minPos = nil
-					for i = (self.Caret.x > self.Start.x and self.Start.x or self.Caret.x), (self.Start.x > self.Caret.x and self.Start.x or self.Caret.x) do
+					local minPos, from, to, text = nil, (self.Caret.x > self.Start.x and self.Start.x or self.Caret.x), (self.Start.x > self.Caret.x and self.Start.x or self.Caret.x), ""
+					for i = from, to do
 						local pos = string.find( self.Rows[i], "[!-}]" )
-						if !pos then continue end
+						if !pos then text = text .. (i == to and "" or "\n"); continue end
 						if !minPos || minPos > pos then minPos = pos end
-						self.Rows[i] = string.sub( self.Rows[i], 0, minPos-1 ) .. "//" .. string.sub(self.Rows[i], minPos)
+						text = text .. string.sub( self.Rows[i], 0, minPos-1 ) .. "//" .. string.sub(self.Rows[i], minPos) .. (i == to and "" or "\n")
 					end
-					local caret, scroll = self.Caret, self.Scroll
-					self:SetCode( self:GetCode() )
-					self.Caret = caret
-					self.Start = caret
-					self.Scroll = scroll
-					self.ScrollBar:SetScroll( self.Scroll.x - 1 )
-					self.hScrollBar:SetScroll( self.Scroll.y - 1 )
+					self:SetArea( { Vector2(from, 1), Vector2(to, #self.Rows[to]+2) }, text )
+					self.Start = Vector2(from, 1)
+					self.Caret = Vector2(from, 1)
 				end )
 				
 				Menu:AddOption( "Uncomment", function( ) 
-					for i = (self.Caret.x > self.Start.x and self.Start.x or self.Caret.x), (self.Start.x > self.Caret.x and self.Start.x or self.Caret.x) do
+					local minPos, from, to, text = nil, (self.Caret.x > self.Start.x and self.Start.x or self.Caret.x), (self.Start.x > self.Caret.x and self.Start.x or self.Caret.x), ""
+					for i = from, to do
 						local pos = string.find( self.Rows[i], "//" )
-						if !pos then continue end
-						self.Rows[i] = string.sub( self.Rows[i], 0, pos-1 ) .. string.sub( self.Rows[i], pos + 2 )
+						if !pos then text = text .. self.Rows[i] .. (i == to and "" or "\n"); continue end
+						text = text .. string.sub( self.Rows[i], 0, pos-1 ) .. string.sub( self.Rows[i], pos + 2 ) .. (i == to and "" or "\n")
 					end
-					local caret, scroll = self.Caret, self.Scroll
-					self:SetCode( self:GetCode() )
-					self.Caret = caret
-					self.Start = caret
-					self.Scroll = scroll
-					self.ScrollBar:SetScroll( self.Scroll.x - 1 )
-					self.hScrollBar:SetScroll( self.Scroll.y - 1 )
+					self:SetArea( { Vector2(from, 1), Vector2(to, #self.Rows[to]+2) }, text )
+					self.Start = Vector2(from, 1)
+					self.Caret = Vector2(from, 1)
 				end )
 			end
 			
