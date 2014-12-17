@@ -64,7 +64,9 @@ EXPADV.AddInlineOperator( nil, "function", "d", "f", "@value 1" )
 
 EXPADV.AddVMOperator( nil, "call", "f,s,...", "_vr",
 	function(Context, Trace, Function, rExpect, ...)
-		local rType, rValue = Function(Context, ...)
+		local rValue, rType = Function(Context, ...)
+
+		print("Call Expected " .. tostring(rExpect) .. " got " .. tostring(rType) )
 
 		if (!rExpect or rExpect == "void") and (!rType or rType == "void") then
 			return -- VOID!
