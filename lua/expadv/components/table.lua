@@ -366,6 +366,7 @@ function Component:OnPostRegisterClass( Name, Class )
 		Table:AddVMOperator( "get", "t,n," .. Class.Short, Class.Short, Get )
 		Table:AddVMOperator( "get", "t,s," .. Class.Short, Class.Short, Get )
 		Table:AddVMOperator( "get", "t,e," .. Class.Short, Class.Short, Get )
+		Table:AddVMOperator( "get", "t,ply," .. Class.Short, Class.Short, Get )
 
 	/* --- --------------------------------------------------------------------------------
 		@: Set Operators
@@ -393,6 +394,7 @@ function Component:OnPostRegisterClass( Name, Class )
 		Table:AddVMOperator( "set", "t,n," .. Class.Short, "", Set )
 		Table:AddVMOperator( "set", "t,s," .. Class.Short, "", Set )
 		Table:AddVMOperator( "set", "t,e," .. Class.Short, "", Set )
+		Table:AddVMOperator( "set", "t,ply," .. Class.Short, "", Set )
 
 	/* --- --------------------------------------------------------------------------------
 		@: Insert Function
@@ -433,6 +435,14 @@ function Component:OnPostRegisterClass( Name, Class )
    		Component:AddFunctionHelper( "insert", "t:" .. Class.Short, string.format( "Inserts %s to the top of the tables array element.", Class.Short ) )
    		Component:AddFunctionHelper( "insert", "t:n," .. Class.Short, string.format( "Inserts %s tables array element at index, pushing all higher index up.", Class.Short ) )
 
+	/* --- --------------------------------------------------------------------------------
+		@: Hologram index support
+		   --- */
+
+   	EXPADV.ServerOperators( )
+	Table:AddVMOperator( "set", "t,h," .. Class.Short, "", Set )
+	Table:AddVMOperator( "get", "t,h," .. Class.Short, Class.Short, Get )
+	
 end
 
 /* --- --------------------------------------------------------------------------------
@@ -468,38 +478,6 @@ end
 		end )
 
 	Component:AddFunctionHelper( "sort", "t:d", "Takes a table and sorts it, the returned table will be sorted by the provided delegate and all indexs will be numberic. The delegate will be called with 2 variants that are values on the table, return true if the first is bigger then the second this delegate must return a boolean." )
-
-/* --- --------------------------------------------------------------------------------
-	@: Now for a way to build a filled table
-   --- */
-
-	Component:AddGeneratedFunction( "table", "...", "t", function( Operator, Compiler, Trace, ... )
-		local Inputs = { ... }
-		local Preperation = { }
-		local Values, Types, Look = { }, { }, { }
-		
-		for I = 1, #Inputs, 1 do
-			local Input = Inputs[I]
-
-			if Input.FLAG == EXPADV_PREPARE or Input.FLAG == EXPADV_INLINEPREPARE then
-				Preperation[#Preperation + 1] = Input.Prepare
-			end
-
-			if Input.FLAG == EXPADV_INLINE or Input.FLAG == EXPADV_INLINEPREPARE then
-				Values[I] = Input.Inline
-			end
-
-			Types[I] = string.format( "%q", Input.Return )
-
-			Look[I] = I
-		end
-
-		local LuaInline = "{ Data = { %s }, Types = { %s }, Look = { %s }, Size = %i, Count = %i, HasChanged = false }"
-
-		LuaInline = string.format( LuaInline, table.concat( Values, "," ), table.concat( Types, "," ), table.concat( Look, "," ), #Values, #Values )
-
-		return { Trace = Trace, Inline = LuaInline, Prepare = table.concat( Preperation, "\n" ), Return = "t", FLAG = EXPADV_INLINEPREPARE }
-	end )
 
 /* ---	--------------------------------------------------------------------------------
 	@: VON Support

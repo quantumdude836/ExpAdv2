@@ -900,14 +900,24 @@ end
 	@: Tables
    --- */
 
-function Compiler:Compile_TABLE( Trace, Expressions )
-	local Operator = EXPADV.Functions[ "table(...)" ]
-		
-	if !Operator then
-		self:TraceError( Trace, "No such operation { ... }" )
+function Compiler:Compile_TABLE( Trace, KeyValues )
+	local Statments = { }
+
+	local Defined = self:DefineVariable( )
+	local Quick = Quick(Defined, "t")
+
+	local Prepare = string.format( "%s = { Data = { }, Types = { }, Look = { }, Size = 0, Count = 0, HasChanged = false }", Defined)
+	Statments[1] = { Trace = Trace, Prepare = Prepare, Return = "", FLAG = EXPADV_PREPARE }
+
+	for Key, Value in pairs( KeyValues ) do
+		Statments[#Statments + 1] = self:Compile_SET( Trace, Quick, Key, Value )
 	end
 
-	return Operator.Compile( self, Trace, unpack( Expressions ) )
+	local Instr = self:Compile_SEQ(Trace, Statments)
+
+	Instr.Return, Instr.Inline, Instr.FLAG, Instr.IsSequence = "t", Defined, EXPADV_INLINEPREPARE, false
+
+	return Instr
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------

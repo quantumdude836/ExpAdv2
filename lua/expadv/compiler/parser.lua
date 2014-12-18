@@ -506,8 +506,6 @@ function Compiler:Expression_Value( Trace )
 		return self:Compile_NUM( self:GetTokenTrace( Trace ), self.TokenData )
 	elseif self:AcceptToken( "str" ) then
 		return self:Compile_STR( self:GetTokenTrace( Trace ), self.TokenData )
-	--elseif self:CheckToken( "lsb" ) then
-	--	return self:Expression_Array( Trace )
 	elseif self:AcceptToken( "func" ) then
 		self:RequireToken( "lpa", "Left parenthesis ( () missing, to open delegated function arguments" )
 		
@@ -529,7 +527,7 @@ function Compiler:Expression_Value( Trace )
 		Instr.Return = "d"
 		return Instr
 	elseif self:CheckToken("lcb") then
-		return self:GetArray( Trace )
+		return self:GetTable( Trace )
 	end
 end
 
@@ -537,36 +535,55 @@ end
 	@: Array and Tables
    --- */
 
-function Compiler:GetArray( Trace )
+function Compiler:GetTable( Trace )
 	if !self:AcceptToken("lcb") then return end
 	
-	local Expressions, Type = { }
+	local Index, KeyValues = 0, {}
 
-	if !self:CheckToken( "rcb" ) then
-		local Expr = self:Expression( Trace )
+	while !self:CheckToken( "rcb" ) do
+		self:ExcludeToken( "com", "Expression separator (,) can not appear here." )
 
-		Expressions[1] = Expr
-		Type = Expr.Return
+		local Expression = self:Expression(Trace)
 
-		while self:AcceptToken( "com" ) do
-			local Expr = self:Expression( Trace )
-			Expressions[#Expressions + 1] = Expr
+		if !self:AcceptToken( "ass" ) then
+			Index = Index + 1
 
-			if Expr.Return ~= Type then
-				Type = nil -- Type missmatch, make a table :D
+			local Quick = { Trace = Trace, Inline = tostring(Index), Return = "n", FLAG = EXPADV_INLINE, IsRaw = true }
+			KeyValues[Quick] = Expression
+		
+		else
+			if !Expression.Return or Expression.Return == "" then
+				self:TraceError(Trace, "void must not be used as a table index.")
 			end
+
+			if Expression.Return ~= "n" or Expression.Return ~= "s" or Expression.Return ~= "e" then
+				local NewKey = self:Compile_CAST( Trace, "number", Expression, true )
+
+				if !NewKey then
+					NewKey = self:Compile_CAST( Trace, "entity", Expression, true )
+				end
+
+				if !NewKey then
+					NewKey = self:Compile_CAST( Trace, "string", Expression, true )
+				end
+
+				if !NewKey then
+					self:TraceError(Trace, "%s must not be used as a table index.", self:NiceClass(Expression.Return))
+				end
+
+				Expression = NewKey
+			end
+
+			KeyValues[Expression] = self:Expression(Trace)
 		end
-	end
-	
-	self:RequireToken( "rcb", "Right curly bracket (}) missing, to terminate " .. ( Type and "array" or "table" ) )
 
-	if Type then
-		return Compiler:Compile_ARRAY( Trace, Type, Expressions )
+		if !self:AcceptToken( "com" ) then break end
 	end
 
-	return Compiler:Compile_TABLE( Trace, Expressions )
+	self:RequireToken( "rcb", "Right curly bracket (}) missing, to terminate table" )
+
+	return self:Compile_TABLE( Trace, KeyValues )
 end
-
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Directives
@@ -1331,7 +1348,7 @@ function Compiler:Statement_8( Trace )
 
 			self:RequireToken( "var", "Variable expected for parameter." )
 			
-			local Quick ={ Trace = Trace, Inline = "i", Return = Class.Short, FLAG = EXPADV_INLINE, IsRaw = true }
+			local Quick = { Trace = Trace, Inline = "i", Return = Class.Short, FLAG = EXPADV_INLINE, IsRaw = true }
 
 			local AssInstr = self:Compile_ASS( Trace, self.TokenData, Quick, Class.Name )
 			

@@ -102,10 +102,36 @@ function Component:OnPostRegisterClass( Name, Class )
 		]], Class.Short, Class.Name), "@value 1[@value 2] = @value 3")
 
 /* ---	--------------------------------------------------------------------------------
-	@: Set Operator
+	@: Array builder
    ---	*/
 
-   Component:AddInlineFunction( string.format("%sArray", Class.Name ), "", "ar", string.format( "{__type=%q}", Class.Short) )
+   Component:AddGeneratedFunction( Class.Name .. "Array", "...", "ar",
+		function( Operator, Compiler, Trace, ... )
+			local Inputs = { ... }
+			local Preperation = { }
+			local Values = { }
+
+			for I = 1, #Inputs, 1 do
+				local Input = Inputs[I]
+
+				print( I, Input.Return, Class.Short)
+				if Input.Return ~= Class.Short then
+					Compiler:TraceError(Trace, "Array of type %s must not contain value of type %s", Compiler:NiceClass(Class.Short, Input.Return or "void") )
+				end
+
+				if Input.FLAG == EXPADV_PREPARE or Input.FLAG == EXPADV_INLINEPREPARE then
+					Preperation[#Preperation + 1] = Input.Prepare
+				end
+
+				if Input.FLAG == EXPADV_INLINE or Input.FLAG == EXPADV_INLINEPREPARE then
+					Values[I] = Input.Inline
+				end
+			end
+
+			local LuaInline = string.format( "{ __type = %q, %s }", Class.Short, table.concat( Values, "," ) )
+
+			return { Trace = Trace, Inline = LuaInline, Prepare = table.concat( Preperation, "\n" ), Return = "_ar", FLAG = EXPADV_INLINEPREPARE }
+		end )
 
 /* ---	--------------------------------------------------------------------------------
 	@: Functions
@@ -136,32 +162,6 @@ function Component:OnPostRegisterClass( Name, Class )
    			@prepare 2
    		end]] )
 end
-
-/* ---	--------------------------------------------------------------------------------
-	@: Now for a way to build a filled table
-	---	*/
-
-Component:AddGeneratedOperator( "array", "s,...", "ar", function( Operator, Compiler, Trace, Type, ... )
-	local Inputs = { ... }
-	local Preperation = { }
-	local Values = { }
-	
-	for I = 1, #Inputs, 1 do
-		local Input = Inputs[I]
-
-		if Input.FLAG == EXPADV_PREPARE or Input.FLAG == EXPADV_INLINEPREPARE then
-			Preperation[#Preperation + 1] = Input.Prepare
-		end
-
-		if Input.FLAG == EXPADV_INLINE or Input.FLAG == EXPADV_INLINEPREPARE then
-			Values[I] = Input.Inline
-		end
-	end
-
-	local LuaInline = string.format( "{ __type = %q, %s }", Type, table.concat( Values, "," ) )
-
-	return { Trace = Trace, Inline = LuaInline, Prepare = table.concat( Preperation, "\n" ), Return = "_ar", FLAG = EXPADV_INLINEPREPARE }
-end )
 
 /* ---	--------------------------------------------------------------------------------
 	@: VON Support
