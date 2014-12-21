@@ -164,7 +164,7 @@ Component:AddVMFunction( "perf", "n", "b",
 		if Context.Status.Perf + Context.Status.Counter >= (expadv_hardquota - expadv_tickquota) * Value * 0.01 then
 			return false
 		elseif Value == 100 then
-			if Context.Status.Perf >= xpadv_softquota * 2 then
+			if Context.Status.Perf >= expadv_softquota * 2 then
 				return false
 			end
 		elseif Context.Status.Perf >= expadv_softquota * Value * 0.01 then

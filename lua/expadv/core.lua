@@ -183,7 +183,7 @@ if SERVER then
 				SaveAndSendConfig( )
 			end
 
-			return PrintFromCommand( Player, "%s: ", A, Config.settings[ string.lower( A ) ] )
+			return PrintFromCommand( Player, "%s: %s", A, Config.settings[ string.lower( A ) ] )
 		end
 
 		return PrintFromCommand( Player, "No such command %s", A )

@@ -416,7 +416,7 @@ function Compiler:Expression_12( Trace )
 	elseif self:AcceptToken( "sub" ) then
 		local Trace = self:GetTokenTrace( Trace )
 		self:ExcludeWhiteSpace( "Negation operator (-) must not be succeeded by whitespace" )
-		return self:Compile_NEG( Trace, self:Expression_1( Trace ) )
+		return self:Compile_NEG( Trace, self:GetGroupedOrValue( Trace ) )
 	
 	elseif self:AcceptToken( "mul" ) then
 		local Trace = self:GetTokenTrace( Trace )
