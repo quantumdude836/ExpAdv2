@@ -718,6 +718,8 @@ function PANEL:_OnKeyCodeTyped( code )
 			self.Search:ReplaceKey( )
 		elseif code == KEY_B then
 			self:GetParent( ):GetParent( ):ToggleVoice( )
+		elseif code == KEY_P then
+			self:GetParent( ):GetParent( ):DoValidate( true )
 		end
 	else
 		if code == KEY_ENTER then
