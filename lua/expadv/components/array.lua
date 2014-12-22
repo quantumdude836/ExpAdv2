@@ -114,7 +114,6 @@ function Component:OnPostRegisterClass( Name, Class )
 			for I = 1, #Inputs, 1 do
 				local Input = Inputs[I]
 
-				print( I, Input.Return, Class.Short)
 				if Input.Return ~= Class.Short then
 					Compiler:TraceError(Trace, "Array of type %s must not contain value of type %s", Compiler:NiceClass(Class.Short, Input.Return or "void") )
 				end
