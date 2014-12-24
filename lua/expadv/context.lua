@@ -241,7 +241,11 @@ EXPADV_STATE_ALERT = 2
 EXPADV_STATE_CRASHED = 3
 EXPADV_STATE_BURNED = 4
 
+local NextCheck
+
 hook.Add( "Tick", "ExpAdv2.Performance", function( )
+	//if NextCheck and NextCheck < CurTime() then return end
+	
 	for Context, _ in pairs( EXPADV.CONTEXT_REGISTERY ) do
 		if !Context.Online then continue end
 
@@ -267,6 +271,8 @@ hook.Add( "Tick", "ExpAdv2.Performance", function( )
 			Monitor.State = EXPADV_STATE_ONLINE
 		end
 	end
+	
+	//NextCheck = CurTime() + 0.033 -- TODO: Try this?
 end )
 
 /* --- --------------------------------------------------------------------------------

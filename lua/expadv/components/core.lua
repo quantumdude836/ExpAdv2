@@ -148,7 +148,7 @@ Component:AddInlineFunction( "cpuStopWatch", "", "n", "Context.Status.StopWatch"
 
 Component:AddVMFunction( "perf", "", "b",
 	function( Context, Trace )
-		if Context.Status.Perf + Context.Status.Counter >= expadv_hardquota - expadv_tickquota then
+		if Context.Status.Perf + Context.Status.Counter > expadv_hardquota - expadv_tickquota then
 			return false
 		elseif Context.Status.Perf >= expadv_softquota * 2 then
 			return false
@@ -178,7 +178,7 @@ Component:AddVMFunction( "perf", "n", "b",
 
 Component:AddVMFunction( "minquota", "", "n",
 	function( Context, Trace )
-		if self.prf < e2_softquota then
+		if Context.Status.Perf < expadv_softquota then
 			return math.floor(expadv_softquota - Context.Status.Perf)
 		else
 			return 0
