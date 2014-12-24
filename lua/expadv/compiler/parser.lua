@@ -470,11 +470,22 @@ function Compiler:Expression_13( Trace )
 end
 
 function Compiler:GetGroupedOrValue( Trace )
-	if self:CheckToken( "lpa ") then
-		return self:Expression_13( Trace )
+	
+	if self:AcceptToken( "lpa" ) then
+		local Expression = self:Expression_1( Trace )
+		
+		if Expression.FLAG == EXPADV_INLINE or Expression.FLAG == EXPADV_INLINEPREPARE then
+			Expression.Inline = string.format( "(%s)", Expression.Inline )
+		end
+
+		self:RequireToken( "rpa", "Right parenthesis ( )) missing, to close grouped equation." )
+
+		Expression.Inline = string.format( "(%s)", Expression.Inline )
+		
+		return self:Expression_17( Trace, Expression )
 	end
 
-	return self:Expression_14( Trace )
+	return self:Expression_17( Trace, self:Expression_14( Trace ) )
 end
 
 -- Stage 14: Value
