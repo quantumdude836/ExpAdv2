@@ -567,7 +567,7 @@ function Compiler:GetTable( Trace )
 				self:TraceError(Trace, "void must not be used as a table index.")
 			end
 
-			if Expression.Return ~= "n" or Expression.Return ~= "s" or Expression.Return ~= "e" then
+			if Expression.Return ~= "n" and Expression.Return ~= "s" and Expression.Return ~= "e" then
 				local NewKey = self:Compile_CAST( Trace, "number", Expression, true )
 
 				if !NewKey then

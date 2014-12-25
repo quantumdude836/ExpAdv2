@@ -978,7 +978,7 @@ function Compiler:Compile_SET( Trace, Expression1, Expression2, Expression3, Cla
 	end
 
 	local Operator = self:LookUpClassOperator( Expression1.Return, "set", Expression1.Return, Expression2.Return, Expression3.Return )
-
+	
 	if !Operator and ClassShort then
 		self:TraceError( Trace, "No such operator (%s[%s,%s]=)", self:NiceClass( Expression1.Return, Expression2.Return, Expression3.Return ) )
 	elseif !Operator then
