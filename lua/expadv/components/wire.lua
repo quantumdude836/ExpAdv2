@@ -33,7 +33,11 @@ Component:AddInlineOperator( "entity", "wl", "e", "@value 1" )
 
 Component:AddPreparedOperator( "wirelink", "e", "wl", [[
 	@define WL = $Entity(0)
+<<<<<<< HEAD
 	if EXPADV.PPCheck(Context.player,@value 1) then
+=======
+	if EXPADV.PPCheck(Context.player,@value 1)) then
+>>>>>>> e28ba5cd4d64cdd7c565b5e2ca9b5e6420e4fe5b
 		@WL = @value 1
 	end]], "@WL" )
 
