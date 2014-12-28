@@ -64,16 +64,18 @@ EXPADV.AddInlineOperator( nil, "function", "d", "f", "@value 1" )
 
 EXPADV.AddVMOperator( nil, "call", "f,s,...", "_vr",
 	function(Context, Trace, Function, rExpect, ...)
+		if !Function then Context:Throw( Trace, "invoke", "Attempt to call void" ) end
+		
 		local rValue, rType = Function(Context, ...)
-
+		
 		if (!rExpect or rExpect == "void") and (!rType or rType == "void") then
 			return -- VOID!
 		elseif rExpect == "void" then
-			Context:Throw( Rrace, "invoke", "Invalid return value, void expected got " .. EXPADV.TypeName(rType))
+			Context:Throw( Trace, "invoke", "Invalid return value, void expected got " .. EXPADV.TypeName(rType))
 		elseif rType == "void" then
-			Context:Throw( Rrace, "invoke", "Invalid return value, " .. EXPADV.TypeName(rExpect) .. " expected got void")
+			Context:Throw( Trace, "invoke", "Invalid return value, " .. EXPADV.TypeName(rExpect) .. " expected got void")
 		elseif rExpect ~= rType then
-			Context:Throw( Rrace, "invoke", string.format("Invalid return value, %s expected got %s", EXPADV.TypeName(rExpect, rType)))
+			Context:Throw( Trace, "invoke", string.format("Invalid return value, %s expected got %s", EXPADV.TypeName(rExpect, rType)))
 		end
 
 		return rValue

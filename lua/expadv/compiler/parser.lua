@@ -115,7 +115,9 @@ end
 
 function Compiler:ExpressionError( Trace )
 	self:ExcludeWhiteSpace( "Further input required at end of code, incomplete expression" )
-
+	
+	self:ExcludeToken( "void", "void must not appear inside an equation" )
+	
 	self:ExcludeToken( "add", "Arithmetic operator (+) must be preceded by equation or value" )
 	self:ExcludeToken( "sub", "Arithmetic operator (-) must be preceded by equation or value" )
 	self:ExcludeToken( "mul", "Arithmetic operator (*) must be preceded by equation or value" )
@@ -186,7 +188,11 @@ function Compiler:Expression( Trace )
 
 	self.ExpressionRequired = _ExprRequire
 	self.ExpressionRoot = _ExprRoot
-
+	
+	if !Expression.Return or Expression.Return == "" then
+		Expression.Return = "void"
+	end
+	
 	return Expression
 end
 
@@ -513,6 +519,8 @@ function Compiler:Expression_Value( Trace )
 		return self:Compile_BOOL( self:GetTokenTrace( Trace ), true )
 	elseif self:AcceptToken( "fls" ) then
 		return self:Compile_BOOL( self:GetTokenTrace( Trace ), false )
+	elseif self:AcceptToken( "void" ) then
+		return self:Compile_VOID( self:GetTokenTrace( Trace ) )
 	elseif self:AcceptToken( "num" ) then
 		return self:Compile_NUM( self:GetTokenTrace( Trace ), self.TokenData )
 	elseif self:AcceptToken( "str" ) then
@@ -1238,15 +1246,24 @@ function Compiler:Statement_6( Trace )
 		-- Variable assigments / Arithmatic assigments
 
 	if self:AcceptToken( "func" ) then
+	
+		if !self:AcceptToken("void") then
+			self:RequireToken( "var", "function return type or void expected" ) -- TODO: Change this.
+		end
+		
+		ReturnClass = self:GetClass( Trace, self.TokenData ).Short
 
-		self:RequireToken( "var", "function return type or void expected" ) -- TODO: Change this.
-
-		local ReturnClass = "void"
-		if self.TokenData ~= "void" then ReturnClass = self:GetClass( Trace, self.TokenData ).Short end
-
-		self:RequireToken( "var", "function name expected" ) -- TODO: Change this.
+		self:RequireToken( "var", "function name expected" )
 
 		local Variable = self.TokenData
+		
+		local MemRef = self:FindCell( Trace, Variable, false )
+		
+		if !MemRef then
+			MemRef = self:CreateVariable( Trace, Variable, "function", Modifier ).Memory
+		end
+		
+		self.KnownReturnTypes[self.ScopeID][MemRef] = ReturnClass
 
 		local Function
 
@@ -1263,25 +1280,21 @@ function Compiler:Statement_6( Trace )
 			
 			self:RequireToken( "rpa", "Right parenthesis () ) missing, to close function arguments" )
 			
-			self:RequireToken( "lcb", "Left curly bracket ({) missing, to open function" )
+			//self:RequireToken( "lcb", "Left curly bracket ({) missing, to open function" )
 	
-			local Sequence = self:Sequence( Trace, "rcb" )
+			local Sequence = self:GetBlock( Trace, "to close function" ) //self:Sequence( Trace, "rcb" )
 	
 			local Memory = self:PopLambdaDeph( )
 			self:PopReturnDeph( )
 			self:PopScope( )
 	
-			self:RequireToken( "rcb", "Right curly bracket (}) missing, to close function" )
+			//self:RequireToken( "rcb", "Right curly bracket (}) missing, to close function" )
 
 			Function = self:Build_Function( Trace, Perams, UseVarg, Sequence, Memory )
 		end
 		
 
-		local Instr = self:Compile_ASS( Trace, Variable, Function, "function", Modifier )
-		
-		local MemRef = self:FindCell( Trace, Variable, true )
-
-		self.KnownReturnTypes[self.ScopeID][MemRef] = ReturnClass
+		local Instr = self:Compile_ASS( Trace, Variable, Function )//, "function", Modifier )
 
 		return Instr
 

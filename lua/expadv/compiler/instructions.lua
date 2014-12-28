@@ -12,6 +12,10 @@ function Compiler:Compile_BOOL( Trace, Bool )
 	return { Trace = Trace, Inline = Bool and "true" or "false", Return = "b", FLAG = EXPADV_INLINE, IsRaw = true }
 end
 
+function Compiler:Compile_VOID( Trace )
+	return { Trace = Trace, Inline = "nil", Return = "", FLAG = EXPADV_INLINE, IsRaw = true }
+end
+
 function Compiler:Compile_NUM( Trace, Int )
 	return { Trace = Trace, Inline = tostring( Int ), Return = "n", FLAG = EXPADV_INLINE, IsRaw = true }
 end
@@ -614,23 +618,25 @@ function Compiler:Compile_ASS( Trace, Variable, Expression, DefinedClass, Modifi
 		self:CreateVariable( Trace, Variable, DefinedClass, Modifier )
 	end
 
-	if !Expression.Return or Expression.Return == "" then
+	/*if !Expression.Return or Expression.Return == "" then
 		self:TraceError( Trace, "Invalid assigment, %s is assigned void.", Variable )
-	end
+	end*/
 
 	local MemRef, Scope = self:FindCell( Trace, Variable, true )
 
 	local Cell = self.Cells[MemRef]
 
-	if Cell and Cell.Return ~= Expression.Return then
+	if Cell and Expression.Return ~= "void" and Cell.Return ~= Expression.Return then
 		Expression = self:Compile_CAST( Trace, self:NiceClass( Cell.Return ), Expression )
 	end -- We cast automatically, to allow us to assign numbers to strings and so forth.
 
 	self:TestCell( Trace, MemRef, Expression.Return, Variable )
 
-	local Operator = self:LookUpClassOperator( Expression.Return, "=", "n", Expression.Return ) -- self:LookUpOperator( "=", Expression.Return, "n" )
+	local Operator = self:LookUpClassOperator( Expression.Return, "=", "n", Expression.Return)
 	
-	if !Operator then
+	if !Operator and Expression.Return == "void" then
+		return { Trace = Trace, Return = "", Prepare = "Context.Memory[" .. MemRef .. "] = nil", FLAG = EXPADV_PREPARE }
+	elseif !Operator then
 		self:TraceError( Trace, "Assigment operator (=) does not support 'var = %s'", self:NiceClass( Expression.Return ) )
 	end
 

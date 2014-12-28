@@ -367,8 +367,8 @@ function Compiler:BuildToken( )
 			return self:NewToken( "tre", "true")
 		elseif RawData == "false" then
 			return self:NewToken( "fls", "false")
-		elseif RawData == "null" then
-			return self:NewToken( "nll", "null")
+		elseif RawData == "lemon" then
+			return self:NewToken( "void", "void")
 
 
 	-- SUB KEYWORDS:

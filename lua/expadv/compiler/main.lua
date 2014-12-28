@@ -245,8 +245,9 @@ end
 	@: Classes.
    --- */
 function Compiler:GetClass( Trace, ClassName, bNoError )
-
+	
 	local Class = EXPADV.GetClass( ClassName, true )
+	
 	if !Class and bNoError then return end
 
 	if !Class then --or (Class.Name ~= ClassName and !EXPADV.ClassAliases[ ClassName ] ) then
@@ -358,7 +359,7 @@ function Compiler:TestCell( Trace, MemRef, ClassShort, Variable, Comparator )
 
 	if !Cell and Variable then
 		self:TraceError( Trace, "%s of type %s does not exist", Variable, self:NiceClass( ClassShort ) )
-	elseif ClassShort and Cell.Return ~= ClassShort and Variable then
+	elseif ClassShort and ClassShort ~= "_void" and Cell.Return ~= ClassShort and Variable then
 		self:TraceError( Trace, "%s of type %s can not be assigned as %s", Variable, self:NiceClass( Cell.Return, ClassShort ) )
 	elseif self.IsServerScript and !Cell.Server then
 		self:TraceError( Trace, "%s of type %s is not avalible serverside", Variable, self:NiceClass( Cell.Return ) )

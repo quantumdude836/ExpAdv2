@@ -165,7 +165,7 @@ local Class_Generic = setmetatable( { Name = "generic", Short = "g" }, EXPADV.Ba
 	@: Define Null Class
    --- */
 
-   -- TODO
+local Class_Void = setmetatable( { Name = "void", Short = "void" }, EXPADV.BaseClassObj )
 
 /* --- --------------------------------------------------------------------------------
 	@: GetClass
@@ -173,7 +173,7 @@ local Class_Generic = setmetatable( { Name = "generic", Short = "g" }, EXPADV.Ba
 
 -- Returns a classes module, using either name or id as look up.
 function EXPADV.GetClass( Name, bNoShort ) -- String
-	if !Name then return end
+	if !Name or Name == "" or Name == "void" then return Class_Void end
 
 	if EXPADV.Classes[ Name ] then return EXPADV.Classes[ Name ] end
 
@@ -191,7 +191,7 @@ end
    --- */
 
 function EXPADV.TypeName( Name, bNoVoid )
-	if !Name or Name == "" then return "void" end
+	if !Name or Name == "" or Name == "void" then return "void" end
 
 	if Name == "..." then return "..." end
 	
@@ -309,8 +309,8 @@ function EXPADV.LoadClasses( )
 
  	for _, Class in pairs( EXPADV.Classes ) do
  		if Class == Class_Generic then continue end
-
- 		local DeriveClass = EXPADV.GetClass( Class.DeriveFrom )
+		
+		local DeriveClass = EXPADV.GetClass( Class.DeriveFrom )
 
  		if !DeriveClass then
  			EXPADV.Classes[ Class.Name ] = nil

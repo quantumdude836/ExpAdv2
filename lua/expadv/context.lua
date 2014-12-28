@@ -16,7 +16,7 @@ setmetatable = setmetatable
 /* --- --------------------------------------------------------------------------------
 	@: Now we need a way to build this object
    --- */
-
+   
 -- Builds a new context from a compilers instance.
 function EXPADV.BuildNewContext( Instance, Player, Entity ) -- Table, Player, Entity
 	local Context = setmetatable( { player = Player, entity = Entity, Online = false }, EXPADV.RootContext )
@@ -97,7 +97,17 @@ function EXPADV.RootContext:Execute( Location, Operation, ... ) -- String, Funct
 		Status.Memory = Status.Memory + (collectgarbage("count") - Status.MemoryMark)
 
 	if !Ok and isstring( Result ) then
-		if IsValid( self.entity ) then self.entity:ScriptError( Result ) end
+		if IsValid( self.entity ) then -- This is the only way, :(
+			if Result:find("attempt to perform arithmetic on a nil value") then
+				Result = "attempt to perform arithmetic on void"
+			elseif Result:find("attempt to index a nil value") then
+				Result = "attempt to reach void"
+			elseif Result:find("attempt to call a nil value") then
+				Result = "attempt to call void"
+			end 
+
+			self.entity:ScriptError( Result )
+		end
 		
 		self:ShutDown( )
 

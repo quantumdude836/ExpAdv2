@@ -245,7 +245,17 @@ local colors = {
 	["variable"]     = Color(    0,  180,   80 ), 
 	["prediction"]   = Color( 0xe3, 0xb5, 0x2d ), 
 	["metamethod"]   = Color( 0x00, 0xc8, 0xff ), 
+	["lemon"]      = Color(    255,  255,  255 ), 
 }
+
+local JediMindTrick; JediMindTrick = function()
+	colors.lemon.r = math.random(50,200)
+	colors.lemon.g = math.random(50,200)
+	colors.lemon.b = math.random(50,200)
+	
+	timer.Simple(math.random(30,500), JediMindTrick)
+end; JediMindTrick()
+
 
 -- fallback for nonexistant entries: 
 setmetatable( colors, { __index = function( tbl, index ) return Color( 255, 255, 255 ) end } ) 
@@ -410,6 +420,11 @@ function Syntaxer:Parse( Row )
 				
 			tokenname = "notfound" 
 			-- tokenname = "variable" 
+			
+			if word == "lemon" then
+				addToken( "lemon", self.tokendata ) 
+				continue 
+			end
 			
 			if word == "function" then 
 				self:NextPattern( " *" ) 
