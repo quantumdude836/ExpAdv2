@@ -31,6 +31,12 @@ WireLink:DefaultAsLua( Entity(0) )
 
 Component:AddInlineOperator( "entity", "wl", "e", "@value 1" )
 
+Component:AddPreparedOperator( "wirelink", "e", "wl", [[
+	@define WL = $Entity(0)
+	if EXPADV.PPCheck(Context.player,@value 1) then
+		@WL = @value 1
+	end]], "@WL" )
+
 WireLink:AddVMOperator( "=", "n,wl", "", function( Context, Trace, MemRef, Value )
 	Context.Memory[MemRef] = Value
 end )
