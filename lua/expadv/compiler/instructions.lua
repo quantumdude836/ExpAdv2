@@ -785,22 +785,20 @@ function Compiler:Compile_METHOD( Trace, Expression, Method, Expressions, bNoErr
 end
 
 function Compiler:Compile_RETURN( Trace, Expression )
-	local Optional = self.ReturnOptional[ self.ReturnDeph ]
-	local Expected = self.ReturnTypes[ self.ReturnDeph ]
+	local Optional = self.ReturnOptional[ self.ReturnDeph ] or false
+	local Expected = self.ReturnTypes[ self.ReturnDeph ] or "void"
 
-	if Expected and Expected == "void" then Expected = nil end
-
-	if (Optional or !Expected) and !Expression then
+	if (Optional or Expected == "void") and !Expression then
 		return Quick( "return nil, \"void\"" )
+	elseif Expression and Expression.Return == "void" then
+		return Quick( string.format("return nil, %q", Expected))
 	elseif !Expression then
-		self:TraceError( Trace, "Can not return %s here, void expected.", self:NiceClass( Expected ) )
-	elseif Expected and Expression.Return ~= Expected then
+		self:TraceError( Trace, "Can not return void here, %s expected.", self:NiceClass( Expected ) )
+	elseif Expression and Expected ~= "void" and Expression.Return ~= Expected and Expression.Return ~= "void" then
 		self:TraceError( Trace, "Can not return %s here, %s expected.", self:NiceClass( Expression.Return, Expected ) )
+	elseif Expression and Expected == "void" and Expression.Return ~= "void" then
+		self:TraceError( Trace, "Can not return %s here, void expected.", self:NiceClass( Expression.Return ) )
 	end 
-
-	--if !Expected and Expression.Return ~= "_vr" then
-	--	Expression = self:Compile_CAST( Trace, "variant", Expression )
-	--end
 
 	Expression.Inline = string.format( "return %s, %q", Expression.Inline, Expression.Return or "void" )
 
