@@ -719,7 +719,7 @@ if CLIENT then
 					local BonePos, BoneAng = Ply:GetBonePosition( BoneIndx )
 					
 					for I = 1, math.random( 0, 2 ) do
-						local Particle = Emitter:Add("omicron/lembletoe", BonePos + Vector(0, 0, 10) )
+						local Particle = Emitter:Add("omicron/lemongear", BonePos + Vector(0, 0, 10) )
 					
 						if Particle then
 							Particle:SetColor( 255, 255, 255 )

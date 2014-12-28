@@ -75,7 +75,7 @@ EXPADV.AddVMOperator( nil, "call", "f,s,...", "_vr",
 		elseif rType == "void" then
 			Context:Throw( Trace, "invoke", "Invalid return value, " .. EXPADV.TypeName(rExpect) .. " expected got void")
 		elseif rExpect ~= rType then
-			Context:Throw( Trace, "invoke", string.format("Invalid return value, %s expected got %s", EXPADV.TypeName(rExpect, rType)))
+			Context:Throw( Trace, "invoke", string.format("Invalid return value, %s expected got %s", EXPADV.TypeName(rExpect), EXPADV.TypeName(rType)))
 		end
 
 		return rValue
