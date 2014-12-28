@@ -13,7 +13,7 @@ function Compiler:Compile_BOOL( Trace, Bool )
 end
 
 function Compiler:Compile_VOID( Trace )
-	return { Trace = Trace, Inline = "nil", Return = "", FLAG = EXPADV_INLINE, IsRaw = true }
+	return { Trace = Trace, Inline = "nil", Return = "void", FLAG = EXPADV_INLINE, IsRaw = true }
 end
 
 function Compiler:Compile_NUM( Trace, Int )

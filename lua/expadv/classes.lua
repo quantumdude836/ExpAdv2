@@ -158,7 +158,7 @@ end
 	@: Define generic Class
    --- */
 
-local Class_Generic = setmetatable( { Name = "generic", Short = "g" }, EXPADV.BaseClassObj )
+local Class_Generic = setmetatable( { Name = "generic", Short = "generic" }, EXPADV.BaseClassObj )
 	-- We do this manually, so it doesnt get treated like the rest!
 
 /* --- --------------------------------------------------------------------------------
@@ -167,6 +167,13 @@ local Class_Generic = setmetatable( { Name = "generic", Short = "g" }, EXPADV.Ba
 
 local Class_Void = setmetatable( { Name = "void", Short = "void" }, EXPADV.BaseClassObj )
 
+hook.Add("Expadv.PreLoadOperators", "expadv.void",
+	function( )
+		EXPADV.AddInlineOperator( nil, "==", "generic,void", "b", "(@value 1 == nil)" )
+		EXPADV.AddInlineOperator( nil, "==", "void,generic", "b", "(@value 2 == nil)" )
+		EXPADV.AddInlineOperator( nil, "!=", "generic,void", "b", "(@value 1 ~= nil)" )
+		EXPADV.AddInlineOperator( nil, "!=", "void,generic", "b", "(@value 2 ~= nil)" )
+	end )
 /* --- --------------------------------------------------------------------------------
 	@: GetClass
    --- */
@@ -174,6 +181,8 @@ local Class_Void = setmetatable( { Name = "void", Short = "void" }, EXPADV.BaseC
 -- Returns a classes module, using either name or id as look up.
 function EXPADV.GetClass( Name, bNoShort ) -- String
 	if !Name or Name == "" or Name == "void" then return Class_Void end
+
+	if Name == "generic" then return Class_Generic end
 
 	if EXPADV.Classes[ Name ] then return EXPADV.Classes[ Name ] end
 
@@ -214,6 +223,8 @@ local ToStringLookUp = { }
 
 -- Used during execution to translate class objects to strings.
 function EXPADV.ToString( Short, Obj ) -- String, Obj
+	if Short == "void" then return "void" end
+
 	return ToStringLookUp[Short]( Obj )
 end
 

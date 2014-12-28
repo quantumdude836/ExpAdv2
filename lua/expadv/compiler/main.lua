@@ -246,7 +246,11 @@ end
    --- */
 function Compiler:GetClass( Trace, ClassName, bNoError )
 	
-	local Class = EXPADV.GetClass( ClassName, true )
+	local Class
+
+	if ClassName ~= "generic" then
+		Class = EXPADV.GetClass( ClassName, true )
+	end
 	
 	if !Class and bNoError then return end
 
@@ -359,7 +363,7 @@ function Compiler:TestCell( Trace, MemRef, ClassShort, Variable, Comparator )
 
 	if !Cell and Variable then
 		self:TraceError( Trace, "%s of type %s does not exist", Variable, self:NiceClass( ClassShort ) )
-	elseif ClassShort and ClassShort ~= "_void" and Cell.Return ~= ClassShort and Variable then
+	elseif ClassShort and ClassShort ~= "void" and Cell.Return ~= ClassShort and Variable then
 		self:TraceError( Trace, "%s of type %s can not be assigned as %s", Variable, self:NiceClass( Cell.Return, ClassShort ) )
 	elseif self.IsServerScript and !Cell.Server then
 		self:TraceError( Trace, "%s of type %s is not avalible serverside", Variable, self:NiceClass( Cell.Return ) )
@@ -567,6 +571,7 @@ function Compiler:LookUpOperator( Name, First, ... )
 	end
 
 	local Op = EXPADV.Operators[ string.format( "%s(%s)", Name, table.concat( { First, ... }, "" ) ) ]
+
 	if Op then return Op end
 
 	local Class = EXPADV.GetClass( First )

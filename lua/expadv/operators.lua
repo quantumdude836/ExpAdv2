@@ -150,8 +150,8 @@ function EXPADV.LoadOperators( )
 		end
 
 		-- First of all, Check the return type!
-		if !Operator.Return or Operator.Return == "" or Operator.Return == "void" or Operator.Return == "_void" then
-			Operator.Return = "_void"
+		if !Operator.Return or Operator.Return == "" or Operator.Return == "void" or Operator.Return == "void" then
+			Operator.Return = "void"
 
 			if Operator.FLAG == EXPADV_INLINE then
 				EXPADV.Msg( string_format( "Skipped operator: %s(%s), Inline operators can't return void.", Operator.Name, Operator.Input ) )
@@ -382,8 +382,8 @@ function EXPADV.LoadFunctions( )
 		if Operator.Component and !Operator.Component.Enabled then continue end
 
 		-- First of all, Check the return type!
-		if !Operator.Return or Operator.Return == "" or Operator.Return == "void" or Operator.Return == "_void" then
-			Operator.Return = "_void"
+		if !Operator.Return or Operator.Return == "" or Operator.Return == "void" or Operator.Return == "void" then
+			Operator.Return = "void"
 
 			if Operator.FLAG == EXPADV_INLINE then
 				EXPADV.Msg( string_format( "Skipped operator: %s(%s), Inline operators can't return void.", Operator.Name, Operator.Input ) )
@@ -510,6 +510,7 @@ function EXPADV.LoadFunctions( )
 		EXPADV.Functions[ Operator.Signature ] = Operator
 
 		EXPADV.LoadFunctionAliases( Operator )
+
 	end
 
 	if CLIENT then
