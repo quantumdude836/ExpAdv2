@@ -567,7 +567,7 @@ Component:AddVMFunction( "isWeldedTo", "e:", "e",
 Component:AddVMFunction( "getConstraints", "e:", "ar",
 	function( Context, Trace, Ent )
 		local Array = {__type = "e"}
-		if IsValid(Ent) or !constraint.HasConstraints( Ent ) then return Array end
+		if !IsValid(Ent) or !constraint.HasConstraints( Ent ) then return Array end
 		
 		for _, Constraint in pairs( constraint.GetAllConstrainedEntities( Ent ) ) do
 			if IsValid( Constraint ) and Constraint ~= Ent then

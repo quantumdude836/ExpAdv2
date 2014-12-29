@@ -111,7 +111,7 @@ hook.Add( "Think", "expadv.timers", function( )
 		if !Context.Online then continue end
 
 		local Timers = Context.Data.Timers
-		if !Timers then return end
+		if !Timers then continue end
 
 		local Count, time = 0, CurTime( )
 
