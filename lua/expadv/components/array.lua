@@ -141,13 +141,15 @@ function Component:OnPostRegisterClass( Name, Class )
 		if @value 1[@value 2] == nil then Context.Throw(@trace, "array", "array reach index " .. @value 2 .. " returned void" ) end
 		]], Class.Short, Class.Name), "$table.remove(@value 1, @value 2)")
 
-	Component:AddPreparedFunction( "insert", "ar,n," .. Class.Short, "", string.format([[
+	Component:AddPreparedFunction( "insert", "ar:n," .. Class.Short, "", string.format([[
 		if @value 1.__type ~= %q then Context.Throw(@trace, "array", "array type missmatch, %s expected got " .. EXPADV.TypeName(@value 1.__type)) end
 		]], Class.Short, Class.Name), "$table.insert(@value 1, @value 2, @value 3)")
+	EXPADV.AddFunctionAlias("insert", "ar,n," .. Class.Short)
 
-	Component:AddPreparedFunction( "insert", "ar," .. Class.Short, "", string.format([[
+	Component:AddPreparedFunction( "insert", "ar:" .. Class.Short, "", string.format([[
 		if @value 1.__type ~= %q then Context.Throw(@trace, "array", "array type missmatch, %s expected got " .. EXPADV.TypeName(@value 1.__type)) end
 		]], Class.Short, Class.Name), "$table.insert(@value 1, @value 2)")
+	EXPADV.AddFunctionAlias("insert", "ar," .. Class.Short)
 
 /* ---	--------------------------------------------------------------------------------
 	@: Foreach Loop
