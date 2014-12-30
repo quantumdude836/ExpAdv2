@@ -216,7 +216,7 @@ function Compiler:StringToken( StrChar )
 	self:SkipChar( )
 
 	while self.Char do
-		if self.TimeMark < SysTime( ) then coroutine.yield( ) end
+		if self.TimeMark and self.TimeMark < SysTime( ) then coroutine.yield( ) end
 		
 		if self.Char == "\n" then
 			

@@ -173,6 +173,8 @@ function ENT:DrawScreen( )
 		surface.SetDrawColor( 0, 0,0 ,255 )
 		surface.DrawRect( -256 * Aspect, -256 * Aspect, 512 * Aspect, 512 * Aspect )
 
+		if self.PreDrawScreen then self:PreDrawScreen(512 * Aspect, 512 * Aspect) end
+
 		if self.RenderTarget and self.RenderMat then
 			local Previous = self.RenderMat:GetTexture( "$basetexture" )
 			self.RenderMat:SetTexture( "$basetexture", self.RenderTarget )
@@ -184,6 +186,7 @@ function ENT:DrawScreen( )
 			self.RenderMat:SetTexture( "$basetexture", Previous )
 		end
 
+		if self.PostDrawScreen then self:PostDrawScreen(512 * Aspect, 512 * Aspect) end
 	cam.End3D2D( )
 end
 

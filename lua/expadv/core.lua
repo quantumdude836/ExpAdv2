@@ -631,18 +631,18 @@ hook.Add( "Expadv.PostLoadConfig", "expadv.quota", function( )
 	EXPADV.CreateSetting( "softquota", 100000 )
 	EXPADV.CreateSetting( "hardquota", 1000000 )
 	EXPADV.CreateSetting( "memorylimit", 5 )
-	-- EXPADV.CreateSetting( "maxcompilertime", 1 )
 end )
 
-timer.Create( "expadv.quota", 1, 0, function( )
+local function update( )
 	expadv_luahook   = EXPADV.ReadSetting( "hookrate", 500 )
 	expadv_tickquota = EXPADV.ReadSetting( "tickquota", 250000 )
 	expadv_softquota = EXPADV.ReadSetting( "softquota", 100000 )
 	expadv_hardquota = EXPADV.ReadSetting( "hardquota", 1000000 )
 	expadv_memorylimit = EXPADV.ReadSetting( "memorylimit", 5 ) * 1024
-	-- expadv_maxcompilertime = EXPADV.ReadSetting( "maxcompilertime", 1 )
-end ) 
+end
 
+update()
+timer.Create( "expadv.quota", 1, 0, update )
 /* --- --------------------------------------------------------------------------------
 	@: Transmit Notice.
    --- */

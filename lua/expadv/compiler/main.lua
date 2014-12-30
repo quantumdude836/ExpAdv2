@@ -754,10 +754,29 @@ function Compiler:GetStatus( )
 	if self.Pos <= 0 or self.Len <= 0 then return 0 end
 	return math.ceil( math.Clamp(self.Pos / self.Len, 0, 1) * 100)
 end
+/* --- --------------------------------------------------------------------------------
+	@: Compiler Managment
+   --- */
+
+expadv_compilespeed = 0.1
+
+hook.Add( "Expadv.PostLoadConfig", "expadv.quota", function( )
+	EXPADV.CreateSetting( "compile_speed", 20 )
+end )
+
+timer.Create( "expadv.quota", 1, 0, function( )
+	local Speed = EXPADV.ReadSetting( "compile_speed", 20 )
+	
+	if Speed == 0 then
+		expadv_compilespeed = 0
+	else
+		expadv_compilespeed = math.Clamp(math.ceil(Speed / 100), 0.1, 1)
+	end
+end ) 
 
 function Compiler:Resume( HandelManual )
 
-	self.TimeMark = SysTime( ) + 0.1
+	self.TimeMark = (expadv_compilespeed > 0) and SysTime( ) + (expadv_compilespeed) or 0
 	
 	local Ok, Error = coroutine.resume( self.Thread )
 
