@@ -39,7 +39,7 @@ local function GetValidPath( Context, Path )
 
 	if CLIENT and Context.player == LocalPlayer() then
 		Root = "expadv2/files"
-	elseif EXPADV.CanAccessFeature(Context.entity, "File access") then
+	elseif SERVER or EXPADV.CanAccessFeature(Context.entity, "File access") then
 		Root = "expadv2/userfiles/" .. string.gsub(Context.player:SteamID(), ":", "_")
 	else
 		return false
