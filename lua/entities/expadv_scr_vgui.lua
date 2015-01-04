@@ -261,20 +261,14 @@ function ENT:Think()
 
 	self.Hovered = true
 	
-	if LocalPlayer():KeyPressed( IN_USE ) then self:KeyPress( IN_USE ) end
+	if LocalPlayer():KeyPressed( IN_USE ) then self:KeyPress( MOUSE_LEFT )//IN_USE ) end
 
-	if LocalPlayer():KeyReleased( IN_USE ) then self:KeyRelease( IN_USE ) end
+	if LocalPlayer():KeyReleased( IN_USE ) then self:KeyRelease( MOUSE_LEFT )//IN_USE ) end
 	
 	local atk1 = input.IsMouseDown( MOUSE_LEFT )
 	local iuse = input.IsMouseDown( IN_USE )
 
-	if (!self.In_Use and iuse) then
-		self.In_Use = true
-		self:KeyPress( MOUSE_LEFT )
-	elseif (self.In_Use and !iuse) then
-		self.In_Use = false
-		self:KeyRelease( MOUSE_LEFT )
-	elseif (!self.Attack1 and atk1) then
+	if (!self.Attack1 and atk1) then
 		self.Attack1 = true
 		self:KeyPress( MOUSE_LEFT )
 	elseif (self.Attack1 and !atk1) then
