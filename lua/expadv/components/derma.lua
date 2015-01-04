@@ -291,10 +291,27 @@ Component:AddVMFunction( "dpropertysheet", "df", "dps", function(Context, Trace,
 Component:AddVMFunction( "dpropertysheet", "", "dps", function(Context, Trace) return CreatePanel(Context, Trace, "DPropertySheet") end )
 
 /* -----------------------------------------------------------------------------------
-	@: DImage (TODO)
+	@: DImage
 --- */
 
--- Component:AddVMFunction( "cursorImage", "", "di", function(Context, Trace) return self.Cursor_Image end )
+local DImageClass = Component:AddClass( "dimage", "dimg" )
+DImageClass:ExtendClass( "dp" )
+
+DImageClass:AddPreparedOperator( "=", "n,dimg", "", "Context.Memory[@value 1] = @value 2" )
+
+Component:AddVMFunction( "dimage", "dp", "dimage", function(Context, Trace, Panel) return CreatePanel(Context, Trace, "DImage", Panel) end )
+Component:AddVMFunction( "dimage", "df", "dimage", function(Context, Trace, Panel) return CreatePanel(Context, Trace, "DImage", Panel) end )
+Component:AddVMFunction( "dimage", "", "dimage", function(Context, Trace) return CreatePanel(Context, Trace, "DImage") end )
+
+Component:AddPreparedFunction( "setImage", "dimage", "s", [[if IsValid(@value 1) then
+	@value 1:SetImage(@value 2)
+end]] )
+
+
+Component:AddVMFunction( "cursorImage", "", "dimg", function(Context, Trace)
+	if !Context.entity.ScreenDerma then return nil end 
+	return Context.entity.Cursor_Image
+end )
 
 /* -----------------------------------------------------------------------------------
 	@: Functions for all classes

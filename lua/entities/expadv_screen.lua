@@ -246,10 +246,12 @@ function ENT:RenderScreen( )
 
 		Context:Execute( "Event drawScreen", Event, 512, 512 )
 
-		for i=1, Context.Matrices do
-			cam.PopModelMatrix( )
+		if Context.Matrices > 0 then
+			for i=1, Context.Matrices do
+				cam.PopModelMatrix( )
+			end
 		end
-
+		
 		Context.In2DRender = false
 
 	cam.End2D( )

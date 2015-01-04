@@ -92,39 +92,49 @@ end
    --- */
 
 function ENT:Initialize()
-	self.Attack1 = false
-	self.Attack2 = false
+
 	self.Hovered = false
 
-	self.Panel = self:CreateDermaObject( "DPanel" ) //"EditablePanel" )
-	self.Panel.Paint = function() end
+	self.Panel = self:CreateDermaObject( "DPanel" )
+	self.Panel:SetPos(0,0)
+	self.Panel:SetSize(512, 512)
+	self.Panel:SetDrawBackground(false)
+	self.Panel:SetPaintedManually( true )
 
 	self.Cursor_Image = self:CreateDermaObject( "DImage" )
 	self.Cursor_Image:SetImage("omicron/lemongear.png")
 	self.Cursor_Image:SetSize(16, 16)
+	self.Cursor_Image:SetZPos( 32767 )
 	self.Cursor_Image:SetVisible(false)
 
 	local Panel = vgui.Create( "EditablePanel" )
+
+	hook.Add("KeyPress", self, self.OnKeyPress)
+	hook.Add("KeyRelease", self, self.OnKeyRelease)
+	hook.Add("GUIMousePressed", self, self.GUIMousePressed)
+	hook.Add("GUIMouseReleased", self, self.GUIMouseReleased)
 
 	self.BaseClass.Initialize(self)
 end
 
 function ENT:OnRemove()
+	self:RestoreGuiMouse()
+	EXPADV.CacheRenderTarget( self.RenderTarget, self.RenderMat )
+
 	if self.Panel and self.Panel:IsValid() then self.Panel:Remove() end
 
-	self:RestoreGuiMouse()
+	return self.BaseClass.BaseClass.OnRemove( self )
 end
 
 function ENT:PostDrawScreen( Width, Height )
 	if !ValidPanel(self.Panel) then return end
 
-	self.Panel:SetSize(Width, Height)
-	self.Panel:SetPos(0, 0)
-
 	self:checkHover( self.Panel )
 	self.Panel:SetPaintedManually( false )
 	self.Panel:PaintManual()
 	self.Panel:SetPaintedManually( true )
+
+	surface.DisableClipping(true)
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -262,7 +272,7 @@ function ENT:Think()
 	self.CursorX = CursorPos.x
 	self.CursorY = CursorPos.y
 
-	self.Cursor_Image:SetPos(self.CursorX, self.CursorY)
+	self.Cursor_Image:SetPos(self.CursorX + 1, self.CursorY + 1)
 
  	if CursorPos.x == 0 and CursorPos.y == 0 then
  		if self.Hovered == true then self:RestoreGuiMouse() end
@@ -276,27 +286,76 @@ function ENT:Think()
 
 	self.Hovered = true
 	
-	if LocalPlayer():KeyPressed( IN_USE ) then self:KeyPress( MOUSE_LEFT ) end//IN_USE ) end
+end
 
-	if LocalPlayer():KeyReleased( IN_USE ) then self:KeyRelease( MOUSE_LEFT ) end//IN_USE ) end
-	
-	local atk1 = input.IsMouseDown( MOUSE_LEFT )
+function ENT:OnKeyPress( Player, Key )
+	if self.CursorX == 0 and self.CursorY == 0 then return end
+	if Player != LocalPlayer() then return end
 
-	if (!self.Attack1 and atk1) then
-		self.Attack1 = true
+	if Key == IN_USE then
 		self:KeyPress( MOUSE_LEFT )
-	elseif (self.Attack1 and !atk1) then
-		self.Attack1 = false
+	end
+end
+
+function ENT:OnKeyRelease( Player, Key )
+	if self.CursorX == 0 and self.CursorY == 0 then return end
+	if Player != LocalPlayer() then return end
+
+	if Key == IN_USE then
 		self:KeyRelease( MOUSE_LEFT )
 	end
-	
-	local atk2 = input.IsMouseDown( MOUSE_RIGHT )
+end
 
-	if (!self.Attack2 and atk2) then
-		self.Attack2 = true
-		self:KeyPress( MOUSE_LEFT )
-	elseif (self.Attack2 and !atk2) then
-		self.Attack2 = false
-		self:KeyRelease( MOUSE_LEFT )
+function ENT:GUIMousePressed( Key )
+	if self.CursorX == 0 and self.CursorY == 0 then return end
+	self:KeyPress( Key )
+end
+
+function ENT:GUIMouseReleased( Key )
+	if self.CursorX == 0 and self.CursorY == 0 then return end
+	self:KeyRelease( Key )
+end
+
+local LEFT_CLICK, RIGHT_CLICK = false, false
+
+hook.Add("Tick", "expadv.dermascreen", function()
+	local ExpAdv = LocalPlayer():GetEyeTrace().Entity
+	
+	if IsValid(ExpAdv) and ExpAdv.ExpAdv and ExpAdv.ScreenDerma then
+
+		local LeftBtn = input.IsMouseDown( MOUSE_LEFT )
+
+		if LeftBtn and !LEFT_CLICK then
+			LEFT_CLICK = true
+			ExpAdv:GUIMousePressed( MOUSE_LEFT )
+		elseif !LeftBtn and LEFT_CLICK then
+			LEFT_CLICK = false
+			ExpAdv:GUIMouseReleased( MOUSE_LEFT )
+		end
+
+		local RightBtn = input.IsMouseDown( MOUSE_LEFT )
+
+		if RightBtn and !RIGHT_CLICK then
+			RIGHT_CLICK = true
+			ExpAdv:GUIMousePressed( MOUSE_RIGHT )
+		elseif !RightBtn and RIGHT_CLICK then
+			RIGHT_CLICK = false
+			ExpAdv:GUIMouseReleased( MOUSE_RIGHT )
+		end
 	end
+end )
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: OnRemove
+   --- */
+
+function ENT:OnRemove( )
+	hook.Remove("KeyPress", self)
+	hook.Remove("KeyRelease", self)
+	hook.Remove("GUIMousePressed", self)
+	hook.Remove("GUIMouseReleased", self)
+
+	if self.Panel then self.Panel:Remove() end
+
+	return self.BaseClass.BaseClass.OnRemove( self )
 end
