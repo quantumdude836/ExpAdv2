@@ -26,7 +26,7 @@ EXPADV.SharedOperators()
 
 
 
-local function GetValidPath( Context, Path )
+local function GetValidPath( Context, Path, bCreate )
 	if Path:find( "..", 1, true ) then return false end
 
 	local FilePath = string.GetPathFromFilename( Path )
@@ -71,9 +71,9 @@ Component:AddVMFunction( "writeFile", "s,s", "",
 	function( Context, Trace, Path, File )
 		if #File < Component:ReadSetting( "max_filesize", 300 ) then
 			local ValidPath = GetValidPath( Context, Path, true )
-			MsgN("Valid Path: ", ValidPath)
+
 			if ValidPath then
-				file.Write( ValidPath, File )
+				file.Write( ValidPath, File, true )
 			end
 		end
 	end )
