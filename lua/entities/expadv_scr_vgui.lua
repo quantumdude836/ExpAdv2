@@ -81,9 +81,12 @@ function ENT:Initialize()
 	self.Attack1 = false
 	self.Attack2 = false
 	self.Hovered = false
-	
+
 	self.Panel = self:CreateDermaObject( "EditablePanel" )
-	self.Panel.Paint = function() end
+	self.Cursor_Image = self:CreateDermaObject( "DImage" )
+	self.Cursor_Image:SetImage("omicron/lemongear.png")
+	self.Cursor_Image:SetSize(16, 16)
+	self.Cursor_Image:SetVisible(false)
 
 	local Panel = vgui.Create( "EditablePanel" )
 
@@ -100,7 +103,7 @@ function ENT:PostDrawScreen( Width, Height )
 	if !ValidPanel(self.Panel) then return end
 
 	self.Panel:SetSize(Width, Height)
-	self.Panel:SetPos(-Width * 0.5, -Height * 0.5)
+	self.Panel:SetPos(0, 0)
 
 	self:checkHover( self.Panel )
 	self.Panel:SetPaintedManually( false )
@@ -242,6 +245,8 @@ function ENT:Think()
  	local CursorPos = self:GetCursor( LocalPlayer() )
 	self.CursorX = CursorPos.x
 	self.CursorY = CursorPos.y
+
+	self.Cursor_Image:SetPos(self.CursorX, self.CursorY)
 
  	if CursorPos.x == 0 and CursorPos.y == 0 then
  		if self.Hovered == true then self:RestoreGuiMouse() end

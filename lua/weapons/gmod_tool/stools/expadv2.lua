@@ -36,6 +36,7 @@ end
 
 TOOL.ClientConVar.model 		= "models/lemongate/lemongate.mdl"
 TOOL.ClientConVar.screen 		= 0
+TOOL.ClientConVar.derma			= 0
 TOOL.ClientConVar.weld		 	= 0
 TOOL.ClientConVar.weldworld 	= 0
 TOOL.ClientConVar.frozen		= 0
@@ -135,6 +136,32 @@ end
 
 duplicator.RegisterEntityClass( "expadv_screen", MakeExpadvScreen, "Pos", "Ang", "Model", "DupeInPorts", "DupeOutPorts" )
 
+local function MakeExpadvScreenDerma( Player, Position, Angle, Model, InPorts, OutPorts )
+	if Player:GetCount( "expadv" ) > EXPADV.ReadSetting( "limit", 20 ) then
+		Player:LimitHit( "Expression Advanced entity limit reached." )
+		return nil
+	end
+	
+	local ExpAdv = ents.Create( "expadv_scr_vgui" )
+	if !IsValid( ExpAdv ) then return end
+
+	ExpAdv:SetPos( Position )
+	ExpAdv:SetAngles( Angle )
+	ExpAdv:SetModel( Model )
+	ExpAdv:Activate( )
+	ExpAdv:Spawn( )
+
+	Player:AddCount( "expadv", ExpAdv )
+	ExpAdv:SetPlayer( Player )
+	ExpAdv.player = Player
+
+	ExpAdv:ApplyDupePorts( InPorts, OutPorts )
+
+	return ExpAdv
+end
+
+duplicator.RegisterEntityClass( "expadv_scr_vgui", MakeExpadvScreenDerma, "Pos", "Ang", "Model", "DupeInPorts", "DupeOutPorts" )
+
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Left Click
    --- */
@@ -160,7 +187,11 @@ function TOOL:LeftClick( Trace )
 	local Ang = Trace.HitNormal:Angle( ) + Angle( 90, 0, 0 )
 
 	if self:GetClientNumber( "screen" ) == 1 then
-		ExpAdv = MakeExpadvScreen( self:GetOwner( ), Trace.HitPos, Ang, Model )
+		if self:GetClientNumber( "derma" ) == 1 then
+			ExpAdv = MakeExpadvScreenDerma( self:GetOwner( ), Trace.HitPos, Ang, Model )
+		else
+			ExpAdv = MakeExpadvScreen( self:GetOwner( ), Trace.HitPos, Ang, Model )
+		end
 	else
 		ExpAdv = MakeExpadv( self:GetOwner( ), Trace.HitPos, Ang, Model )
 	end
@@ -240,6 +271,7 @@ if CLIENT then
 		CPanel:AddItem( PropList )
 
 		local Screen = CPanel:CheckBox( "Create screen", "expadv2_screen" )
+		local Derma = CPanel:CheckBox( "Use VGUI for Screen", "expadv2_derma" )
 		local CheckWeld  = CPanel:CheckBox( "Create Welded", "expadv2_weld" )
 		local CheckFroze = CPanel:CheckBox( "Create Frozen", "expadv2_frozen" )
 		local CheckWorld = CPanel:CheckBox( "Create Welded to World", "expadv2_weldworld" )

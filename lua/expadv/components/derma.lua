@@ -81,7 +81,9 @@ Component:AddPreparedFunction("dockPadding", "dp:n,n,n,n", "", "@value 1:DockPad
 
 Component:AddPreparedFunction("center", "dp:", "", "@value 1:Center()")
 
-Component:AddPreparedFunction("onPaint", "dp:d", "", [[@value 1.Paint = function() Context:Execute( "paint", @value 2 ) end]])
+Component:AddPreparedFunction("onPaint", "dp:d", "", [[@value 1.Paint = function()
+	Context:Execute( "paint", @value 2 )
+end]])
 
 PanelClass:AddPreparedOperator( "=", "n,dp", "", "Context.Memory[@value 1] = @value 2" )
 
@@ -140,7 +142,9 @@ Component:AddVMFunction( "dbutton", "df", "db", function(Context, Trace, Panel) 
 Component:AddVMFunction( "dbutton", "", "db", function(Context, Trace) return CreatePanel(Context, Trace, "DButton") end )
 
 Component:AddPreparedFunction("onClick", "db:d", "", [[
-	@value 1.DoClick = function() Context:Execute( "dbutton", @value 2 ) end
+	@value 1.DoClick = function()
+		Context:Execute( "dbutton", @value 2 )
+	end
 ]])
 
 /* -----------------------------------------------------------------------------------
@@ -158,7 +162,9 @@ Component:AddVMFunction( "dtextentry", "dp", "dte", function(Context, Trace, Pan
 Component:AddVMFunction( "dtextentry", "df", "dte", function(Context, Trace, Panel) return CreatePanel(Context, Trace, "DTextEntry", Panel) end )
 Component:AddVMFunction( "dtextentry", "", "dte", function(Context, Trace) return CreatePanel(Context, Trace, "DTextEntry") end )
 
-Component:AddPreparedFunction("onTextChanged", "dte:d", "", [[@value 1.OnTextChanged = function() Context:Execute( "textentry", @value 2 ) end]])
+Component:AddPreparedFunction("onTextChanged", "dte:d", "", [[@value 1.OnTextChanged = function()
+	Context:Execute( "textentry", @value 2 )
+end]])
 
 /* -----------------------------------------------------------------------------------
 	@: Check Box
@@ -178,7 +184,9 @@ Component:AddVMFunction( "dcheckbox", "", "dcb", function(Context, Trace) return
 Component:AddPreparedFunction("setChecked", "dcb:b", "", "@value 1:SetChecked( @value 2 )")
 Component:AddInlineFunction("getChecked", "dcb:", "b", "@value 1:GetChecked( )")
 
-Component:AddPreparedFunction("onChange", "dcb:d", "", [[@value 1.OnChange = function() Context:Execute( "checkbox", @value 2 ) end]])
+Component:AddPreparedFunction("onChange", "dcb:d", "", [[@value 1.OnChange = function()
+	Context:Execute( "checkbox", @value 2 )
+end]])
 
 /* -----------------------------------------------------------------------------------
 	@: Panel List
@@ -210,7 +218,9 @@ Component:AddPreparedFunction("setMin", "dns:n", "", "@value 1:SetMin(@value 2)"
 Component:AddPreparedFunction("setMax", "dns:n", "", "@value 1:SetMax(@value 2)")
 Component:AddPreparedFunction("setValue", "dns:n", "", "@value 1:SetValue(@value 2)")
 Component:AddInlineFunction("getValue", "dns:", "n", "@value 1:GetValue()")
-Component:AddPreparedFunction("onChange", "dns:d", "", [[@value 1.ValueChanged = function() Context:Execute( "numslider", @value 2 ) end]])
+Component:AddPreparedFunction("onChange", "dns:d", "", [[@value 1.ValueChanged = function()
+	Context:Execute( "numslider", @value 2 )
+end]])
 
 /* -----------------------------------------------------------------------------------
 	@: Menu
@@ -224,9 +234,15 @@ MenuClass:AddPreparedOperator( "=", "n,dm", "", "Context.Memory[@value 1] = @val
 Component:AddVMFunction( "dmenu", "", "dm", function(Context, Trace) return CreatePanel(Context, Trace, "DMenu") end )
 
 Component:AddPreparedFunction("addOption", "dm:s", "", "@value 1:AddOption(@value 2)")
-Component:AddPreparedFunction("addOption", "dm:s,d", "", [[@value 1:AddOption(@value 2, function() Context:Execute("dmenu", @value 3) end)]])
+Component:AddPreparedFunction("addOption", "dm:s,d", "", [[@value 1:AddOption(@value 2, function()
+	Context:Execute("dmenu", @value 3)
+end)]])
+
 Component:AddInlineFunction("addSubMenu", "dm:s", "dm", "@value 1:AddSubMenu(@value 2)")
-Component:AddInlineFunction("addSubMenu", "dm:s,d", "dm", [[@value 1:AddSubMenu(@value 2, function() Context:Execute("dmenu", @value 3) end)]])
+Component:AddInlineFunction("addSubMenu", "dm:s,d", "dm", [[@value 1:AddSubMenu(@value 2, function()
+	Context:Execute("dmenu", @value 3)
+end)]])
+
 Component:AddPreparedFunction("addSpacer", "dm:", "", "@value 1:AddSpacer()")
 Component:AddPreparedFunction("open", "dm:", "", "@value 1:Open()")
 
@@ -274,6 +290,11 @@ Component:AddVMFunction( "dpropertysheet", "dp", "dps", function(Context, Trace,
 Component:AddVMFunction( "dpropertysheet", "df", "dps", function(Context, Trace, Panel) return CreatePanel(Context, Trace, "DPropertySheet", Panel) end )
 Component:AddVMFunction( "dpropertysheet", "", "dps", function(Context, Trace) return CreatePanel(Context, Trace, "DPropertySheet") end )
 
+/* -----------------------------------------------------------------------------------
+	@: DImage (TODO)
+--- */
+
+-- Component:AddVMFunction( "cursorImage", "", "di", function(Context, Trace) return self.Cursor_Image end )
 
 /* -----------------------------------------------------------------------------------
 	@: Functions for all classes
