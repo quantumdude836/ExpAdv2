@@ -13,7 +13,7 @@ Component.Description = "Adds a 3d and a 2d vector object."
 
 local VectorObj = Component:AddClass( "vector", "v" )
 
-VectorObj:StringBuilder( function( Vector ) return string.format( "Vec( %f, %f, %f )", Vector.x, Vector.y, Vector.z ) end )
+VectorObj:StringBuilder( function( Vector ) return string.format( "Vec( %i, %i, %i )", Vector.x, Vector.y, Vector.z ) end )
 VectorObj:CanSerialize( true )
 VectorObj:DefaultAsLua( Vector(0, 0, 0) )
 
@@ -291,7 +291,7 @@ require( "vector2" )
 
 local Vector2Obj = Component:AddClass( "vector2", "v2" )
 
-Vector2Obj:StringBuilder( function( Vector ) return string.format( "Vec2( %f, %f )", Vector.x, Vector.y ) end )
+Vector2Obj:StringBuilder( function( Vector ) return string.format( "Vec2( %i, %i )", Vector.x, Vector.y ) end )
 Vector2Obj:DefaultAsLua( Vector2(0, 0) )
 Vector2Obj:CanSerialize( true )
 
@@ -367,8 +367,8 @@ Context.Changed[@value 1] = @value
 	  @: Casting
    --- */
 
-Component:AddInlineOperator( "string", "v2", "s", "string.format( \"Vec2( %f, %f )\", @value 1.x, @value 1.y)" )
-Component:AddInlineOperator( "string", "v", "s", "string.format( \"Vec( %f, %f, %f )\", @value 1.x, @value 1.y, @value 1.z)" )
+Component:AddInlineOperator( "string", "v2", "s", [["Vec2(" .. @value 1.x .. ", " .. @value 1.y .. ")"]] )
+Component:AddInlineOperator( "string", "v", "s", [["Vec(" .. @value 1.x .. ", " .. @value 1.y .. ", " .. @value 1.z .. ")"]] )
 Component:AddInlineOperator( "vector2", "v", "v2", "Vector2(@value 1.x, @value 1.y)" )
 Component:AddInlineOperator( "vector", "v2", "v", "Vector(@value 1.x, @value 1.y,0)" )
 

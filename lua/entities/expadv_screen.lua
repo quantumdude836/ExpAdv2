@@ -31,6 +31,13 @@ function EXPADV.AddMonitor( Mdl, Off, Rot, Pos, Size, Res )
 	MonitorMdls[Mdl] = Monitor
 end
 
+function EXPADV.SetMonitorMinMax( Mdl, Max, Min )
+	if !MonitorMdls[Mdl] then return end
+
+	MonitorMdls[Mdl].Min = Min
+	MonitorMdls[Mdl].Max = Max
+end
+
 function EXPADV.GetMonitors( )
 	return MonitorMdls
 end
@@ -54,6 +61,16 @@ if WireLib then -- But Wiremods monitors do :D
 		EXPADV.AddMonitor( Mdl, Monitor.offset, Monitor.rot, Vector2( Monitor.x1, Monitor.y1 ), Vector2( Monitor.x2, Monitor.y2 ), Monitor.RS )
 	end
 end
+
+EXPADV.SetMonitorMinMax("models/hunter/plates/plate1x1.mdl", Vector(-23.039999008179, -23.040002822876, 1.7000000476837), Vector(23.039999008179, 23.040002822876, 1.7000000476837))
+EXPADV.SetMonitorMinMax("models/kobilica/wiremonitorsmall.mdl", Vector(0.30000039935112, -4.4800000190735, 9.4799995422363), Vector(0.29999962449074, 4.4800000190735, 0.51999998092651))
+EXPADV.SetMonitorMinMax("models/hunter/blocks/cube1x1x1.mdl", Vector(24.000001907349, -23.040000915527, 23.040000915527), Vector(23.999998092651, 23.040000915527, -23.040000915527))
+EXPADV.SetMonitorMinMax("models/props_lab/workspace002.mdl", Vector(-36.135429382324, -61.599151611328, 57.217697143555), Vector(-48.131019592285, -23.145492553711, 27.004096984863))
+EXPADV.SetMonitorMinMax("models/hunter/plates/plate05x05.mdl", Vector(-11.519999504089, -11.520001411438, 1.7000000476837), Vector(11.519999504089, 11.520001411438, 1.7000000476837))
+EXPADV.SetMonitorMinMax("models/props_lab/monitor01b.mdl", Vector(6.5300006866455, -5.6556153297424, 5.1859998703003), Vector(6.5299997329712, 3.6556153297424, -4.28600025177))
+EXPADV.SetMonitorMinMax("models/blacknecro/tv_plasma_4_3.mdl", Vector(0.10000213980675, -27.952558517456, 20.492000579834), Vector(0.099997863173485, 27.952558517456, -21.492000579834))
+EXPADV.SetMonitorMinMax("models/hunter/plates/plate2x2.mdl", Vector(-46.591995239258, -46.592002868652, 1.7000000476837), Vector(46.591995239258, 46.592002868652, 1.7000000476837))
+EXPADV.SetMonitorMinMax("models/kobilica/wiremonitorbig.mdl", Vector(0.20000101625919, -11.620611190796, 24.520000457764), Vector(0.19999898970127, 11.620611190796, 1.4799995422363))
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: GetCursor
@@ -166,12 +183,16 @@ function ENT:DrawScreen( )
 	local Monitor = EXPADV.GetMonitor( self:GetModel( ) )
 	if !Monitor then return end
 
+	local Position, Angles, Resolution = self:LocalToWorld( Monitor.Off ), self:LocalToWorldAngles( Monitor.Rot ), Monitor.Res
 	
-	cam.Start3D2D( self:LocalToWorld( Monitor.Off ), self:LocalToWorldAngles( Monitor.Rot ), Monitor.Res )
-		local Aspect = 1 / Monitor.Ratio
+	if Monitor.Max and Monitor.Min then Position = self:LocalToWorld( Monitor.Max ) end
 
+	cam.Start3D2D( Position, Angles, Resolution )
+		local Aspect = 1 / Monitor.Ratio
+		local Offset = (Monitor.Min and Monitor.Max) and 0 or -256 * Aspect
+		
 		surface.SetDrawColor( 0, 0,0 ,255 )
-		surface.DrawRect( -256 * Aspect, -256 * Aspect, 512 * Aspect, 512 * Aspect )
+		surface.DrawRect( Offset, Offset, 512 * Aspect, 512 * Aspect )
 
 		if self.RenderTarget and self.RenderMat then
 			local Previous = self.RenderMat:GetTexture( "$basetexture" )
@@ -179,7 +200,7 @@ function ENT:DrawScreen( )
 
 			surface.SetDrawColor( 255, 255, 255, 255 )
 			surface.SetMaterial( self.RenderMat )
-			surface.DrawTexturedRect( -256 * Aspect, -256 * Aspect, 512 * Aspect, 512 * Aspect )
+			surface.DrawTexturedRect( Offset, Offset, 512 * Aspect, 512 * Aspect )
 
 			self.RenderMat:SetTexture( "$basetexture", Previous )
 		end
