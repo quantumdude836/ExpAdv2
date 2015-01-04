@@ -70,6 +70,20 @@ function ENT:CreateDermaObject( Panel, Parent )
 		end
 	end
 	
+	if Panel.PerformLayout then
+		Panel._PerformLayout = Panel.PerformLayout
+
+		function Panel.PerformLayout(Panel, ...)
+			for _, Child in pairs( Panel:GetChildren() ) do
+				if !Child.Parent then
+					self:CreateDermaObject( Child, Panel )
+				end
+			end
+
+			return Panel:_PerformLayout(...)
+		end
+	end
+
 	return Panel
 end
 
