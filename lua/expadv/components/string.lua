@@ -214,10 +214,10 @@ Component:AddPreparedFunction( "format", "s:...", "s", [[
 	@define values, result = {}
 	
 	for i, variant in pairs( { @... } ) do
-		@values[I] = tostring( @variant[1] )
+		@values[i] = tostring( variant[1] )
 	end
 	
-	@result = string.format( @value 1, unpack(@values) )
+	@result = string.format( @value 1, $unpack(@values) )
 ]], "@result" )
 
 /* --- --------------------------------------------------------------------------------
