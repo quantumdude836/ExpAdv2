@@ -80,10 +80,11 @@ end
 function ENT:Initialize()
 	self.Attack1 = false
 	self.Attack2 = false
-	self.In_Use   = false
 	self.Hovered = false
 
-	self.Panel = self:CreateDermaObject( "EditablePanel" )
+	self.Panel = self:CreateDermaObject( "DPanel" ) //"EditablePanel" )
+	self.Panel.Paint = function() end
+
 	self.Cursor_Image = self:CreateDermaObject( "DImage" )
 	self.Cursor_Image:SetImage("omicron/lemongear.png")
 	self.Cursor_Image:SetSize(16, 16)
@@ -261,12 +262,11 @@ function ENT:Think()
 
 	self.Hovered = true
 	
-	if LocalPlayer():KeyPressed( IN_USE ) then self:KeyPress( MOUSE_LEFT )//IN_USE ) end
+	if LocalPlayer():KeyPressed( IN_USE ) then self:KeyPress( MOUSE_LEFT ) end//IN_USE ) end
 
-	if LocalPlayer():KeyReleased( IN_USE ) then self:KeyRelease( MOUSE_LEFT )//IN_USE ) end
+	if LocalPlayer():KeyReleased( IN_USE ) then self:KeyRelease( MOUSE_LEFT ) end//IN_USE ) end
 	
 	local atk1 = input.IsMouseDown( MOUSE_LEFT )
-	local iuse = input.IsMouseDown( IN_USE )
 
 	if (!self.Attack1 and atk1) then
 		self.Attack1 = true
