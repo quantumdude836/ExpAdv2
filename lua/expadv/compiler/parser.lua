@@ -412,7 +412,7 @@ end
 function Compiler:Expression_12( Trace )
 	-- MsgN( "Compiler -> Expression 2" )
 
-	if self.TimeMark < SysTime( ) then coroutine.yield( ) end
+	if self.TimeMark and self.TimeMark < SysTime( ) then coroutine.yield( ) end
 	
 	if self:AcceptToken( "add" ) then
 		local Trace = self:GetTokenTrace( Trace )
@@ -801,7 +801,7 @@ function Compiler:Statement( Trace )
 	--	self:Error( 0, "Script took longer then %i second to compile!", expadv_maxcompilertime )
 	--end
 
-	if self.TimeMark < SysTime( ) then coroutine.yield( ) end
+	if self.TimeMark and self.TimeMark < SysTime( ) then coroutine.yield( ) end
 
 	local _StmtRoot = self.StatmentRoot
 	self.StatmentRoot = self:GetTokenTrace( Trace )
