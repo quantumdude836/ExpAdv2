@@ -530,7 +530,7 @@ function Compiler:Expression_Value( Trace )
 		
 		self:PushScope( )
 		self:PushLambdaDeph( )
-		self:PushReturnDeph( ReturnClass, false )
+		self:PushReturnDeph( "*", true )
 
 		local Perams, UseVarg = self:Util_Perams( Trace )
 		

@@ -319,7 +319,10 @@ end
 local LEFT_CLICK, RIGHT_CLICK = false, false
 
 hook.Add("Tick", "expadv.dermascreen", function()
-	local ExpAdv = LocalPlayer():GetEyeTrace().Entity
+	local Player = LocalPlayer()
+	if !IsValid(Player) then return end
+	
+	local ExpAdv = Player:GetEyeTrace().Entity
 	
 	if IsValid(ExpAdv) and ExpAdv.ExpAdv and ExpAdv.ScreenDerma then
 

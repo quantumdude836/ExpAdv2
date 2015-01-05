@@ -790,6 +790,8 @@ function Compiler:Compile_RETURN( Trace, Expression )
 
 	if (Optional or Expected == "void") and !Expression then
 		return Quick( "return nil, \"void\"" )
+	elseif Expression and Expected == "*" then
+		-- Wildcard, do nothing :D
 	elseif Expression and Expression.Return == "void" then
 		return Quick( string.format("return nil, %q", Expected))
 	elseif !Expression then
