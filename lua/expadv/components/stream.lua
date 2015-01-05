@@ -38,19 +38,20 @@ EXPADV.SharedOperators( )
 Component:AddVMFunction( "writeNumber", "st:n", "", function( Context, Trace, Stream, Obj )
 	Stream.W = Stream.W + 1
 	if Stream.W >= 128 then Context:Throw( Trace, "stream", "Failed to write number to stream, maxamum stream size achived (128)" ) end
-	Stream.V[Stream.W] = Obj
+	Stream.V[Stream.W] = Obj or 0
 	Stream.T[Stream.W] = "n"
 end )
 
 Component:AddVMFunction( "writeString", "st:s", "", function( Context, Trace, Stream, Obj )
 	Stream.W = Stream.W + 1
 	if Stream.W >= 128 then Context:Throw( Trace, "stream", "Failed to write string to stream, maxamum stream size achived (128)" ) end
-	Stream.V[Stream.W] = Obj
+	Stream.V[Stream.W] = Obj or ""
 	Stream.T[Stream.W] = "s"
 end )
 
 Component:AddVMFunction( "writeEntity", "st:e", "", function( Context, Trace, Stream, Obj )
 	Stream.W = Stream.W + 1
+	if !IsValid(Obj) then Context:Throw( Trace, "stream", "Failed to write entity to stream, entity is invalid" ) end
 	if Stream.W >= 128 then Context:Throw( Trace, "stream", "Failed to write entity to stream, maxamum stream size achived (128)" ) end
 	Stream.V[Stream.W] = Obj
 	Stream.T[Stream.W] = "e"
@@ -58,9 +59,10 @@ end )
 
 Component:AddVMFunction( "writePlayer", "st:ply", "", function( Context, Trace, Stream, Obj )
 	Stream.W = Stream.W + 1
+	if !IsValid(Obj) then Context:Throw( Trace, "stream", "Failed to write player to stream, player is invalid" ) end
 	if Stream.W >= 128 then Context:Throw( Trace, "stream", "Failed to write entity to stream, maxamum stream size achived (128)" ) end
 	Stream.V[Stream.W] = Obj
-	Stream.T[Stream.W] = "e"
+	Stream.T[Stream.W] = "_ply"
 end )
 
 Component:AddVMFunction( "writeVector", "st:v", "", function( Context, Trace, Stream, Obj )
@@ -74,7 +76,7 @@ Component:AddVMFunction( "writeVector2", "st:v2", "", function( Context, Trace, 
 	Stream.W = Stream.W + 1
 	if Stream.W >= 128 then Context:Throw( Trace, "stream", "Failed to write vector to stream, maxamum stream size achived (128)" ) end
 	Stream.V[Stream.W] = {Obj.x, Obj.y}
-	Stream.T[Stream.W] = "v2"
+	Stream.T[Stream.W] = "_v2"
 end )
 
 Component:AddVMFunction( "writeAngle", "st:a", "", function( Context, Trace, Stream, Obj )
@@ -145,7 +147,7 @@ Component:AddVMFunction( "readPlayer", "st:", "ply", function( Context, Trace, S
 	
 	if !Stream.T[Stream.R] then
 		Context:Throw( Trace, "stream", "Failed to read player from stream, stream returned void." )
-	elseif Stream.T[Stream.R] ~= "e" then
+	elseif Stream.T[Stream.R] ~= "_ply" then
 		Context:Throw( Trace, "stream", "Failed to read player from stream, stream returned " .. EXPADV.TypeName( Stream.T[Stream.R] )  .. "." )
 	end
 
@@ -175,7 +177,7 @@ Component:AddVMFunction( "readVector2", "st:", "v2", function( Context, Trace, S
 	
 	if !Stream.T[Stream.R] then
 		Context:Throw( Trace, "stream", "Failed to read vector2 from stream, stream returned void." )
-	elseif Stream.T[Stream.R] ~= "v2" then
+	elseif Stream.T[Stream.R] ~= "_v2" then
 		Context:Throw( Trace, "stream", "Failed to read vector2 from stream, stream returned " .. EXPADV.TypeName( Stream.T[Stream.R] )  .. "." )
 	end
 

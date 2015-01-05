@@ -191,8 +191,14 @@ function PANEL:AddTabNamer( )
 		local Value = self:GetValue( )
 		local Title = string.sub( string.gsub( Value, "[^a-zA-Z0-9_ ]", "" ), 0, 16 )
 		
-		self:GetParent( ):GetParent( ):GetParent( ).TabHolder:GetActiveTab( ):SetText( Title )
-		self:GetParent( ):GetParent( ):GetParent( ).TabHolder:PerformLayout( )
+		local TabHolder = self:GetParent( ):GetParent( ):GetParent( ).TabHolder
+		local ActiveTab = TabHolder:GetActiveTab( )
+
+		ActiveTab:SetText( Title )
+		ActiveTab:SizeToContents( )
+		
+		TabHolder:InvalidateLayout( true )
+		TabHolder.tabScroller:InvalidateLayout( true )
 		
 		local X, Y = self:GetCaretPos( )
 		if Value != Title then X = X - 1 end

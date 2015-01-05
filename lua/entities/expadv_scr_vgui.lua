@@ -167,6 +167,25 @@ function ENT:RestoreGuiMouse()
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: DMenu Fixes
+	@: Author: Rusketh
+   --- */
+
+local DMenu_Open = DMenu.Open
+
+function DMenu.Open(...)
+	if !Fixed then return DMenu_Open(...) end
+
+	local MouseX, MouseY = gui.MouseX, gui.MouseY
+
+	gui.MouseX, gui.MouseY = __X, __Y
+
+	DMenu_Open(...)
+
+	gui.MouseX, gui.MouseY = MouseX, MouseY
+end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: 3D2D vgui wrapper
 	@: Author: Overv
    --- */
