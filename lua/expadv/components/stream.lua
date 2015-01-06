@@ -9,7 +9,7 @@ Component.Description = "Allows expression advanced chips and screens to communi
 
 /* --- --------------------------------------------------------------------------------
 	@: Base Stream Object
-	@: This should not have extra data type, avalible.
+	@: This should not have extra data types avalible.
 	@: If you require a stream object to contain more then basic types,
 	@: then you should extend a new object from this one (like the netstream object).
    --- */
@@ -269,33 +269,33 @@ Component:AddFunctionHelper( "hookStream", "s,d", "Calls the function (delegate)
 					if !H then return end
 					
 					E.Context:Execute( "Receive Stream " .. N, H, { E, "e" }, { { V = V, T = T, R = 0, W = #V } , "_st" } )
-			end
-					
 				end
+					
 			end
-
-			HasQueued, NetQueue = false, { }
 		end
+
+		HasQueued, NetQueue = false, { }
+	end
 
 	/* --- --------------------------------------------------------------------------------
 		@: Receiving from Server
 	   --- */
 
-		net.Receive( "expadv.netstream", function( )
-			local E = net.ReadEntity( )
-			local N = net.ReadString( )
-			local T, V = net.ReadTable( ), net.ReadTable( )
+	net.Receive( "expadv.netstream", function( )
+		local E = net.ReadEntity( )
+		local N = net.ReadString( )
+		local T, V = net.ReadTable( ), net.ReadTable( )
 
-			if IsValid( E ) and E:IsRunning( ) then
-				
-				local H = E.Context.Data["net_" .. N]
+		if IsValid( E ) and E:IsRunning( ) then
+			
+			local H = E.Context.Data["net_" .. N]
 
-				if !H then return end
-				
-				E.Context:Execute( "Net Receive " .. N, H, { { V = V, T = T, R = 0, W = #V } , "_nst" } )
-			end
-		end )
-	end
+			if !H then return end
+			
+			E.Context:Execute( "Net Receive " .. N, H, { { V = V, T = T, R = 0, W = #V } , "_nst" } )
+		end
+	end )
+end
 
 /* --- ------------------------------------------------------------------------------------ --- */
 do --- Net component: used to sync from server to client :D
@@ -447,19 +447,19 @@ do --- Net component: used to sync from server to client :D
 		@: Receiving
 	   --- */
 	   
-		net.Receive( "expadv.netstream", function( )
-			local E = net.ReadEntity( )
-			local N = net.ReadString( )
-			local T, V = net.ReadTable( ), net.ReadTable( )
+	net.Receive( "expadv.netstream", function( )
+		local E = net.ReadEntity( )
+		local N = net.ReadString( )
+		local T, V = net.ReadTable( ), net.ReadTable( )
 
-			if IsValid( E ) and E.ExpAdv and E:IsRunning( ) then
-				
-				local H = E.Context.Data["net_" .. N]
+		if IsValid( E ) and E.ExpAdv and E:IsRunning( ) then
+			
+			local H = E.Context.Data["net_" .. N]
 
-				if !H then return end
-				
-				E.Context:Execute( "Net Receive " .. N, H, { { V = V, T = T, R = 0, W = #V } , "_nst" } )
-			end
-		end )
+			if !H then return end
+			
+			E.Context:Execute( "Net Receive " .. N, H, { { V = V, T = T, R = 0, W = #V } , "_nst" } )
+		end
+	end )
 
 end

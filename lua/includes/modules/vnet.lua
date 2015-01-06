@@ -3,24 +3,22 @@
 	Copyright 2014 Alexandru-Mihai Maftei
 			   aka Vercas
 
+	The code below is subject to my license at http://www.vercas.com/license
+
 	Containing GitHub Repository:
-		https://github.com/vercas/Relay-Console
+		https://github.com/vercas/vNet-for-GMod
 
-	You may use this for any purpose as long as:
-	-	You don't remove this copyright notice.
-	-	You don't claim this to be your own.
-	-	You properly credit the author (Vercas) if you publish your work based on (and/or using) this.
+	Here is a summary of it: do whatever you want as long as you acknowledge my contribution and preserve the license.
 
-	If you modify the code for any purpose, the above obligations still apply.
-	If you make any interesting modifications, try forking the GitHub repository instead.
+	To expand on that:
+    -	Do not remove, alter or replace the license and copyright statements under any circumstances.
+    -	I am not responsible for how, where and why the code is used.
+    -	If you modify the code, publish your changes under the same license. If the changes are substantial, you may only append your copyright statement next to mine.
+    -	If a project uses the code, ideally you should credit my work somewhere in the software if possible. Exception makes open-source software where the code is redistributed in the repository.
+    -	The code may be used for personal, academic or commercial purposes as long as the terms of the licenses are met.
 
-	Instead of copying this code over for sharing, rather use the link:
-		https://github.com/vercas/Relay-Console/tree/master/lua/includes/modules/vnet.lua
-
-	The author may not be held responsible for any damage or losses directly or indirectly caused by
-	the use of vNet.
-
-	If you disagree with the above, don't use the code.
+    Please check the full license text provided in the link above before continuing.
+	If you disagree with the terms of the license, do not use the code.
 
 -----------------------------------------------------------------------------------------------------------------------------
 	
@@ -37,8 +35,7 @@
 
 -----------------------------------------------------------------------------------------------------------------------------
 	
-	New in this version:
-		-	Fixed typo at line 1152, where 'v' was typed instead of 'val', yielding errors when writing strings.
+	Nothing new here as far as the GitHub users are concerned.
 --]]
 
 

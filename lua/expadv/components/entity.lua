@@ -220,6 +220,96 @@ end]])
 Component:AddFunctionHelper( "killPod", "e:", "Kills the driver of the given vehicle.")
 
 /* --- --------------------------------------------------------------------------------
+	@: LINKED VEHICLES
+   --- */
+
+local function GetPod( Context )
+	if !IsValid(Context.entity) or !Context.entity.GetLinkedPod() then return Entity(0) end
+	return Context.entity:GetLinkedPod() or Entity(0)
+end
+
+EXPADV.SharedOperators()
+
+Component:AddVMFunction( "getVehicle", "", "e", GetPod )
+Component:AddFunctionHelper( "getVehicle", "", "Returns the Vehicle linked to the gate (by the expadv2 tool).")
+
+EXPADV.ServerOperators()
+
+Component:AddVMFunction( "getDriver", "", "ply",
+	function(Context, Trace)
+		local Pod = GetPod( Context )
+
+		if !IsValid(Pod) or !Pod:IsVehicle() then return Entity(0) end
+
+		return Pod:GetDriver() or Entity(0)
+	end )
+
+Component:AddVMFunction( "getPassenger", "", "ply",
+	function(Context, Trace)
+		local Pod = GetPod( Context )
+
+		if !IsValid(Pod) or !Pod:IsVehicle() then return Entity(0) end
+
+		return Pod:GetPassenger(0) or Entity(0)
+	end )
+
+Component:AddFunctionHelper( "getDriver", "", "Return the Driver of the Vehicle linked to the gate (by the expadv2 tool).")
+Component:AddFunctionHelper( "getPassenger", "", "Return the Passenger of the Vehicle linked to the gate (by the expadv2 tool).")
+
+Component:AddVMFunction( "lockVehicle", "b", "",
+	function(Context, Trace, Lock)
+		local Pod = GetPod( Context )
+
+		if !IsValid(Pod) or !Pod:IsVehicle() then return end
+
+		Pod:Fire(Lock and "Lock" or "Unlock", "", 0)
+	end )
+
+Component:AddVMFunction( "ejectVehicle", "", "",
+	function(Context, Trace, Lock)
+		local Pod = GetPod( Context )
+		if !IsValid(Pod) or !Pod:IsVehicle() then return end
+
+		local Driver = Pod:GetDriver()
+		if IsValid(Driver) then Driver:ExitVehicle() end
+	end )
+
+Component:AddVMFunction( "handBreak", "b", "",
+	function(Context, Trace, Break)
+		local Pod = GetPod( Context )
+		if !IsValid(Pod) or !Pod:IsVehicle() then return end
+
+		if Break then
+			Pod:Fire("TurnOff","1",0)
+			Pod:Fire("HandBrakeOn","1",0)
+		else
+			Pod:Fire("TurnOn","1",0)
+			Pod:Fire("HandBrakeOff","1",0)
+		end
+	end )
+
+Component:AddFunctionHelper( "lockVehicle", "b", "Locks the Vehicle linked to the gate (by the expadv2 tool).")
+Component:AddFunctionHelper( "ejectVehicle", "", "Ejects the driver of the Vehicle linked to the gate (by the expadv2 tool).")
+Component:AddFunctionHelper( "handBreak", "b", "Activates the handbreak for Vehicle linked to the gate (by the expadv2 tool).")
+
+Component:AddVMFunction( "allowCrosshair", "b", "",
+	function(Context, Trace, Allow)
+		local Pod = GetPod( Context )
+		if !IsValid(Pod) or !Pod:IsVehicle() then return end
+
+		local Driver = Pod:GetDriver()
+		if !IsValid(Driver) then return end
+		
+		if Allow then 
+			Driver:CrosshairEnable()
+		else
+			Driver:CrosshairDisable()
+		end
+	end )
+
+Component:AddFunctionHelper( "allowCrosshair", "b", "Activates the crosshair for driver of the Vehicle linked to the gate (by the expadv2 tool).")
+
+/* --- --------------------------------------------------------------------------------
 	@: Physics Geters
    --- */
 
@@ -619,6 +709,10 @@ Component:AddFunctionHelper( "setTrails", "e:n,n,n,s,c,n,b", "Adds a trail to an
 /* --- --------------------------------------------------------------------------------
 	@: Entity Events
    --- */
+
+EXPADV.SharedEvents( )
+Component:AddEvent( "playerEnteredVehicle", "ply", "" )
+Component:AddEvent( "playerExitedVehicle", "ply", "" )
 
 EXPADV.ServerEvents( )
 Component:AddEvent( "onKill", "e,e,e", "" )
