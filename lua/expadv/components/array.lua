@@ -79,9 +79,11 @@ function Component:OnPostRegisterClass( Name, Class )
 	if Class.LoadOnServer and Class.LoadOnClient then
 		EXPADV.SharedOperators( )
 	elseif Class.LoadOnServer then
-		EXPADV.LoadOnClient( )
-	elseif Class.LoadOnServer then
+		EXPADV.ServerOperators( )
+	elseif Class.LoadOnClient then
 		EXPADV.ClientOperators( )
+	else
+		return
 	end
 
 /* ---	--------------------------------------------------------------------------------

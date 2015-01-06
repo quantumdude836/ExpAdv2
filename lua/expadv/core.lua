@@ -355,6 +355,7 @@ function EXPADV.LoadCore( )
 	EXPADV.AddComponentFile( "utility" )
 	EXPADV.AddComponentFile( "wire" )
 	EXPADV.AddComponentFile( "files" )
+	EXPADV.AddComponentFile( "navigation" )
 	EXPADV.AddComponentFile( "derma" )
 	EXPADV.AddComponentFile( "context" )
 

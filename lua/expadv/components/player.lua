@@ -122,7 +122,7 @@ EXPADV.ClientOperators( )
 Component:AddInlineFunction( "localPlayer", "", "ply", "$LocalPlayer()")
 Component:AddFunctionHelper( "localPlayer", "", "Returns the clientside player.")
 
-Component:AddInlineFunction("voiceVolume", "ply:", "", "@value 1:VoiceVolume()")
+Component:AddInlineFunction("voiceVolume", "ply:", "n", "@value 1:VoiceVolume()")
 Component:AddFunctionHelper("voiceVolume", "ply:", "Returns the volume of the player's voice")
 
 /* --- --------------------------------------------------------------------------------

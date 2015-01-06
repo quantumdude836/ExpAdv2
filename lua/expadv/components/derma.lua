@@ -36,6 +36,8 @@ Component:AddInlineFunction("canUseDerma", "", "b", [[EXPADV.CanAccessFeature(Co
 
 local PanelClass = Component:AddClass( "dpanel", "dp" )
 
+PanelClass:MakeClientOnly( ) //Szymekk - REMBER TO DO THIS NEXT TIME!
+
 local function CreatePanel( Context, Trace, Name, Object ) 
 	local CreatedPanel
 
@@ -320,6 +322,8 @@ end )
 function Component:OnPostRegisterClass( Name, Class )
 	if Class.Component != self && Name != "dframe" then return end
 
+	EXPADV.ClientOperators() //Szymekk - REMBER TO DO THIS NEXT TIME!
+	
 	Component:AddPreparedFunction("addSheet", "dps:s," .. Class.Short .. ",s", "", [[@value 1:AddSheet(@value 2, @value 3, @value 4)]])
 	EXPADV.AddFunctionAlias("addSheet", "dps:s," .. Class.Short)
 

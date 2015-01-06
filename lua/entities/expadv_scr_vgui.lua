@@ -130,6 +130,7 @@ function ENT:PostDrawScreen( Width, Height )
 	if !ValidPanel(self.Panel) then return end
 
 	self:checkHover( self.Panel )
+
 	self.Panel:SetPaintedManually( false )
 	self.Panel:PaintManual()
 	self.Panel:SetPaintedManually( true )

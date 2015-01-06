@@ -358,12 +358,7 @@ local Temp_HelperData = { }
 function EXPADV.AddFunctionHelper( Component, Name, Input, Description )
 	if SERVER then return end
 
-	Temp_HelperData[#Temp_HelperData + 1] = {
-		Component = Component,
-		Name = Name,
-		Input = Input,
-		Description = Description
-	}
+	Temp_HelperData[string_format( "%s(%s)", Name, Input or "" )] = Description
 end
 
 /* --- --------------------------------------------------------------------------------
@@ -386,7 +381,7 @@ function EXPADV.LoadFunctions( )
 			Operator.Return = "void"
 
 			if Operator.FLAG == EXPADV_INLINE then
-				EXPADV.Msg( string_format( "Skipped operator: %s(%s), Inline operators can't return void.", Operator.Name, Operator.Input ) )
+				EXPADV.Msg( string_format( "Skipped function: %s(%s), Inline operators can't return void.", Operator.Name, Operator.Input ) )
 				continue
 			end
 
@@ -410,6 +405,10 @@ function EXPADV.LoadFunctions( )
 
 			Operator.Return = Class.Short
 		end
+
+		-- Get Helper Data
+
+		Operator.Description = Temp_HelperData[string_format( "%s(%s)", Operator.Name, Operator.Input or "" )]
 
 		-- Second we check the input types, and build our signatures!
 		local ShouldNotLoad = false
@@ -437,9 +436,11 @@ function EXPADV.LoadFunctions( )
 
 				if !Class.LoadOnServer and Operator.LoadOnServer then
 					EXPADV.Msg( string_format( "Skipped function: %s(%s), method class %s is not avalible on server.", Operator.Name, Operator.Input, Class.Name ) )
+					MsgN(Class.LoadOnServer, " vs ", Operator.LoadOnServer)
 					continue
 				elseif !Class.LoadOnClient and Operator.LoadOnClient then
 					EXPADV.Msg( string_format( "Skipped function: %s(%s), method class %s is not avalible on clients.", Operator.Name, Operator.Input, Class.Name ) )
+					MsgN(Class.LoadOnClient, " vs ", Operator.LoadOnClient)
 					continue
 				end
 
@@ -513,23 +514,7 @@ function EXPADV.LoadFunctions( )
 
 	end
 
-	if CLIENT then
-
-		for I = 1, #Temp_HelperData do
-			local Helper = Temp_HelperData[I]
-			
-			if Helper.Component and !Helper.Component.Enabled then continue end
-
-			local Signature = string_format( "%s(%s)", Helper.Name, Helper.Input or "" )
-
-			local Operator = EXPADV.Functions[Signature]
-
-			if !Operator then continue end
-
-			Operator.Description = Helper.Description
-		end
-
-	end
+	if CLIENT then Temp_HelperData = nil end
 
 	EXPADV.CallHook( "PostLoadFunctions" )
 end

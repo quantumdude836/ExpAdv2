@@ -332,16 +332,16 @@ Component:AddPreparedFunction( "entityKeys", "t:", "ar", [[
 
 function Component:OnPostRegisterClass( Name, Class )
 
-	EXPADV.SharedOperators( )
-
 	if Name == "generic" or Name == "variant" or Name == "function" or Name == "class" then return end
 
 	if Class.LoadOnServer and Class.LoadOnClient then
 		EXPADV.SharedOperators( )
 	elseif Class.LoadOnServer then
-		EXPADV.LoadOnClient( )
-	elseif Class.LoadOnServer then
+		EXPADV.ServerOperators( )
+	elseif Class.LoadOnClient then
 		EXPADV.ClientOperators( )
+	else
+		return
 	end
 	
 	/* --- --------------------------------------------------------------------------------

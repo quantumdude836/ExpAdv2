@@ -210,7 +210,7 @@ Component:AddFunctionHelper( "lengthSqr", "v:", "Returns the squared length of t
 Component:AddInlineFunction( "insideAABox", "v:v,v", "b", "@value 1:WithinAABox( @value 2, @value 3 )" )
 Component:AddFunctionHelper( "insideAABox", "v:v,v", "Returns whenever the given vector is in a box created by the 2 other vectors." )
 
-Component:AddInlineFunction( "zero", "v:", "", "@value 1:Zero( )" )
+Component:AddPreparedFunction( "zero", "v:", "", "@value 1:Zero( )" )
 Component:AddFunctionHelper( "zero", "v:v,v", "Sets a vectors x, y and z to 0." )
 
 Component:AddInlineFunction( "ceil", "v:", "v", "Vector(math.ceil(@value 1.x), math.ceil(@value 1.y), math.ceil(@value 1.z))" )
