@@ -166,6 +166,34 @@ function Component:OnPostRegisterClass( Name, Class )
    		end]] )
 end
 
+/* --- --------------------------------------------------------------------------------
+	@: Now for the complicated stuff:
+	@: Lets try adding a sort function :P
+   --- */
+
+	Component:AddVMFunction( "sort", "ar:d", "ar",
+		function( Context, Trace, Array, Delegate )
+
+			local New = { }
+			local Type = Array.__type
+
+			for Index, Value in pairs(Array) do
+				New[Index] = Value
+			end
+
+			table.sort(New, function(A, B)
+				local Value, Type = Delegate(Context, {A, Type}, {B, Type})
+				if Type and Type == "_vr" then Value, Type = Value[1], Value[2] end
+				if Type and Type == "b" then return Value or false end
+				Context:Throw( Trace, "invoke", "Array sort function returned " .. EXPADV.TypeName( Type ) .. ", boolean expected." )
+			end )
+
+			return New
+		end )
+
+	Component:AddFunctionHelper( "sort", "ar:d", "Takes an array and sorts it, the returned array will be sorted by the provided delegate and all indexs will be numberic. The delegate will be called with 2 variants that are values on the table, return true if the first is bigger then the second this delegate must return a boolean." )
+
+
 /* ---	--------------------------------------------------------------------------------
 	@: VON Support
 	---	*/

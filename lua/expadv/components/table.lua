@@ -451,30 +451,37 @@ end
    --- */
 
 	Component:AddVMFunction( "sort", "t:d", "t",
-		function( Context, Trace, Table, Function )
+		function( Context, Trace, Table, Delegate )
 
-			local Types, Data, Look = Table.Types, Table.Data, { }
-			for K, V in pairs( Table.Look ) do Look[K] = V end
+			local Keys = { }
 
-			local function Sort( A, B )
-				local Boolean, Type = Sort_Function( Context, {Data[A], Types[A]}, {Data[B], Types[B]} )
-
-				if Type != "b" then
-					Sort_Context:Throw( Trace, "invoke", "Table sort function returned " .. EXPADV.TypeName( Type ) .. ", boolean expected." )
-				end
-
-				return Boolean or false
+			for _, Index in pairs(Table.Look) do
+				if Table.Types[Index] ~= "n" then continue end
+				Keys[#Keys + 1] = Index
 			end
 
-			local NewData, NewTypes, NewLook = { }, { }, { }
+			table.sort(Keys, function(A, B)
+				local Value, Type = Delegate(Context, {Table.Data[A], Table.Types[A]}, {Table.Data[B], Table.Types[B]})
+				if Type and Type == "_vr" then Value, Type = Value[1], Value[2] end
+				if Type and Type == "b" then return Value or false end
+				Context:Throw( Trace, "invoke", "Table sort function returned " .. EXPADV.TypeName( Type ) .. ", boolean expected." )
+			end )
 
-			for _, Index in pairs( Look ) do
-				NewData[Index] = Data[Index]
-				NewTypes[Index] = Types[Index]
-				NewLook[Index] = Index
+			local Data, Types, Look = { }, { }, { }
+
+			for I, Index in pairs(Keys) do
+				Look[I]  = Index
+				Data[I]  = Table.Data[Index]
+				Types[I] = Table.Types[Index]
 			end
 
-			return { Data = NewData, Types = NewTypes, Look = NewLook, Size = Table.Size, Count = #Data, HasChanged = true }
+			for _, Index in pairs(Table.Look) do
+				if Look[Index] then continue end
+				Data[Index]  = Table.Data[Index]
+				Types[Index] = Table.Types[Index]
+			end
+
+			return { Data = Data, Types = Types, Look = Look, Size = Table.Size, Count = #Data, HasChanged = true }
 		end )
 
 	Component:AddFunctionHelper( "sort", "t:d", "Takes a table and sorts it, the returned table will be sorted by the provided delegate and all indexs will be numberic. The delegate will be called with 2 variants that are values on the table, return true if the first is bigger then the second this delegate must return a boolean." )
