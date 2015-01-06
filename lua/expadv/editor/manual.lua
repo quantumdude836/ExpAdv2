@@ -329,6 +329,13 @@ function EXPADV.Editor.OpenHelper( )
 
 		TabSheet:AddSheet( "Syntax", WikiTabSheet, nil, true, true, "Syntax documentation." )
 
+		local ExamplesTabSheet = vgui.Create( "DHTML" )
+		ExamplesTabSheet:OpenURL( "https://github.com/Rusketh/ExpAdv2/wiki/Examples" )
+		ExamplesTabSheet:DockMargin( 5, 5, 5 ,5 )
+		ExamplesTabSheet:Dock( FILL )
+
+		TabSheet:AddSheet( "Examples", ExamplesTabSheet, nil, true, true, "Example Codes." )
+
 		local ComponentTabSheet = vgui.Create( "DPanel" )
 		ComponentTabSheet:DockMargin( 5, 5, 5 ,5 )
 		ComponentTabSheet:Dock( FILL )

@@ -53,7 +53,8 @@ end )
 ---------------------------------------------------------------------------*/
 local HomeScreen = [[
 /*----------------------------------------------------
- Expression Advanced 2:
+    Expression Advanced 2 - Need to know
+ 	  - Click (?) top-right for more info
 ----------------------------------------------------*/
  
 //Define Variables:
