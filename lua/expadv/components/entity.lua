@@ -224,7 +224,7 @@ Component:AddFunctionHelper( "killPod", "e:", "Kills the driver of the given veh
    --- */
 
 local function GetPod( Context )
-	if !IsValid(Context.entity) or !Context.entity.GetLinkedPod() then return Entity(0) end
+	if !IsValid(Context.entity) or !Context.entity.GetLinkedPod then return Entity(0) end
 	return Context.entity:GetLinkedPod() or Entity(0)
 end
 
