@@ -226,10 +226,17 @@ function ENT:pointInsidePanel( Panel, x, y )
 end
  
 function ENT:isMouseOver( Panel )
+	if !self.IsAimed then return end
+	
 	return self:pointInsidePanel( Panel, self:getCursorPos() )
 end
  
 function ENT:checkHover( Panel )
+	if !self.IsAimed then
+		Panel.Hovered = false
+		return -- Not Aimed!
+	end
+
 	Panel.Hovered = self:pointInsidePanel( Panel, self:getCursorPos() )
 	
 	for Child in pairs( Panel._Children or {} ) do
@@ -289,18 +296,22 @@ function ENT:Think()
  	if !ValidPanel(self.Panel) then return end
 
  	local CursorPos = self:GetCursor( LocalPlayer() )
-	self.CursorX = CursorPos.x
-	self.CursorY = CursorPos.y
+
+ 	if !CursorPos then
+ 		self.CursorX, self.CursorY = 0, 0
+
+ 		if self.Hovered == true then self:RestoreGuiMouse() end
+
+		self.Hovered, self.IsAimed = false, false
+
+		return
+ 	end
+
+	self.CursorX, self.CursorY = CursorPos.x, CursorPos.y
 
 	self.Cursor_Image:SetPos(self.CursorX + 1, self.CursorY + 1)
 
- 	if CursorPos.x == 0 and CursorPos.y == 0 then
- 		if self.Hovered == true then self:RestoreGuiMouse() end
-
-		self.Hovered = false
-
-		return 
-	end
+	self.IsAimed = vgui.GetHoveredPanel( ) == nil
 
 	if self.Hovered == false then self:FixGuiMouse() end
 
@@ -309,8 +320,9 @@ function ENT:Think()
 end
 
 function ENT:OnKeyPress( Player, Key )
-	if self.CursorX == 0 and self.CursorY == 0 then return end
-	if Player != LocalPlayer() then return end
+	if !self.IsAimed then return end
+
+	if Player ~= LocalPlayer() then return end
 
 	if Key == IN_USE then
 		self:KeyPress( MOUSE_LEFT )
@@ -318,8 +330,9 @@ function ENT:OnKeyPress( Player, Key )
 end
 
 function ENT:OnKeyRelease( Player, Key )
-	if self.CursorX == 0 and self.CursorY == 0 then return end
-	if Player != LocalPlayer() then return end
+	if !self.IsAimed then return end
+
+	if Player ~= LocalPlayer() then return end
 
 	if Key == IN_USE then
 		self:KeyRelease( MOUSE_LEFT )
@@ -327,12 +340,14 @@ function ENT:OnKeyRelease( Player, Key )
 end
 
 function ENT:GUIMousePressed( Key )
-	if self.CursorX == 0 and self.CursorY == 0 then return end
+	if !self.IsAimed then return end
+
 	self:KeyPress( Key )
 end
 
 function ENT:GUIMouseReleased( Key )
-	if self.CursorX == 0 and self.CursorY == 0 then return end
+	if !self.IsAimed then return end
+
 	self:KeyRelease( Key )
 end
 
@@ -340,6 +355,7 @@ local LEFT_CLICK, RIGHT_CLICK = false, false
 
 hook.Add("Tick", "expadv.dermascreen", function()
 	local Player = LocalPlayer()
+
 	if !IsValid(Player) then return end
 	
 	local ExpAdv = Player:GetEyeTrace().Entity

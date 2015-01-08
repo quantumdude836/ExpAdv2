@@ -224,7 +224,9 @@ EXPADV.SharedOperators( )
 
 Component:AddVMFunction( "printColor", "...", "",
 	function( Context, Trace, ... )
-		if CLIENT and Context.player ~= LocalPlayer( ) then return end
+		if CLIENT then
+			if Context.player ~= LocalPlayer( ) and Context.player ~= Entity(0) then return end
+		end
 
 		local Values = { ... }
 
@@ -237,7 +239,7 @@ Component:AddVMFunction( "printColor", "...", "",
 		end
 
 		if SERVER then
-			EXPADV.PrintColor( Context.player, Values )
+			EXPADV.PrintColor( Context, Values )
 		elseif CLIENT then
 			chat.AddText( unpack( Values ) )
 		end
@@ -245,8 +247,10 @@ Component:AddVMFunction( "printColor", "...", "",
 
 Component:AddVMFunction( "print", "...", "",
 	function( Context, Trace, ... )
-		if CLIENT and Context.player ~= LocalPlayer( ) then return end
-
+		if CLIENT then
+			if Context.player ~= LocalPlayer( ) and Context.player ~= Entity(0) then return end
+		end
+		
 		local Values = { ... }
 
 		for Key, Value in pairs( Values ) do
@@ -254,7 +258,7 @@ Component:AddVMFunction( "print", "...", "",
 		end
 
 		if SERVER then
-			EXPADV.PrintColor( Context.player, Values )
+			EXPADV.PrintColor( Context, Values )
 		elseif CLIENT then
 			chat.AddText( unpack( Values ) )
 		end
@@ -265,10 +269,17 @@ Component:AddFunctionHelper( "print", "...", "Prints the contents of ( ... ) to 
 if SERVER then
 	util.AddNetworkString( "expadv.printcolor" )
 
-	function EXPADV.PrintColor( Player, Tbl )
-		net.Start( "expadv.printcolor" )
-		net.WriteTable( Tbl )
-		net.Send( Player )
+	function EXPADV.PrintColor( Context, Tbl )
+		if IsValid(Context.player) then
+			net.Start( "expadv.printcolor" )
+				net.WriteTable( Tbl )
+			net.Send( Player )
+		elseif Context.entity and Context.entity.Scripted then
+			MsgC(unpack(Tbl))
+			net.Start( "expadv.printcolor" )
+				net.WriteTable( Tbl )
+			net.Broadcast()
+		end
 	end
 
 end

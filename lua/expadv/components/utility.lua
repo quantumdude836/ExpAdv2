@@ -717,61 +717,61 @@ end )
 
 PropComponent:AddPreparedFunction( "noSpawnEffect", "b", "", "Context.Data.PC_NoEffect = @value 1" )
 
-PropComponent:AddPreparedFunction( "remove", "e:", "", "if IsValid( @value 1 ) and EXPADV.PPCheck( Context.player, @value 1 ) then @value 1:Remove( ) end" )
+PropComponent:AddPreparedFunction( "remove", "e:", "", "if IsValid( @value 1 ) and EXPADV.PPCheck(Context, @value 1 ) then @value 1:Remove( ) end" )
 
 PropComponent:AddPreparedFunction( "setPos", "e:v", "",[[
-if IsValid( @value 1 ) and EXPADV.PPCheck( Context.player, @value 1 ) then
+if IsValid( @value 1 ) and EXPADV.PPCheck(Context, @value 1 ) then
 	if !( @value 2.x ~= @value 2.x and @value 2.y ~= @value 2.y and @value 2.z ~= @value 2.z ) then
 		@value 1:SetPos( @value 2 )
 	end
 end]] )
 
 PropComponent:AddPreparedFunction( "setAng", "e:a", "",[[
-if IsValid( @value 1 ) and EXPADV.PPCheck( Context.player, @value 1 ) then
+if IsValid( @value 1 ) and EXPADV.PPCheck(Context, @value 1 ) then
 	if !( @value 2.p ~= @value 2.p and @value 2.y ~= @value 2.y and @value 2.r ~= @value 2.r ) then
 		@value 1:SetAngles( @value 2 )
 	end
 end]] )
 
 PropComponent:AddPreparedFunction( "parent", "e:e", "", [[
-if IsValid( @value 1 ) and EXPADV.PPCheck( Context.player, @value 1 ) and IsValid( @value 2 ) then
+if IsValid( @value 1 ) and EXPADV.PPCheck(Context, @value 1 ) and IsValid( @value 2 ) then
 	if !@value 1:IsVehicle( ) and !@value 2:IsVehicle( ) then
 		@value 1:SetParent(@value 2)
 	end
 end]] )
 
 PropComponent:AddPreparedFunction( "parent", "e:p", "", [[
-if IsValid( @value 1 ) and EXPADV.PPCheck( Context.player, @value 1 ) and IsValid( @value 2 ) then
+if IsValid( @value 1 ) and EXPADV.PPCheck(Context, @value 1 ) and IsValid( @value 2 ) then
 	if !@value 1:IsVehicle( ) then
 		@value 1:SetParent(@value 2)
 	end
 end]] )
 
 PropComponent:AddPreparedFunction( "unparent", "e:", "", [[
-if IsValid( @value 1 ) and EXPADV.PPCheck( Context.player, @value 1 ) then
+if IsValid( @value 1 ) and EXPADV.PPCheck(Context, @value 1 ) then
 	@value 1:SetParent( nil )
 end]] )
 
 PropComponent:AddPreparedFunction( "freeze", "e:b", "", [[
-if IsValid( @value 1 ) and EXPADV.PPCheck( Context.player, @value 1 ) then
+if IsValid( @value 1 ) and EXPADV.PPCheck(Context, @value 1 ) then
 	@define Phys = @value 1:GetPhysicsObject()
 	@Phys:EnableMotion( !@value 2 )
 	@Phys:Wake( )
 end]], "" )
 
 PropComponent:AddPreparedFunction( "freeze", "p:b", "", [[
-if IsValid( @value 1 ) and EXPADV.PPCheck( Context.player, @value 1:GetEntity( ) ) then
+if IsValid( @value 1 ) and EXPADV.PPCheck(Context, @value 1:GetEntity( ) ) then
 	@value 1:EnableMotion( !@value 2 )
 	@value 1:Wake( )
 end]] )
 
 PropComponent:AddPreparedFunction( "setNotSolid", "e:b", "", [[
-if IsValid( @value 1 ) and EXPADV.PPCheck( Context.player, @value 1 ) then
+if IsValid( @value 1 ) and EXPADV.PPCheck(Context, @value 1 ) then
 	@value 1:SetNotSolid( @value 2 )
 end]] )
 
 PropComponent:AddPreparedFunction("enableGravity", "e:b", "", [[
-if IsValid( @value 1 ) and EXPADV.PPCheck( Context.player, @value 1 ) then
+if IsValid( @value 1 ) and EXPADV.PPCheck(Context, @value 1 ) then
 	@define Phys = @value 1:GetPhysicsObject()
 	@Phys:EnableGravity( @value 2 )
 	@Phys:Wake( )
@@ -783,7 +783,7 @@ if IsValid( @value 1 ) and EXPADV.PPCheck( Context.player, @value 1 ) then
 end]], "" )
 
 PropComponent:AddPreparedFunction("enableGravity", "p:b", "", [[
-if IsValid( @value 1 ) and EXPADV.PPCheck( Context.player, @value 1:GetEntity( ) ) then
+if IsValid( @value 1 ) and EXPADV.PPCheck(Context, @value 1:GetEntity( ) ) then
 	@value 1:EnableGravity( @value 2 )
 	@value 1:Wake( )
 
@@ -794,18 +794,18 @@ if IsValid( @value 1 ) and EXPADV.PPCheck( Context.player, @value 1:GetEntity( )
 end]] )
 
 PropComponent:AddPreparedFunction( "setPhysProp", "e:s,b", "", [[
-if IsValid( @value 1 ) and EXPADV.PPCheck( Context.player, @value 1 ) then
+if IsValid( @value 1 ) and EXPADV.PPCheck(Context, @value 1 ) then
 	$construct.SetPhysProp( Context.player, @value 1, 0, nil, { GravityToggle = @value 3, Material = @value 2 } )
 end]] )
 
 PropComponent:AddPreparedFunction( "destroy", "e:", "", [[
-if IsValid( @value 1 ) and EXPADV.PPCheck( Context.player, @value 1 ) then
+if IsValid( @value 1 ) and EXPADV.PPCheck(Context, @value 1 ) then
 	@value 1:GibBreakClient( Vector() )
 	@value 1:Remove( )
 end]] )
 
 PropComponent:AddPreparedFunction( "destroy", "e:v,b", "", [[
-if IsValid( @value 1 ) and @value 2:IsNotHuge( ) and EXPADV.PPCheck( Context.player, @value 1 ) then
+if IsValid( @value 1 ) and @value 2:IsNotHuge( ) and EXPADV.PPCheck(Context, @value 1 ) then
 	if !( @value 2.x ~= @value 2.x and @value 2.y ~= @value 2.y and @value 2.z ~= @value 2.z ) then
 		@value 1:GibBreakClient( @value 2 )
 		if ( @value 3 ) then @value 1:Remove( ) end
@@ -813,7 +813,7 @@ if IsValid( @value 1 ) and @value 2:IsNotHuge( ) and EXPADV.PPCheck( Context.pla
 end]] )
 
 PropComponent:AddPreparedFunction( "dealDamage", "e:n", "",[[
-if IsValid( @value 1 ) and EXPADV.PPCheck( Context.player, @value 1 ) then
+if IsValid( @value 1 ) and EXPADV.PPCheck(Context, @value 1 ) then
 	@value 1:TakeDamage( @value 2, Context.player, Context.entity )
 end]] )
 

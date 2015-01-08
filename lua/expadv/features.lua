@@ -131,13 +131,15 @@ end
 	function EXPADV.IsFeatureBlockedForEntity( Entity, Feature )
 		if !Entity.BlockedFeatures then return false end
 
-	return Entity.BlockedFeatures[Feature] or false
+		return Entity.BlockedFeatures[Feature] or false
 	end
 
 function EXPADV.CanAccessFeature( Entity, Feature )
 
 	if !EXPADV.Features[Feature] then return false end
 
+	if Entity.Scripted then return true end
+	
 	if EXPADV.IsFeatureBlockedForEntity(Entity, Feature) then return false end
 
 	if Entity.player == LocalPlayer() then return true end

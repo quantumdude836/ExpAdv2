@@ -1,6 +1,6 @@
 /* --- --------------------------------------------------------------------------------
-	@: CPPI support - Prop Protection integration.
-   --- */
+@: CPPI support - Prop Protection integration.
+--- */
 
 if CPPI then
 	function EXPADV.GetOwner( Entity )
@@ -35,13 +35,18 @@ if CPPI then
 		return false
 	end
 
-	function EXPADV.PPCheck( Player, Entity )
-		if !IsValid( Entity ) or !IsValid( Player ) then return false end
+	function EXPADV.PPCheck( Context, Entity )
+		if !IsValid( Entity ) then return false end
+
+		if IsValid(Context.entity) and Context.entity.Scripted then return true end
+		
+		if !IsValid(Context.player) then return false end
 
 		local Owner = Entity:CPPIGetOwner( )
+
 		if !IsValid( Owner ) then return false end
 
-		return Owner == Player or EXPADV.IsFriend( Player, Owner )
+		return Owner == Context.player or EXPADV.IsFriend( Context.player, Owner )
 	end
 
 	return -- Cave Johnson, we're done here!
@@ -84,13 +89,18 @@ function EXPADV.IsFriend( Friend, Player )
 	return Friends[ UIDCach[Player] ][ UIDCach[Friend] ] or false
 end
 
-function EXPADV.PPCheck( Player, Entity )
-	if !IsValid( Entity ) or !IsValid( Player ) then return false end
+function EXPADV.PPCheck( Context, Entity )
+	if !IsValid( Entity ) then return false end
+
+	if IsValid(Context.entity) and Context.entity.Scripted then return true end
+	
+	if !IsValid(Context.player) then return false end
 
 	local Owner = EXPADV.GetOwner( Entity )
+	
 	if !IsValid( Owner ) then return false end
 
-	return Owner == Player or EXPADV.IsFriend( Player, Owner )
+	return Owner == Context.player or EXPADV.IsFriend( Context.player, Owner )
 end
 
 /* --- --------------------------------------------------------------------------------

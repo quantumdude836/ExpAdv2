@@ -79,16 +79,19 @@ EXPADV.SetMonitorMinMax("models/kobilica/wiremonitorbig.mdl", Vector(0.200001016
 require( "vector2" )
 
 function ENT:GetCursor( Player )
-	local Monitor = EXPADV.GetMonitor( self:GetModel( ) )
-	if !Monitor or !IsValid( Player ) then return Vector2( 0, 0 ) end
 
-	local Start, Dir = Player:GetShootPos( ),Player:GetAimVector( )
+	local Monitor = EXPADV.GetMonitor( self:GetModel( ) )
+	if !Monitor or !IsValid( Player ) then return nil end
+
+	if Player:EyePos():Distance( self:GetPos() ) > 156 then return end
+
+	local Start, Dir = Player:GetShootPos( ), Player:GetAimVector( )
 	
 	local Ang = self:LocalToWorldAngles( Monitor.Rot )
 	local Pos = self:LocalToWorld( Monitor.Off )
 	
 	local A = Ang:Up( ):Dot( Dir )
-	if (A == 0 or A > 0) then return Vector2( 0, 0 ) end
+	if (A == 0 or A > 0) then return nil end
 
 	local B = Ang:Up( ):Dot( Pos - Start ) / A
 
@@ -96,7 +99,7 @@ function ENT:GetCursor( Player )
 	local X = (0.5 + HitPos.x / (Monitor.Res * 512 / Monitor.Ratio)) * 512
 	local Y = (0.5 - HitPos.y / (Monitor.Res * 512)) * 512
 			
-	if (X < 0 or X > 512 or Y < 0 or Y > 512) then return Vector2( 0, 0 ) end
+	if (X < 0 or X > 512 or Y < 0 or Y > 512) then return nil end
 
 	return Vector2( X, Y )
 end
@@ -258,15 +261,6 @@ function ENT:RenderScreen( )
 
 	render.SetViewPort( 0, 0, _ScrW, _ScrH )
 	render.SetRenderTarget( PreviousRT )
-end
-
-/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
-	@: OnRemove
-   --- */
-
-function ENT:OnRemove( )
-	EXPADV.CacheRenderTarget( self.RenderTarget, self.RenderMat )
-	return self.BaseClass.OnRemove( self )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------

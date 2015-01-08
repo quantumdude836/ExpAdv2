@@ -144,6 +144,8 @@ if SERVER then
 		if A == "reload" then
 			EXPADV.LoadCore( )
 			return PrintFromCommand( Player, "Reloaded Expression Advanced 2" )
+		elseif A == "reload_sents" then
+			EXPADV.LoadSents()
 		end
 
 		if B then B = string.lower( B ) end
@@ -200,7 +202,7 @@ elseif CLIENT then
 		if !Config then return end
 
 		if A == "" then
-			local AC = { "expadv reload" }
+			local AC = { "expadv reload", "expadv reload_sents" }
 
 			if Config.settings then
 				for Key, _ in pairs( Config.settings ) do

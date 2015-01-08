@@ -103,6 +103,7 @@ FrameClass:AddPreparedOperator( "=", "n,dp", "", "Context.Memory[@value 1] = @va
 
 Component:AddVMFunction( "dframe", "", "df", function(Context, Trace) return CreatePanel(Context, Trace, "DFrame") end )
 
+Component:AddPreparedFunction("showCloseButton", "df:b", "", "@value 1:ShowCloseButton(@value 2)")
 Component:AddPreparedFunction("setDraggable", "df:b", "", "@value 1:SetDraggable(@value 2)")
 Component:AddPreparedFunction("setSizable", "df:b", "", "@value 1:SetSizable(@value 2)")
 Component:AddPreparedFunction("setBackgroundBlur", "df:b", "", "@value 1:SetBackgroundBlur(@value 2)")

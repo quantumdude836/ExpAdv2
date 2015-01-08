@@ -140,7 +140,7 @@ end]], "@Val" )
    --- */
 
 Component:AddPreparedFunction( "setMass", "p:n", "", [[
-if IsValid( @value 1 ) and EXPADV.PPCheck( Context.player, @value 1:GetEntity( ) )
+if IsValid( @value 1 ) and EXPADV.PPCheck(Context, @value 1:GetEntity( ) )
 	@value 1:SetMass( math.Clamp( @value 2, 0.001, 50000 ) )
 end]] )
 
@@ -156,7 +156,7 @@ Component:AddInlineFunction( "massCenterWorld", "p:", "v", "(IsValid(@value 1) a
 
 Component:AddInlineFunction( "massCenter", "p:", "v", "(IsValid(@value 1) and ( @value 1:GetMassCenter( ) ) or Vector(0, 0, 0) )")
 
-Component:AddPreparedFunction( "enableDrag", "p:b", "", "if(IsValid(@value 1) && EXPADV.PPCheck(Context.player, @value 1)) then @value 1:EnableDrag(@value 2) end") -- Because why not :) ?
+Component:AddPreparedFunction( "enableDrag", "p:b", "", "if(IsValid(@value 1) && EXPADV.PPCheck(Context, @value 1)) then @value 1:EnableDrag(@value 2) end") -- Because why not :) ?
 Component:AddFunctionHelper( "setDrag", "p:b", "Enables/disables drag on an entity.")
 
 /* --- --------------------------------------------------------------------------------
@@ -185,7 +185,7 @@ Component:AddInlineFunction( "isFrozen", "p:", "b", "(IsValid(@value 1) and @val
 EXPADV.ServerOperators()
 
 Component:AddVMFunction( "applyForce", "p:v", "", function( Context, Trace, Phys, Pos )
-	if Phys:IsValid() and VectorNotHuge( Pos ) and EXPADV.PPCheck(Context.player, Phys:GetEntity( )) then
+	if Phys:IsValid() and VectorNotHuge( Pos ) and EXPADV.PPCheck(Context, Phys:GetEntity( )) then
 		Phys:ApplyForceCenter(Pos)
 	end
 end)
@@ -193,7 +193,7 @@ end)
 Component:AddFunctionHelper( "applyForce", "p:v", "Applies a vector of force on the given physics object.")
 
 Component:AddVMFunction( "applyOffsetForce", "p:v,v", "", function( Context, Trace, Phys, Pos1, Pos2 )
-	if Phys:IsValid() and VectorNotHuge( Pos1 ) and VectorNotHuge( Pos2 ) and EXPADV.PPCheck(Context.player, Phys:GetEntity( )) then
+	if Phys:IsValid() and VectorNotHuge( Pos1 ) and VectorNotHuge( Pos2 ) and EXPADV.PPCheck(Context, Phys:GetEntity( )) then
 		Phys:ApplyForceOffset(Pos1, Pos2)
 	end
 end)
@@ -203,7 +203,7 @@ Component:AddFunctionHelper( "applyForceOffset", "p:v,v", "Applies an offset vec
 Component:AddVMFunction( "applyAngForce", "p:a", "",
 	function( Context, Trace, Phys, Angle )
 
-		if Phys:IsValid() and AngleNotHuge(Angle )and EXPADV.PPCheck(Context.player,Phys:GetEntity( )) then
+		if Phys:IsValid() and AngleNotHuge(Angle )and EXPADV.PPCheck(Context,Phys:GetEntity( )) then
 				if Angle.p != 0 or Angle.y != 0 or Angle.r != 0 then
 					
 					local up = Phys:GetUp()
@@ -236,7 +236,7 @@ Component:AddVMFunction( "applyAngForce", "p:a", "",
 Component:AddFunctionHelper( "applyAngForce", "p:a", "Applies torque to the given physics object depending on the given angle")
 
 Component:AddVMFunction( "applyTorque", "p:v", "", function( Context, Trace, Phys, TQ )
-	if Phys:IsValid() and EXPADV.PPCheck(Context.player, Phys:GetEntity( )) then
+	if Phys:IsValid() and EXPADV.PPCheck(Context, Phys:GetEntity( )) then
 		if TQ.x == 0 and TQ.y == 0 and TQ.z == 0 then return end
 
 		if Phys:GetEntity():GetMoveType() == MOVETYPE_VPHYSICS then
