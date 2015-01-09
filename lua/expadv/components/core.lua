@@ -264,6 +264,7 @@ Component:AddVMFunction( "print", "...", "",
 		end
 	end )
 
+Component:AddFunctionHelper( "printColor", "...", "Prints the contents of ( ... ) to chat seperated with a space using colors." )
 Component:AddFunctionHelper( "print", "...", "Prints the contents of ( ... ) to chat seperated with a space." )
 
 if SERVER then
