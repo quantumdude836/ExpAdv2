@@ -245,7 +245,6 @@ Component:AddVMFunction( "toUnit", "s,n", "n",
 		return -1
 	end )
 
-Component:AddFunctionHelper( "toUnit", "s,s,n", "Converts the number to the unit S." )
 
 Component:AddVMFunction( "fromUnit", "s,n", "n",
 	function( Context, Trace, Unit, Value )
@@ -260,7 +259,7 @@ Component:AddVMFunction( "fromUnit", "s,n", "n",
 		return -1
 	end )
 
-Component:AddFunctionHelper( "fromUnit", "s,s,n", "Converts the number from the unit S." )
+
 
 Component:AddVMFunction( "convertUnit", "s,s,n", "n",
 	function( Context, Trace, To, From, Value )
@@ -275,6 +274,8 @@ Component:AddVMFunction( "convertUnit", "s,s,n", "n",
 		return -1
 	end )
 
+Component:AddFunctionHelper( "toUnit", "s,n", "Converts the number to the unit S." )
+Component:AddFunctionHelper( "fromUnit", "s,n", "Converts the number from the unit S." )
 Component:AddFunctionHelper( "convertUnit", "s,s,n", "Converts the number from unit at 1st index to unit at 2nd index." )
 
 /* --- --------------------------------------------------------------------------------
@@ -876,7 +877,7 @@ Component:AddVMFunction( "deserialize", "s", "vr", function(Context, Trace, VON)
 	Context:Throw( Trace, "von", "failed to deserialize to valid object." )
 end )
 
-Component:AddFunctionHelper( "deserialize", "vr", "Deserializes object into variant so it can be loaded back." )
+Component:AddFunctionHelper( "deserialize", "s", "Deserializes string into variant so it can be loaded back." )
 
 function Component:OnPostRegisterClass( Name, Class )
 
