@@ -158,6 +158,9 @@ Component:AddPreparedFunction( "entityKeys", "t:", "ar", [[
 	end
 ]], "@Array" )
 
+Component:AddFunctionHelper( "numberKeys", "t:", "Returns array of all number keys from the table" )
+Component:AddFunctionHelper( "stringKeys", "t:", "Returns array of all string keys from the table" )
+Component:AddFunctionHelper( "entityKeys", "t:", "Returns array of all entity keys from the table" )
 /* --- --------------------------------------------------------------------------------
 	@: Variant Get Operators
    --- */
@@ -325,6 +328,8 @@ Component:AddPreparedFunction( "entityKeys", "t:", "ar", [[
 
 			return New
 		end )
+
+ Component:AddFunctionHelper( "clone", "t:", "Returns the table as a new object." )
 
 /* --- --------------------------------------------------------------------------------
 	@: We need to add support for every class :D
