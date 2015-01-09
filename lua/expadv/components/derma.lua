@@ -76,7 +76,7 @@ Component:AddFunctionHelper( "setVisible", "dp:b", "Enables/disables visibility 
 Component:AddInlineFunction("getPos", "dp:", "v2", "Vector2(@value 1:GetPos())")
 Component:AddFunctionHelper( "getPos", "dp:", "Returns the position of the dpanel." )
 Component:AddInlineFunction("getSize", "dp:", "v2", "Vector2(@value 1:GetSize())")
-Component:AddFunctionHelper( "getSize", "dp:", "Returns the text of the dpanel." )
+Component:AddFunctionHelper( "getSize", "dp:", "Returns the size of the dpanel." )
 Component:AddInlineFunction("getText", "dp:", "s", "@value 1:GetText()")
 Component:AddFunctionHelper( "getText", "dp:", "Returns the text of the dpanel." )
 
