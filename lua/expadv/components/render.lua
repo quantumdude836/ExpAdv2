@@ -86,7 +86,7 @@ Component:AddFunctionHelper( "setFont", "s,n", "Sets the current font and fontsi
 Component:AddFunctionHelper( "setFont", "s,n,c", "Sets the current font, fontsize and font color." )
 Component:AddFunctionHelper(  "setFontColor", "c", "Sets the current font color." )
 Component:AddFunctionHelper(  "getTextWidth", "s", "Returns the width of drawing string using the current font." )
-Component:AddFunctionHelper(  "getTextHeight", "s", "Returns the width of drawing string using the current font." )
+Component:AddFunctionHelper(  "getTextHeight", "s", "Returns the height of drawing string using the current font." )
 
 /* -----------------------------------------------------------------------------------
 	@: Text
@@ -109,9 +109,9 @@ Component:AddPreparedFunction( "drawTextAlignedRight", "v2,s", "",
 	surface.DrawText( @value 2 )
 ]])
 
-Component:AddFunctionHelper( "drawText", "v,s", "Draws a line of text aligned left of position." )
-Component:AddFunctionHelper( "drawTextCentered", "v,s", "Draws a line of text aligned center of position." )
-Component:AddFunctionHelper( "drawTextAlignedRight", "v,s", "Draws a line of text aligned right of position." )
+Component:AddFunctionHelper( "drawText", "v2,s", "Draws a line of text aligned left of position." )
+Component:AddFunctionHelper( "drawTextCentered", "v2,s", "Draws a line of text aligned center of position." )
+Component:AddFunctionHelper( "drawTextAlignedRight", "v2,s", "Draws a line of text aligned right of position." )
 
 /* -----------------------------------------------------------------------------------
 	@: Color / Material
@@ -160,7 +160,7 @@ Component:AddFunctionHelper( "drawTexturedBox", "v2,v2,n,n,n,n", "Draws a textur
    --- */
   
 Component:AddPreparedFunction("drawSprite", "v,n,n,c", "", "$render.DrawSprite(@value 1, @value 2, @value 3, @value 4)")
-Component:AddFunctionHelper("drawSprite", "", "Creates a sprite at the given position.")
+Component:AddFunctionHelper("drawSprite", "v,n,n,c", "Creates a sprite at the given position.")
 
 
 /* -----------------------------------------------------------------------------------
@@ -275,7 +275,7 @@ end]] )
 Component:AddFunctionHelper( "pauseNextFrame", "b", "While set to true the screen will not draw the next frame." )
 
 Component:AddInlineFunction( "nextFramePaused", "", "b", "((IsValid( Context.entity ) and Context.entity.Screen) and Context.entity:GetRenderingPaused( ) or false)" )
-Component:AddFunctionHelper( "pauseNextFrame", "b", "returns true, if the screens next frame is paused." )
+Component:AddFunctionHelper( "nextFramePaused", "", "Returns true, if the screens next frame is paused." )
 
 Component:AddPreparedFunction( "noFrameRefresh", "b", "", [[
 if IsValid( Context.entity ) and Context.entity.Screen then
@@ -285,7 +285,7 @@ end]] )
 Component:AddFunctionHelper( "noFrameRefresh", "b", "While set to true the screen will not draw the next frame." )
 
 Component:AddInlineFunction( "frameRefreshDisabled", "", "b", "((IsValid( Context.entity ) and Context.entity.Screen) and Context.entity:GetNoClearFrame( ) or false)" )
-Component:AddFunctionHelper( "frameRefreshDisabled", "b", "returns true, if the screens is set not to clear the screen each frame." )
+Component:AddFunctionHelper( "frameRefreshDisabled", "", "Returns true, if the screens is set not to clear the screen each frame." )
 
 EXPADV.SharedOperators( )
 
