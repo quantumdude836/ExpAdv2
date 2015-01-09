@@ -37,11 +37,15 @@ Component:AddInlineOperator( "table", "ar", "t", "EXPADV.ResultTable(@value 1.__
 
 Component:AddInlineFunction( "exists", "ar,n", "b", "(@value 1[@value 2] ~= nil)" )
 
+Component:AddFunctionHelper( "exists", "ar,n", "Returns true if object at the given index in the given array isn't null." )
+
 Component:AddInlineFunction( "unpack", "ar", "...", "$unpack( @value 1 )" )
 
 Component:AddPreparedFunction( "remove", "ar:n", "vr", [[
 if @value 1[@value 2] == nil then Context.Throw(@trace, "array", "array reach index " .. @value 2 .. " returned void" ) end
 ]], "{$table.remove(@value 1, @value 2), @value 1.__type}" )
+
+Component:AddFunctionHelper( "remove", "ar:n", "Returns variant at the given index in the given array and removes it from the array." )
 
 Component:AddPreparedFunction("connect", "ar:ar", "ar", [[
 if @value 1.__type == @value 2.__type then

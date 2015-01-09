@@ -109,7 +109,7 @@ Component:AddInlineOperator( "not", "ac", "b", "!IsValid(@value 1)" )
    --- */
 
 Component:AddInlineFunction( "isValid", "ac:", "b", "IsValid(@value 1)" )
-Component:AddFunctionHelper( "hasStopped", "ac:", "Returns true is the audio channel is valid." )
+Component:AddFunctionHelper( "isValid", "ac:", "Returns true is the audio channel is valid." )
 
 Component:AddPreparedFunction( "hasStopped", "ac:", "b", [[if !IsValid( @value 1) then Context:Throw( @trace, "audio channel", "Recieved invalid audio channel." ) end]], 
 "(@value 1:GetState( ) == $GMOD_CHANNEL_STOPPED)" )
@@ -139,7 +139,7 @@ Component:AddFunctionHelper( "fft", "ac:n", "Returns the FFT table of the sound 
 
 Component:AddPreparedFunction( "get3DCone", "ac:", "a", [[if !IsValid( @value 1) then Context:Throw( @trace, "audio channel", "Recieved invalid audio channel." ) end]],
 		"Angle(@value 1:Get3DCone( ))" )
-Component:AddFunctionHelper( "get3DCone", "ac:", "a", "Returns 3D cone of the sound channel, ang(The angle of the inside projection cone in degrees, The angle of the outside projection cone in degrees. The delta-volume outside the outer projection cone). " )
+Component:AddFunctionHelper( "get3DCone", "ac:", "Returns 3D cone of the sound channel, ang(The angle of the inside projection cone in degrees, The angle of the outside projection cone in degrees. The delta-volume outside the outer projection cone). " )
 
 Component:AddPreparedFunction( "getMax3DFadeDistance", "ac:", "n", [[if !IsValid( @value 1) then Context:Throw( @trace, "audio channel", "Recieved invalid audio channel." ) end
 	@define min, max = @value 1:Get3DFadeDistance( )]], "@max" )
