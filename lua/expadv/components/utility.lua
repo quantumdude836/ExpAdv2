@@ -713,7 +713,7 @@ PropComponent:AddVMFunction( "canSpawn", "", "b", function( Context )
 	return true
 end )
 
-PropComponent:AddVMFunction( "spawnedProps", "", "a", function( Context )
+PropComponent:AddVMFunction( "spawnedProps", "", "ar", function( Context )
 	local Array = { __type = "e" }
 
 	if Props[Context] then
@@ -835,17 +835,19 @@ PropComponent:AddFunctionHelper( "parent", "e:e", "Sets the parent entity of E."
 PropComponent:AddFunctionHelper( "destroy", "e:", "Creates an array." )
 PropComponent:AddFunctionHelper( "setNotSolid", "e:b", "Changes the solidity of an entity." )
 PropComponent:AddFunctionHelper( "noSpawnEffect", "b", "Makes propcore use an effect when spawning props." )
-PropComponent:AddFunctionHelper( "enableGravity", "e:b", "Enable gravity on E." )
+PropComponent:AddFunctionHelper( "enableGravity", "e:b", "Enables gravity on entity E." )
 PropComponent:AddFunctionHelper( "destroy", "e:v,b", "Creates an array." )
-PropComponent:AddFunctionHelper( "freeze", "p:b", "Set B to true to freeze a physics object." )
-PropComponent:AddFunctionHelper( "freeze", "e:b", "Set B to true to freeze an entity." )
+PropComponent:AddFunctionHelper( "freeze", "p:b", "Sets B to true to freeze a physics object." )
+PropComponent:AddFunctionHelper( "freeze", "e:b", "Sets B to true to freeze an entity." )
 PropComponent:AddFunctionHelper( "unparent", "e:", "Unparents E from its parent." )
 PropComponent:AddFunctionHelper( "parent", "e:p", "Sets the parent physics object of E." )
 PropComponent:AddFunctionHelper( "canSpawn", "", "Returns true if a prop can be created." )
 PropComponent:AddFunctionHelper( "spawn", "s,b", "Creates and returns a new prop using S as its model, it will be frozen if B is true." )
 PropComponent:AddFunctionHelper( "remove", "e:", "Removes entity E." )
 PropComponent:AddFunctionHelper( "dealDamage", "e:n", "Deals damage to an entity." )
-PropComponent:AddFunctionHelper( "enableGravity", "p:b", "Enable gravity on physics object P." )
+PropComponent:AddFunctionHelper( "enableGravity", "p:b", "Enables gravity on physics object P." )
+PropComponent:AddFunctionHelper( "spawnedProps", "", "Returns an array of props spawned by this chip." )
+PropComponent:AddFunctionHelper( "setPhysProp", "e:s,b", "Enables/disables physical property S." )
 
 /* --- --------------------------------------------------------------------------------
 	@: VON support
