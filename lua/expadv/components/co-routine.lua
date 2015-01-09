@@ -132,5 +132,5 @@ Component:AddFunctionHelper( "sleep", "n", "Pauses the current coroutine for N s
 Component:AddFunctionHelper( "wait", "s", "Pauses the current coroutine until event S is called." )
 Component:AddFunctionHelper( "getCoroutine", "", "Returns the current coroutine or throws exception." )
 Component:AddFunctionHelper( "yield", "", "Yields the current coroutine to be resumed later." )
-Component:AddFunctionHelper( "resume", "_cr:", "Resumes/starts a coroutine." )
-Component:AddFunctionHelper( "status", "_cr:", "Returns the status of a coroutine." )
+Component:AddFunctionHelper( "resume", "cr:", "Resumes/starts a coroutine." )
+Component:AddFunctionHelper( "status", "cr:", "Returns the status of a coroutine." )
