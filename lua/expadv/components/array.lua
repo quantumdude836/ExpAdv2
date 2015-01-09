@@ -134,6 +134,9 @@ function Component:OnPostRegisterClass( Name, Class )
 			return { Trace = Trace, Inline = LuaInline, Prepare = table.concat( Preperation, "\n" ), Return = "_ar", FLAG = EXPADV_INLINEPREPARE }
 		end )
 
+	Component:AddFunctionHelper( Class.Name .. "Array", "...", "Creates " .. Class.Name .. " array with (...) components.")
+	
+
 /* ---	--------------------------------------------------------------------------------
 	@: Functions
    ---	*/
@@ -142,16 +145,25 @@ function Component:OnPostRegisterClass( Name, Class )
 		if @value 1.__type ~= %q then Context.Throw(@trace, "array", "array type missmatch, %s expected got " .. EXPADV.TypeName(@value 1.__type)) end
 		if @value 1[@value 2] == nil then Context.Throw(@trace, "array", "array reach index " .. @value 2 .. " returned void" ) end
 		]], Class.Short, Class.Name), "$table.remove(@value 1, @value 2)")
+	
+	Component:AddFunctionHelper( "remove" .. Class.Name, "ar:n", "Returns " .. Class.Name .. " at the given index in the given array and removes it from the array.")
 
 	Component:AddPreparedFunction( "insert", "ar:n," .. Class.Short, "", string.format([[
 		if @value 1.__type ~= %q then Context.Throw(@trace, "array", "array type missmatch, %s expected got " .. EXPADV.TypeName(@value 1.__type)) end
 		]], Class.Short, Class.Name), "$table.insert(@value 1, @value 2, @value 3)")
 	EXPADV.AddFunctionAlias("insert", "ar,n," .. Class.Short)
+	
+	Component:AddFunctionHelper( "insert", "ar:n," .. Class.Short, "Inserts " .. Class.Name .. " at the given index into the array.")
+	Component:AddFunctionHelper( "insert", "ar,n," .. Class.Short, "Inserts " .. Class.Name .. " at the given index into the given array.")
 
 	Component:AddPreparedFunction( "insert", "ar:" .. Class.Short, "", string.format([[
 		if @value 1.__type ~= %q then Context.Throw(@trace, "array", "array type missmatch, %s expected got " .. EXPADV.TypeName(@value 1.__type)) end
 		]], Class.Short, Class.Name), "$table.insert(@value 1, @value 2)")
 	EXPADV.AddFunctionAlias("insert", "ar," .. Class.Short)
+	
+	Component:AddFunctionHelper( "insert", "ar:" .. Class.Short, "Inserts " .. Class.Name .. " at the last index into the array.")
+	Component:AddFunctionHelper( "insert", "ar," .. Class.Short, "Inserts " .. Class.Name .. " at the last index into the given array.")
+	
 
 /* ---	--------------------------------------------------------------------------------
 	@: Foreach Loop
