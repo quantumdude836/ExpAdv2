@@ -132,7 +132,7 @@ Component:AddPreparedFunction( "setZ", "v:n", "", "@value 1.z = @value 2" )
 Component:AddFunctionHelper( "setZ", "v:n", "Sets the Z value of a vector" )
 
 Component:AddPreparedFunction( "set", "v:v", "", "@value 1:Set( @value 2 )")
-Component:AddFunctionHelper( "set", "v:n", "Sets a vector to the value of another vector" )
+Component:AddFunctionHelper( "setZ", "v:n", "Sets a vector to the value of another vector" )
 
 /* --- --------------------------------------------------------------------------------
     @: Rotate
@@ -168,7 +168,7 @@ Component:AddInlineFunction( "angle", "v:", "a", "@value 1:Angle( )" )
 Component:AddInlineFunction( "angleEx", "v:v", "a", "@value 1:AngleEx( @value 2 )" )
 
 Component:AddFunctionHelper( "angle", "v:", "Returns an angle representing the normal of the vector." )
-Component:AddFunctionHelper( "angleEx", "v:v", "Returns the angle between two vectors." )
+Component:AddFunctionHelper( "angle", "v:v", "Returns the angle between two vectors." )
 
 /* --- --------------------------------------------------------------------------------
     @: Useful
@@ -211,7 +211,7 @@ Component:AddInlineFunction( "insideAABox", "v:v,v", "b", "@value 1:WithinAABox(
 Component:AddFunctionHelper( "insideAABox", "v:v,v", "Returns whenever the given vector is in a box created by the 2 other vectors." )
 
 Component:AddPreparedFunction( "zero", "v:", "", "@value 1:Zero( )" )
-Component:AddFunctionHelper( "zero", "v:", "Sets a vectors x, y and z to 0." )
+Component:AddFunctionHelper( "zero", "v:v,v", "Sets a vectors x, y and z to 0." )
 
 Component:AddInlineFunction( "ceil", "v:", "v", "Vector(math.ceil(@value 1.x), math.ceil(@value 1.y), math.ceil(@value 1.z))" )
 Component:AddFunctionHelper( "ceil", "v:", "Returns ceiled vector." )
