@@ -369,10 +369,10 @@ Component.Author = "Rusketh"
 Component.Description = "Used to debug thrown exceptions in your code."
 
 Component:AddInlineFunction( "type", "ex:", "s", "@value 1.Exception" )
-Component:AddFunctionHelper( "type", "_ex:", "Returns the true type of an Exception" )
+Component:AddFunctionHelper( "type", "ex:", "Returns the true type of an Exception" )
 
 Component:AddInlineFunction( "message", "ex:", "s", "@value 1.Message" )
-Component:AddFunctionHelper( "message", "_ex:", "Returns the current exceptions message." )
+Component:AddFunctionHelper( "message", "ex:", "Returns the current exceptions message." )
 
 Component:AddInlineFunction( "root", "ex:", "ar", [[{@value 1.Trace[1] or 0, @value 1.Trace[2] or 0, __type = "n" } ]] )
 
