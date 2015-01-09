@@ -245,6 +245,8 @@ Component:AddVMFunction( "toUnit", "s,n", "n",
 		return -1
 	end )
 
+Component:AddFunctionHelper( "toUnit", "s,s,n", "Converts the number to the unit S." )
+
 Component:AddVMFunction( "fromUnit", "s,n", "n",
 	function( Context, Trace, Unit, Value )
 		if UnitSpeed[Unit] then
@@ -258,6 +260,7 @@ Component:AddVMFunction( "fromUnit", "s,n", "n",
 		return -1
 	end )
 
+Component:AddFunctionHelper( "fromUnit", "s,s,n", "Converts the number from the unit S." )
 
 Component:AddVMFunction( "convertUnit", "s,s,n", "n",
 	function( Context, Trace, To, From, Value )
@@ -271,6 +274,8 @@ Component:AddVMFunction( "convertUnit", "s,s,n", "n",
 
 		return -1
 	end )
+
+Component:AddFunctionHelper( "convertUnit", "s,s,n", "Converts the number from unit at 1st index to unit at 2nd index." )
 
 /* --- --------------------------------------------------------------------------------
 	@: Some useful array sorting functions
@@ -570,6 +575,10 @@ Component:AddPreparedFunction( "httpPostRequest", "s,t,d,d", "", [[$http.Post( @
 	end
 )]] )
 
+Component:AddFunctionHelper( "httpRequest", "s,d,d", "Sends HTTP Request, executing 1st delegate with string Body on success or 2nd deleget on failure." )
+Component:AddFunctionHelper( "httpPostRequest", "s,t,d,d", "Sends HTTP Request with data table, executing 1st delegate with string Body on success or 2nd delegate on failure." )
+
+
 /* --- --------------------------------------------------------------------------------
 	@: Physics Control Component
    --- */
@@ -853,6 +862,8 @@ Component:AddVMFunction( "serialize", "vr", "s", function(Context, Trace, Varian
 	return von.serialize( Serialized ) 
 end )
 
+Component:AddFunctionHelper( "serialize", "vr", "Serializes object into string so it can be saved into file." )
+
 Component:AddVMFunction( "deserialize", "s", "vr", function(Context, Trace, VON)
 	local Ok, Obj = pcall(von.deserialize, VON)
 
@@ -864,6 +875,8 @@ Component:AddVMFunction( "deserialize", "s", "vr", function(Context, Trace, VON)
 
 	Context:Throw( Trace, "von", "failed to deserialize to valid object." )
 end )
+
+Component:AddFunctionHelper( "deserialize", "vr", "Deserializes object into variant so it can be loaded back." )
 
 function Component:OnPostRegisterClass( Name, Class )
 
@@ -883,6 +896,8 @@ function Component:OnPostRegisterClass( Name, Class )
 			
 			Context:Throw( Trace, "von", "failed to serialize object." )
 		end )
+		
+		Component:AddFunctionHelper( "serialize", Class.Short, "Serializes object into string so it can be saved into file." )
 
 	end
 end
