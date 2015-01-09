@@ -7,7 +7,7 @@ require( "quaternion" )
 local Component = EXPADV.AddComponent( "quaternion", true )
 
 Component.Author = "Shadowsicon"
-Component.Description = "Adds coroutines witch can be yeileded and resumed later."
+Component.Description = "Adds quaternions."
 
 local Obj = Component:AddClass( "quaternion", "q" )
 
