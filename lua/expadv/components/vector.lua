@@ -132,7 +132,7 @@ Component:AddPreparedFunction( "setZ", "v:n", "", "@value 1.z = @value 2" )
 Component:AddFunctionHelper( "setZ", "v:n", "Sets the Z value of a vector" )
 
 Component:AddPreparedFunction( "set", "v:v", "", "@value 1:Set( @value 2 )")
-Component:AddFunctionHelper( "set", "v:n", "Sets a vector to the value of another vector" )
+Component:AddFunctionHelper( "set", "v:v", "Sets a vector to the value of another vector" )
 
 /* --- --------------------------------------------------------------------------------
     @: Rotate
@@ -424,10 +424,15 @@ Component:AddFunctionHelper( "setY", "v2:n", "Sets the Y value of a vector2" )
    --- */
 
 Component:AddInlineFunction( "dot", "v2:v2", "n", "@value 1:Dot(@value 2)" )
+
 Component:AddInlineFunction( "normal", "v2:v2", "v2", "@value 1:Normalize(@value 2)" )
+
 Component:AddInlineFunction( "length", "v2:v2", "n", "@value 1:Length(@value 2)" )
+
 Component:AddInlineFunction( "cross", "v2:v2", "v2", "@value 1:Cross(@value 2)" )
+
 Component:AddInlineFunction( "distance", "v2:v2", "n", "@value 1:Distance(@value 2)" )
+
 
 Component:AddInlineFunction( "ceil", "v2:", "v2", "Vector2(math.ceil(@value 1.x), math.ceil(@value 1.y))" )
 Component:AddFunctionHelper( "ceil", "v2:", "Returns ceiled vector." )
