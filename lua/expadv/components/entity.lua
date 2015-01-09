@@ -84,7 +84,7 @@ Component:AddInlineFunction( "entity", "", "e", "Context.entity" )
 Component:AddInlineFunction( "entity", "n", "e", "Entity(@value 1)" )
 
 Component:AddFunctionHelper( "entity", "", "Returns the chip the code is executing in." )
-Component:AddFunctionHelper( "entity", ":n", "Returns the entity of the given index." )
+Component:AddFunctionHelper( "entity", "n", "Returns the entity of the given index." )
 
 /* --- --------------------------------------------------------------------------------
 	@: Accessors Get
@@ -139,7 +139,7 @@ Component:AddInlineFunction( "owner", "e:", "ply", "(@value 1:IsValid() and EXPA
 Component:AddFunctionHelper( "owner", "e:", "Gets the owner of the given entity.")
 
 Component:AddInlineFunction( "boxCenter", "e:", "v", "(@value 1:IsValid() and @value 1:OBBCenter() or Vector(0,0,0))")
-Component:AddFunctionHelper( "boxCenter", "e:", "Gets the collision bounding size for the given entity.")
+Component:AddFunctionHelper( "boxCenter", "e:", "Gets the collision bounding center for the given entity.")
 
 Component:AddInlineFunction( "boxSize", "e:", "v", "(@value 1:IsValid() and (@value 1:OBBMaxs() - @value 1:OBBMins()) or Vector(0,0,0))")
 Component:AddFunctionHelper( "boxSize", "e:", "Gets the collision bounding size for the given entity.")
@@ -178,7 +178,7 @@ Component:AddPreparedFunction( "setColour", "e:c", "", "if(IsValid(@value 1) && 
 Component:AddFunctionHelper( "setColour", "e:c", "Sets the colour of the given entity.")
 
 Component:AddPreparedFunction( "enableDrag", "e:b", "", "if(IsValid(@value 1) && IsValid(@value 1:GetPhysicsObject()) && EXPADV.PPCheck(Context, @value 1)) then @value 1:GetPhysicsObject():EnableDrag(@value 2) end") -- Because why not :) ?
-Component:AddFunctionHelper( "setDrag", "e:b", "Enables/disables drag on an entity.")
+Component:AddFunctionHelper( "enableDrag", "e:b", "Enables/disables drag on an entity.")
 
 /* --- --------------------------------------------------------------------------------
 	@: VEHICLES
@@ -210,7 +210,7 @@ Component:AddPreparedFunction( "ejectPod", "e:", "",
 	@value 1:GetDriver():ExitVehicle()
 end]])
 
-Component:AddFunctionHelper( "lockPod", "e:", "Ejects the driver from the given vehicle.")
+Component:AddFunctionHelper( "ejectPod", "e:", "Ejects the driver from the given vehicle.")
 
 Component:AddPreparedFunction( "killPod", "e:", "", 
 [[if(@value 1:IsValid() && EXPADV.PPCheck(Context,@value 1) && @value 1:IsVehicle() && @value 1:GetDriver():IsValid()) then
