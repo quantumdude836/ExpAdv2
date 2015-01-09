@@ -107,25 +107,26 @@ Component:AddInlineFunction("getEquipped", "ply:", "e", "(IsValid(@value 1) and 
 Component:AddFunctionHelper("getEquipped", "ply:", "Returns the player's current weapon or null entity.")
 
 local FuncKeys = {
-	["leftClick"] = IN_ATTACK,
-	["rightClick"] = IN_ATTACK2,
-	["keyForward"] = IN_FORWARD,
-	["keyLeft"] = IN_MOVELEFT,
-	["keyBack"] = IN_BACK,
-	["keyRight"] = IN_MOVERIGHT,
-	["keyJump"] = IN_JUMP,
-	["keyUse"] = IN_USE,
-	["keyReload"] = IN_RELOAD,
-	["keyZoom"] = IN_ZOOM,
-	["keyWalk"] = IN_WALK,
-	["keySprint"] = IN_SPEED,
-	["keyDuck"] = IN_DUCK,
-	["keyLeftTurn"] = IN_LEFT,
-	["keyRightTurn"] = IN_RIGHT,
+	["leftClick"] = {IN_ATTACK, "Returns true if players left mouse button is pressed."},
+	["rightClick"] = {IN_ATTACK2, "Returns true if players right mouse button is pressed."},
+	["keyForward"] = {IN_FORWARD, "Returns true if players forward key is pressed."},
+	["keyLeft"] = {IN_MOVELEFT, "Returns true if players left key is pressed."},
+	["keyBack"] = {IN_BACK, "Returns true if players backward key is pressed."},
+	["keyRight"] = {IN_MOVERIGHT, "Returns true if players right key is pressed."},
+	["keyJump"] = {IN_JUMP, "Returns true if players jump key is pressed."},
+	["keyUse"] = {IN_USE, "Returns true if players use key is pressed."},
+	["keyReload"] = {IN_RELOAD, "Returns true if players reload key is pressed."},
+	["keyZoom"] = {IN_ZOOM, "Returns true if players zoom key is pressed."},
+	["keyWalk"] = {IN_WALK, "Returns true if players walk key is pressed."},
+	["keySprint"] = {IN_SPEED, "Returns true if players sprint key is pressed."},
+	["keyDuck"] = {IN_DUCK, "Returns true if players duck key is pressed."},
+	["keyLeftTurn"] = {IN_LEFT, "Returns true if players left turn key is pressed."},
+	["keyRightTurn"] = {IN_RIGHT, "Returns true if players right turn key is pressed."}
 }
 
 for Name, Enum in pairs( FuncKeys ) do
-	Component:AddInlineFunction( Name, "ply:", "b", "(IsValid(@value 1) and @value 1:KeyDown( " .. Enum .. " ) )" )
+	Component:AddInlineFunction( Name, "ply:", "b", "(IsValid(@value 1) and @value 1:KeyDown( " .. Enum[1] .. " ) )" )
+	Component:AddFunctionHelper( Name, "ply:", Enum[2])
 end
 
 Component:AddVMFunction( "players", "", "ar", 
@@ -219,3 +220,4 @@ end
 	hook.Add( "PlayerEnteredVehicle", "Expav.Event", function( Player, Car, Role )
 		EXPADV.CallEvent( "playerEnterVehicle", Player, Car or Entity(0), Role or 0 )
 	end )
+
