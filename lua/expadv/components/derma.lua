@@ -328,7 +328,7 @@ Component:AddFunctionHelper( "dmenubar", "dp", "Returns new dmenubar object with
 Component:AddFunctionHelper( "dmenubar", "df", "Returns new dmenubar object with the given dframe as parent." )
 
 Component:AddInlineFunction("addMenu", "dmb:s", "dm", "@value 1:AddMenu(@value 2)")
-
+Component:AddFunctionHelper( "addMenu", "dmb:s", "Adds a menu into menubar." )
 /* -----------------------------------------------------------------------------------
 	@: Color Mixer
 --- */
@@ -390,10 +390,14 @@ Component:AddPreparedFunction( "setImage", "dimage", "s", [[if IsValid(@value 1)
 	@value 1:SetImage(@value 2)
 end]] )
 
+Component:AddFunctionHelper( "setImage", "dimg", "Sets the dimage." )
+
 Component:AddVMFunction( "cursorImage", "", "dimg", function(Context, Trace)
 	if !Context.entity.ScreenDerma then return nil end 
 	return Context.entity.Cursor_Image
 end )
+
+Component:AddFunctionHelper( "cursorImage", "", "Returns the cursor image. " )
 
 /* -----------------------------------------------------------------------------------
 	@: Functions for all classes
@@ -406,9 +410,12 @@ function Component:OnPostRegisterClass( Name, Class )
 	
 	Component:AddPreparedFunction("addSheet", "dps:s," .. Class.Short .. ",s", "", [[@value 1:AddSheet(@value 2, @value 3, @value 4)]])
 	EXPADV.AddFunctionAlias("addSheet", "dps:s," .. Class.Short)
-
+	
+	Component:AddFunctionHelper( "addSheet", "dps:s," .. Class.Short .. ",s", "Adds " .. Class.Name .. " into the dpropertysheet." )
+	
 	Component:AddPreparedFunction("addItem", "dpl:" .. Class.Short .. "", "", [[@value 1:AddItem(@value 2)]])
 
+	Component:AddFunctionHelper( "addItem", "dpl:" .. Class.Short .. "", "Adds " .. Class.Name .. " into the dpanel." )
 end
 
 /* -----------------------------------------------------------------------------------
