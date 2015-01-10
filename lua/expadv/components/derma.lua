@@ -30,6 +30,8 @@ end
 
 Component:AddInlineFunction("canUseDerma", "", "b", [[EXPADV.CanAccessFeature(Context.entity, "Derma")]])
 
+Component:AddFunctionHelper( "canUseDerma", "", "Returns true if derma feature can be accessed." )
+
 /* -----------------------------------------------------------------------------------
 	@: Panel
 --- */
@@ -150,7 +152,7 @@ Component:AddFunctionHelper( "dlabel", "df", "Returns new dlabel object with the
 Component:AddPreparedFunction( "setTextColor", "dl:c", "", "@value 1:SetTextColor(@value 2)")
 Component:AddFunctionHelper( "setTextColor", "dl:c", "Sets the text color of the dlabel." )
 Component:AddInlineFunction( "getTextColor", "dl:", "c", "@value 1:GetTextColor()")
-Component:AddFunctionHelper( "setTextColor", "dl:c", "Returns the text color of the dlabel." )
+Component:AddFunctionHelper( "setTextColor", "dl:", "Returns the text color of the dlabel." )
 
 /* -----------------------------------------------------------------------------------
 	@: Button
@@ -224,7 +226,9 @@ Component:AddFunctionHelper( "dcheckbox", "dp", "Returns new dcheckbox object wi
 Component:AddFunctionHelper( "dcheckbox", "df", "Returns new dcheckbox object with the given dframe as parent." )
 
 Component:AddPreparedFunction("setChecked", "dcb:b", "", "@value 1:SetChecked( @value 2 )")
+Component:AddFunctionHelper( "setChecked", "dcb:b", "Sets the dcheckbox checked/unchecked." )
 Component:AddInlineFunction("getChecked", "dcb:", "b", "@value 1:GetChecked( )")
+Component:AddFunctionHelper( "getChecked", "dcb:", "Returns true if the dcheckbox is checked." )
 
 Component:AddPreparedFunction("onChange", "dcb:d", "", [[@value 1.OnChange = function()
 	Context:Execute( "checkbox", @value 2 )
@@ -349,7 +353,7 @@ Component:AddFunctionHelper( "dcolormixer", "df", "Returns new dcolormixer objec
 Component:AddPreparedFunction("setColor", "dcm:c", "", "@value 1:SetColor(@value 2)")
 Component:AddFunctionHelper( "setColor", "dcm:c", "Sets the color of the dcolormixer." )
 Component:AddInlineFunction("getColor", "dcm:", "c", "@value 1:GetColor()")
-Component:AddFunctionHelper( "getColor", "dcm:c", "Returns the color of the dcolormixer." )
+Component:AddFunctionHelper( "getColor", "dcm:", "Returns the color of the dcolormixer." )
 
 /* -----------------------------------------------------------------------------------
 	@: Property Sheet
@@ -390,7 +394,7 @@ Component:AddPreparedFunction( "setImage", "dimage", "s", [[if IsValid(@value 1)
 	@value 1:SetImage(@value 2)
 end]] )
 
-Component:AddFunctionHelper( "setImage", "dimg", "Sets the dimage." )
+Component:AddFunctionHelper( "setImage", "dimage", "Sets the dimage." )
 
 Component:AddVMFunction( "cursorImage", "", "dimg", function(Context, Trace)
 	if !Context.entity.ScreenDerma then return nil end 
