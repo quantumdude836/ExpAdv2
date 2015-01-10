@@ -424,15 +424,15 @@ Component:AddFunctionHelper( "setY", "v2:n", "Sets the Y value of a vector2" )
    --- */
 
 Component:AddInlineFunction( "dot", "v2:v2", "n", "@value 1:Dot(@value 2)" )
-
+Component:AddFunctionHelper( "dot", "v2:v2", "Returns the dot (scalar) product of vector2s." )
 Component:AddInlineFunction( "normal", "v2:v2", "v2", "@value 1:Normalize(@value 2)" )
-
+Component:AddFunctionHelper( "normal", "v2:v2", "Returns the normalized product of vector2s." )
 Component:AddInlineFunction( "length", "v2:v2", "n", "@value 1:Length(@value 2)" )
-
+Component:AddFunctionHelper( "length", "v2:v2", "Returns the length product of vector2s." )
 Component:AddInlineFunction( "cross", "v2:v2", "v2", "@value 1:Cross(@value 2)" )
-
+Component:AddFunctionHelper( "cross", "v2:v2", "Returns the cross/wedge product of vector2s." )
 Component:AddInlineFunction( "distance", "v2:v2", "n", "@value 1:Distance(@value 2)" )
-
+Component:AddFunctionHelper( "distance", "v2:v2", "Returns the distance between vector2s." )
 
 Component:AddInlineFunction( "ceil", "v2:", "v2", "Vector2(math.ceil(@value 1.x), math.ceil(@value 1.y))" )
 Component:AddFunctionHelper( "ceil", "v2:", "Returns ceiled vector." )
