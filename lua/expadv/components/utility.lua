@@ -292,6 +292,8 @@ Component:AddPreparedFunction( "sortVectorsByDistance", "ar,v", "", [[
 		end )
 	]])
 
+Component:AddFunctionHelper( "sortVectorsByDistance", "ar,v", "Sorts the given array of vectors by distance to the given position." )
+
 /* --- --------------------------------------------------------------------------------
 	@: Rangers
    --- */
