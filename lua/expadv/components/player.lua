@@ -81,6 +81,7 @@ Component:AddFunctionHelper("eyeAngles", "ply:", "Returns the player's eye's ang
 Component:AddInlineFunction("aimEntity", "ply:", "e", "( IsValid(@value 1) and @value 1:GetEyeTraceNoCursor().Entity or Entity(0))" )
 Component:AddFunctionHelper("aimEntity", "ply:", "Returns the player's aim entity.")
 Component:AddInlineFunction("aimNormal", "ply:", "v", "( IsValid(@value 1) and @value 1:GetEyeTraceNoCursor().HitNormal or Vector(0,0,0) )" )
+Component:AddFunctionHelper("aimNormal", "ply:", "Returns hit normal of player's eyetrace." )
 Component:AddInlineFunction("aimPos", "ply:", "v", "( IsValid(@value 1) and @value 1:GetEyeTraceNoCursor().HitPos or Vector(0,0,0) )" )
 Component:AddFunctionHelper("aimPos", "ply:", "Returns the player's aim position.")
 

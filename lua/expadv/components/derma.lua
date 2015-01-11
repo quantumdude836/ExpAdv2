@@ -101,10 +101,13 @@ Component:AddPreparedFunction("dockPadding", "dp:n,n,n,n", "", "@value 1:DockPad
 Component:AddFunctionHelper( "dockPadding", "dp:n,n,n,n", "Sets the dock padding of the dpanel." )
 
 Component:AddPreparedFunction("center", "dp:", "", "@value 1:Center()")
+Component:AddFunctionHelper("center", "dp:", "Sets the dpanel's position to center of its parent." )
 
 Component:AddPreparedFunction("onPaint", "dp:d", "", [[@value 1.Paint = function()
 	Context:Execute( "paint", @value 2 )
 end]])
+
+Component:AddFunctionHelper("onPaint", "dp:d", "Replaces the paint event of the dpanel.")
 
 PanelClass:AddPreparedOperator( "=", "n,dp", "", "Context.Memory[@value 1] = @value 2" )
 
@@ -131,6 +134,7 @@ Component:AddFunctionHelper( "setDraggable", "df:b", "If set to true players wil
 Component:AddPreparedFunction("setSizable", "df:b", "", "@value 1:SetSizable(@value 2)")
 Component:AddFunctionHelper( "setSizable", "df:b", "If set to true players will be able to resize the frame." )
 Component:AddPreparedFunction("setBackgroundBlur", "df:b", "", "@value 1:SetBackgroundBlur(@value 2)")
+Component:AddFunctionHelper("setBackgroundBlur", "df:b", "If set to true blurs background." )
 
 Component:AddPreparedFunction("setTitle", "df:s", "", "@value 1:SetTitle(@value 2)")
 Component:AddFunctionHelper( "setTitle", "df:s", "Sets the title of the dframe." )

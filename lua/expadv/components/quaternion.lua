@@ -233,6 +233,8 @@ Component:AddFunctionHelper( "toAngle", "q:", "Converts a quaternion to an angle
 Component:AddFunctionHelper( "slerp", "q,q,n", "Interpolates between two quaternions by a ratio of the given number." )
 Component:AddFunctionHelper( "vec", "q", "Creates a vector from a quaternion." )
 Component:AddFunctionHelper( "rotationVector", "q", "Returns the rotation vector of a quaternion." )
+Component:AddFunctionHelper( "rotationAngle", "q", "Returns the rotation angle of a quaternion." )
+Component:AddFunctionHelper( "rotationAxis", "q", "Returns the rotation axis of a quaternion." )
 Component:AddFunctionHelper( "qRotation", "v,n", "Returns a quaternion from a vector, number controls the angle." )
 Component:AddFunctionHelper( "qRotation", "v", "Returns a quaternion from a vector, vector components control axis and angle." )
 
