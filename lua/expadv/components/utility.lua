@@ -555,6 +555,7 @@ Component:AddFunctionHelper( "ranger", "", "Creates a new ranger object." )
 Component:AddFunctionHelper( "ignoreWorld", "rd:b", "Sets a ranger to ingore the world." )
 Component:AddFunctionHelper( "hitNoneWorld", "rd:", "Returns true if the ranger hit a non-world surface (a prop, for example)." )
 Component:AddFunctionHelper( "hitSky", "rd:", "Returns true if skybox was hit by ranger." )
+Component:AddFunctionHelper( "clearFilter", "rd:", "Clears the filter of the ranger." )
 
 /* --- --------------------------------------------------------------------------------
 	@: HTTP

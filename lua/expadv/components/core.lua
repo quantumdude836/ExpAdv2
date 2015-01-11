@@ -394,7 +394,7 @@ Component:AddInlineFunction( "message", "ex:", "s", "@value 1.Message" )
 Component:AddFunctionHelper( "message", "ex:", "Returns the current exceptions message." )
 
 Component:AddInlineFunction( "root", "ex:", "ar", [[{@value 1.Trace[1] or 0, @value 1.Trace[2] or 0, __type = "n" } ]] )
-Component:AddFunctionHelper( "roo", "ex:", "Returns the root of the exception." )
+Component:AddFunctionHelper( "root", "ex:", "Returns the root of the exception." )
 
 Component:AddVMFunction( "stack", "ex:n", "ar",
 	function( Context, Trace, Exception, Index )

@@ -96,7 +96,9 @@ Component:AddPreparedFunction("dockBottom", "dp:", "", "@value 1:Dock($BOTTOM)")
 Component:AddFunctionHelper( "dockBottom", "dp:", "Docks the panel to the bottom of its parent." )
 
 Component:AddPreparedFunction("dockMargin", "dp:n,n,n,n", "", "@value 1:DockMargin(@value 2, @value 3, @value 4, @value 5)")
+Component:AddFunctionHelper( "dockMargin", "dp:n,n,n,n", "Sets the dock margin of the dpanel." )
 Component:AddPreparedFunction("dockPadding", "dp:n,n,n,n", "", "@value 1:DockPadding(@value 2, @value 3, @value 4, @value 5)")
+Component:AddFunctionHelper( "dockPadding", "dp:n,n,n,n", "Sets the dock padding of the dpanel." )
 
 Component:AddPreparedFunction("center", "dp:", "", "@value 1:Center()")
 
@@ -396,11 +398,11 @@ Component:AddFunctionHelper( "dimage", "", "Returns new dimage object." )
 Component:AddFunctionHelper( "dimage", "dp", "Returns new dimage object with the given dpanel as parent." )
 Component:AddFunctionHelper( "dimage", "df", "Returns new dimage object with the given dframe as parent." )
 
-Component:AddPreparedFunction( "setImage", "dimage:s", "", [[if IsValid(@value 1) then
+Component:AddPreparedFunction( "setImage", "dimg:s", "", [[if IsValid(@value 1) then
 	@value 1:SetImage(@value 2)
 end]] )
 
-Component:AddFunctionHelper( "setImage", "dimage", "Sets the dimage." )
+Component:AddFunctionHelper( "setImage", "dimg:s", "Sets the dimage." )
 
 Component:AddVMFunction( "cursorImage", "", "dimg", function(Context, Trace)
 	if !Context.entity.ScreenDerma then return nil end 

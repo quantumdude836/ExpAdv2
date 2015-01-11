@@ -413,7 +413,7 @@ Component:AddFunctionHelper( "rotate", "mx:n", "Rotates the matrix by given angl
 Component:AddPreparedFunction("setAngles", "mx:a", "", "@value 1:SetAngles(@value 2)")
 Component:AddFunctionHelper( "setAngles", "mx:a", "Sets angle of a matrix." )
 Component:AddPreparedFunction("setAngle", "mx:n", "", "@value 1:SetAngles($Angle(0,@value 2,0))")
-Component:AddFunctionHelper( "setAngles", "mx:n", "Sets angle of a matrix." )
+Component:AddFunctionHelper( "setAngle", "mx:n", "Sets angle of a matrix." )
 Component:AddInlineFunction("getAngles", "mx:", "a", "@value 1:GetAngles()")
 Component:AddFunctionHelper( "getAngles", "mx:", "Gets angle of a matrix." )
 

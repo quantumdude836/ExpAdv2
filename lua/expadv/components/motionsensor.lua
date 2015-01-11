@@ -75,7 +75,7 @@ MSComponent:AddPreparedFunction( "startMotionSensor", "ply:", "", [[if IsValid( 
 	@value 1:SendLua( 'motionsensor.Start( )' )
 end]] )
 
-MSComponent:AddFunctionHelper( "startMotionSensor", "", "Starts the players motion sensor, player has enabled 'expadv_allow_msensor'." )
+MSComponent:AddFunctionHelper( "startMotionSensor", "ply:", "Starts the players motion sensor, player has enabled 'expadv_allow_msensor'." )
 
 for Name, Num in pairs( BONES ) do
 	local function Virtual( Context, Trace, Player )
