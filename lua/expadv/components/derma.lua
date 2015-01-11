@@ -83,11 +83,17 @@ Component:AddInlineFunction("getText", "dp:", "s", "@value 1:GetText()")
 Component:AddFunctionHelper( "getText", "dp:", "Returns the text of the dpanel." )
 
 Component:AddPreparedFunction("noDock", "dp:", "", "@value 1:Dock($NODOCK)")
+Component:AddFunctionHelper( "noDock", "dp:", "Removes dock from the panel." )
 Component:AddPreparedFunction("dockFill", "dp:", "", "@value 1:Dock($FILL)")
+Component:AddFunctionHelper( "dockFill", "dp:", "Docks the panel to fill its parent." )
 Component:AddPreparedFunction("dockLeft", "dp:", "", "@value 1:Dock($LEFT)")
+Component:AddFunctionHelper( "dockLeft", "dp:", "Docks the panel to the left of its parent." )
 Component:AddPreparedFunction("dockTop", "dp:", "", "@value 1:Dock($TOP)")
+Component:AddFunctionHelper( "dockTop", "dp:", "Docks the panel to the top of its parent." )
 Component:AddPreparedFunction("dockRight", "dp:", "", "@value 1:Dock($RIGHT)")
+Component:AddFunctionHelper( "dockRight", "dp:", "Docks the panel to the right of its parent." )
 Component:AddPreparedFunction("dockBottom", "dp:", "", "@value 1:Dock($BOTTOM)")
+Component:AddFunctionHelper( "dockBottom", "dp:", "Docks the panel to the bottom of its parent." )
 
 Component:AddPreparedFunction("dockMargin", "dp:n,n,n,n", "", "@value 1:DockMargin(@value 2, @value 3, @value 4, @value 5)")
 Component:AddPreparedFunction("dockPadding", "dp:n,n,n,n", "", "@value 1:DockPadding(@value 2, @value 3, @value 4, @value 5)")
@@ -152,7 +158,7 @@ Component:AddFunctionHelper( "dlabel", "df", "Returns new dlabel object with the
 Component:AddPreparedFunction( "setTextColor", "dl:c", "", "@value 1:SetTextColor(@value 2)")
 Component:AddFunctionHelper( "setTextColor", "dl:c", "Sets the text color of the dlabel." )
 Component:AddInlineFunction( "getTextColor", "dl:", "c", "@value 1:GetTextColor()")
-Component:AddFunctionHelper( "setTextColor", "dl:", "Returns the text color of the dlabel." )
+Component:AddFunctionHelper( "getTextColor", "dl:", "Returns the text color of the dlabel." )
 
 /* -----------------------------------------------------------------------------------
 	@: Button
@@ -390,7 +396,7 @@ Component:AddFunctionHelper( "dimage", "", "Returns new dimage object." )
 Component:AddFunctionHelper( "dimage", "dp", "Returns new dimage object with the given dpanel as parent." )
 Component:AddFunctionHelper( "dimage", "df", "Returns new dimage object with the given dframe as parent." )
 
-Component:AddPreparedFunction( "setImage", "dimage", "s", [[if IsValid(@value 1) then
+Component:AddPreparedFunction( "setImage", "dimage:s", "", [[if IsValid(@value 1) then
 	@value 1:SetImage(@value 2)
 end]] )
 

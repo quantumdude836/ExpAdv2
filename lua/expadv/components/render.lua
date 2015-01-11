@@ -426,7 +426,7 @@ Component:AddFunctionHelper( "setScale", "mx:v", "Sets scale of a matrix." )
 Component:AddPreparedFunction("setScale", "mx:v2", "", "@value 1:SetScale($Vector(@value 2.x,@value 2.y,1))")
 Component:AddFunctionHelper( "setScale", "mx:v2", "Sets scale of a matrix." )
 Component:AddInlineFunction("getScale", "mx:", "v", "@value 1:GetScale()")
-Component:AddFunctionHelper( "setScale", "mx:", "Gets scale of a matrix." )
+Component:AddFunctionHelper( "getScale", "mx:", "Gets scale of a matrix." )
 
 EXPADV.ClientOperators()
 

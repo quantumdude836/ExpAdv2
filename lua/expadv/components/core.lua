@@ -117,6 +117,8 @@ EXPADV.AddGeneratedFunction( nil, "invoke", "cls,d,...", "",
 		return { Trace = Trace, Inline = Return, Prepare = table.concat( Preperation, "\n" ), Return = Inputs[1].PointClass, FLAG = EXPADV_INLINEPREPARE }
 	end ); EXPADV.AddFunctionAlias("invoke", "cls,d")
 
+EXPADV.AddFunctionHelper("invoke", "cls,d,...", "Executes the given delegate passing given params and returning the value (return type class, the function, params)." )
+	
 /* --- -------------------------------------------------------------------------------
 	@: Loops
    --- */
