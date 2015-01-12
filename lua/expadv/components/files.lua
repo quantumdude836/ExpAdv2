@@ -29,11 +29,17 @@ EXPADV.SharedOperators()
 local function GetValidPath( Context, Path, bCreate )
 	if Path:find( "..", 1, true ) then return false end
 
-	local FilePath = string.GetPathFromFilename( Path )
+	local FilePath, FileName
 
-	if FilePath == "" or FilePath == "/" then FilePath = nil end
-
-	local FileName = string.GetFileFromFilename( Path )
+	if string.find(Path, "/") then
+		FileName = string.GetFileFromFilename( Path )
+		FilePath = string.GetPathFromFilename( Path )
+		if FilePath[#FilePath] == "/" then FilePath = string.sub(FilePath, 1, #FilePath - 1) end
+		if FilePath == "" or FilePath == "/" then FilePath = nil end
+	else
+		FileName = Path
+	end
+	
 
 	local Root
 
@@ -70,7 +76,9 @@ Component:AddVMFunction( "readFile", "s", "s",
 Component:AddVMFunction( "writeFile", "s,s", "",
 	function( Context, Trace, Path, File )
 		if #File < Component:ReadSetting( "max_filesize", 300 ) then
+
 			local ValidPath = GetValidPath( Context, Path, true )
+			print( "Valid Path:", ValidPath)
 
 			if ValidPath then
 				file.Write( ValidPath, File, true )
