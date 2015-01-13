@@ -354,6 +354,20 @@ Component:AddInlineFunction( "radius", "e:", "n","(@value 1:IsValid() and @value
 Component:AddFunctionHelper( "radius", "e:", "Returns the bounding radius of the given entity.")
 
 /* --- --------------------------------------------------------------------------------
+	@: Is Somthing
+   --- */
+EXPADV.ServerOperators()
+
+Component:AddInlineFunction( "isNPC", "e:", "b", "(IsValid(@value 1) and @value 1:IsNPC())")
+Component:AddFunctionHelper( "isNPC", "e", "returns true is the entity is an npc.")
+
+Component:AddInlineFunction( "isPlayer", "e:", "b", "(IsValid(@value 1) and @value 1:IsPlayer())")
+Component:AddFunctionHelper( "isPlayer", "e", "returns true is the entity is a player.")
+
+Component:AddInlineFunction( "isVehicle", "e:", "b", "(IsValid(@value 1) and @value 1:IsVehicle())")
+Component:AddFunctionHelper( "isVehicle", "e", "returns true is the entity is a Vehicle.")
+
+/* --- --------------------------------------------------------------------------------
 	@: Physics Setters
    --- */
 

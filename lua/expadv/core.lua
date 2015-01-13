@@ -359,6 +359,7 @@ function EXPADV.LoadCore( )
 	EXPADV.AddComponentFile( "files" )
 	EXPADV.AddComponentFile( "navigation" )
 	EXPADV.AddComponentFile( "derma" )
+	EXPADV.AddComponentFile( "keyboard" )
 	EXPADV.AddComponentFile( "context" )
 
 	EXPADV.CallHook( "AddComponents" )
