@@ -760,9 +760,9 @@ end
 
 expadv_compilespeed = 0.1
 
-hook.Add( "Expadv.PostLoadConfig", "expadv.quota", function( )
+//hook.Add( "Expadv.PostLoadConfig", "expadv.quota", function( )
 	EXPADV.CreateSetting( "compilerate", 20 )
-end )
+//end )
 
 timer.Create( "expadv.quota", 1, 0, function( )
 	local Speed = EXPADV.ReadSetting( "compilerate", 20 )
