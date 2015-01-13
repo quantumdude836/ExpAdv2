@@ -236,15 +236,13 @@ local Component = EXPADV.AddComponent( "print" , true )
 
 Component.Author = "Rusketh"
 Component.Description = "Prints stuff to your chat."
+Component:AddFeature( "print", "Prints to you..", "fugue/printer-monochrome.png" )
 
 EXPADV.SharedOperators( )
 
 Component:AddVMFunction( "printColor", "...", "",
 	function( Context, Trace, ... )
-		if CLIENT then
-			if Context.player ~= LocalPlayer( ) and Context.player ~= Entity(0) then return end
-		end
-
+		
 		local Values = { ... }
 
 		for Key, Value in pairs( Values ) do
@@ -255,51 +253,42 @@ Component:AddVMFunction( "printColor", "...", "",
 			end
 		end
 
-		if SERVER then
-			EXPADV.PrintColor( Context, Values )
-		elseif CLIENT then
-			chat.AddText( unpack( Values ) )
-		end
+		EXPADV.PrintColor( Context, Values )
 	end )
 
 Component:AddVMFunction( "print", "...", "",
 	function( Context, Trace, ... )
-		if CLIENT then
-			if Context.player ~= LocalPlayer( ) and Context.player ~= Entity(0) then return end
-		end
-		
 		local Values = { ... }
 
 		for Key, Value in pairs( Values ) do
 			Values[Key] = EXPADV.ToString( Value[2], Value[1] )
 		end
 
-		if SERVER then
-			EXPADV.PrintColor( Context, Values )
-		elseif CLIENT then
-			chat.AddText( unpack( Values ) )
-		end
+		EXPADV.PrintColor( Context, Values )
 	end )
 
 Component:AddFunctionHelper( "printColor", "...", "Prints the contents of ( ... ) to chat seperated with a space using colors." )
 Component:AddFunctionHelper( "print", "...", "Prints the contents of ( ... ) to chat seperated with a space." )
 
-if SERVER then
-	util.AddNetworkString( "expadv.printcolor" )
+if SERVER then util.AddNetworkString( "expadv.printcolor" ) end
 
-	function EXPADV.PrintColor( Context, Tbl )
-		if IsValid(Context.player) then
-			net.Start( "expadv.printcolor" )
-				net.WriteTable( Tbl )
-			net.Send( Player )
-		elseif Context.entity and Context.entity.Scripted then
-			MsgC(unpack(Tbl))
-			net.Start( "expadv.printcolor" )
-				net.WriteTable( Tbl )
-			net.Broadcast()
-		end
+function EXPADV.PrintColor( Context, Tbl, ... )
+
+	if !istable(Tbl) then Tbl = {Tbl, ...} end
+
+	if CLIENT then
+		if !EXPADV.EntityCanAccessFeature(Context.entity, "print") then return end
+		chat.AddText( unpack(Tbl) )
+	elseif IsValid(Context.player) then
+		net.Start( "expadv.printcolor" )
+			net.WriteTable( Tbl )
+		net.Send( Player )
+	elseif Context.entity and Context.entity.Scripted then
+		MsgC(unpack(Tbl))
+		net.Start( "expadv.printcolor" )
+			net.WriteTable( Tbl )
+		net.Broadcast()
 	end
-
 end
 
 if CLIENT then

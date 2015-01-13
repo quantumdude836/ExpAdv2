@@ -123,17 +123,17 @@ function EXPADV.GetAcessToFeatureForEntity( Entity, Feature )
 	return Entity.Features[Feature] or false
 end
 	
-	function EXPADV.SetFeatureBlockedForEntity( Entity, Feature, bBool )
-		if !Entity.BlockedFeatures then Entity.BlockedFeatures = { } end
+function EXPADV.SetFeatureBlockedForEntity( Entity, Feature, bBool )
+	if !Entity.BlockedFeatures then Entity.BlockedFeatures = { } end
 
 	Entity.BlockedFeatures[Feature] = bBool
-	end
+end
 
-	function EXPADV.IsFeatureBlockedForEntity( Entity, Feature )
-		if !Entity.BlockedFeatures then return false end
+function EXPADV.IsFeatureBlockedForEntity( Entity, Feature )
+	if !Entity.BlockedFeatures then return false end
 
-		return Entity.BlockedFeatures[Feature] or false
-	end
+	return Entity.BlockedFeatures[Feature] or false
+end
 
 function EXPADV.CanAccessFeature( Entity, Feature )
 
@@ -180,6 +180,14 @@ local function UpdateEntity(Entity, Feature)
 		EXPADV.CallHook("ChangeFeatureAccess", Entity, Feature, Value)
 	end
 end
+
+hook.Add( "Expadv.RegisterContext", "expadv.context", function( Context )
+	if IsValid(Context.entity) then
+		for Feature, Info in pairs(EXPADV.Features) do
+			UpdateEntity(Context.entity, Feature)
+		end
+	end
+end )
 
 function EXPADV.EntityCanAccessFeature(Entity, Feature)
 	if !Memory[Entity] then return false end

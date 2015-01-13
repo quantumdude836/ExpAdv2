@@ -299,27 +299,21 @@ EXPADV.SharedOperators( )
 Component:AddPreparedFunction( "getScreenCursor", "ply:", "v2", [[
 if IsValid( Context.entity ) and Context.entity.Screen then
 	@define value = Context.entity:GetCursor( @value 1 )
-else
-	@value = Vector2(0,0)
-end]], "@value" )
+]], "(@value or Vector2(0,0))" )
 
 Component:AddFunctionHelper( "getScreenCursor", "ply:", "Returns the cursor psotion of a player, for a screen." )
 
 Component:AddPreparedFunction( "screenToLocal", "v2", "v", [[
 if IsValid( Context.entity ) and Context.entity.Screen then
 	@define value = Context.entity:ScreenToLocalVector( @value 1 )
-else
-	@value = Vector(0,0,0)
-end]], "@value" )
+end]], "(@value or Vector2(0,0))" )
 
 Component:AddFunctionHelper( "screenToLocal", "v2", "Returns the position on screen as a local vector." )
 
 Component:AddPreparedFunction( "screenToWorld", "v2", "v", [[
 if IsValid( Context.entity ) and Context.entity.Screen then
 	@define value = Context.entity:LocalToWorld( Context.entity:ScreenToLocalVector( @value 1 ) )
-else
-	@value = Vector(0,0,0)
-end]], "@value" )
+end]], "(@value or Vector(0,0,0))" )
 
 Component:AddFunctionHelper( "screenToWorld", "v2", "Returns the position on screen as a world vector." )
 
