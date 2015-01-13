@@ -165,7 +165,7 @@ function PANEL:AddTabNamer( )
 	end
 	
 	function Panel:Think( )
-		local FullWide = Panel.IsOpen and 130 or 25
+		local FullWide = Panel.IsOpen and 200 or 25
 		
 		local Wide = self:GetWide( )
 		Wide = Wide + math.Clamp( FullWide - Wide, -5, 5 )
@@ -189,7 +189,7 @@ function PANEL:AddTabNamer( )
 	
 	function Panel.txt:OnTextChanged( )
 		local Value = self:GetValue( )
-		local Title = string.sub( string.gsub( Value, "[^a-zA-Z0-9_ ]", "" ), 0, 16 )
+		local Title = string.sub( string.gsub( Value, "[^a-zA-Z0-9_ ]", "" ), 0, 30 )
 		
 		local TabHolder = self:GetParent( ):GetParent( ):GetParent( ).TabHolder
 		local ActiveTab = TabHolder:GetActiveTab( )
