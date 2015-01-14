@@ -3,9 +3,11 @@
    --- */
 
 include( "shared.lua" )
+include( "vars.lua" )
 include( "wiremod.lua" )
 AddCSLuaFile( "shared.lua" )
 AddCSLuaFile( "cl_init.lua" )
+AddCSLuaFile( "vars.lua" )
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: vNet
