@@ -14,24 +14,49 @@ ENT.AutomaticFrameAdvance  	= true
 -- if CLIENT then game.AddParticles( "particles/fire_01.pcf" ) end
 -- PrecacheParticleSystem( "fire_verysmall_01" )
 
-
-/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
-	@: Net Vars
-   --- */
-
 AccessorFunc( ENT, "ClientState", "ClientState", FORCE_NUMBER )
 AccessorFunc( ENT, "ClientCompletion", "ClientCompletion", FORCE_NUMBER )
 
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Ops
+   --- */
+
 function ENT:SetupDataTables( )
-	self:NetworkVar( "Float", 0, "TickQuota" )
-	self:NetworkVar( "Float", 1, "StopWatch" )
-	self:NetworkVar( "Float", 2, "Average" )
-	self:NetworkVar( "Float", 3, "ServerState" )
-	self:NetworkVar( "Float", 4, "ServerCompletion" )
+	self:AddExpVar( "FLOAT", 0, "TickQuota" )
+	self:AddExpVar( "FLOAT", 1, "StopWatch" )
+	self:AddExpVar( "FLOAT", 2, "Average" )
+	self:AddExpVar( "FLOAT", 3, "ServerState" )
+	self:AddExpVar( "FLOAT", 4, "ServerCompletion" )
+	self:AddExpVar( "STRING", 0, "GateName" )
+	self:AddExpVar( "ENTITY", 0, "LinkedPod" )
+end
 
-	self:NetworkVar( "String", 0, "GateName" )
+if SERVER then
+	function ENT:CalculateOps(Context)
+		self:SetTickQuota(Context.Status.Perf)
+		self:SetStopWatch(self:GetStopWatch(0) * 0.95 + (Context.Status.StopWatch * 50000))
+		self:SetAverage(self:GetAverage(0) * 0.95 + Context.Status.Perf)
+		
+		if Context.Status.Counter > expadv_hardquota * 0.5 then
+			self:SetServerState(EXPADV_STATE_ALERT)
+		else
+			self:SetServerState(EXPADV_STATE_ONLINE)
+		end
+	end
+end
 
-	self:NetworkVar( "Entity", 0, "LinkedPod" )
+if CLIENT then
+	function ENT:CalculateOps(Context)
+		self.ClientTickQuota = Context.Status.Perf
+		self.ClientStopWatch = self.ClientStopWatch * 0.95 + (Context.Status.StopWatch * 50000)
+		self.ClientAverage = self.ClientAverage * 0.95 + Context.Status.Perf
+
+		if Context.Status.Counter > expadv_hardquota * 0.5 then
+			self:SetClientState(EXPADV_STATE_ALERT)
+		else
+			self:SetClientState(EXPADV_STATE_ONLINE)
+		end
+	end
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -74,38 +99,17 @@ end
    --- */
 
 function ENT:Think( )
-	if self.NextThinkTime and self.NextThinkTime > CurTime( ) then return end
-	self.NextThinkTime = CurTime( ) + 1
-
-	if self:IsRunning( ) then
-		local Monitor = self.Context.Monitor
-
-		if SERVER then
-			self:SetTickQuota( Monitor.Counter ) -- Perf )
-			self:SetStopWatch( Monitor.StopWatch )
-			self:SetAverage( Monitor.Usage )
-			self:SetServerState( Monitor.State or EXPADV_STATE_OFFLINE )
-		elseif CLIENT then
-			self.ClientTickQuota = Monitor.Counter -- Monitor.Perf
-			self.ClientStopWatch = Monitor.StopWatch
-			self.ClientAverage = Monitor.Usage
-			self:SetClientState( Monitor.State or EXPADV_STATE_OFFLINE )
-		end
-	end
 
 	if SERVER and self:GetModel( ) == "models/lemongate/lemongate.mdl" then
 		local Context = self.Context
 
-		local State = Context and Context.Monitor.State or 0
-		local Usage = Context and Context.Monitor.Usage or 0
-
 		local Attachment = self:LookupAttachment("fan_attch")
 
-	    local Percent = (Usage / expadv_hardquota) * 100
+	    local Percent = (self:GetAverage(1) / expadv_hardquota) * 100
 	    
 	    local SpinSpeed = self.SpinSpeed or 0
 
-	    if State >= EXPADV_STATE_CRASHED then SpinSpeed = 0 end
+	    if self:GetServerState(EXPADV_STATE_OFFLINE) >= EXPADV_STATE_CRASHED then SpinSpeed = 0 end
 	    
 	    self.SpinSpeed = SpinSpeed + math.Clamp( Percent - SpinSpeed, -0.1, 0.1 )
 
@@ -121,6 +125,9 @@ function ENT:Think( )
 			self.Compiler_Instance = nil
 		end
 	end
+
+	self:NextThink(CurTime() + 1)
+	return true
 end
 
 function ENT:OnCompilerUpdate( Status )

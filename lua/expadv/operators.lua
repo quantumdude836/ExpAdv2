@@ -705,14 +705,14 @@ function EXPADV.BuildVMOperator( Operator )
 
 				elseif Instruction.FLAG == EXPADV_INLINE then
 
-					Arguments[I] = string_format( "{%s,%q}", Instruction.Inline, Instruction.Return )
+					Arguments[I] = (Instruction.Return ~= "...") and string_format( "{%s,%q}", Instruction.Inline, Instruction.Return ) or Instruction.Inline
 
 				elseif Instruction.FLAG == EXPADV_PREPARE then
 
 					Prepare[ #Prepare + 1 ] = Instruction.Prepare
 
 				else
-					Arguments[I] = string_format( "{%s,%q}", Instruction.Inline, Instruction.Return )
+					Arguments[I] = (Instruction.Return ~= "...") and string_format( "{%s,%q}", Instruction.Inline, Instruction.Return ) or Instruction.Inline
 
 					Prepare[ #Prepare + 1 ] = Instruction.Prepare
 				end
@@ -858,7 +858,7 @@ function EXPADV.BuildLuaOperator( Operator )
 						VAPrepare[ #VAPrepare + 1 ] = Input.Prepare
 					end
 
-					if Input.Return ~= "..." and Input.Return ~= "_vr" then
+					if Instruction.Return ~= "..." and Input.Return ~= "_vr" then
 						Inline = string_format( "{%s,%q}", Inline, Input.Return or "NIL" )
 					end
 
