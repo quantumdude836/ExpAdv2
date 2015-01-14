@@ -56,7 +56,7 @@ Component:AddFunctionHelper("connect", "ar:ar", "Connects one array with another
 Component:AddPreparedFunction("hasValue", "ar:vr", "b", [[
 	@define found = false
 	if(EXPADV.TypeName(@value 2[2]) != @value 1.__type) then
-		Context.Throw(@trace, "array", "variant not of array type, " .. @value 1.__type .. " expected got " .. EXPADV.TypeName(@value 2.__type[2])) end
+		Context.Throw(@trace, "array", "variant not of array type, " .. @value 1.__type .. " expected got " .. EXPADV.TypeName(@value 2[2])) end
 	else
 		for k, v in pairs(@value 1) do
 			if(v == @value 1.__type) then continue end
