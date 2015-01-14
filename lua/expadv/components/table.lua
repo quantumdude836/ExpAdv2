@@ -158,6 +158,18 @@ Component:AddPreparedFunction( "entityKeys", "t:", "ar", [[
 	end
 ]], "@Array" )
 
+// lol lets squeeze it in here
+Component:AddPreparedFunction("hasValue", "t:vr", "b", [[
+	@define found = false
+	for k, v in pairs(@value 1) do
+		if(v == @value 2) then
+			@found = true
+			break
+		end
+	end
+end]], "@found")
+Component:AddPreparedFunction("hasValue", "t:vr", "b", "Checks if the given value is in the given table.")
+
 /* --- --------------------------------------------------------------------------------
 	@: Variant Get Operators
    --- */

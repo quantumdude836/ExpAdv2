@@ -53,6 +53,23 @@ else Context.Throw(@trace, "array", "array type missmatch, " .. EXPADV.TypeName(
 ]],"@value 1")
 Component:AddFunctionHelper("connect", "ar:ar", "Connects one array with another array.")
 
+Component:AddPreparedFunction("hasValue", "ar:vr", "b", [[
+	@define found = false
+	if(EXPADV.TypeName(@value 2[2]) != @value 1.__type) then
+		Context.Throw(@trace, "array", "variant not of array type, " .. @value 1.__type .. " expected got " .. EXPADV.TypeName(@value 2.__type[2])) end
+	else
+		for k, v in pairs(@value 1) do
+			if(v == @value 1.__type) then continue end
+			if(v == @value 2) then
+				@found = true
+				break
+			end
+		end
+	end
+end]], "@found")
+Component:AddPreparedFunction("hasValue", "ar:vr", "b", "Checks if the given value is in the given array.")
+			
+
 /* --- --------------------------------------------------------------------------------
 	@: Unpack to vararg
    --- */
