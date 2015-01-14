@@ -61,11 +61,11 @@ Component:AddFunctionHelper("connect", "ar:ar", "Connects one array with another
 	@: Unpack to vararg
    --- */
 
-local Unpack
-
-function Unpack( Array, Index )
+local function Unpack( Array, Index )
 	if Array[Index] == nil then return end
 	
+	if Array.__type == "_vr" then return Array[Index], Unpack( Array, Index + 1 ) end
+
 	return { Array[Index], Array.__type }, Unpack( Array, Index + 1 )
 end
 

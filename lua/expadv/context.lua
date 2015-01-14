@@ -43,14 +43,6 @@ function EXPADV.BuildNewContext( Instance, Player, Entity ) -- Table, Player, En
 		Memory = 0,
 	}
 
-	Context.Monitor = {
-		Perf = 0,
-		Usage = 0,
-		Counter = 0,
-		StopWatch = 0,
-		State = 0,
-	}
-
 	return Context
 end
 
@@ -72,7 +64,6 @@ function EXPADV.RootContext:Execute( Location, Operation, ... ) -- String, Funct
 
 		local function op_counter( )
 			Status.Perf = Status.Perf + expadv_luahook
-
 			if Status.Perf > expadv_tickquota then
 				debug.sethook( )
 				error( { Trace = {0,0}, Quota = true, Msg = Message, Context = Context }, 0 )
@@ -251,38 +242,29 @@ EXPADV_STATE_ALERT = 2
 EXPADV_STATE_CRASHED = 3
 EXPADV_STATE_BURNED = 4
 
-local NextCheck
 
 hook.Add( "Tick", "ExpAdv2.Performance", function( )
-	//if NextCheck and NextCheck < CurTime() then return end
-	
 	for Context, _ in pairs( EXPADV.CONTEXT_REGISTERY ) do
 		if !Context.Online then continue end
 
-		local Status, Monitor = Context.Status, Context.Monitor
+		local status = Context.Status
 
-		Monitor.Perf = Status.Perf
-		Monitor.Usage = Monitor.Usage * 0.95 + (Status.Perf * 0.05)
-		Monitor.StopWatch = Monitor.StopWatch * 0.95 + ( Status.StopWatch * 50000 )
+		local Counter = status.Counter or 0
 
-		local Counter = Status.Counter or 0
-		Counter = Counter + Status.Perf - expadv_softquota
+		Counter = Counter + status.Perf - expadv_softquota
+		
 		if Counter < 0 then Counter = 0 end
 
-		Status.Perf = 0
-		Status.Memory = 0
-		Status.StopWatch = 0
-		Status.Counter = Counter
-		Monitor.Counter = Counter
+		status.Counter = Counter
 
-		if Counter > expadv_hardquota * 0.5 then
-			Monitor.State = EXPADV_STATE_ALERT
-		else
-			Monitor.State = EXPADV_STATE_ONLINE
+		if IsValid(Context.entity) and Context.entity.CalculateOps then
+			if Context.entity.CalculateOps(Context.entity, Context) then continue end
 		end
+
+		status.Perf = 0
+		status.Memory = 0
+		status.StopWatch = 0
 	end
-	
-	//NextCheck = CurTime() + 0.033 -- TODO: Try this?
 end )
 
 /* --- --------------------------------------------------------------------------------
