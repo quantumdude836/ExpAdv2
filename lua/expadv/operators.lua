@@ -750,6 +750,8 @@ function EXPADV.BuildLuaOperator( Operator )
 	end
 
 	Operator.Compile = function( Compiler, _Trace, ... )
+		local TIME = SysTime()
+
 		EXPADV.CanBuildOperator( Compiler, _Trace, Operator )
 
 		local Trace = { }
@@ -858,7 +860,7 @@ function EXPADV.BuildLuaOperator( Operator )
 						VAPrepare[ #VAPrepare + 1 ] = Input.Prepare
 					end
 
-					if Instruction.Return ~= "..." and Input.Return ~= "_vr" then
+					if Input.Return ~= "..." and Input.Return ~= "_vr" then
 						Inline = string_format( "{%s,%q}", Inline, Input.Return or "NIL" )
 					end
 
@@ -976,7 +978,12 @@ function EXPADV.BuildLuaOperator( Operator )
 
 		local PreperedLines = #Preperation >= 1 and table_concat( Preperation, "\n" ) or nil
 
-		return Compiler:NewLuaInstruction( Trace, Operator, PreperedLines, OpInline )
+		local Inst = Compiler:NewLuaInstruction( Trace, Operator, PreperedLines, OpInline )
+
+		Compiler.Debug_OpTime = Compiler.Debug_OpTime + (SysTime() - TIME)
+		Compiler.Debug_OpCount = Compiler.Debug_OpCount + 1
+
+		return Inst
 	end
 
 end

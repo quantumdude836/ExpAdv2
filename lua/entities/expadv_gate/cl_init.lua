@@ -3,7 +3,7 @@
    --- */
 
 include( "shared.lua" )
-//include( "overlay.lua" )
+include( "overlay.lua" )
 //if true then return end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -50,16 +50,6 @@ surface.CreateFont( "ExpAdv_OverlayFont", {
 
 local function PaintClient( X, Y, Entity )
 
-    local LoadStatus = Entity:GetClientCompletion( ) or 0
-    
-    if LoadStatus < 100 then
-        draw.SimpleText( "Client:", "ExpAdv_OverlayFont", X + (50 * Mult), Y + (30 * Mult), TextColor, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
-        
-        draw.SimpleText( "Loading: " .. LoadStatus .. "%", "ExpAdv_OverlayFont", X + (50 * Mult), Y + (40 * Mult), TextColor, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
-        
-        return
-    end
-
     local CLState = Entity:GetClientState( ) or 0
 
     if CLState >= EXPADV_STATE_CRASHED then
@@ -84,16 +74,6 @@ local function PaintClient( X, Y, Entity )
 end
 
 local function PaintServer( X, Y, Entity )
-    
-    local LoadStatus = Entity:GetServerCompletion( ) or 0
-    
-    if LoadStatus < 100 then
-        draw.SimpleText( "Server:", "ExpAdv_OverlayFont", X + (150 * Mult), Y + (30 * Mult), TextColor, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
-        
-        draw.SimpleText( "Loading: " .. LoadStatus .. "%", "ExpAdv_OverlayFont", X + (150 * Mult), Y + (40 * Mult), TextColor, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
-    
-        return
-    end
 
     local SVState = Entity:GetServerState( ) or 0
 

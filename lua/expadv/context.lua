@@ -33,6 +33,7 @@ function EXPADV.BuildNewContext( Instance, Player, Entity ) -- Table, Player, En
 	Context.Cells = Instance.Cells or { }
 	Context.OutClick = Instance.OutClick or { }
 	Context.Strings = Instance.Strings or { }
+	Context.Traces = Instance.Traces or { }
 	Context.Instructions = Instance.VMInstructions or { }
 	Context.Enviroment = Instance.Enviroment or error( "No safe guard.", 0 )
 

@@ -101,21 +101,33 @@ include( "instructions.lua" )
    --- */
 
 function Compiler:GetTokenTrace( RootTrace )
-	local Trace = { self.ReadLine, self.ReadChar }
-	if !RootTrace then return Trace end
+	//local Trace = { self.ReadLine, self.ReadChar }
+	//if !RootTrace then return Trace end
 
-	Trace.Stack = { {RootTrace[1], RootTrace[2] } } 
-	if !RootTrace.Stack then return Trace end
+	//local ID = self.TraceLK[RootTrace]
+	//if ID then RootTrace = self.Traces[ID] end
 
-	for I = 1, 5 do
-		Trace.Stack[I + 1] = RootTrace.Stack[I]
-	end
+	//Trace.Stack = { {RootTrace[1], RootTrace[2] } } 
+	//if !RootTrace.Stack then return Trace end
 
-	return Trace
+	//for I = 1, 5 do Trace.Stack[I + 1] = RootTrace.Stack[I] end
+
+	//return Trace
+
+	return {0,0}
 end
 
 function Compiler:CompileTrace( Trace )
-	return EXPADV.ToLua( Trace )
+	//local ID = self.TraceLK[Trace]
+
+	//if !ID then
+	//	ID = #self.Traces + 1
+	//	self.Traces[ID] = table.Copy(Trace) -- TODO: Fix this :D
+	//end
+
+	//return string.format("Context.Traces[%s]", ID)
+
+	return "{0,0}"
 end
 
 /* --- --------------------------------------------------------------------------------
@@ -660,145 +672,53 @@ end
 	@: Compile Code
    --- */
 
-local Instances = { }
+function EXPADV.CreateCompiler(Script, Files)
+	local self = setmetatable({}, Compiler)
 
-Compiler.Instances = { }
-
-function Compiler:SoftCompile( Script, Files )
-
-	-- Client and Server
-		self.IsServerScript = true
-		self.IsClientScript = true
-
-	-- Instance
-		self.Pos = 0
-		self.Len = #Script
-		self.Buffer = Script
-		self.Files = Files or { }
-
-	-- Holders
-		self.DefineID = 0
-		self.Strings = { }
-		self.VMInstructions = { }
-		self.VMLookUp = { }
-		self.NativeLog = { }
-
-	-- Enviroment
-		self.Enviroment = CreateEnviroment( )
-		
-	-- Memory:
-		self:BuildScopes( )
-
-		self.Delta = { }
-		self.Memory = { }
-
-		self.Cells = { }
-		self.InPorts = { }
-		self.OutPorts = { }
-		self.OutClick = { }
-		
-		self.FreshMemory = { }
-		self.MemoryDeph = 0
-		self.LambdaDeph = 0
-		self.LoopDeph = 0
-
-		self.ReturnOptional = { }
-		self.ReturnTypes = { }
-		self.ReturnDeph = 0
-
-	-- Exit Softcompiler
-		coroutine.yield( )
-		-- self.ExitTime = SysTime( ) + expadv_maxcompilertime
-
-	-- Start the Tokenizer:
-		self:StartTokenizer( )
-
-	-- Call hook:
-		EXPADV.CallHook( "PreCompileScript", self, Script, Files )
-
-	-- Ok, Run the compiler.
-		local Compiled, Instruction = pcall( self.Sequence, self, { 0, 0 } ) -- self.Main
-
-	-- Finish!
-		setmetatable( self.Enviroment, EXPADV.BaseEnv )
-
-		if !Compiled then
-			if self.OnError then self.OnError( Instruction ) end
-		elseif self.OnSucess then
-			self.OnSucess( self, self:FixPlaceHolders( Instruction ) )
-		end
-
-		self.Running = false
-
-		return
-end
-
-function EXPADV.CreateCompiler( Script, Files, OnError, OnSucess, OnUpdate )
-	local Thread = coroutine.create( Compiler.SoftCompile )
-	local Instance = setmetatable( { Thread = Thread, Running = true, OnError = OnError, OnSucess = OnSucess, OnUpdate = OnUpdate }, Compiler )
-
-	local Ok, Error = coroutine.resume( Thread, Instance, Script, Files )
-
-	if Ok then return Instance end
-
-	if Instance.OnError then
-		Instance.OnError( Error )
-	end
-
-	Instance.Running = false
-end
-
-local SysTime = SysTime
-
-function Compiler:GetStatus( )
-	if self.Pos <= 0 or self.Len <= 0 then return 0 end
-	return math.ceil( math.Clamp(self.Pos / self.Len, 0, 1) * 100)
-end
-/* --- --------------------------------------------------------------------------------
-	@: Compiler Managment
-   --- */
-
-expadv_compilespeed = 0.1
-
-//hook.Add( "Expadv.PostLoadConfig", "expadv.quota", function( )
-	EXPADV.CreateSetting( "compilerate", 20 )
-//end )
-
-timer.Create( "expadv.quota", 1, 0, function( )
-	local Speed = EXPADV.ReadSetting( "compilerate", 20 )
+	self.IsServerScript, self.IsClientScript = true, true
+	self.Pos, self.Len, self.Buffer, self.Files = 0, #Script, Script, Files or { }
+	self.DefineID, self.Strings, self.VMInstructions, self.VMLookUp, self.NativeLog = 0, { }, { }, { }, { }
 	
-	if Speed == 0 then
-		expadv_compilespeed = 0
-	else
-		expadv_compilespeed = math.Clamp(Speed / 100, 0.1, 1)
-	end
-end ) 
-
-function Compiler:Resume( HandelManual )
-
-	self.TimeMark = (expadv_compilespeed > 0) and SysTime( ) + (expadv_compilespeed) or 0
+	self.Traces = {}
+	self.TraceLK = {}
+	self.Enviroment = CreateEnviroment()
 	
-	local Ok, Error = coroutine.resume( self.Thread )
+	self:BuildScopes()
+	self.Delta, self.Memory = { }, { }
+	self.Cells, self.InPorts, self.OutPorts, self.OutClick = { }, { }, { }, { }
+	self.FreshMemory, self.MemoryDeph, self.LambdaDeph, self.LoopDeph = { }, 0, 0, 0
+	self.ReturnOptional, self.ReturnTypes, self.ReturnDeph = { }, { }, 0
 
-	if Ok then
-		if self.Running and self.OnUpdate then
-			self.OnUpdate( self:GetStatus( ) )
-		end
+	return self
+end
 
-		return true
-	end
+function EXPADV.SolidCompile(Script, Files)
+	local self = EXPADV.CreateCompiler(Script, Files)
+	
+	self:StartTokenizer( )
+	
+	EXPADV.CallHook("PreCompileScript", self, Script, Files)
+	
+	local Time = SysTime()
+	self.Debug_OpTime, self.Debug_OpCount = 0, 0
+	self.Debug_ExpCount, self.Debug_ExpTime = 0, 0
 
-	if HandelManual then
-		return false, Error
-	end
+	local Status, Instruction = pcall(self.Sequence, self, {0, 0})
+	
+	local Time, Avg = SysTime() - Time, self.Debug_OpTime / self.Debug_OpCount
+	MsgN(string.format("Compiler took %s seconds to compile %s operators", self.Debug_OpTime, self.Debug_OpCount))
+	MsgN(string.format("Average %s.", Avg))
 
-	if self.OnError then
-		self.OnError( Error )
-	end
+	MsgN(string.format("Compiler took %s seconds to compile %s expressions", self.Debug_ExpTime, self.Debug_ExpCount))
+	MsgN(string.format("Average %s.", self.Debug_ExpTime / self.Debug_ExpCount))
+	
+	MsgN(string.format("Total compiler time %s.", Time))
 
-	self.Running = false
+	if !Status then return false, Instruction end
 
-	return false
+	setmetatable(self.Enviroment, EXPADV.BaseEnv)
+
+	return true, self, self:FixPlaceHolders(Instruction)
 end
 
 /* --- --------------------------------------------------------------------------------

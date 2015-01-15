@@ -106,7 +106,7 @@ if CLIENT then
 
 					for Type, Values in pairs(Vars) do
 						for id, Value in pairs(Values) do
-							if IsValid(ent) then
+							if IsValid(ent) and ent.__ExpVars then
 								ent:SetExpVar(Type, id, Value)
 							else
 								ExpVars[ID] = ExpVars[ID] or default()
