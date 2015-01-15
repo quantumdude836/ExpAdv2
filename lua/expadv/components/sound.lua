@@ -199,7 +199,7 @@ Component:AddFunctionHelper( "stop", "ac:", "Stops playing the stream." )
 
 Component:AddPreparedFunction( "set3DFadeDistance", "ac:n,n", "", [[if !IsValid( @value 1) then Context:Throw( @trace, "audio channel", "Recieved invalid audio channel." ) end
 @value 1:Set3DFadeDistance(@value 2, @value 3)]] )
-Component:AddFunctionHelper( "set3DFadeDistance", "ac:n,n", "Sets minamum and maximum ,3D fade distances of a sound channel." )
+Component:AddFunctionHelper( "set3DFadeDistance", "ac:n,n", "Sets minamum and maximum 3D fade distances of a sound channel." )
 
 Component:AddPreparedFunction( "set3DCone", "ac:n,n,n", "", [[if !IsValid( @value 1) then Context:Throw( @trace, "audio channel", "Recieved invalid audio channel." ) end
 @value 1:Set3DCone(@value 2, @value 3, @value 4)]] )

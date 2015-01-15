@@ -41,7 +41,9 @@ hook.Add( "Expadv.PreLoadFunctions", "expadv.features",
 	function( )
 		EXPADV.ClientOperators( )
 		EXPADV.AddInlineFunction( nil, "canAccessFeature", "s", "b", "EXPADV.EntityCanAccessFeature(Context.entity, @value 1)")
-		EXPADV.AddFunctionHelper( "canAccessFeature", "s", "Returns true if the entity can access the given feature." )
+		/*EXPADV.AddFunctionHelper( "canAccessFeature", "s", "Returns true if the entity can access the given feature." )
+			Need to know how to do this.
+		*/
 	end )
 
 if SERVER then return end

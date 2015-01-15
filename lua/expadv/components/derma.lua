@@ -294,7 +294,7 @@ Component:AddPreparedFunction("onChange", "dns:d", "", [[@value 1.ValueChanged =
 	Context:Execute( "numslider", @value 2 )
 end]])
 
-Component:AddFunctionHelper( "onChange", "dns:d", "The given delegate will be executed when the dnumslider has changed." )
+Component:AddFunctionHelper( "onChange", "dns:d", "The given delegate will be executed when the dnumslider's value has changed." )
 
 /* -----------------------------------------------------------------------------------
 	@: Menu

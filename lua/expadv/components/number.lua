@@ -162,7 +162,7 @@ Component:AddGeneratedFunction( "max", "n,n,n,n,n", "n", function( Operator, Com
   return { Trace = Trace, Inline = LuaInline, Prepare = table.concat( Prep, "\n" ), Return = "n", FLAG = EXPADV_INLINEPREPARE }
 end )
 
-Component:AddFunctionHelper( "max", "n,n,n,n,n", "Returns the higest value out of given numbers." )
+Component:AddFunctionHelper( "max", "n,n,n,n,n", "Returns the higest value out of the given numbers." )
 EXPADV.AddFunctionAlias( "max", "n,n,n,n" )
 EXPADV.AddFunctionAlias( "max", "n,n,n" )
 EXPADV.AddFunctionAlias( "max", "n,n" )
@@ -195,7 +195,7 @@ EXPADV.AddFunctionAlias( "min", "n,n,n,n" )
 EXPADV.AddFunctionAlias( "min", "n,n,n" )
 EXPADV.AddFunctionAlias( "min", "n,n" )
 
-Component:AddFunctionHelper( "min", "n,n,n,n,n", "Returns the lowest value out of given numbers." )
+Component:AddFunctionHelper( "min", "n,n,n,n,n", "Returns the lowest value out of the given numbers." )
 
 /* --- --------------------------------------------------------------------------------
     @: General math
