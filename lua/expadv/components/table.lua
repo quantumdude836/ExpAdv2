@@ -162,18 +162,14 @@ Component:AddPreparedFunction( "entityKeys", "t:", "ar", [[
 Component:AddPreparedFunction("hasValue", "t:vr", "b", [[
 	@define found = false
 	for k, v in pairs(@value 1) do
-	if(v == @value 2) then
-	@found = true
-	break
-	end
+		if(v == @value 2) then
+			@found = true
+			break
+		end
 	end
 end]], "@found")
-Component:AddFunctionHelper("hasValue", "t:vr", "Checks if the given value is in the given table.")
+Component:AddFunctionHelper("hasValue", "t:vr", "b", "Checks if the given value is in the given table.")
 
-
-Component:AddFunctionHelper( "numberKeys", "t:", "Returns array of all number keys from the table" )
-Component:AddFunctionHelper( "stringKeys", "t:", "Returns array of all string keys from the table" )
-Component:AddFunctionHelper( "entityKeys", "t:", "Returns array of all entity keys from the table" )
 /* --- --------------------------------------------------------------------------------
 	@: Variant Get Operators
    --- */
@@ -341,8 +337,6 @@ Component:AddFunctionHelper( "entityKeys", "t:", "Returns array of all entity ke
 
 			return New
 		end )
-
- Component:AddFunctionHelper( "clone", "t:", "Returns the table as a new object." )
 
 /* --- --------------------------------------------------------------------------------
 	@: We need to add support for every class :D
