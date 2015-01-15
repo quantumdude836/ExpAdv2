@@ -72,7 +72,7 @@ Component:AddPreparedFunction("hasValue", "ar:vr", "b", [[
 	end
 end]], "@found")
 
-Component:AddPreparedFunction("hasValue", "ar:vr", "b", "Checks if the given value is in the given array.")
+Component:AddFunctionHelper("hasValue", "ar:vr", "b", "Checks if the given value is in the given array.")
 
 			
 
