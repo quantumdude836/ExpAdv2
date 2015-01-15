@@ -35,7 +35,8 @@ Component:AddInlineOperator( "table", "ar", "t", "EXPADV.ResultTable(@value 1.__
 	@: Basic Functions
    ---	*/
 
-Component:AddInlineFunction( "exists", "ar,n", "b", "(@value 1[@value 2] ~= nil)" )
+Component:AddInlineFunction( "exists", "ar:n", "b", "(@value 1[@value 2] ~= nil)" )
+EXPADV.AddFunctionAlias("exists", "ar,n")
 
 Component:AddInlineFunction( "unpack", "ar", "...", "$unpack( @value 1 )" )
 
@@ -52,6 +53,28 @@ if @value 1.__type == @value 2.__type then
 else Context.Throw(@trace, "array", "array type missmatch, " .. EXPADV.TypeName(@value 1.__type) .. " expected got " .. EXPADV.TypeName(@value 2.__type)) end
 ]],"@value 1")
 Component:AddFunctionHelper("connect", "ar:ar", "Connects one array with another array.")
+
+Component:AddPreparedFunction("hasValue", "ar:vr", "b", [[
+	if @value 1.__type ~= "_vr" then
+		if @value 2[2] ~= @value 1.__type then
+			Context.Throw(@trace, "array", "variant not of array type, " .. @value 1.__type .. " expected got " .. EXPADV.TypeName(@value 2[2])) end
+		end
+		
+		@value 2 = @value 2[2]
+	end
+
+	@define found = false
+
+	for k, v in pairs(@value 1) do
+		if k == "__type" then continue end
+		if @value 1.__type == "_vr" then v = v[1] end
+		if v == @value 2 then @found = true; break end
+	end
+end]], "@found")
+
+Component:AddFunctionHelper("hasValue", "ar:vr", "b", "Checks if the given value is in the given array.")
+
+			
 
 /* --- --------------------------------------------------------------------------------
 	@: Unpack to vararg
@@ -152,6 +175,32 @@ function Component:OnPostRegisterClass( Name, Class )
 		if @value 1.__type ~= %q then Context.Throw(@trace, "array", "array type missmatch, %s expected got " .. EXPADV.TypeName(@value 1.__type)) end
 		]], Class.Short, Class.Name), "$table.insert(@value 1, @value 2)")
 	EXPADV.AddFunctionAlias("insert", "ar," .. Class.Short)
+
+	if !Class.Short == "_vr" then
+		Component:AddPreparedFunction("hasValue", "ar:" .. Class.Short, "b", [[
+			
+			if @value 1.__type ~= "]] .. Class.Short .. [[" then
+				Context.Throw(@trace, "array", "variant not of array type, "]] .. Class.Short .. [[" expected got " .. EXPADV.TypeName(@value 1.__type)) end
+			end
+			
+			@value 2 = @value 2[2]
+
+			@define found = false
+
+			for k, v in pairs(@value 1) do
+				if k == "__type" then continue end
+				
+				if @value 1.__type == "_vr" then
+					if v[2] ~= "]] .. Class.Short .. [[" then continue end 
+					v = v[1]
+				end
+
+				if v == @value 2 then @found = true; break end
+			end
+		end]], "@found")
+
+		Component:AddPreparedFunction("hasValue", "ar:" .. Class.Short, "b", "Checks if the given value is in the given array.")
+	end
 
 /* ---	--------------------------------------------------------------------------------
 	@: Foreach Loop
