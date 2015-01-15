@@ -799,6 +799,8 @@ end -- TODO: ^ This
 
 function Compiler:Statement( Trace )
 	-- MsgN( "Compiler -> Statement" )
+	
+	local TIME = SysTime()
 
 	local _StmtRoot = self.StatmentRoot
 	self.StatmentRoot = self:GetTokenTrace( Trace )
@@ -814,6 +816,9 @@ function Compiler:Statement( Trace )
 	self.StatmentRoot = _StmtRoot
 
 	local Seperator = self:AcceptSeperator( )
+
+	self.Debug_StmCount = self.Debug_StmCount + 1
+	self.Debug_StmTime = self.Debug_StmTime + (SysTime() - TIME)
 
 	return Statement, Seperator
 end
@@ -854,6 +859,8 @@ end
    --- */
 
 function Compiler:GetBlock( Trace, RCB, Flag )
+	self:ExcludeWhiteSpace( "Further input required at end of code, incomplete statment" )
+	
 	if self:AcceptToken( "lcb" ) then
 
 		self:PushScope( )

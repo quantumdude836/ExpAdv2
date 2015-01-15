@@ -698,21 +698,28 @@ function EXPADV.SolidCompile(Script, Files)
 	self:StartTokenizer( )
 	
 	EXPADV.CallHook("PreCompileScript", self, Script, Files)
-	
-	local Time = SysTime()
-	self.Debug_OpTime, self.Debug_OpCount = 0, 0
-	self.Debug_ExpCount, self.Debug_ExpTime = 0, 0
+		
+		local Time = SysTime()
+		self.Debug_OpTime, self.Debug_OpCount = 0, 0
+		self.Debug_ExpCount, self.Debug_ExpTime = 0, 0
+		self.Debug_StmCount, self.Debug_StmTime = 0, 0
 
 	local Status, Instruction = pcall(self.Sequence, self, {0, 0})
 	
-	local Time, Avg = SysTime() - Time, self.Debug_OpTime / self.Debug_OpCount
-	MsgN(string.format("Compiler took %s seconds to compile %s operators", self.Debug_OpTime, self.Debug_OpCount))
-	MsgN(string.format("Average %s.", Avg))
+		debug.sethook()
 
-	MsgN(string.format("Compiler took %s seconds to compile %s expressions", self.Debug_ExpTime, self.Debug_ExpCount))
-	MsgN(string.format("Average %s.", self.Debug_ExpTime / self.Debug_ExpCount))
-	
-	MsgN(string.format("Total compiler time %s.", Time))
+		local Time, Avg = SysTime() - Time, self.Debug_OpTime / self.Debug_OpCount
+		MsgN(string.format("Compiler took %f seconds to compile %s operators", self.Debug_OpTime, self.Debug_OpCount))
+		MsgN(string.format("Average %f.", Avg))
+
+		MsgN(string.format("Compiler took %f seconds to compile %s expressions", self.Debug_ExpTime, self.Debug_ExpCount))
+		MsgN(string.format("Average %f.", self.Debug_ExpTime / self.Debug_ExpCount))
+
+		MsgN(string.format("Compiler took %f seconds to compile %s statments", self.Debug_StmTime, self.Debug_StmCount))
+		MsgN(string.format("Average %f.", self.Debug_StmTime / self.Debug_StmCount))
+
+		MsgN(string.format("Total compiler time %f.", Time))
+
 
 	if !Status then return false, Instruction end
 
