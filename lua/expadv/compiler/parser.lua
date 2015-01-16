@@ -177,7 +177,7 @@ end
 
 function Compiler:Expression( Trace )
 	-- MsgN( "Compiler -> Expression" )
-
+	
 	local _ExprRequire = self.ExpressionRequired
 	self.ExpressionRequired = true
 
@@ -199,6 +199,7 @@ end
 -- Stage 1: Ternary
 function Compiler:Expression_1( Trace )
 	-- MsgN( "Compiler -> Expression 1" )
+	self:CheckStatus( )
 
 	local Expression = self:Expression_2( Trace )
 
@@ -218,6 +219,7 @@ end
 -- Stage 2: logical or
 function Compiler:Expression_2( Trace )
 	-- MsgN( "Compiler -> Expression 2" )
+	self:CheckStatus( )
 
 	local Expression = self:Expression_3( Trace )
 
@@ -231,6 +233,7 @@ end
 -- Stage 3: logical and
 function Compiler:Expression_3( Trace )
 	-- MsgN( "Compiler -> Expression 3" )
+	self:CheckStatus( )
 
 	local Expression = self:Expression_4( Trace )
 
@@ -244,6 +247,7 @@ end
 -- Stage 4: bitwise or
 function Compiler:Expression_4( Trace )
 	-- MsgN( "Compiler -> Expression 4" )
+	self:CheckStatus( )
 
 	local Expression = self:Expression_5( Trace )
 
@@ -257,6 +261,7 @@ end
 -- Stage 5: bitwise exclusive or
 function Compiler:Expression_5( Trace )
 	-- MsgN( "Compiler -> Expression 5" )
+	self:CheckStatus( )
 
 	local Expression = self:Expression_6( Trace )
 
@@ -270,6 +275,7 @@ end
 -- Stage 6: bitwise and
 function Compiler:Expression_6( Trace )
 	-- MsgN( "Compiler -> Expression 6" )
+	self:CheckStatus( )
 
 	local Expression = self:Expression_7( Trace )
 
@@ -283,6 +289,7 @@ end
 -- Stage 7: Comparisons equal and not equal.
 function Compiler:Expression_7( Trace )
 	-- MsgN( "Compiler -> Expression 7" )
+	self:CheckStatus( )
 
 	local Expression = self:Expression_8( Trace )
 
@@ -335,6 +342,7 @@ end
 -- Stage 8: Comparisons Greater and Less
 function Compiler:Expression_8( Trace )
 	-- MsgN( "Compiler -> Expression 9" )
+	self:CheckStatus( )
 
 	local Expression = self:Expression_9( Trace )
 
@@ -356,6 +364,7 @@ end
 -- Stage 9: Bitwise shift left and right
 function Compiler:Expression_9( Trace )
 	-- MsgN( "Compiler -> Expression 9" )
+	self:CheckStatus( )
 
 	local Expression = self:Expression_10( Trace )
 
@@ -373,6 +382,7 @@ end
 -- Stage 10: Addition and subtraction
 function Compiler:Expression_10( Trace )
 	-- MsgN( "Compiler -> Expression 10" )
+	self:CheckStatus( )
 
 	local Expression = self:Expression_11( Trace )
 
@@ -390,6 +400,7 @@ end
 -- Stage 11: Multiplication, division, modulo
 function Compiler:Expression_11( Trace )
 	-- MsgN( "Compiler -> Expression 11" )
+	self:CheckStatus( )
 
 	local Expression = self:Expression_12( Trace )
 
@@ -411,6 +422,7 @@ end
 -- Stage 12: Unary operations, sizeof, casting
 function Compiler:Expression_12( Trace )
 	-- MsgN( "Compiler -> Expression 2" )
+	self:CheckStatus( )
 	
 	if self:AcceptToken( "add" ) then
 		local Trace = self:GetTokenTrace( Trace )
@@ -455,6 +467,7 @@ end
 -- Stage 13: Grouped Equation
 function Compiler:Expression_13( Trace )
 	-- MsgN( "Compiler -> Expression 13" )
+	self:CheckStatus( )
 	
 	if self:AcceptToken( "lpa" ) then
 		local Expression = self:Expression_1( Trace )
@@ -495,6 +508,7 @@ end
 -- Stage 14: Value
 function Compiler:Expression_14( Trace )
 	-- MsgN( "Compiler -> Expression 14" )
+	self:CheckStatus( )
 
 	local Expression = self:Expression_Value( Trace ) or self:Expression_Variable( Trace )
 
@@ -512,6 +526,7 @@ end
 -- Stage 15: Raw Values:
 function Compiler:Expression_Value( Trace )
 	-- MsgN( "Compiler -> Expression Value" )
+	self:CheckStatus( )
 
 	if self:AcceptToken( "tre" ) then
 		return self:Compile_BOOL( self:GetTokenTrace( Trace ), true )
@@ -609,6 +624,7 @@ end
 -- Stage 16: Increment, Decrement and Variables.
 function Compiler:Expression_Variable( Trace )
 	-- MsgN( "Compiler -> Expression Variable" )
+	self:CheckStatus( )
 
 	if self:AcceptToken( "inc" ) then
 		local Trace = self:GetTokenTrace( Trace )
@@ -670,6 +686,7 @@ end
 -- Stage 17: Indexing, Calling
 function Compiler:Expression_17( Trace, Expression, Statment )
 	-- MsgN( "Compiler -> Expression 17" )
+	self:CheckStatus( )
 
 	while self:CheckToken( "prd", "lsb", "lpa" ) do
 
@@ -763,27 +780,6 @@ function Compiler:Expression_17( Trace, Expression, Statment )
 	return Expression
 end
 
--- Stage 18: Arrays
-
-function Compiler:Expression_Array( Trace )
-	if self:AcceptToken( "lsb" ) then
-	-- This is disabled, Arrays are difficult atm and this will conflict with multi comparason operations.
-		local Trace = self:GetTokenTrace( Trace )
-
-		if self:AcceptToken( "rsb" ) then
-			return self:Compile_Array( Trace, nil )
-		end
-
-		local Expressions = { }
-
-		while true do
-			Expressions[#Expressions+1] = self:Expression( Trace )
-			if !self:AcceptToken( "com" ) then break end
-		end
-
-		return self:Compile_Array( Trace, Expressions )
-	end
-end
 /* --- --------------------------------------------------------------------------------
 	@: Statments
    --- */
@@ -903,6 +899,7 @@ end
 -- Stage 1: If statments
 function Compiler:Statement_1( Trace )
 	-- MsgN( "Compiler -> Statement 1" )
+	self:CheckStatus( )
 
 	if self:AcceptToken( "if" ) then
 		return self:Compile_IF( Trace, self:GetCondition( Trace ), self:GetBlock( Trace, "to close if statment" ), self:Statement_2( Trace ) )
@@ -914,6 +911,7 @@ end
 -- Stage 2: elseif, else statments
 function Compiler:Statement_2( Trace )
 	-- MsgN( "Compiler -> Statement 2" )
+	self:CheckStatus( )
 
 	if self:AcceptToken( "eif" ) then
 
@@ -927,6 +925,9 @@ end
 
 -- Stage 3: Try, Catch, Final
 function Compiler:Statement_3( Trace )
+	-- MsgN( "Compiler -> Statement 3" )
+	self:CheckStatus( )
+
 	if self:AcceptToken( "try" ) then
 		local Trace = self:GetTokenTrace( Trace )
 
@@ -1012,6 +1013,7 @@ end
 -- Stage 4: Events
 function Compiler:Statement_4( Trace )
 	-- MsgN( "Compiler -> Statement 4" )
+	self:CheckStatus( )
 
 	if self:AcceptToken( "evt" ) then
 		local Trace = self:GetTokenTrace( Trace )
@@ -1077,6 +1079,7 @@ end
 -- Stage 5: Return, Break, Coninue
 function Compiler:Statement_5( Trace )
 	-- MsgN( "Compiler -> Statement 5" )
+	self:CheckStatus( )
 	
 	if self:AcceptToken( "ret" ) then
 		local Trace = self:GetTokenTrace( Trace )
@@ -1130,6 +1133,7 @@ end
 -- Stage 6: Variable Assigments.
 function Compiler:Statement_6( Trace )
 	-- MsgN( "Compiler -> Statement 6" )
+	self:CheckStatus( )
 
 	local Modifier
 
@@ -1309,6 +1313,7 @@ end
 -- Stage 7: Server / Client seperation.
 function Compiler:Statement_7( Trace )
 	-- MsgN( "Compiler -> Statement 7" )
+	self:CheckStatus( )
 
 	if self:AcceptToken( "sv" ) then
 		local Trace = self:GetTokenTrace( Trace )
@@ -1360,6 +1365,7 @@ end
 -- Stage 8: Loops
 function Compiler:Statement_8( Trace )
 	-- MsgN( "Compiler -> Statement 8" )
+	self:CheckStatus( )
 
 	if self:AcceptToken( "for" ) then
 		local Trace = self:GetTokenTrace( Trace )
@@ -1465,6 +1471,7 @@ end
 -- Stage 9: Statment Expressions
 function Compiler:Statement_9( Trace )
 	-- MsgN( "Compiler -> Statement 9" )
+	self:CheckStatus( )
 
 	if !self:HasTokens( ) then
 		return
@@ -1556,6 +1563,7 @@ end
 
 function Compiler:GetDirective( Trace )
 	-- MsgN( "Compiler -> GetDirective" )
+	self:CheckStatus( )
 
 	self:RequireToken( "var", "directive name expected after (@) '@<name>:'" )
 

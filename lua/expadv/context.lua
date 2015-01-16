@@ -237,6 +237,7 @@ end )
 	@: Context Monitoring.
    --- */
 
+EXPADV_STATE_COMPILE = -1
 EXPADV_STATE_OFFLINE = 0
 EXPADV_STATE_ONLINE = 1
 EXPADV_STATE_ALERT = 2

@@ -145,10 +145,6 @@ end
 	@: Compiler
    --- */
 
-function ENT:IsCompiling( )
-	return self.Compiler ~= nil
-end
-
 function ENT:CompileScript(Root, Files)
 
 	if self:IsRunning( ) then

@@ -636,6 +636,12 @@ function Compiler:DefineVariable( )
 end
 
 /* --- --------------------------------------------------------------------------------
+	@: Add a default CheckStatus function, used by the queue.
+   --- */
+
+function Compiler:CheckStatus() end
+
+/* --- --------------------------------------------------------------------------------
 	@: Base Env
    --- */
 
@@ -703,6 +709,128 @@ function EXPADV.SolidCompile(Script, Files)
 
 	return true, self, self:FixPlaceHolders(Instruction)
 end
+
+/* --- --------------------------------------------------------------------------------
+	@: Soft compiler, uses a coroutine to pretend its threaded.
+   --- */
+
+local SoftCompiler = {IsDone = false}
+
+function SoftCompiler:OnFail(err) end
+function SoftCompiler:OnCompletion(instruction) end
+function SoftCompiler:PostResume(percent) end
+
+function EXPADV.NewSoftCompiler(Script, Files)
+	local self = EXPADV.CreateCompiler(Script, Files)
+
+	for k, v in pairs(SoftCompiler) do self[k] = v end
+
+	self.Thread = coroutine.create(function()
+		self:StartTokenizer( )
+	
+		EXPADV.CallHook("PreCompileScript", self, Script, Files)
+			
+		local Status, Instruction = pcall(self.Sequence, self, {0, 0})
+		
+		self.IsDone = true -- What ever happens this coroutine is done!
+
+		if !Status then return self:OnFail(Instruction) end
+
+		setmetatable(self.Enviroment, EXPADV.BaseEnv)
+
+		Instruction = self:FixPlaceHolders(Instruction)
+
+		self:OnCompletion(Instruction)
+	end) -- Yes, I know its not really a thread.
+
+	return self
+end
+
+function SoftCompiler:Resume(MilliSeconds)
+	if self.IsDone then return true, 0 end -- Shouldn't happen
+	if MilliSeconds <= 0 then return false, 0 end
+
+	local Seconds = 1 / (MilliSeconds * 1000000)
+
+	local Time, Hault = 0, false
+
+	local function hook() Hault = (SysTime() - Time) >= Seconds end
+
+	function self:CheckStatus()
+		if Hault then coroutine.yield() end
+	end -- I wish I could do this from the above hook :(
+
+
+
+	Time = SysTime()
+	debug.sethook(hook, "", 500)
+
+	coroutine.resume(self.Thread)
+
+	debug.sethook()
+	Time = (SysTime() - Time) - Seconds
+	if Time > 1 then Time = 0 end
+
+	self:PostResume(math.ceil((self.Pos / self.Len) * 100))
+
+	return self.IsDone, Time
+end
+
+/* --- --------------------------------------------------------------------------------
+	@: Queued Compiler (0.01 seconds compile time :D)
+   --- */
+
+local Queue = {}
+Compiler.Compiler_Queue = Queue
+
+function EXPADV.QueueCompiler(self, Pos)
+	if self.IsDone then return end
+	
+	if Pos then table.insert(Queue, Pos, self)
+	else Queue[#Queue + 1] = self end
+end
+
+function EXPADV.UnqueueCompiler(self)
+	local Pos
+
+	for i = 1, #Queue do
+		if Queue[i] == self then
+			Pos = i
+			break
+		end
+	end
+	
+	if Pos then table.remove(Queue, Pos) end
+end
+
+hook.Add("Tick", "expadv.compiler.queue", function()
+	local count = #Queue
+	if count == 0 then return end
+	if count > 10 then count = 10 end
+
+	local finished = {}
+	local speed = ((engine.TickInterval() * 0.4) / count) * 1000000
+	local nextSpeed = speed -- Allows us to make the most of this :D
+
+	for i = 1, count do
+		local self = Queue[i]
+
+		if !self.Resume then
+			finished[#finished + 1] = i
+			MsgN("Skipped Compiler Thread " .. i)
+			for k,v in pairs(self) do MsgN(k, " = ", v) end
+			continue
+		end
+		
+		local isDone, extraTime = self:Resume(nextSpeed)
+
+		if isDone then finished[#finished + 1] = i end
+		
+		nextSpeed = speed + extraTime
+	end
+
+	for i = 1, #finished do table.remove(Queue, finished[i]) end
+end)
 
 /* --- --------------------------------------------------------------------------------
 	@: END OF COMPILER!

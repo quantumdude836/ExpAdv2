@@ -8,23 +8,83 @@ ENT.ExpAdv 					= true
 ENT.AutomaticFrameAdvance  	= true
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Queded Compiler
+   --- */
+
+function ENT:CompileScript(Root, Files)
+
+	if self:IsRunning( ) then
+		self.Context:ShutDown( )
+		EXPADV.UnregisterContext( self.Context )
+	end
+	
+	if self.SlowCompiler then EXPADV.UnqueueCompiler(self.SlowCompiler) end
+
+	if !Root or Root == "" then
+		return self:ScriptError( "No code submited, compiler exited." )
+	end
+
+	self.SlowCompiler = EXPADV.NewSoftCompiler(Root, Files)
+
+	self.SlowCompiler.OnFail = function(sc, err)
+		if IsValid(self) then
+			self.SlowCompiler = nil
+			self:OnCompileError(err)
+		end
+	end
+
+	self.SlowCompiler.OnCompletion = function(sc, Instruction)
+		if IsValid(self) then
+			self:BuildInstance( sc, Instruction )
+		end
+	end
+
+	self.SlowCompiler.PostResume = function(sc, percent)
+		if IsValid(self) then
+			if SERVER then
+				self:SetServerLoaded(percent)
+			else
+				self:SetClientLoaded(percent)
+			end
+		end
+	end
+
+	if SERVER then
+		self:SetServerLoaded(0)
+		self:SetServerState( EXPADV_STATE_COMPILE )
+	else
+		self:SetClientLoaded(0)
+		self:SetClientState( EXPADV_STATE_COMPILE )
+	end
+
+	EXPADV.QueueCompiler(self.SlowCompiler)
+end
+
+function ENT:OnRemove()
+	if self.SlowCompiler then EXPADV.UnqueueCompiler(self.SlowCompiler) end
+	self.BaseClass.OnRemove(self)
+end
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Effects
    --- */
 
 -- if CLIENT then game.AddParticles( "particles/fire_01.pcf" ) end
 -- PrecacheParticleSystem( "fire_verysmall_01" )
 
-AccessorFunc( ENT, "ClientState", "ClientState", FORCE_NUMBER )
-
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Ops
    --- */
+
+AccessorFunc( ENT, "ClientState", "ClientState", FORCE_NUMBER )
+AccessorFunc( ENT, "ClientLoaded", "ClientLoaded", FORCE_NUMBER )
 
 function ENT:SetupDataTables( )
 	self:AddExpVar( "FLOAT", 0, "TickQuota" )
 	self:AddExpVar( "FLOAT", 1, "StopWatch" )
 	self:AddExpVar( "FLOAT", 2, "Average" )
 	self:AddExpVar( "FLOAT", 3, "ServerState" )
+	self:AddExpVar( "FLOAT", 3, "ServerLoaded" )
+
 	self:AddExpVar( "STRING", 0, "GateName" )
 	self:AddExpVar( "ENTITY", 0, "LinkedPod" )
 end
