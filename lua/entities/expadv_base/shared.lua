@@ -149,30 +149,23 @@ function ENT:IsCompiling( )
 	return self.Compiler ~= nil
 end
 
-function ENT:CompileScript( Root, Files )
+function ENT:CompileScript(Root, Files)
 
 	if self:IsRunning( ) then
 		self.Context:ShutDown( )
 		EXPADV.UnregisterContext( self.Context )
 	end
 	
-	if !Root or Root == "" then return end
+	if !Root or Root == "" then
+		return self:ScriptError( "No code submited, compiler exited." )
+	end
 
-	local Instance = EXPADV.CreateCompiler( Root, Files,
-		function( Error ) -- Instance.OnError
-			self:OnCompileError( Error, Instance )
-		end, function( Instance, Instruction ) -- Instance.OnSucess
-			self:BuildInstance( Instance, Instruction )
-		end, function( Status ) -- Instance.OnUpdate
-			self:OnCompilerUpdate( Status )
-		end )
+	local Status, Instance, Instruction = EXPADV.SolidCompile(Root, Files)
 
-	if !Instance then return end
-
-	self.Compiler_Instance = Instance
+	if !Status then self:OnCompileError(Instance) end
+	
+	return true, Instance, self:BuildInstance( Instance, Instruction )
 end
-
-function ENT:OnCompilerUpdate( Status ) end
 
 function ENT:OnCompileError( ErMsg, Compiler ) end
 
@@ -209,14 +202,12 @@ function ENT:BuildInstance( Instance, Instruction )
 
 		self:PostStartUp( Context )
 
-		if SERVER and self.PastedFromDupe then
-			self:CallEvent( "dupePasted" )
-		end
+		if SERVER and self.PastedFromDupe then self:CallEvent( "dupePasted" ) end
 	end )
 
 	if !Ok then
 		MsgN( "ExpAdv2 Statup Error: ", Error )
-		return self:OnCompileError( Error, Instance )
+		return self:OnCompileError( Error )
 	end
 
 	if CLIENT then

@@ -117,6 +117,9 @@ EXPADV.AddGeneratedFunction( nil, "invoke", "cls,d,...", "",
 		return { Trace = Trace, Inline = Return, Prepare = table.concat( Preperation, "\n" ), Return = Inputs[1].PointClass, FLAG = EXPADV_INLINEPREPARE }
 	end ); EXPADV.AddFunctionAlias("invoke", "cls,d")
 
+/*EXPADV.AddFunctionHelper("invoke", "cls,d,...", "Executes the given delegate passing given params and returning the value (return type class, the function, params)." )
+	Not working :/
+*/
 /* --- -------------------------------------------------------------------------------
 	@: Loops
    --- */
@@ -139,12 +142,17 @@ Component.Description = "Allows for monitoring performance and usage."
 EXPADV.SharedOperators( )
 
 Component:AddInlineFunction( "ops", "", "n", "math.Round(Context.Status.Perf)" )
+Component:AddFunctionHelper( "ops", "", "Returns the current ops status." )
 
 Component:AddInlineFunction( "opCounter", "", "n", "math.ceil(Context.Status.Perf + Context.Status.Counter)" )
+Component:AddFunctionHelper( "opCounter", "", "Returns the current opCounter status." )
 
 Component:AddInlineFunction( "cpuUsage", "", "n", "($SysTime( ) - Context.Status.BenchMark)" )
+Component:AddFunctionHelper( "cpuUsage", "", "Returns the current cpuUsage status." )
 
 Component:AddInlineFunction( "cpuStopWatch", "", "n", "Context.Status.StopWatch" )
+Component:AddFunctionHelper( "cpuStopWatch", "", "Returns the current cpuStopWatch status." )
+// Not sure about these.
 
 		--------------------------------------------------------------
 
@@ -159,6 +167,8 @@ Component:AddVMFunction( "perf", "", "b",
 		return true
 	end )
 
+Component:AddFunctionHelper( "perf", "", "Returns true if the current qouta is below limit." )
+	
 Component:AddVMFunction( "perf", "n", "b",
 	function( Context, Trace, Value )
 		Value = math.Clamp( Value, 0, 100 )
@@ -176,6 +186,7 @@ Component:AddVMFunction( "perf", "n", "b",
 		return true
 	end )
 
+Component:AddFunctionHelper( "perf", "n", "Returns true if the given number is below qouta limit." )
 		--------------------------------------------------------------
 
 Component:AddVMFunction( "minquota", "", "n",
@@ -187,6 +198,8 @@ Component:AddVMFunction( "minquota", "", "n",
 		end
 	end )
 
+Component:AddFunctionHelper( "minquota", "", "Returns the minQuota." )
+	
 Component:AddVMFunction( "maxquota", "", "n",
 	function( Context, Trace )
 		local Perf = Context.Status.Perf
@@ -201,15 +214,21 @@ Component:AddVMFunction( "maxquota", "", "n",
 		return math.floor(tickquota)
 	end )
 
+Component:AddFunctionHelper( "maxquota", "", "Returns the maxQuota." )
+	
 Component:AddVMFunction( "softQuota", "", "n",
 	function( Context, Trace )
 		return expadv_softquota
 	end )
 
+Component:AddFunctionHelper( "softQuota", "", "Returns the softQuota." )
+	
 Component:AddVMFunction( "hardQuota", "", "n",
 	function( Context, Trace )
 		return expadv_hardquota
 	end )
+	
+Component:AddFunctionHelper( "hardQuota", "", "Returns the hardQouta." )
 
 /* --- --------------------------------------------------------------------------------
 	@: Printing
@@ -250,6 +269,7 @@ Component:AddVMFunction( "print", "...", "",
 		EXPADV.PrintColor( Context, Values )
 	end )
 
+Component:AddFunctionHelper( "printColor", "...", "Prints the contents of ( ... ) to chat seperated with a space using colors." )
 Component:AddFunctionHelper( "print", "...", "Prints the contents of ( ... ) to chat seperated with a space." )
 
 if SERVER then util.AddNetworkString( "expadv.printcolor" ) end
@@ -333,6 +353,7 @@ function Component:OnPostRegisterClass( Name, Class )
 end
 
 Component:AddInlineFunction( "type", "vr:", "s", "EXPADV.TypeName(@value 1[2])" )
+Component:AddFunctionHelper( "type", "vr:", "Returns the type of the variant." )
 
 /* --- --------------------------------------------------------------------------------
 	@: Variant VON support
@@ -358,12 +379,13 @@ Component.Author = "Rusketh"
 Component.Description = "Used to debug thrown exceptions in your code."
 
 Component:AddInlineFunction( "type", "ex:", "s", "@value 1.Exception" )
-Component:AddFunctionHelper( "type", "_ex:", "Returns the true type of an Exception" )
+Component:AddFunctionHelper( "type", "ex:", "Returns the true type of an Exception" )
 
 Component:AddInlineFunction( "message", "ex:", "s", "@value 1.Message" )
-Component:AddFunctionHelper( "message", "_ex:", "Returns the current exceptions message." )
+Component:AddFunctionHelper( "message", "ex:", "Returns the current exceptions message." )
 
 Component:AddInlineFunction( "root", "ex:", "ar", [[{@value 1.Trace[1] or 0, @value 1.Trace[2] or 0, __type = "n" } ]] )
+Component:AddFunctionHelper( "root", "ex:", "Returns the root of the exception." )
 
 Component:AddVMFunction( "stack", "ex:n", "ar",
 	function( Context, Trace, Exception, Index )

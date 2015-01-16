@@ -109,10 +109,11 @@ Component:AddInlineOperator( "not", "ac", "b", "!IsValid(@value 1)" )
    --- */
 
 Component:AddInlineFunction( "isValid", "ac:", "b", "IsValid(@value 1)" )
+Component:AddFunctionHelper( "isValid", "ac:", "Returns true is the audio channel is valid." )
 
 Component:AddPreparedFunction( "hasStopped", "ac:", "b", [[if !IsValid( @value 1) then Context:Throw( @trace, "audio channel", "Recieved invalid audio channel." ) end]], 
 "(@value 1:GetState( ) == $GMOD_CHANNEL_STOPPED)" )
-Component:AddFunctionHelper( "isStopped", "ac:", "Returns true is the audio channel has stopped." )
+Component:AddFunctionHelper( "hasStopped", "ac:", "Returns true is the audio channel has stopped." )
 
 Component:AddPreparedFunction( "isPlaying", "ac:", "b", [[if !IsValid( @value 1) then Context:Throw( @trace, "audio channel", "Recieved invalid audio channel." ) end]], 
 "(@value 1:GetState( ) == $GMOD_CHANNEL_PLAYING)" )
@@ -138,15 +139,15 @@ Component:AddFunctionHelper( "fft", "ac:n", "Returns the FFT table of the sound 
 
 Component:AddPreparedFunction( "get3DCone", "ac:", "a", [[if !IsValid( @value 1) then Context:Throw( @trace, "audio channel", "Recieved invalid audio channel." ) end]],
 		"Angle(@value 1:Get3DCone( ))" )
-Component:AddFunctionHelper( "get3DCone", "ac:", "a", "Returns 3D cone of the sound channel, ang(The angle of the inside projection cone in degrees, The angle of the outside projection cone in degrees. The delta-volume outside the outer projection cone). " )
+Component:AddFunctionHelper( "get3DCone", "ac:", "Returns 3D cone of the sound channel, ang(The angle of the inside projection cone in degrees, The angle of the outside projection cone in degrees. The delta-volume outside the outer projection cone). " )
 
 Component:AddPreparedFunction( "getMax3DFadeDistance", "ac:", "n", [[if !IsValid( @value 1) then Context:Throw( @trace, "audio channel", "Recieved invalid audio channel." ) end
 	@define min, max = @value 1:Get3DFadeDistance( )]], "@max" )
-Component:AddFunctionHelper( "getMax3DFadeDistance", "ac:", "The channel's volume is at maximum when the listener is within this distance" )
+Component:AddFunctionHelper( "getMax3DFadeDistance", "ac:", "The channel's volume is at maximum when the listener is within this distance." )
 
 Component:AddPreparedFunction( "getMin3DFadeDistance", "ac:", "n", [[if !IsValid( @value 1) then Context:Throw( @trace, "audio channel", "Recieved invalid audio channel." ) end
 	@define min, max = @value 1:Get3DFadeDistance( )]], "@min" )
-Component:AddFunctionHelper( "getMax3DFadeDistance", "ac:", "The channel's volume stops decreasing when the listener is beyond this distance" )
+Component:AddFunctionHelper( "getMin3DFadeDistance", "ac:", "The channel's volume stops decreasing when the listener is beyond this distance." )
 
 Component:AddPreparedFunction( "getBitsPerSample", "ac:", "n", [[if !IsValid( @value 1) then Context:Throw( @trace, "audio channel", "Recieved invalid audio channel." ) end]], "@value 1:GetBitsPerSample( )" )
 Component:AddFunctionHelper( "getBitsPerSample", "ac:", "Number of bits per sample, or 0 if unknown." )
@@ -198,7 +199,7 @@ Component:AddFunctionHelper( "stop", "ac:", "Stops playing the stream." )
 
 Component:AddPreparedFunction( "set3DFadeDistance", "ac:n,n", "", [[if !IsValid( @value 1) then Context:Throw( @trace, "audio channel", "Recieved invalid audio channel." ) end
 @value 1:Set3DFadeDistance(@value 2, @value 3)]] )
-Component:AddFunctionHelper( "set3DFadeDistance", "ac:n,n", "Sets minamum and maxamum ,3D fade distances of a sound channel." )
+Component:AddFunctionHelper( "set3DFadeDistance", "ac:n,n", "Sets minamum and maximum 3D fade distances of a sound channel." )
 
 Component:AddPreparedFunction( "set3DCone", "ac:n,n,n", "", [[if !IsValid( @value 1) then Context:Throw( @trace, "audio channel", "Recieved invalid audio channel." ) end
 @value 1:Set3DCone(@value 2, @value 3, @value 4)]] )
@@ -264,6 +265,10 @@ Component:AddVMFunction( "playURL", "s,s,d,d", "",
 	end )
 
 EXPADV.AddFunctionAlias( "playURL", "s,s,d" )
+
+Component:AddFunctionHelper( "playURL", "s,s,d,d", "Plays sound from 1st string URL with 2st string mode, executes 1st delegate with audio on success else 2nd delegate.")
+Component:AddFunctionHelper( "playURL", "s,s,d", "Plays sound from 1st string URL with 2st string mode executes the delegate with audio on success.")
+
 
 /* -----------------------------------------------------------------------------------
 	@: Hooks

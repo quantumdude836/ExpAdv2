@@ -113,7 +113,7 @@ Component:AddInlineFunction( "getBlue", "c:", "n", "@value 1.b")
 Component:AddFunctionHelper( "getBlue", "c:", "Gets the blue value of a color object")
 
 Component:AddInlineFunction( "getAlpha", "c:", "n", "@value 1.a")
-Component:AddFunctionHelper( "color", "c:", "Gets the alpha value of a color object")
+Component:AddFunctionHelper( "getAlpha", "c:", "Gets the alpha value of a color object")
 
 --SETTERS
 Component:AddPreparedFunction( "setRed", "c:n", "", "@value 1.r = @value 2")

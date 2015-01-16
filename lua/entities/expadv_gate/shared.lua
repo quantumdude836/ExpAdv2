@@ -15,7 +15,6 @@ ENT.AutomaticFrameAdvance  	= true
 -- PrecacheParticleSystem( "fire_verysmall_01" )
 
 AccessorFunc( ENT, "ClientState", "ClientState", FORCE_NUMBER )
-AccessorFunc( ENT, "ClientCompletion", "ClientCompletion", FORCE_NUMBER )
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Ops
@@ -26,7 +25,6 @@ function ENT:SetupDataTables( )
 	self:AddExpVar( "FLOAT", 1, "StopWatch" )
 	self:AddExpVar( "FLOAT", 2, "Average" )
 	self:AddExpVar( "FLOAT", 3, "ServerState" )
-	self:AddExpVar( "FLOAT", 4, "ServerCompletion" )
 	self:AddExpVar( "STRING", 0, "GateName" )
 	self:AddExpVar( "ENTITY", 0, "LinkedPod" )
 end
@@ -69,7 +67,6 @@ function ENT:ResetState( State )
 		self:SetTickQuota( 0 )
 		self:SetStopWatch( 0 )
 		self:SetAverage( 0 )
-		self:SetServerCompletion( 0 )
 		self:SetServerState( State or EXPADV_STATE_OFFLINE )
 	end
 
@@ -77,7 +74,6 @@ function ENT:ResetState( State )
 		self.ClientTickQuota = 0
 		self.ClientStopWatch = 0
 		self.ClientAverage = 0
-		self:SetClientCompletion( 0 )
 		self:SetClientState( State or EXPADV_STATE_OFFLINE )
 	end
 end
@@ -130,23 +126,12 @@ function ENT:Think( )
 	return true
 end
 
-function ENT:OnCompilerUpdate( Status )
-	if SERVER then
-		self:SetServerCompletion( Status )
-	end
-
-	if CLIENT then
-		self:SetClientCompletion( Status )
-	end
-end
-
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Quota Stuffs
    --- */
 
 function ENT:StartUp( )
 	self:ResetState( EXPADV_STATE_ONLINE )
-	self:OnCompilerUpdate( 100 )
 end
 
 function ENT:HitTickQuota( )
