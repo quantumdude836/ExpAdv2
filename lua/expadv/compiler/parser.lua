@@ -178,8 +178,6 @@ end
 function Compiler:Expression( Trace )
 	-- MsgN( "Compiler -> Expression" )
 
-	local TIME = SysTime()
-
 	local _ExprRequire = self.ExpressionRequired
 	self.ExpressionRequired = true
 
@@ -195,9 +193,6 @@ function Compiler:Expression( Trace )
 		Expression.Return = "void"
 	end
 	
-	self.Debug_ExpCount = self.Debug_ExpCount + 1
-	self.Debug_ExpTime = self.Debug_ExpTime + (SysTime() - TIME)
-
 	return Expression
 end
 
@@ -799,8 +794,6 @@ end -- TODO: ^ This
 
 function Compiler:Statement( Trace )
 	-- MsgN( "Compiler -> Statement" )
-	
-	local TIME = SysTime()
 
 	local _StmtRoot = self.StatmentRoot
 	self.StatmentRoot = self:GetTokenTrace( Trace )
@@ -817,13 +810,12 @@ function Compiler:Statement( Trace )
 
 	local Seperator = self:AcceptSeperator( )
 
-	self.Debug_StmCount = self.Debug_StmCount + 1
-	self.Debug_StmTime = self.Debug_StmTime + (SysTime() - TIME)
-
 	return Statement, Seperator
 end
 
 function Compiler:Sequence( Trace, ExitToken )
+	-- MsgN( "Compiler -> Sequence" )
+
 	if !self:HasTokens( ) then return {} end
 	
 	if ExitToken and self:CheckToken( ExitToken ) then return {} end
@@ -859,6 +851,8 @@ end
    --- */
 
 function Compiler:GetBlock( Trace, RCB, Flag )
+	-- MsgN( "Compiler -> GetBlock" )
+
 	self:ExcludeWhiteSpace( "Further input required at end of code, incomplete statment" )
 	
 	if self:AcceptToken( "lcb" ) then
@@ -889,6 +883,8 @@ function Compiler:GetBlock( Trace, RCB, Flag )
 end
 
 function Compiler:GetCondition( Trace, LPA, RPA )
+	-- MsgN( "Compiler -> GetCondition" )
+
 	local Trace = self:GetTokenTrace( Trace )
 
 	self:RequireToken( "lpa", "Left parenthesis (( ) missing, %s", LPA or "to open condition" )
@@ -1015,6 +1011,8 @@ end
 
 -- Stage 4: Events
 function Compiler:Statement_4( Trace )
+	-- MsgN( "Compiler -> Statement 4" )
+
 	if self:AcceptToken( "evt" ) then
 		local Trace = self:GetTokenTrace( Trace )
 
@@ -1078,6 +1076,7 @@ end
 
 -- Stage 5: Return, Break, Coninue
 function Compiler:Statement_5( Trace )
+	-- MsgN( "Compiler -> Statement 5" )
 	
 	if self:AcceptToken( "ret" ) then
 		local Trace = self:GetTokenTrace( Trace )
@@ -1556,6 +1555,7 @@ end
    --- */
 
 function Compiler:GetDirective( Trace )
+	-- MsgN( "Compiler -> GetDirective" )
 
 	self:RequireToken( "var", "directive name expected after (@) '@<name>:'" )
 

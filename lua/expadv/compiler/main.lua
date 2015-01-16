@@ -101,33 +101,29 @@ include( "instructions.lua" )
    --- */
 
 function Compiler:GetTokenTrace( RootTrace )
-	//local Trace = { self.ReadLine, self.ReadChar }
-	//if !RootTrace then return Trace end
+	local Trace = { self.ReadLine, self.ReadChar }
+	if !RootTrace then return Trace end
 
-	//local ID = self.TraceLK[RootTrace]
-	//if ID then RootTrace = self.Traces[ID] end
+	local ID = self.TraceLK[RootTrace]
+	if ID then RootTrace = self.Traces[ID] end
 
-	//Trace.Stack = { {RootTrace[1], RootTrace[2] } } 
-	//if !RootTrace.Stack then return Trace end
+	Trace.Stack = { {RootTrace[1], RootTrace[2] } } 
+	if !RootTrace.Stack then return Trace end
 
-	//for I = 1, 5 do Trace.Stack[I + 1] = RootTrace.Stack[I] end
+	for I = 1, 5 do Trace.Stack[I + 1] = RootTrace.Stack[I] end
 
-	//return Trace
-
-	return {0,0}
+	return Trace
 end
 
 function Compiler:CompileTrace( Trace )
-	//local ID = self.TraceLK[Trace]
+	local ID = self.TraceLK[Trace]
 
-	//if !ID then
-	//	ID = #self.Traces + 1
-	//	self.Traces[ID] = table.Copy(Trace) -- TODO: Fix this :D
-	//end
+	if !ID then
+		ID = #self.Traces + 1
+		self.Traces[ID] = table.Copy(Trace) -- TODO: Fix this :D
+	end
 
-	//return string.format("Context.Traces[%s]", ID)
-
-	return "{0,0}"
+	return string.format("Context.Traces[%s]", ID)
 end
 
 /* --- --------------------------------------------------------------------------------
@@ -699,28 +695,8 @@ function EXPADV.SolidCompile(Script, Files)
 	
 	EXPADV.CallHook("PreCompileScript", self, Script, Files)
 		
-		local Time = SysTime()
-		self.Debug_OpTime, self.Debug_OpCount = 0, 0
-		self.Debug_ExpCount, self.Debug_ExpTime = 0, 0
-		self.Debug_StmCount, self.Debug_StmTime = 0, 0
-
 	local Status, Instruction = pcall(self.Sequence, self, {0, 0})
 	
-		debug.sethook()
-
-		local Time, Avg = SysTime() - Time, self.Debug_OpTime / self.Debug_OpCount
-		MsgN(string.format("Compiler took %f seconds to compile %s operators", self.Debug_OpTime, self.Debug_OpCount))
-		MsgN(string.format("Average %f.", Avg))
-
-		MsgN(string.format("Compiler took %f seconds to compile %s expressions", self.Debug_ExpTime, self.Debug_ExpCount))
-		MsgN(string.format("Average %f.", self.Debug_ExpTime / self.Debug_ExpCount))
-
-		MsgN(string.format("Compiler took %f seconds to compile %s statments", self.Debug_StmTime, self.Debug_StmCount))
-		MsgN(string.format("Average %f.", self.Debug_StmTime / self.Debug_StmCount))
-
-		MsgN(string.format("Total compiler time %f.", Time))
-
-
 	if !Status then return false, Instruction end
 
 	setmetatable(self.Enviroment, EXPADV.BaseEnv)

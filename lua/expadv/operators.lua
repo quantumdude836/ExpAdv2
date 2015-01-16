@@ -750,8 +750,6 @@ function EXPADV.BuildLuaOperator( Operator )
 	end
 
 	Operator.Compile = function( Compiler, _Trace, ... )
-		local TIME = SysTime()
-
 		EXPADV.CanBuildOperator( Compiler, _Trace, Operator )
 
 		local Trace = { }
@@ -870,7 +868,7 @@ function EXPADV.BuildLuaOperator( Operator )
 
 				-- Preare the varargs preperation statments.
 				if #VAPrepare >= 1 then
-					table_insert( Preperation, table_concat( VAPrepare, "\n" ) )
+					Preperation[#Preperation + 1] = table_concat( VAPrepare, "\n" )
 					-- OpPrepare = (OpPrepare or "") .. "\n" .. table_concat( VAPrepare, "\n" )
 				end
 
@@ -979,9 +977,6 @@ function EXPADV.BuildLuaOperator( Operator )
 		local PreperedLines = #Preperation >= 1 and table_concat( Preperation, "\n" ) or nil
 
 		local Inst = Compiler:NewLuaInstruction( Trace, Operator, PreperedLines, OpInline )
-
-		Compiler.Debug_OpTime = Compiler.Debug_OpTime + (SysTime() - TIME)
-		Compiler.Debug_OpCount = Compiler.Debug_OpCount + 1
 
 		return Inst
 	end
