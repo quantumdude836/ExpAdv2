@@ -99,6 +99,7 @@ Component:AddFunctionHelper( "writeString", "st:s", "Appends a string to the str
 Component:AddFunctionHelper( "writeEntity", "st:e", "Appends an entity to the stream object." )
 Component:AddFunctionHelper( "writePlayer", "st:ply", "Appends a player to the stream object." )
 Component:AddFunctionHelper( "writeVector", "st:v", "Appends a vector to the stream object." )
+Component:AddFunctionHelper( "writeVector2", "st:v2", "Appends a vector2 to the stream object." )
 Component:AddFunctionHelper( "writeAngle", "st:a", "Appends an angle to the stream object." )
 Component:AddFunctionHelper( "writeColor", "st:c", "Appends a color to the stream object." )
 
@@ -216,6 +217,7 @@ Component:AddFunctionHelper( "readString", "st:", "Reads a string from the strea
 Component:AddFunctionHelper( "readEntity", "st:", "Reads an entity from the stream object." )
 Component:AddFunctionHelper( "readPlayer", "st:", "Reads a player from the stream object." )
 Component:AddFunctionHelper( "readVector", "st:", "Reads a vector from the stream object." )
+Component:AddFunctionHelper( "readVector2", "st:", "Reads a vector2 from the stream object." )
 Component:AddFunctionHelper( "readAngle", "st:", "Reads an angle from the stream object." )
 Component:AddFunctionHelper( "readColor", "st:", "Reads a color from the stream object." )
 

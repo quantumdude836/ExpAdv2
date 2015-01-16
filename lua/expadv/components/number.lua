@@ -162,7 +162,7 @@ Component:AddGeneratedFunction( "max", "n,n,n,n,n", "n", function( Operator, Com
   return { Trace = Trace, Inline = LuaInline, Prepare = table.concat( Prep, "\n" ), Return = "n", FLAG = EXPADV_INLINEPREPARE }
 end )
 
-Component:AddFunctionHelper( "max", "n,n,n,n,n", "returns the higest value out of 3 numbers." )
+Component:AddFunctionHelper( "max", "n,n,n,n,n", "Returns the higest value out of the given numbers." )
 EXPADV.AddFunctionAlias( "max", "n,n,n,n" )
 EXPADV.AddFunctionAlias( "max", "n,n,n" )
 EXPADV.AddFunctionAlias( "max", "n,n" )
@@ -195,7 +195,7 @@ EXPADV.AddFunctionAlias( "min", "n,n,n,n" )
 EXPADV.AddFunctionAlias( "min", "n,n,n" )
 EXPADV.AddFunctionAlias( "min", "n,n" )
 
-Component:AddFunctionHelper( "min", "n,n,n,n,n", "returns the lowest value out of 3 numbers." )
+Component:AddFunctionHelper( "min", "n,n,n,n,n", "Returns the lowest value out of the given numbers." )
 
 /* --- --------------------------------------------------------------------------------
     @: General math
@@ -206,7 +206,7 @@ Component:AddFunctionHelper( "floor", "n", "Rounds (number) to the nearest integ
 
 
 Component:AddInlineFunction( "abs", "n", "n", "((@value 1 >= 0) and @value 1 or -@value 1)" ) ; 
-Component:AddFunctionHelper( "abs", "n", "returns the absolute value of the specified number." )
+Component:AddFunctionHelper( "abs", "n", "Returns the absolute value of the specified number." )
 
 
 Component:AddInlineFunction( "ceil", "n", "n", "(@value 1 - @value 1 @modulus -1)" ) ;
@@ -253,7 +253,7 @@ Component:AddInlineFunction( "random", "n", "n", "(math.random( ) * @value 1)" )
 Component:AddFunctionHelper( "random", "n", "Returns a floating point between 0 and (number max)" )
 
 Component:AddInlineFunction( "random", "n,n", "n", "(@value 1 + math.random( ) * (@value 2 - @value 1))" )
-Component:AddFunctionHelper( "random", "", "Returns a floating point between min and max)" )
+Component:AddFunctionHelper( "random", "n,n", "Returns a floating point between min and max)" )
 
 
 /*==============================================================================================

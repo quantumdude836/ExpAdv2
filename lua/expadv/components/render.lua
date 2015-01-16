@@ -86,7 +86,7 @@ Component:AddFunctionHelper( "setFont", "s,n", "Sets the current font and fontsi
 Component:AddFunctionHelper( "setFont", "s,n,c", "Sets the current font, fontsize and font color." )
 Component:AddFunctionHelper(  "setFontColor", "c", "Sets the current font color." )
 Component:AddFunctionHelper(  "getTextWidth", "s", "Returns the width of drawing string using the current font." )
-Component:AddFunctionHelper(  "getTextHeight", "s", "Returns the width of drawing string using the current font." )
+Component:AddFunctionHelper(  "getTextHeight", "s", "Returns the height of drawing string using the current font." )
 
 /* -----------------------------------------------------------------------------------
 	@: Text
@@ -109,9 +109,9 @@ Component:AddPreparedFunction( "drawTextAlignedRight", "v2,s", "",
 	surface.DrawText( @value 2 )
 ]])
 
-Component:AddFunctionHelper( "drawText", "v,s", "Draws a line of text aligned left of position." )
-Component:AddFunctionHelper( "drawTextCentered", "v,s", "Draws a line of text aligned center of position." )
-Component:AddFunctionHelper( "drawTextAlignedRight", "v,s", "Draws a line of text aligned right of position." )
+Component:AddFunctionHelper( "drawText", "v2,s", "Draws a line of text aligned left of position." )
+Component:AddFunctionHelper( "drawTextCentered", "v2,s", "Draws a line of text aligned center of position." )
+Component:AddFunctionHelper( "drawTextAlignedRight", "v2,s", "Draws a line of text aligned right of position." )
 
 /* -----------------------------------------------------------------------------------
 	@: Color / Material
@@ -160,7 +160,7 @@ Component:AddFunctionHelper( "drawTexturedBox", "v2,v2,n,n,n,n", "Draws a textur
    --- */
   
 Component:AddPreparedFunction("drawSprite", "v,n,n,c", "", "$render.DrawSprite(@value 1, @value 2, @value 3, @value 4)")
-Component:AddFunctionHelper("drawSprite", "", "Creates a sprite at the given position.")
+Component:AddFunctionHelper("drawSprite", "v,n,n,c", "Creates a sprite at the given position.")
 
 
 /* -----------------------------------------------------------------------------------
@@ -178,9 +178,15 @@ Vertex:AddPreparedOperator( "=", "n,vt", "", "Context.Memory[@value 1] = @value 
 
 Component:AddInlineFunction( "vert", "v2,v2", "vt", "{x = @value 1.x, y = @value 1.y, u = @value 2.x, v = @value 2.y }" )
 
+Component:AddFunctionHelper( "vert", "v2,v2", "Creates a vertex object." )
+
 Component:AddInlineFunction( "vert", "v2,n,n", "vt", "{x = @value 1.x, y = @value 1.y, u = @value 2, v = @value 3 }" )
 
+Component:AddFunctionHelper( "vert", "v2,n,n", "Creates a vertex object." )
+
 Component:AddInlineFunction( "vert", "n,n,n,n", "vt", "{x = @value 1, y = @value 2, u = @value 3, v = @value 4 }" )
+
+Component:AddFunctionHelper( "vert", "n,n,n,n", "Creates a vertex object." )
 
 /* --- -------------------------------------------------------------------------------
 	@: Polys
@@ -233,6 +239,7 @@ Component:AddFunctionHelper( "drawTriangle", "v2,v2,v2", "Draws a traingle from 
 Component:AddFunctionHelper( "drawPoly", "ar", "Draws a polygon using an arry of 2d vectors or vertexs." )
 Component:AddFunctionHelper( "drawPolyOutline", "ar", "Draws an outlined polygon using an arry of 2d vectors or vertexs." )
 Component:AddFunctionHelper( "drawTexturedTriangle", "v2,v2,v2", "Draws a textured traingle from 3 points." )
+Component:AddFunctionHelper( "drawTexturedTriangle", "vt,vt,vt", "Draws a textured traingle from 3 vertices." )
 Component:AddFunctionHelper( "drawTexturedPoly", "ar", "Draws a textured polygon using an arry of 2d vectors or vertexs." )
 
 /* --- -------------------------------------------------------------------------------
@@ -275,7 +282,7 @@ end]] )
 Component:AddFunctionHelper( "pauseNextFrame", "b", "While set to true the screen will not draw the next frame." )
 
 Component:AddInlineFunction( "nextFramePaused", "", "b", "((IsValid( Context.entity ) and Context.entity.Screen) and Context.entity:GetRenderingPaused( ) or false)" )
-Component:AddFunctionHelper( "pauseNextFrame", "b", "returns true, if the screens next frame is paused." )
+Component:AddFunctionHelper( "nextFramePaused", "", "Returns true, if the screens next frame is paused." )
 
 Component:AddPreparedFunction( "noFrameRefresh", "b", "", [[
 if IsValid( Context.entity ) and Context.entity.Screen then
@@ -285,7 +292,7 @@ end]] )
 Component:AddFunctionHelper( "noFrameRefresh", "b", "While set to true the screen will not draw the next frame." )
 
 Component:AddInlineFunction( "frameRefreshDisabled", "", "b", "((IsValid( Context.entity ) and Context.entity.Screen) and Context.entity:GetNoClearFrame( ) or false)" )
-Component:AddFunctionHelper( "frameRefreshDisabled", "b", "returns true, if the screens is set not to clear the screen each frame." )
+Component:AddFunctionHelper( "frameRefreshDisabled", "", "Returns true, if the screens is set not to clear the screen each frame." )
 
 EXPADV.SharedOperators( )
 
@@ -294,7 +301,7 @@ if IsValid( Context.entity ) and Context.entity.Screen then
 	@define value = Context.entity:GetCursor( @value 1 )
 ]], "(@value or Vector2(0,0))" )
 
-Component:AddFunctionHelper( "getScreenCursor", "ply:", "Returns the cursor psotion of a player, for a screen." )
+Component:AddFunctionHelper( "getScreenCursor", "ply:", "Returns the cursor position of a player, for a screen." )
 
 Component:AddPreparedFunction( "screenToLocal", "v2", "v", [[
 if IsValid( Context.entity ) and Context.entity.Screen then
@@ -312,13 +319,13 @@ Component:AddFunctionHelper( "screenToWorld", "v2", "Returns the position on scr
 
 Component:AddPreparedFunction( "setFPS", "n", "", [[if IsValid( Context.entity ) and Context.entity.Screen then Context.entity:SetFPS(@value 1) end]] )
 
-Component:AddFunctionHelper( "setFPS", "n", "sets the fps of the screen, between 1 - 60 frames per second." )
+Component:AddFunctionHelper( "setFPS", "n", "Sets the fps of the screen, between 1 - 60 frames per second." )
 
 Component:AddPreparedFunction( "getFPS", "", "n", [[if IsValid( Context.entity ) and Context.entity.Screen then 
 	@define fps = Context.entity:GetFPS() 
 end]], "(@fps or 0)" )
 
-Component:AddFunctionHelper( "getFPS", "", "returns the fps of the screen." )
+Component:AddFunctionHelper( "getFPS", "", "Returns the fps of the screen." )
 
 /* -----------------------------------------------------------------------------------
 	@: Time functions
@@ -380,25 +387,40 @@ Component:AddPreparedFunction("matrix", "v2,n,v2", "mx", [[
 ]], "@Matrix")
 EXPADV.AddFunctionAlias("matrix", "v2") 	
 EXPADV.AddFunctionAlias("matrix", "v2,n")
-Component:AddFunctionHelper("matrix", "v2,a,v2", "Returns new matrix object (translation, angle, scale).")
+Component:AddFunctionHelper("matrix", "v2,n,v2", "Returns new matrix object (translation, angle, scale).")
 
 Component:AddPreparedFunction("translate", "mx:v", "", "@value 1:Translate(@value 2)")
+Component:AddFunctionHelper("translate", "mx:v", "Translates the matrix by the given vector aka. adds the vector to the translation." )
 Component:AddPreparedFunction("translate", "mx:v2", "", "@value 1:Translate($Vector(@value 2.x,@value 2.y,0))")
+Component:AddFunctionHelper("translate", "mx:v2", "Translates the matrix by the given vector2 aka. adds the vector2 to the translation." )
 Component:AddPreparedFunction("setTranslation", "mx:v", "", "@value 1:SetTranslation(@value 2)")
+Component:AddFunctionHelper( "setTranslation", "mx:v", "Sets translation of a matrix." )
 Component:AddPreparedFunction("setTranslation", "mx:v2", "", "@value 1:SetTranslation($Vector(@value 2.x,@value 2.y,1))")
+Component:AddFunctionHelper( "setTranslation", "mx:v2", "Sets translation of a matrix." )
 Component:AddInlineFunction("getTranslation", "mx:", "v", "@value 1:GetTranslation()")
+Component:AddFunctionHelper( "getTranslation", "mx:", "Gets translation of a matrix." )
 
 Component:AddPreparedFunction("rotate", "mx:a", "", "@value 1:Rotate(@value 2)")
+Component:AddFunctionHelper( "rotate", "mx:a", "Rotates the matrix by given angle." )
 Component:AddPreparedFunction("rotate", "mx:n", "", "@value 1:Rotate($Angle(0,@value 2,0))")
+Component:AddFunctionHelper( "rotate", "mx:n", "Rotates the matrix by given angle." )
 Component:AddPreparedFunction("setAngles", "mx:a", "", "@value 1:SetAngles(@value 2)")
+Component:AddFunctionHelper( "setAngles", "mx:a", "Sets angle of a matrix." )
 Component:AddPreparedFunction("setAngle", "mx:n", "", "@value 1:SetAngles($Angle(0,@value 2,0))")
+Component:AddFunctionHelper( "setAngle", "mx:n", "Sets angle of a matrix." )
 Component:AddInlineFunction("getAngles", "mx:", "a", "@value 1:GetAngles()")
+Component:AddFunctionHelper( "getAngles", "mx:", "Gets angle of a matrix." )
 
 Component:AddPreparedFunction("scale", "mx:v", "", "@value 1:Scale(@value 2)")
+Component:AddFunctionHelper("scale", "mx:v", "Scales the matrix by the given vector. ")
 Component:AddPreparedFunction("scale", "mx:v2", "", "@value 1:Scale($Vector(@value 2.x,@value 2.y,1))")
+Component:AddFunctionHelper("scale", "mx:v2", "Scales the matrix by the given vector2. ")
 Component:AddPreparedFunction("setScale", "mx:v", "", "@value 1:SetScale(@value 2)")
+Component:AddFunctionHelper( "setScale", "mx:v", "Sets scale of a matrix." )
 Component:AddPreparedFunction("setScale", "mx:v2", "", "@value 1:SetScale($Vector(@value 2.x,@value 2.y,1))")
+Component:AddFunctionHelper( "setScale", "mx:v2", "Sets scale of a matrix." )
 Component:AddInlineFunction("getScale", "mx:", "v", "@value 1:GetScale()")
+Component:AddFunctionHelper( "getScale", "mx:", "Gets scale of a matrix." )
 
 EXPADV.ClientOperators()
 
@@ -409,12 +431,16 @@ if Context.In2DRender || Context.In3DRender then
 end
 ]])
 
+Component:AddFunctionHelper( "pushMatrix", "mx", "Starts rendering in a matrix." )
+
 Component:AddPreparedFunction("popMatrix", "", "", [[
 if (Context.In2DRender || Context.In3DRender) && Context.Matrices > 0 then
 	Context.Matrices = Context.Matrices - 1
 	$cam.PopModelMatrix()
 end
 ]])
+
+Component:AddFunctionHelper( "popMatrix", "", "Stops rendering in current matrix." )
 
 /* -----------------------------------------------------------------------------------
 	@: 3D
@@ -463,12 +489,16 @@ end
 ]])
 EXPADV.AddFunctionAlias("start3D2D", "v,a")
 
+Component:AddFunctionHelper( "start3D2D", "v,a,n", "Starts rendering in 3D2D at the given position with the given angle and in the given scale." )
+
 Component:AddPreparedFunction("end3D2D", "", "", [[
 if Context.In3DRender && Context.Cams > 0 then
 	Context.Cams = Context.Cams - 1
 	$cam.End3D2D()
 end
 ]])
+
+Component:AddFunctionHelper( "end3D2D", "", "Stops current 3D2D rendering." )
 
 /* -----------------------------------------------------------------------------------
 	@: Hud Event

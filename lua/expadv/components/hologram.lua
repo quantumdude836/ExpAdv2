@@ -24,10 +24,15 @@ Component:CreateSetting( "model_any", 1 )
    --- */
 
 Component:AddInlineFunction( "hologramLimit", "", "n", "@setting max" )
+Component:AddFunctionHelper( "hologramLimit", "", "Returns how many holograms can be spawned per player." )
 Component:AddInlineFunction( "hologramSpawnRate", "", "n", "@setting rate" )
+Component:AddFunctionHelper( "hologramSpawnRate", "", "Returns how many holograms can be spawned per second." )
 Component:AddInlineFunction( "hologramClipLimit", "", "n", "@setting clips" )
+Component:AddFunctionHelper( "hologramClipLimit", "", "Returns how many clips can a hologram have." )
 Component:AddInlineFunction( "hologramMaxScale", "", "n", "@setting Size" )
+Component:AddFunctionHelper( "hologramMaxScale", "", "Returns the maximum scale of homogram." )
 Component:AddInlineFunction( "hologramAnyModel", "", "b", "@setting model_any" )
+Component:AddFunctionHelper( "hologramAnyModel", "", "Returns true if model_any is enabled." )
 
 /* --- --------------------------------------------------------------------------------
 	@: Hologram Handeling
@@ -225,7 +230,7 @@ local function SetModel( Context, Trace, Entity, Model )
 end
 
 Component:AddVMFunction( "setModel", "h:s", "", SetModel )
-
+Component:AddFunctionHelper( "setModel", "h:s", "Changes hologram's model." )
 /*==============================================================================================
     Section: ID Emulation
     	-- Don't worry, they are still objects!

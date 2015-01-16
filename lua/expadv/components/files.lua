@@ -137,6 +137,14 @@ Component:AddVMFunction( "findFolders", "s,s", "ar",
 	end )
 
 EXPADV.ClientOperators()
+Component:AddFunctionHelper( "readFile", "s", "Returns the containments of file by the given path." )
+Component:AddFunctionHelper( "writeFile", "s,s", "Writes the containments of the 2nd string into file by the 1st string path." )
+Component:AddFunctionHelper( "fileExists", "s", "Returns true if the file by the given path exists." )
+Component:AddFunctionHelper( "deleteFile", "s", "Deletes the file by the given path." )
+Component:AddFunctionHelper( "isDir", "s", "Returns true if the file by the given path is directory." )
+Component:AddFunctionHelper( "fileSize", "s", "Returns the size of file by the given path." )
+Component:AddFunctionHelper( "findFiles", "s,s", "Returns an array with containments of files in 1st string path with name containing the 2nd string." )
+Component:AddFunctionHelper( "findFolders", "s,s", "Returns an array with containments of folders in 1st string path with name containing the 2nd string." )
 Component:AddInlineFunction( "canAccessFiles", "", "b", [[EXPADV.CanAccessFeature(Context.entity, "File access")]] )
 Component:AddFunctionHelper( "canAccessFiles", "", "Returns true if this entity can access files." )
 

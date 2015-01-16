@@ -245,6 +245,7 @@ Component:AddVMFunction( "toUnit", "s,n", "n",
 		return -1
 	end )
 
+
 Component:AddVMFunction( "fromUnit", "s,n", "n",
 	function( Context, Trace, Unit, Value )
 		if UnitSpeed[Unit] then
@@ -257,6 +258,7 @@ Component:AddVMFunction( "fromUnit", "s,n", "n",
 
 		return -1
 	end )
+
 
 
 Component:AddVMFunction( "convertUnit", "s,s,n", "n",
@@ -272,6 +274,10 @@ Component:AddVMFunction( "convertUnit", "s,s,n", "n",
 		return -1
 	end )
 
+Component:AddFunctionHelper( "toUnit", "s,n", "Converts the number to the unit S." )
+Component:AddFunctionHelper( "fromUnit", "s,n", "Converts the number from the unit S." )
+Component:AddFunctionHelper( "convertUnit", "s,s,n", "Converts the number from unit at 1st index to unit at 2nd index." )
+
 /* --- --------------------------------------------------------------------------------
 	@: Some useful array sorting functions
    --- */
@@ -285,6 +291,8 @@ Component:AddPreparedFunction( "sortVectorsByDistance", "ar,v", "", [[
 			return A:Distance( @value 2 ) < B:Distance( @value 2 )
 		end )
 	]])
+
+Component:AddFunctionHelper( "sortVectorsByDistance", "ar,v", "Sorts the given array of vectors by distance to the given position." )
 
 /* --- --------------------------------------------------------------------------------
 	@: Rangers
@@ -509,44 +517,45 @@ Component:AddPreparedFunction( "clear", "rd:", "", "@value 1.Result = nil" )
 	@: Ranger Helpers
    --- */
 
-Component:AddFunctionHelper( "materialType", "_rd:", "Returns the type of material hit by the ranger." )
-Component:AddFunctionHelper( "noHull", "_rd:", "Removes the box min and max from the trace." )
-Component:AddFunctionHelper( "hitWater", "_rd:", "Returns true if a ranger is allowed to hit the world." )
-Component:AddFunctionHelper( "fractionLeftSolid", "_rd:", "If the ranger starts in a solid, this describes when the ranger leaves it as a fraction of the trace distance." )
-Component:AddFunctionHelper( "defaultZero", "_rd:", "Returns true if a trace is set to default zero." )
-Component:AddFunctionHelper( "filter", "_rd:e", "Filters an entity from a ranger." )
-Component:AddFunctionHelper( "startSolid", "_rd:", "Untits before trace exited a solid object." )
-Component:AddFunctionHelper( "mins", "_rd:", "Returns the box min of a trace." )
-Component:AddFunctionHelper( "hitWater", "_rd:b", "Sets wether a ranger is allowed to hit water." )
-Component:AddFunctionHelper( "unfilter", "_rd:e", "Removes E from a rangers filter." )
-Component:AddFunctionHelper( "ignoreEntities", "_rd:", "Returns true if the ranger is set to ignore all entitys." )
-Component:AddFunctionHelper( "ignoreWorld", "_rd:", "Returns true if the ranger is set to ignore world." )
-Component:AddFunctionHelper( "hit", "_rd:", "Returns true if the ranger hit anything." )
-Component:AddFunctionHelper( "hitPos", "_rd:", "Returns the position that was hit by ranger." )
-Component:AddFunctionHelper( "entity", "_rd:", "Returns the hit entity of a ranger." )
-Component:AddFunctionHelper( "normal", "_rd:", "Returns a normalized vector representing the direction of the ranger from start to finish." )
-Component:AddFunctionHelper( "start", "_rd:", "Sets the start position of a ranger." )
-Component:AddFunctionHelper( "hitBox", "_rd:", "Returns the ENUM of hitGroup the ranger hit. Alternative to hitGroup. See wiki for list of ENUMs." )
-Component:AddFunctionHelper( "setHull", "_rd:v,v", "Sets the mix and max hull size of a ranger." )
-Component:AddFunctionHelper( "end", "_rd:", "Returns the end position of a ranger." )
-Component:AddFunctionHelper( "maxs", "_rd:", "Returns the box max of a trace." )
-Component:AddFunctionHelper( "clear", "_rd:", "Clears the ranger data of the ranger." )
-Component:AddFunctionHelper( "ignoreEntities", "_rd:b", "Sets a ranger to ingore all entitys." )
-Component:AddFunctionHelper( "hitNoDraw", "_rd:", "Returns true if the ranger hit a no-draw brush." )
-Component:AddFunctionHelper( "hitTexture", "_rd:", "Returns the texture of surface hit by ranger." )
-Component:AddFunctionHelper( "defaultZero", "_rd:b", "Sets the defaulty zero of a trace." )
-Component:AddFunctionHelper( "distance", "_rd:", "Returns the distance from the renagers start to the rangers hit positions." )
-Component:AddFunctionHelper( "hitPhysics", "_rd:", "Returns the index of the physics object (on the hit entity) hit by a ranger." )
-Component:AddFunctionHelper( "fraction", "_rd:", "This is a number between 0 and 1. Ex. 0.01 = 1/100 of your ranger's max range." )
-Component:AddFunctionHelper( "hitNormal", "_rd:", "Returns the normal of the surface that was hit by ranger." )
-Component:AddFunctionHelper( "hitWorld", "_rd:", "Sets wether a ranger is allowed to hit the world." )
-Component:AddFunctionHelper( "fire", "_rd:", "Generates the ranger data of the ranger." )
-Component:AddFunctionHelper( "fire", "_rd:v,v,n", "Generates the ranger data of the ranger, using start position, direction and distance." )
-Component:AddFunctionHelper( "fire", "_rd:v,v", "Generates the ranger data of the ranger, using start and end position." )
+Component:AddFunctionHelper( "materialType", "rd:", "Returns the type of material hit by the ranger." )
+Component:AddFunctionHelper( "noHull", "rd:", "Removes the box min and max from the trace." )
+Component:AddFunctionHelper( "hitWater", "rd:", "Returns true if a ranger is allowed to hit the world." )
+Component:AddFunctionHelper( "fractionLeftSolid", "rd:", "If the ranger starts in a solid, this describes when the ranger leaves it as a fraction of the trace distance." )
+Component:AddFunctionHelper( "defaultZero", "rd:", "Returns true if a trace is set to default zero." )
+Component:AddFunctionHelper( "filter", "rd:e", "Filters an entity from a ranger." )
+Component:AddFunctionHelper( "startSolid", "rd:", "Untits before trace exited a solid object." )
+Component:AddFunctionHelper( "mins", "rd:", "Returns the box min of a trace." )
+Component:AddFunctionHelper( "hitWater", "rd:b", "Sets wether a ranger is allowed to hit water." )
+Component:AddFunctionHelper( "unfilter", "rd:e", "Removes E from a rangers filter." )
+Component:AddFunctionHelper( "ignoreEntities", "rd:", "Returns true if the ranger is set to ignore all entitys." )
+Component:AddFunctionHelper( "ignoreWorld", "rd:", "Returns true if the ranger is set to ignore world." )
+Component:AddFunctionHelper( "hit", "rd:", "Returns true if the ranger hit anything." )
+Component:AddFunctionHelper( "hitPos", "rd:", "Returns the position that was hit by ranger." )
+Component:AddFunctionHelper( "entity", "rd:", "Returns the hit entity of a ranger." )
+Component:AddFunctionHelper( "normal", "rd:", "Returns a normalized vector representing the direction of the ranger from start to finish." )
+Component:AddFunctionHelper( "start", "rd:", "Sets the start position of a ranger." )
+Component:AddFunctionHelper( "hitBox", "rd:", "Returns the ENUM of hitGroup the ranger hit. Alternative to hitGroup. See wiki for list of ENUMs." )
+Component:AddFunctionHelper( "setHull", "rd:v,v", "Sets the mix and max hull size of a ranger." )
+Component:AddFunctionHelper( "end", "rd:", "Returns the end position of a ranger." )
+Component:AddFunctionHelper( "maxs", "rd:", "Returns the box max of a trace." )
+Component:AddFunctionHelper( "clear", "rd:", "Clears the ranger data of the ranger." )
+Component:AddFunctionHelper( "ignoreEntities", "rd:b", "Sets a ranger to ingore all entitys." )
+Component:AddFunctionHelper( "hitNoDraw", "rd:", "Returns true if the ranger hit a no-draw brush." )
+Component:AddFunctionHelper( "hitTexture", "rd:", "Returns the texture of surface hit by ranger." )
+Component:AddFunctionHelper( "defaultZero", "rd:b", "Sets the defaulty zero of a trace." )
+Component:AddFunctionHelper( "distance", "rd:", "Returns the distance from the renagers start to the rangers hit positions." )
+Component:AddFunctionHelper( "hitPhysics", "rd:", "Returns the index of the physics object (on the hit entity) hit by a ranger." )
+Component:AddFunctionHelper( "fraction", "rd:", "This is a number between 0 and 1. Ex. 0.01 = 1/100 of your ranger's max range." )
+Component:AddFunctionHelper( "hitNormal", "rd:", "Returns the normal of the surface that was hit by ranger." )
+Component:AddFunctionHelper( "hitWorld", "rd:", "Sets wether a ranger is allowed to hit the world." )
+Component:AddFunctionHelper( "fire", "rd:", "Generates the ranger data of the ranger." )
+Component:AddFunctionHelper( "fire", "rd:v,v,n", "Generates the ranger data of the ranger, using start position, direction and distance." )
+Component:AddFunctionHelper( "fire", "rd:v,v", "Generates the ranger data of the ranger, using start and end position." )
 Component:AddFunctionHelper( "ranger", "", "Creates a new ranger object." )
-Component:AddFunctionHelper( "ignoreWorld", "_rd:b", "Sets a ranger to ingore the world." )
-Component:AddFunctionHelper( "hitNoneWorld", "_rd:", "Returns true if the ranger hit a non-world surface (a prop, for example)." )
-Component:AddFunctionHelper( "hitSky", "_rd:", "Returns true if skybox was hit by ranger." )
+Component:AddFunctionHelper( "ignoreWorld", "rd:b", "Sets a ranger to ingore the world." )
+Component:AddFunctionHelper( "hitNoneWorld", "rd:", "Returns true if the ranger hit a non-world surface (a prop, for example)." )
+Component:AddFunctionHelper( "hitSky", "rd:", "Returns true if skybox was hit by ranger." )
+Component:AddFunctionHelper( "clearFilter", "rd:", "Clears the filter of the ranger." )
 
 /* --- --------------------------------------------------------------------------------
 	@: HTTP
@@ -569,6 +578,10 @@ Component:AddPreparedFunction( "httpPostRequest", "s,t,d,d", "", [[$http.Post( @
 		Context:Execute( "http fail callback", @value 4 )
 	end
 )]] )
+
+Component:AddFunctionHelper( "httpRequest", "s,d,d", "Sends HTTP Request, executing 1st delegate with string Body on success or 2nd delegate on failure." )
+Component:AddFunctionHelper( "httpPostRequest", "s,t,d,d", "Sends HTTP Request with data table, executing 1st delegate with string Body on success or 2nd delegate on failure." )
+
 
 /* --- --------------------------------------------------------------------------------
 	@: Physics Control Component
@@ -703,7 +716,7 @@ PropComponent:AddVMFunction( "canSpawn", "", "b", function( Context )
 	return true
 end )
 
-PropComponent:AddVMFunction( "spawnedProps", "", "a", function( Context )
+PropComponent:AddVMFunction( "spawnedProps", "", "ar", function( Context )
 	local Array = { __type = "e" }
 
 	if Props[Context] then
@@ -825,17 +838,19 @@ PropComponent:AddFunctionHelper( "parent", "e:e", "Sets the parent entity of E."
 PropComponent:AddFunctionHelper( "destroy", "e:", "Creates an array." )
 PropComponent:AddFunctionHelper( "setNotSolid", "e:b", "Changes the solidity of an entity." )
 PropComponent:AddFunctionHelper( "noSpawnEffect", "b", "Makes propcore use an effect when spawning props." )
-PropComponent:AddFunctionHelper( "enableGravity", "e:b", "Enable gravity on E." )
+PropComponent:AddFunctionHelper( "enableGravity", "e:b", "Enables gravity on entity E." )
 PropComponent:AddFunctionHelper( "destroy", "e:v,b", "Creates an array." )
-PropComponent:AddFunctionHelper( "freeze", "p:b", "Set B to true to freeze a physics object." )
-PropComponent:AddFunctionHelper( "freeze", "e:b", "Set B to true to freeze an entity." )
+PropComponent:AddFunctionHelper( "freeze", "p:b", "Sets B to true to freeze a physics object." )
+PropComponent:AddFunctionHelper( "freeze", "e:b", "Sets B to true to freeze an entity." )
 PropComponent:AddFunctionHelper( "unparent", "e:", "Unparents E from its parent." )
 PropComponent:AddFunctionHelper( "parent", "e:p", "Sets the parent physics object of E." )
 PropComponent:AddFunctionHelper( "canSpawn", "", "Returns true if a prop can be created." )
 PropComponent:AddFunctionHelper( "spawn", "s,b", "Creates and returns a new prop using S as its model, it will be frozen if B is true." )
 PropComponent:AddFunctionHelper( "remove", "e:", "Removes entity E." )
 PropComponent:AddFunctionHelper( "dealDamage", "e:n", "Deals damage to an entity." )
-PropComponent:AddFunctionHelper( "enableGravity", "p:b", "Enable gravity on physics object P." )
+PropComponent:AddFunctionHelper( "enableGravity", "p:b", "Enables gravity on physics object P." )
+PropComponent:AddFunctionHelper( "spawnedProps", "", "Returns an array of props spawned by this chip." )
+PropComponent:AddFunctionHelper( "setPhysProp", "e:s,b", "Enables/disables physical property S." )
 
 /* --- --------------------------------------------------------------------------------
 	@: VON support
@@ -853,6 +868,8 @@ Component:AddVMFunction( "serialize", "vr", "s", function(Context, Trace, Varian
 	return von.serialize( Serialized ) 
 end )
 
+Component:AddFunctionHelper( "serialize", "vr", "Serializes variant into string so it can be saved into file." )
+
 Component:AddVMFunction( "deserialize", "s", "vr", function(Context, Trace, VON)
 	local Ok, Obj = pcall(von.deserialize, VON)
 
@@ -864,6 +881,8 @@ Component:AddVMFunction( "deserialize", "s", "vr", function(Context, Trace, VON)
 
 	Context:Throw( Trace, "von", "failed to deserialize to valid object." )
 end )
+
+Component:AddFunctionHelper( "deserialize", "s", "Deserializes string into variant so it can be loaded back." )
 
 function Component:OnPostRegisterClass( Name, Class )
 
@@ -883,6 +902,8 @@ function Component:OnPostRegisterClass( Name, Class )
 			
 			Context:Throw( Trace, "von", "failed to serialize object." )
 		end )
+		
+		Component:AddFunctionHelper( "serialize", Class.Short, "Serializes " .. Class.Name .. " into string so it can be saved into file." )
 
 	end
 end

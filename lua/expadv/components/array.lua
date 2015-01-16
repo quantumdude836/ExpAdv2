@@ -72,7 +72,7 @@ Component:AddPreparedFunction("hasValue", "ar:vr", "b", [[
 	end
 end]], "@found")
 
-Component:AddPreparedFunction("hasValue", "ar:vr", "b", "Checks if the given value is in the given array.")
+Component:AddFunctionHelper("hasValue", "ar:vr", "Checks if the given value is in the given array.")
 
 			
 
@@ -199,7 +199,7 @@ function Component:OnPostRegisterClass( Name, Class )
 			end
 		end]], "@found")
 
-		Component:AddPreparedFunction("hasValue", "ar:" .. Class.Short, "b", "Checks if the given value is in the given array.")
+		Component:AddPreparedFunction("hasValue", "ar:" .. Class.Short, "Checks if the given value is in the given array.")
 	end
 
 /* ---	--------------------------------------------------------------------------------
