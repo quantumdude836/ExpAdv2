@@ -679,30 +679,25 @@ end
 ------------------------------------------------------------------------------------------------------
 
 function PANEL:DoValidate( Goto, Code )
-	if self.Validator_Instance and self.Validator_Instance.Running then
-		self.Validator_Instance = nil
-		self.ValidateButton:SetColor( Color( 0, 255, 0 ) )
-		self.ValidateButton:SetText( "Click to validate" )
-		return
+
+	Code = Code or self:GetCode( )
+
+	if !Code or Code == "" then
+		self:OnValidateError( false,"No code submited, compiler exited.")
+		return false
 	end
 
-	local Instance = EXPADV.CreateCompiler( Code or self:GetCode( ), { },
-		function( Error ) -- Instance.OnError
-			self:OnValidateError( Goto, Error )
-		end, function( Instance, Instruction ) -- Instance.OnSucess
-			self.ValidateButton:SetColor( Color( 0, 255, 0 ) )
-			self.ValidateButton:SetText( "Validation Successful!" )
-		end, function( Status ) -- Instance.OnUpdate
-			self.ValidateButton:SetColor( Color( 0, 0, 255 ) )
-			self.ValidateButton:SetText( "Validating: " .. Status .. "%" )
-		end )
+	local Status, Instance, Instruction = EXPADV.SolidCompile(Code, Files or {})
 
-	if !Instance then return end
+	if !Status then
+		self:OnValidateError(Goto, Instance)
+		return false
+	end
+	
+	self.ValidateButton:SetColor( Color( 0, 255, 0 ) )
+	self.ValidateButton:SetText( "Validation Successful!" )
 
-	self.Validator_Instance = Instance
-
-	self.ValidateButton:SetColor( Color( 0, 0, 255 ) )
-	self.ValidateButton:SetText( "Validating: 0%" )
+	return true
 end
 
 function PANEL:OnValidateError( Goto, Error )

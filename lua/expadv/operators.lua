@@ -858,7 +858,7 @@ function EXPADV.BuildLuaOperator( Operator )
 						VAPrepare[ #VAPrepare + 1 ] = Input.Prepare
 					end
 
-					if Instruction.Return ~= "..." and Input.Return ~= "_vr" then
+					if Input.Return ~= "..." and Input.Return ~= "_vr" then
 						Inline = string_format( "{%s,%q}", Inline, Input.Return or "NIL" )
 					end
 
@@ -868,7 +868,7 @@ function EXPADV.BuildLuaOperator( Operator )
 
 				-- Preare the varargs preperation statments.
 				if #VAPrepare >= 1 then
-					table_insert( Preperation, table_concat( VAPrepare, "\n" ) )
+					Preperation[#Preperation + 1] = table_concat( VAPrepare, "\n" )
 					-- OpPrepare = (OpPrepare or "") .. "\n" .. table_concat( VAPrepare, "\n" )
 				end
 
@@ -976,7 +976,9 @@ function EXPADV.BuildLuaOperator( Operator )
 
 		local PreperedLines = #Preperation >= 1 and table_concat( Preperation, "\n" ) or nil
 
-		return Compiler:NewLuaInstruction( Trace, Operator, PreperedLines, OpInline )
+		local Inst = Compiler:NewLuaInstruction( Trace, Operator, PreperedLines, OpInline )
+
+		return Inst
 	end
 
 end

@@ -77,6 +77,16 @@ for I=1,#@value 1.Data,1 do
 end
 ]],"@value 1")
 
+Component:AddPreparedFunction("hasValue", "t:vr", "b", [[
+	@define found = false
+	for k, v in pairs(@value 1) do
+		if(v == @value 2) then
+			@found = true
+			break
+		end
+	end
+end]], "@found")
+
 Component:AddFunctionHelper( "type", "t:n", "Returns the type of obect stored in table at index." )
 Component:AddFunctionHelper( "type", "t:s", "Returns the type of obect stored in table at index." )
 Component:AddFunctionHelper( "type", "t:e", "Returns the type of obect stored in table at index." )
@@ -90,6 +100,7 @@ Component:AddFunctionHelper( "exists", "t:s", "Returns true if obect stored in t
 Component:AddFunctionHelper( "exists", "t:e", "Returns true if obect stored in table at index is not void." )
 
 Component:AddFunctionHelper("connect", "t:t", "Connects one table with another table.")
+Component:AddFunctionHelper("hasValue", "t:vr", "Checks if the given value is in the given table.")
 
 /* --- --------------------------------------------------------------------------------
 	@: Unpack to vararg
@@ -131,44 +142,65 @@ Component:AddFunctionHelper( "concat", "t,s", "concatinates the array element of
 	@: Itorators
    --- */
 
-Component:AddPreparedFunction( "numberKeys", "t:", "ar", [[
-	@define Array = { __type = "n" }
-	for _, Index in pairs( @value 1.Look ) do
-		if @value 1.Types[Index] == "n" then
-			@Array[@Array + 1] = @value 1.Data[Index]
-		end
-	end
-]], "@Array" )
+Component:AddVMFunction( "numberKeys", "t:", "ar",
+	function(Context, Trace, Table)
+		local Array = {__type = "n"}
 
-Component:AddPreparedFunction( "stringKeys", "t:", "ar", [[
-	@define Array = { __type = "s" }
-	for _, Index in pairs( @value 1.Look ) do
-		if @value 1.Types[Index] == "s" then
-			@Array[@Array + 1] = @value 1.Data[Index]
+		for K, V in pairs(Table.Look) do
+			if type(K) == "number" then Array[#Array + 1] = K end
 		end
-	end
-]], "@Array" )
 
-Component:AddPreparedFunction( "entityKeys", "t:", "ar", [[
-	@define Array = { __type = "e" }
-	for _, Index in pairs( @value 1.Look ) do
-		if @value 1.Types[Index] == "e" then
-			@Array[@Array + 1] = @value 1.Data[Index]
-		end
-	end
-]], "@Array" )
+		return Array
+	end)
 
-// lol lets squeeze it in here
-Component:AddPreparedFunction("hasValue", "t:vr", "b", [[
-	@define found = false
-	for k, v in pairs(@value 1) do
-		if(v == @value 2) then
-			@found = true
-			break
+Component:AddVMFunction( "stringKeys", "t:", "ar",
+	function(Context, Trace, Table)
+		local Array = {__type = "s"}
+
+		for K, V in pairs(Table.Look) do
+			if type(K) == "string" then Array[#Array + 1] = K end
 		end
-	end
-end]], "@found")
-Component:AddFunctionHelper("hasValue", "t:vr", "Checks if the given value is in the given table.")
+
+		return Array
+	end)
+
+Component:AddVMFunction( "entityKeys", "t:", "ar",
+	function(Context, Trace, Table)
+		local Array = {__type = "s"}
+
+		for K, V in pairs(Table.Look) do
+			local T = type(K)
+			if T == "Entity" or T == "Player" then Array[#Array + 1] = K end
+		end
+
+		return Array
+	end)
+
+Component:AddVMFunction( "keys", "t:", "ar",
+	function(Context, Trace, Table)
+		local Array = {__type = "_vr"}
+
+		for K, V in pairs(Table.Look) do
+			local T = type(K)
+
+			if T == "number" then
+				Array[#Array + 1] = {K, "n"}
+			elseif T == "string" then
+				Array[#Array + 1] = {K, "s"}
+			elseif T == "Entity" then
+				Array[#Array + 1] = {K, "e"}
+			elseif T == "Player" then
+				Array[#Array + 1] = {K, "_ply"}
+			end
+		end
+
+		return Array
+	end)
+
+Component:AddFunctionHelper( "numberKeys", "t:", "Returns an array of number indexs on the table." )
+Component:AddFunctionHelper( "stringKeys", "t:", "Returns an array of string indexs on the table." )
+Component:AddFunctionHelper( "entityKeys", "t:", "Returns an array of entity indexs on the table." )
+Component:AddFunctionHelper( "keys", "t:", "Returns an array of indexs on the table as a variant." )
 
 /* --- --------------------------------------------------------------------------------
 	@: Variant Get Operators
@@ -444,8 +476,8 @@ function Component:OnPostRegisterClass( Name, Class )
 				Table.Size = Table.Size + 1
 			end )
 
-   		Component:AddFunctionHelper( "insert", "t:" .. Class.Short, string.format( "Inserts %s to the top of the tables array element.", Class.Short ) )
-   		Component:AddFunctionHelper( "insert", "t:n," .. Class.Short, string.format( "Inserts %s tables array element at index, pushing all higher index up.", Class.Short ) )
+   		Component:AddFunctionHelper( "insert", "t:" .. Class.Short, string.format( "Inserts %s to the top of the tables array element.", Class.Name ) )
+   		Component:AddFunctionHelper( "insert", "t:n," .. Class.Short, string.format( "Inserts %s tables array element at index, pushing all higher index up.", Class.Name ) )
 
 	/* --- --------------------------------------------------------------------------------
 		@: Hologram index support
@@ -455,6 +487,25 @@ function Component:OnPostRegisterClass( Name, Class )
 	Table:AddVMOperator( "set", "t,h," .. Class.Short, "", Set )
 	Table:AddVMOperator( "get", "t,h," .. Class.Short, Class.Short, Get )
 	
+	/* --- --------------------------------------------------------------------------------
+		@: Values
+	   --- */
+
+	Component:AddVMFunction( "get" .. Class.Name, "t:", "ar",
+		function(Context, Trace, Table)
+			local Array = { __type = Class.Short }
+
+			for _, Index in pairs( Table.Look ) do
+				if Table.Types[Index] == Class.Short then
+					Array[Array + 1] = Table.Data[Index]
+				end
+			end
+
+			return Array
+		end )
+
+	Component:AddFunctionHelper( "get" .. Class.Name, "t:", string.format( "Returns an array of all %s's stored on the table.", Class.Name ) )
+
 end
 
 /* --- --------------------------------------------------------------------------------

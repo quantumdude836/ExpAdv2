@@ -124,7 +124,6 @@ function Compiler:StartTokenizer( )
 end
 
 function Compiler:NextToken( )
-
 	if self.TokenPos >= 1 then
 		if !self.Tokens[ self.TokenPos ] then
 			self.Tokens[ self.TokenPos ] = self:GetNextToken( )
@@ -168,7 +167,6 @@ function Compiler:NextToken( )
 		self.PrepTokenName = nil
 		self.PrepTokenLine = nil
 	end
-
 end
 
 function Compiler:PopToken( )
@@ -216,8 +214,6 @@ function Compiler:StringToken( StrChar )
 	self:SkipChar( )
 
 	while self.Char do
-		if self.TimeMark and self.TimeMark < SysTime( ) then coroutine.yield( ) end
-		
 		if self.Char == "\n" then
 			
 			if StrChar == "'" then
