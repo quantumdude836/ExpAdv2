@@ -202,10 +202,10 @@ Component:AddVMFunction( "readStringZero", "wl:n", "s", ReadStringZero )
 	@: Helpers
    --- */
 
-Component:AddFunctionHelper( "hasOutput", "_wl:s", "Returns true if the linked component has an output of the specified name." )
-Component:AddFunctionHelper( "readCell", "_wl:n", "Reads from high speed memory on the linked component." )
-Component:AddFunctionHelper( "writeCell", "_wl:n,n", "Writes to high speed memory on the linked component." )
-Component:AddFunctionHelper( "outputType", "_wl:s", "Returns the wiretype of an output on the linked component." )
-Component:AddFunctionHelper( "hasInput", "_wl:s", "Returns true if the linked component has an input of the specified name." )
-Component:AddFunctionHelper( "isHiSpeed", "_wl:", "Returns true if the wirelinked object supports the HiSpeed interface. See wiremod wiki for more information." )
-Component:AddFunctionHelper( "inputType", "_wl:s", "Returns the wiretype of an input on the linked component." )
+Component:AddFunctionHelper( "hasOutput", "wl:s", "Returns true if the linked component has an output of the specified name." )
+Component:AddFunctionHelper( "readCell", "wl:n", "Reads from high speed memory on the linked component." )
+Component:AddFunctionHelper( "writeCell", "wl:n,n", "Writes to high speed memory on the linked component." )
+Component:AddFunctionHelper( "outputType", "wl:s", "Returns the wiretype of an output on the linked component." )
+Component:AddFunctionHelper( "hasInput", "wl:s", "Returns true if the linked component has an input of the specified name." )
+Component:AddFunctionHelper( "isHiSpeed", "wl:", "Returns true if the wirelinked object supports the HiSpeed interface. See wiremod wiki for more information." )
+Component:AddFunctionHelper( "inputType", "wl:s", "Returns the wiretype of an input on the linked component." )

@@ -168,7 +168,7 @@ Component:AddPreparedFunction("hasValue", "t:vr", "b", [[
 		end
 	end
 end]], "@found")
-Component:AddFunctionHelper("hasValue", "t:vr", "b", "Checks if the given value is in the given table.")
+Component:AddFunctionHelper("hasValue", "t:vr", "Checks if the given value is in the given table.")
 
 /* --- --------------------------------------------------------------------------------
 	@: Variant Get Operators

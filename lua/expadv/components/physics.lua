@@ -157,7 +157,7 @@ Component:AddInlineFunction( "massCenterWorld", "p:", "v", "(IsValid(@value 1) a
 Component:AddInlineFunction( "massCenter", "p:", "v", "(IsValid(@value 1) and ( @value 1:GetMassCenter( ) ) or Vector(0, 0, 0) )")
 
 Component:AddPreparedFunction( "enableDrag", "p:b", "", "if(IsValid(@value 1) && EXPADV.PPCheck(Context, @value 1)) then @value 1:EnableDrag(@value 2) end") -- Because why not :) ?
-Component:AddFunctionHelper( "setDrag", "p:b", "Enables/disables drag on an entity.")
+Component:AddFunctionHelper( "enableDrag", "p:b", "Enables/disables drag on an entity.")
 
 /* --- --------------------------------------------------------------------------------
 	@: ABB
@@ -198,7 +198,7 @@ Component:AddVMFunction( "applyOffsetForce", "p:v,v", "", function( Context, Tra
 	end
 end)
 
-Component:AddFunctionHelper( "applyForceOffset", "p:v,v", "Applies an offset vector of force on the given physics object.")
+Component:AddFunctionHelper( "applyOffsetForce", "p:v,v", "Applies an offset vector of force on the given physics object.")
 
 Component:AddVMFunction( "applyAngForce", "p:a", "",
 	function( Context, Trace, Phys, Angle )
@@ -294,3 +294,4 @@ Component:AddFunctionHelper( "forward", "p:", "Returns the forward vector of a p
 Component:AddFunctionHelper( "mass", "p:", "Returns the mass of a physics object." )
 Component:AddFunctionHelper( "aabbMax", "p:", "Return the axis-aligned maximum bounding box of a physics object." )
 Component:AddFunctionHelper( "up", "p:", "Returns the up vector of a physics object." )
+Component:AddFunctionHelper( "applyTorque", "p:v", "Applies a vector torque force to a physics object." )

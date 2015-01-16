@@ -61,7 +61,7 @@ Component:AddPreparedFunction( "yield", "", "", [[if !$coroutine.running( ) then
 Component:AddVMFunction( "sleep", "n", "",
 	function( Context, Trace, Value )
 		local CoRoutine = coroutine.running( )
-		if !CoRoutine then Context:Throw( Trace, "coroutine", "Used sleed( N ) outside coroutine." ) end
+		if !CoRoutine then Context:Throw( Trace, "coroutine", "Used sleep( N ) outside coroutine." ) end
 		
 		timer.Simple( Value, function( )
 			if !IsValid( Context.entity ) or !Context.entity:IsRunning( ) then return end
@@ -111,7 +111,7 @@ Component:AddVMFunction( "wait", "s", "",
 	function( Context, Trace, Value )
 		local CoRoutine = coroutine.running( )
 
-		if !CoRoutine then Context:Throw( Trace, "coroutine", "Used sleed( N ) outside coroutine." ) end
+		if !CoRoutine then Context:Throw( Trace, "coroutine", "Used wait( N ) outside coroutine." ) end
 		
 		if !EXPADV.Events[ Name ] then Context:Throw( Trace, "coroutine", "No such event " .. Name ) end
 
@@ -128,9 +128,11 @@ Component:AddVMFunction( "wait", "s", "",
     @: Helper
    --- */
    
-Component:AddFunctionHelper( "sleep", "n", "Pauses the current coroutine for N seconds." )   
+Component:AddFunctionHelper( "coroutine", "d", "Creates a coroutine of the given function." )
+Component:AddFunctionHelper( "sleep", "n", "Pauses the current coroutine for N seconds." )
 Component:AddFunctionHelper( "wait", "s", "Pauses the current coroutine until event S is called." )
 Component:AddFunctionHelper( "getCoroutine", "", "Returns the current coroutine or throws exception." )
 Component:AddFunctionHelper( "yield", "", "Yields the current coroutine to be resumed later." )
-Component:AddFunctionHelper( "resume", "_cr:", "Resumes/starts a coroutine." )
-Component:AddFunctionHelper( "status", "_cr:", "Returns the status of a coroutine." )
+Component:AddFunctionHelper( "resume", "cr:", "Resumes/starts a coroutine." )
+Component:AddFunctionHelper( "resume", "cr:...", "Resumes/start the given coroutine and passes the given params." )
+Component:AddFunctionHelper( "status", "cr:", "Returns the status of a coroutine." )
