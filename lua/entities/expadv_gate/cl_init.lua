@@ -59,7 +59,13 @@ local function PaintClient( X, Y, Entity )
     end
 
     draw.SimpleText( "Client:", "ExpAdv_OverlayFont", X + (50 * Mult), Y + (30 * Mult), TextColor, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
-        
+    
+    if CLState == EXPADV_STATE_COMPILE then
+        local Loading = string.format( "Loading: %s%%",  Entity:GetClientLoaded( ) or 0 )
+        draw.SimpleText( Loading, "ExpAdv_OverlayFont", X + (50 * Mult), Y + (50 * Mult), TextColor, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
+        return
+    end
+
     local Counter = Entity.ClientTickQuota or 0
     local Line = string.format( "Quota: %s, %i%%", Shorten( Counter ), (Counter / expadv_hardquota) * 100 )
     draw.SimpleText( Line, "ExpAdv_OverlayFont", X + (50 * Mult), Y + (40 * Mult), TextColor, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
@@ -84,7 +90,13 @@ local function PaintServer( X, Y, Entity )
     end
 
     draw.SimpleText( "Server:", "ExpAdv_OverlayFont", X + (150 * Mult), Y + (30 * Mult), TextColor, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
-            
+
+    if SVState == EXPADV_STATE_COMPILE then
+        local Loading = string.format( "Loading: %s%%",  Entity:GetServerLoaded( ) or 0 )
+        draw.SimpleText( Loading, "ExpAdv_OverlayFont", X + (150 * Mult), Y + (50 * Mult), TextColor, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
+        return
+    end
+
     local Counter = Entity:GetTickQuota( ) or 0
     local Line = string.format( "Quota: %s, %i%%", Shorten( Counter ), (Counter / expadv_hardquota) * 100 )
     draw.SimpleText( Line, "ExpAdv_OverlayFont", X + (150 * Mult), Y + (40 * Mult), TextColor, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )

@@ -1,6 +1,64 @@
 require("vnet") //About time I used this.
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Check Type
+   --- */
+
+local v2 = debug.getregistry().Vector2
+
+local function CheckValue(Type, Value)
+	local ty = type(Value)
+
+	if TYPE == "BOOL" then
+		if Value == nil then return false end
+		if ty ~= "boolean" then error("Tried to set ExpVar boolean to " .. ty .. ".", 3) end
+	end
+
+	if Type == "INT" then
+		if Value == nil then return false end
+		if ty ~= "number" then error("Tried to set ExpVar intiger to " .. ty .. ".", 3) end
+		if Value - math.floor(Value) ~= 0 then error("Tried to set ExpVar of intiger to a float.", 3) end
+	end
+
+	if TYPE == "FLOAT" then
+		if Value == nil then return false end
+		if ty ~= "number" then error("Tried to set ExpVar float to " .. ty .. ".", 3) end
+	end
+
+	if TYPE == "STRING" then
+		if Value == nil then return false end
+		if ty ~= "string" then error("Tried to set ExpVar string to " .. ty .. ".", 3) end
+	end
+
+	if TYPE == "ENTITY" then
+		if Value == nil then return false end
+		if ty ~= "Entity" and ty ~= "Player" then error("Tried to set ExpVar entity to " .. ty .. ".", 3) end
+	end
+
+	if TYPE == "VECTOR" then
+		if Value == nil then return false end
+		if ty ~= "Vector" then error("Tried to set ExpVar vector to " .. ty .. ".", 3) end
+	end
+
+	if TYPE == "VECTOR2" then
+		if Value == nil then return false end
+		if ty ~= "table" and getmetatable(Value) ~= v2 then error("Tried to set ExpVar vector2 to " .. ty .. ".", 3) end
+	end
+
+	if TYPE == "ANGLE" then
+		if Value == nil then return false end
+		if ty ~= "Angle" then error("Tried to set ExpVar angle to " .. ty .. ".", 3) end
+	end
+
+	if TYPE == "TABLE" then
+		if Value == nil then return false end
+		if ty ~= "table" then error("Tried to set ExpVar table to " .. ty .. ".", 3) end
+	end
+
+	return true
+end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: ExpVars
    --- */
 
@@ -45,6 +103,8 @@ function ENT:SetExpVar(Type, ID, Value, Force)
 
 	if Values[ID] == Value and !Force then return false end //This has not changed.
 
+	CheckValue(Type, Value)
+	
 	Values[ID] = Value
 
 	if CLIENT then return true end //Client doesnt sync.

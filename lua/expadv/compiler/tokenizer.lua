@@ -214,6 +214,9 @@ function Compiler:StringToken( StrChar )
 	self:SkipChar( )
 
 	while self.Char do
+		
+		self:CheckStatus( )
+
 		if self.Char == "\n" then
 			
 			if StrChar == "'" then

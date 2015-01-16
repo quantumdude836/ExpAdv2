@@ -5,7 +5,7 @@
 include( "shared.lua" )
 AddCSLuaFile( "shared.lua" )
 AddCSLuaFile( "cl_init.lua" )
-AddCSLuaFile( "overlay.lua" )
+//AddCSLuaFile( "overlay.lua" )
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Print Outs
