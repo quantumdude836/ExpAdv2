@@ -803,7 +803,8 @@ function EXPADV.UnqueueCompiler(self)
 	if Pos then table.remove(Queue, Pos) end
 end
 
-hook.Add("Tick", "expadv.compiler.queue", function()
+
+function EXPADV.StepCompilerQueue()
 	local count = #Queue
 	if count == 0 then return end
 	if count > 10 then count = 10 end
@@ -815,13 +816,6 @@ hook.Add("Tick", "expadv.compiler.queue", function()
 	for i = 1, count do
 		local self = Queue[i]
 
-		if !self.Resume then
-			finished[#finished + 1] = i
-			MsgN("Skipped Compiler Thread " .. i)
-			for k,v in pairs(self) do MsgN(k, " = ", v) end
-			continue
-		end
-		
 		local isDone, extraTime = self:Resume(nextSpeed)
 
 		if isDone then finished[#finished + 1] = i end
@@ -830,6 +824,14 @@ hook.Add("Tick", "expadv.compiler.queue", function()
 	end
 
 	for i = 1, #finished do table.remove(Queue, finished[i]) end
+end
+
+hook.Add("Tick", "expadv.compiler.queue", function()
+	local Ok, Error = pcall(EXPADV.StepCompilerQueue)
+
+	if Ok then return end
+
+	EXPADV.Msg("ExpAdv2: Compiler queue failed, " .. Error)
 end)
 
 /* --- --------------------------------------------------------------------------------

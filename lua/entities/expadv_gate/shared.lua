@@ -83,7 +83,7 @@ function ENT:SetupDataTables( )
 	self:AddExpVar( "FLOAT", 1, "StopWatch" )
 	self:AddExpVar( "FLOAT", 2, "Average" )
 	self:AddExpVar( "FLOAT", 3, "ServerState" )
-	self:AddExpVar( "FLOAT", 3, "ServerLoaded" )
+	self:AddExpVar( "FLOAT", 4, "ServerLoaded" )
 
 	self:AddExpVar( "STRING", 0, "GateName" )
 	self:AddExpVar( "ENTITY", 0, "LinkedPod" )
