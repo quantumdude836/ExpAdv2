@@ -165,6 +165,7 @@ Component:AddFunctionHelper( "rotateAroundAxis", "v:v,n", "Rotates a vector arou
    --- */
 
 Component:AddInlineFunction( "angle", "v:", "a", "@value 1:Angle( )" )
+Component:AddInlineOperator( "angle", "v", "a", "@value 1:Angle( )" )
 Component:AddInlineFunction( "angleEx", "v:v", "a", "@value 1:AngleEx( @value 2 )" )
 
 Component:AddFunctionHelper( "angle", "v:", "Returns an angle representing the normal of the vector." )

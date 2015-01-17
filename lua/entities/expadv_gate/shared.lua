@@ -62,7 +62,12 @@ end
 
 function ENT:OnRemove()
 	if self.SlowCompiler then EXPADV.UnqueueCompiler(self.SlowCompiler) end
-	self.BaseClass.OnRemove(self)
+	
+	hook.Remove( "PlayerInitialSpawn", self )
+
+	if !self:IsRunning( ) then return end
+	
+	self.Context:ShutDown( )
 end
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Effects

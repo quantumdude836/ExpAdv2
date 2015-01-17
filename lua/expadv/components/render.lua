@@ -299,7 +299,7 @@ EXPADV.SharedOperators( )
 Component:AddPreparedFunction( "getScreenCursor", "ply:", "v2", [[
 if IsValid( Context.entity ) and Context.entity.Screen then
 	@define value = Context.entity:GetCursor( @value 1 )
-]], "(@value or Vector2(0,0))" )
+end]], "(@value or Vector2(0,0))" )
 
 Component:AddFunctionHelper( "getScreenCursor", "ply:", "Returns the cursor position of a player, for a screen." )
 

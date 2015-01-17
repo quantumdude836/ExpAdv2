@@ -4,6 +4,7 @@
 
 include( "shared.lua" )
 include( "vars.lua" )
+require("vnet")
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: [vNet] Receive Code
@@ -20,7 +21,6 @@ function ENT:ReceivePackage( Package )
 
 	-- self:SetGateName( Package:String( ) )
 end
-
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Render
    --- */
@@ -47,5 +47,7 @@ vnet.Watch( "expadv.cl_script", function( Package )
 
 	ExpAdv:ReceivePackage( Package )
 end, vnet.OPTION_WATCH_OVERRIDE )
+
+
 
 

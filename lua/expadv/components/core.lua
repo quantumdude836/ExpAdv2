@@ -58,6 +58,8 @@ EXPADV.AddInlineOperator( nil, "&&", "b,b", "b", "(@value 1 and @value 2)" )
 
 EXPADV.AddInlineOperator( nil, "string", "b", "s", "(@value 1 and \"true\" or \"false\")" )
 
+EXPADV.AddInlineOperator( nil, "number", "b", "n", "(@value 1 and 1 or 0)" )
+
 EXPADV.AddInlineOperator( nil, "delegate", "f", "d", "@value 1" )
 
 EXPADV.AddInlineOperator( nil, "function", "d", "f", "@value 1" )
@@ -120,6 +122,7 @@ EXPADV.AddGeneratedFunction( nil, "invoke", "cls,d,...", "",
 /*EXPADV.AddFunctionHelper("invoke", "cls,d,...", "Executes the given delegate passing given params and returning the value (return type class, the function, params)." )
 	Not working :/
 */
+
 /* --- -------------------------------------------------------------------------------
 	@: Loops
    --- */

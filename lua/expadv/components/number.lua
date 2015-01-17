@@ -136,7 +136,6 @@ end )
 Component:AddInlineOperator( "string", "n", "s", "tostring(@value 1)" )
 Component:AddInlineOperator( "boolean", "n", "b", "(@value 1 > 0)" )
 Component:AddInlineOperator( "number", "s", "n", "($tonumber(@value 1) or 0)" )
-Component:AddInlineOperator( "int", "s", "n", "($tonumber(@value 1) or 0)" )
 
 /* --- --------------------------------------------------------------------------------
     @: Max Value

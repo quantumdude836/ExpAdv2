@@ -59,6 +59,7 @@ function ENT:ReceivePackage( Package )
 end
 
 function ENT:SendClientPackage( Player, Root, Files )
+	MsgN("Sending package from ", self, " to ", Player)
 	local Package = vnet.CreatePacket( "expadv.cl_script" )
 
 	Package:Short( self:EntIndex( ) )

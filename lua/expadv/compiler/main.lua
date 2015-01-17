@@ -746,11 +746,9 @@ function EXPADV.NewSoftCompiler(Script, Files)
 	return self
 end
 
-function SoftCompiler:Resume(MilliSeconds)
+function SoftCompiler:Resume(Seconds)
 	if self.IsDone then return true, 0 end -- Shouldn't happen
-	if MilliSeconds <= 0 then return false, 0 end
-
-	local Seconds = 1 / (MilliSeconds * 1000000)
+	if Seconds >= 1 then return false, 0 end
 
 	local Time, Hault = 0, false
 
@@ -784,10 +782,15 @@ local Queue = {}
 Compiler.Compiler_Queue = Queue
 
 function EXPADV.QueueCompiler(self, Pos)
-	if self.IsDone then return end
+	if self.IsDone then return MsgN("Already done!") end
 	
-	if Pos then table.insert(Queue, Pos, self)
-	else Queue[#Queue + 1] = self end
+	if Pos then
+		table.insert(Queue, Pos, self)
+		-- MsgN("Added ", Pos, " to queue manually")
+	else
+		Queue[#Queue + 1] = self
+		-- MsgN("Added ", #Queue, " to queue")
+	end
 end
 
 function EXPADV.UnqueueCompiler(self)
@@ -800,7 +803,10 @@ function EXPADV.UnqueueCompiler(self)
 		end
 	end
 	
-	if Pos then table.remove(Queue, Pos) end
+	if Pos then
+		table.remove(Queue, Pos)
+		-- MsgN("Removed ", Pos, " from queue manually")
+	end
 end
 
 
@@ -810,8 +816,10 @@ function EXPADV.StepCompilerQueue()
 	if count > 10 then count = 10 end
 
 	local finished = {}
-	local speed = ((engine.TickInterval() * 0.4) / count) * 1000000
+	local speed = ((engine.TickInterval() * 0.4) / count)
 	local nextSpeed = speed -- Allows us to make the most of this :D
+
+	-- MsgN("processing ", count, " out of ", #Queue)
 
 	for i = 1, count do
 		local self = Queue[i]
@@ -823,7 +831,12 @@ function EXPADV.StepCompilerQueue()
 		nextSpeed = speed + extraTime
 	end
 
-	for i = 1, #finished do table.remove(Queue, finished[i]) end
+	for i = 1, #finished do
+		-- MsgN("Removed ", finished[i], " from queue")
+		table.remove(Queue, finished[i])
+	end
+	
+	-- MsgN("Queue is now ", #Queue, " in size")
 end
 
 hook.Add("Tick", "expadv.compiler.queue", function()

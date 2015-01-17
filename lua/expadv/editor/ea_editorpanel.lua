@@ -38,6 +38,18 @@ function PANEL:Init( )
 	self:SetSize( cookie.GetNumber( "eaeditor_w", math.min( 1000, ScrW( ) * 0.8 ) ), cookie.GetNumber( "eaeditor_h", math.min( 800, ScrH( ) * 0.8 ) ) )
 	self:SetPos( cookie.GetNumber( "eaeditor_x", ScrW( ) / 2 - self:GetWide( ) / 2 ), cookie.GetNumber( "eaeditor_y", ScrH( ) / 2 - self:GetTall( ) / 2 ) )
 
+	self.ExitSave = self:Add( "EA_ImageButton" )
+	self.ExitSave:SetMaterial(Material("fugue/disk.png"))
+	self.ExitSave:SetTooltip("Save and close.")
+	self.ExitSave.Think = function()
+		self.ExitSave:SetPos(self:GetWide( ) - (self.ExitSave:GetWide( ) * 2) - 5, 5)
+	end
+
+	self.ExitSave.DoClick = function()
+		self:SaveFile(true) 
+		self:Close( )
+	end
+
 	self.TabHolder = self:Add( "DPropertySheet" )
 	self.TabHolder:Dock( FILL )
 	self.TabHolder:DockMargin( 5, 5, 5, 5 )
