@@ -222,7 +222,7 @@ function TOOL:LeftClick( Trace )
 	self:GetOwner( ):AddCleanup( "expadv", ExpAdv )
 
 	net.Start( "expadv.request" )
-	net.WriteUInt( ExpAdv:EntIndex( ), 16 )
+		net.WriteUInt( ExpAdv:EntIndex( ), 16 )
 	net.Send( self:GetOwner( ) )
 
 	return true
@@ -248,6 +248,7 @@ function TOOL:RightClick( Trace )
 		net.Send( self:GetOwner( ) )
 		return true
 	elseif self:GetStage() == 1 and Trace.Entity.ExpAdv then
+		self:GetOwner():PrintMessage(HUD_PRINTTALK, "Pod linked gate.")
 		Trace.Entity:LinkPod(self.TargetPod)
 		self:SetStage(0)
 		return true
