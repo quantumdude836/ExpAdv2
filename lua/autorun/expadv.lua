@@ -27,7 +27,6 @@ AddCSLuaFile( "expadv/compiler/instructions.lua" )
 AddCSLuaFile( "expadv/api/gcompute.lua" )
 
 AddCSLuaFile( "includes/modules/von.lua" )
-AddCSLuaFile( "includes/modules/vnet.lua" )
 AddCSLuaFile( "includes/modules/vector2.lua" )
 AddCSLuaFile( "includes/modules/matrix2.lua" )
 AddCSLuaFile( "includes/modules/quaternion.lua" )

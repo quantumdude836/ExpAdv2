@@ -1,7 +1,5 @@
-require("vnet") //About time I used this.
-
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
-	@: Check Type
+	@: ExpAdv Network Vars
    --- */
 
 local v2 = debug.getregistry().Vector2
@@ -60,6 +58,7 @@ end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: ExpVars
+	@: Yes, most of the types avalible might never be used, but its better then not having the option.
    --- */
 
 local Updated = false
@@ -110,9 +109,16 @@ function ENT:SetExpVar(Type, ID, Value, Force)
 	if CLIENT then return true end //Client doesnt sync.
 
 	local EntIdx = self:EntIndex()
-	SyncVars[EntIdx] = SyncVars[EntIdx] or default()
+	local SyncData = SyncVars[EntIdx]
 
-	SyncVars[EntIdx][Type][ID] = Value
+	if !SyncData then
+		SyncData = {}
+		SyncVars[EntIdx] = SyncData
+	end
+
+	if !SyncData[Type] then SyncData[Type] = {} end
+
+	SyncData[Type][ID] = Value
 
 	Updated = true
 
@@ -133,22 +139,150 @@ end
 if SERVER then
 	util.AddNetworkString("expadv.vars")
 
+	local function writeVars(vars)
+		for eid, types in pairs(vars) do
+			net.WriteUInt(eid, 16)
+
+			if !types.BOOLEAN then
+				net.WriteBit(false)
+			else
+				net.WriteBit(true)
+
+				for id, val in pairs(types.BOOLEAN) do
+					net.WriteUInt(id, 8)
+					net.WriteBit(val)
+				end 
+
+				net.WriteUInt(0, 8)
+			end
+			
+			if !types.FLOAT then
+				net.WriteBit(false)
+			else
+				net.WriteBit(true)
+
+				for id, val in pairs(types.FLOAT) do
+
+					net.WriteUInt(id, 8)
+					net.WriteFloat(val)
+				end 
+
+				net.WriteUInt(0, 8)
+			end
+
+			if !types.INT then
+				net.WriteBit(false)
+			else
+				net.WriteBit(true)
+
+				for id, val in pairs(types.INT) do
+
+					net.WriteUInt(id, 8)
+					net.WriteInt(val, 32)
+				end 
+
+				net.WriteUInt(0, 8)
+			end
+
+			if !types.STRING then
+				net.WriteBit(false)
+			else
+				net.WriteBit(true)
+
+				for id, val in pairs(types.STRING) do
+					net.WriteUInt(id, 8)
+					net.WriteString(val)
+				end 
+
+				net.WriteUInt(0, 8)
+			end
+
+			if !types.ENTITY then
+				net.WriteBit(false)
+			else
+				net.WriteBit(true)
+
+				for id, val in pairs(types.ENTITY) do
+					net.WriteUInt(id, 8)
+					net.WriteUInt(val:EntIndex(), 16)
+				end 
+
+				net.WriteUInt(0, 8)
+			end
+
+			if !types.VECTOR then
+				net.WriteBit(false)
+			else
+				net.WriteBit(true)
+
+				for id, val in pairs(types.VECTOR) do
+					net.WriteUInt(id, 8)
+					net.WriteVector(val)
+				end 
+
+				net.WriteUInt(0, 8)
+			end
+
+			if !types.VECTOR2 then
+				net.WriteBit(false)
+			else
+				net.WriteBit(true)
+
+				for id, val in pairs(types.VECTOR2) do
+					net.WriteUInt(id, 8)
+					net.WriteFloat(val.x)
+					net.WriteFloat(val.y)
+				end 
+
+				net.WriteUInt(0, 8)
+			end
+
+			if !types.ANGLE then
+				net.WriteBit(false)
+			else
+				net.WriteBit(true)
+
+				for id, val in pairs(types.ANGLE) do
+					net.WriteUInt(id, 8)
+					net.WriteAngle(val)
+				end 
+
+				net.WriteUInt(0, 8)
+			end
+
+			if !types.TABLE then
+				net.WriteBit(false)
+			else
+				net.WriteBit(true)
+
+				for id, val in pairs(types.TABLE) do
+					net.WriteUInt(id, 8)
+					net.WriteTable(val)
+				end 
+
+				net.WriteUInt(0, 8)
+			end
+		end
+
+		net.WriteUInt(0, 16)
+	end
+
 	hook.Add("Think", "expadv.vars", function()
-		if !Updated then return end
-		local Package = vnet.CreatePacket( "expadv.vars" )
-		Package:Bool( false )
-		Package:Table( SyncVars )
-		Package:Broadcast( )
-		Updated = false
-		SyncVars = {}
+		if Updated then
+			net.Start("expadv.vars")
+				net.WriteBit(false)
+				writeVars(SyncVars)
+			net.Broadcast()
+
+			SyncVars, Updated = {}, false
+		end
 	end)
 
-	hook.Add("PlayerInitalSpawn", "expadv.vars", function(Player)
-		local Package = vnet.CreatePacket( "expadv.vars" )
-		Package:Bool( true )
-		Package:Table( ExpVars )
-		Package:AddTargets( { Player } )
-		Package:Send( )
+	hook.Add("PlayerInitalSpawn", "expadv.vars", function(player)
+		net.Start("expadv.vars")
+			net.WriteBit(true)
+			writeVars(ExpVars)
+		net.Send(player)
 	end)
 end
 
@@ -157,25 +291,175 @@ end
    --- */
 
 if CLIENT then
-	vnet.Watch( "expadv.vars", function( Package )
-			if Package:Bool( ) then
-				ExpVars = Package:Table()
-			else
-				for ID, Vars in pairs(Package:Table()) do
-					local ent = Entity(ID)
 
-					for Type, Values in pairs(Vars) do
-						for id, Value in pairs(Values) do
-							if IsValid(ent) and ent.__ExpVars then
-								ent:SetExpVar(Type, id, Value)
-							else
-								ExpVars[ID] = ExpVars[ID] or default()
-								ExpVars[ID][Type][id] = Value
-							end
-						end
-					end
+	local function resetVars()
+		if ExpVars then
+			for eid, _ in pairs(ExpVars) do
+				local entity = Entity(eid)
+
+				if IsValid(entity) then
+					entity.__ExpVars = nil
 				end
 			end
-		end, vnet.OPTION_WATCH_OVERRIDE )
+		end
 
+		ExpVars = { }
+	end
+	
+	net.Receive( "expadv.vars", function(len)
+		if net.ReadBit() == 1 then resetVars() end
+
+		local eid = net.ReadUInt(16)
+		
+		while eid > 0 do
+			entity = Entity(eid)
+			if !ExpVars[eid] then ExpVars[eid] = default() end
+
+			if net.ReadBit() == 1 then
+				local id = net.ReadUInt(8)
+
+				while id > 0 do
+					local val = net.ReadBit() == 1
+
+					if !entity or !entity:IsValid() or !entity.__ExpVars then
+						ExpVars[eid].BOOLEAN[id] = val
+					else
+						entity:SetExpVar("BOOLEAN", id, val)
+					end
+
+					id = net.ReadUInt(8)
+				end
+			end
+			
+			if net.ReadBit() == 1 then
+				local id = net.ReadUInt(8)
+
+				while id > 0 do
+					local val = net.ReadFloat()
+
+					if !entity or !entity:IsValid() or !entity.__ExpVars then
+						ExpVars[eid].FLOAT[id] = val
+					else
+						entity:SetExpVar("FLOAT", id, val)
+					end
+
+					id = net.ReadUInt(8)
+				end
+			end
+			
+			if net.ReadBit() == 1 then
+				local id = net.ReadUInt(8)
+
+				while id > 0 do
+					local val = net.ReadInt(32)
+
+					if !entity or !entity:IsValid() or !entity.__ExpVars then
+						ExpVars[eid].INT[id] = val
+					else
+						entity:SetExpVar("INT", id, val)
+					end
+
+					id = net.ReadUInt(8)
+				end
+			end
+			
+			if net.ReadBit() == 1 then
+				local id = net.ReadUInt(8)
+
+				while id > 0 do
+					local val = net.ReadString()
+
+					if !entity or !entity:IsValid() or !entity.__ExpVars then
+						ExpVars[eid].STRING[id] = val
+					else
+						entity:SetExpVar("STRING", id, val)
+					end
+
+					id = net.ReadUInt(8)
+				end
+			end
+			
+			if net.ReadBit() == 1 then
+				local id = net.ReadUInt(8)
+
+				while id > 0 do
+					local val = Entity(net.ReadUInt(16))
+
+					if !entity or !entity:IsValid() or !entity.__ExpVars then
+						ExpVars[eid].ENTITY[id] = val
+					else
+						entity:SetExpVar("ENTITY", id, val)
+					end
+
+					id = net.ReadUInt(8)
+				end
+			end
+			
+			if net.ReadBit() == 1 then
+				local id = net.ReadUInt(8)
+
+				while id > 0 do
+					local val = net.ReadVector()
+
+					if !entity or !entity:IsValid() or !entity.__ExpVars then
+						ExpVars[eid].VECTOR[id] = val
+					else
+						entity:SetExpVar("VECTOR", id, val)
+					end
+
+					id = net.ReadUInt(8)
+				end
+			end
+			
+			if net.ReadBit() == 1 then
+				local id = net.ReadUInt(8)
+
+				while id > 0 do
+					local val = Vector2(net.ReadFloat(), net.ReadFloat())
+
+					if !entity or !entity:IsValid() or !entity.__ExpVars then
+						ExpVars[eid].VECTOR2[id] = val
+					else
+						entity:SetExpVar("VECTOR2", id, val)
+					end
+
+					id = net.ReadUInt(8)
+				end
+			end
+			
+			if net.ReadBit() == 1 then
+				local id = net.ReadUInt(8)
+
+				while id > 0 do
+					local val = net.ReadAngle()
+
+					if !entity or !entity:IsValid() or !entity.__ExpVars then
+						ExpVars[eid].ANGLE[id] = val
+					else
+						entity:SetExpVar("ANGLE", id, val)
+					end
+
+					id = net.ReadUInt(8)
+				end
+			end
+			
+			if net.ReadBit() == 1 then
+				local id = net.ReadUInt(8)
+
+				while id > 0 do
+					local val = net.ReadTable()
+
+					if !entity or !entity:IsValid() or !entity.__ExpVars then
+						ExpVars[eid].TABLE[id] = val
+					else
+						entity:SetExpVar("TABLE", id, val)
+					end
+
+					id = net.ReadUInt(8)
+				end
+			end
+
+			eid = net.ReadUInt(16)
+		end
+	end)
 end

@@ -2,8 +2,6 @@
 	@: Files
    ---	*/
 
-require("vnet")
-
 file.CreateDir( "expadv/files" )
 file.CreateDir( "expadv/userfiles" )
 

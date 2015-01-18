@@ -1206,11 +1206,11 @@ function ENT:ApplyHoloInfo( )
 
 		for I, BoneData in pairs( self.BONES ) do
 				
-			self:ManipulateBoneJiggle( I - 1, Bone.JIGGLE and 1 or 0 )
+			self:ManipulateBoneJiggle( I - 1, BoneData.JIGGLE and 1 or 0 )
 
-			self:ManipulateBonePosition( I - 1, Vector( Bone.POSX, Bone.POSY, Bone.POSZ ) )
+			self:ManipulateBonePosition( I - 1, Vector( BoneData.POSX, BoneData.POSY, BoneData.POSZ ) )
 
-			self:ManipulateBoneAngles( I - 1, Angle( Bone.ANGLEP, Bone.ANGLEY, Bone.ANGLEY ) )
+			self:ManipulateBoneAngles( I - 1, Angle( BoneData.ANGLEP, BoneData.ANGLEY, BoneData.ANGLEY ) )
 		end
 	end
 
