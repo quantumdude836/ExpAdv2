@@ -63,7 +63,9 @@ if SERVER then return end
 	@: Features
    --- */
 
-   local DB = { }
+require("von")
+
+local DB = { }
 
 hook.Add( "Expadv.PostLoadCore", "expadv.features", function( )
 	if file.Exists("expadv/features.txt", "DATA") then

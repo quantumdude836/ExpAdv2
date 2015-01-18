@@ -36,7 +36,7 @@ function ENT:Setup(Pos, Ang, File, Dir)
 	end
 	
 	self.SentPath = File
-	self:LoadCodeFromPackage(file.Read(File, Dir), {})
+	self:ReceiveScript(file.Read(File, Dir), File)
 
 	return self.Context
 end

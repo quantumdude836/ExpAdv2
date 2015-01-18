@@ -4,6 +4,7 @@
 
 EXPADV = { }
 MsgN( "Expression advanced Two - Installing..." )
+include( "net.lua" )
 
 /* --- --------------------------------------------------------------------------------
 	@: Debugging Stuff
@@ -498,40 +499,6 @@ function EXPADV.CallHook( Name, ... )
 end
 
 /* --- --------------------------------------------------------------------------------
-	@: We need to send the config file to players.
-   --- */
-
-require( "vnet" )
-
-if SERVER then
-
-	util.AddNetworkString( "expadv.config" )
-
-	function EXPADV.SendConfig( Player, Load )
-		if !IsValid( Player ) and #player.GetAll( ) == 0 then return end
-
-		local Package = vnet.CreatePacket( "expadv.config" )
-
-		Package:Table( EXPADV.Config )
-
-		Package:Bool( Load or false )
-
-		if Player then
-			Package:AddTargets( { Player } )
-			Package:Send( )
-		else
-			Package:Broadcast( )
-		end
-	end
-else
-	vnet.Watch( "expadv.config", function( Package )
-		EXPADV.Config = Package:Table( )
-
-		if Package:Bool( ) then EXPADV.LoadCore( ) end
-
-	end, vnet.OPTION_WATCH_OVERRIDE )
-end
-/* --- --------------------------------------------------------------------------------
 	@: Convenience hooks.
    --- */
    
@@ -542,89 +509,6 @@ hook.Add( "Think", "expadv.Hook", function( )
 		EXPADV.Msg( "ExpAdv2 - Error in main Think hook: ", Msg )
 	end
 end )
-
-/* --- --------------------------------------------------------------------------------
-	@: Code upload
-   --- */
-
-require( "vnet" )
-
-if SERVER then
-	util.AddNetworkString( "expadv.request" )
-
-	util.AddNetworkString( "expadv.upload" )
-
-	util.AddNetworkString( "expadv.download" )
-end
-
-function EXPADV.SendCode( ID, Root, Files, Name )
-	local Package = vnet.CreatePacket( "expadv.upload" )
-
-	Package:Int( ID )
-
-	Package:Entity( LocalPlayer( ) )
-
-	Package:String( Root )
-
-	Package:Table( Files )
-
-	Package:String( Name )
-
-	Package:Send( )
-end
-
-net.Receive( "expadv.request", function( )
-	local ID = net.ReadUInt( 16 )
-
-	local Root = EXPADV.Editor.GetCode( )
-
-	if !Root or Root == "" then return end
-
-	local Name = EXPADV.Editor.GetInstance( ):GetName( )
-
-	EXPADV.SendCode( ID, Root, { }, Name )
-
-	local ExpAdv = Entity( ID )
-
-	if !IsValid( ExpAdv ) or !ExpAdv.ExpAdv then return end
-
-	local Editor = EXPADV.Editor.GetInstance( )
-	Editor.GateTabs[ExpAdv] = Editor.TabHolder:GetActiveTab( )
-end )
-
-net.Receive( "expadv.download", function( )
-	local ExpAdv = Entity( net.ReadUInt( 16 ) )
-	local Title = net.ReadString( )
-
-	if IsValid( ExpAdv ) and ExpAdv.ExpAdv and ExpAdv.root and ExpAdv.root ~= "" then
-		local Editor = EXPADV.Editor.GetInstance( )
-		local Tab = Editor.GateTabs[ExpAdv]
-
-		if !Tab then
-			Editor:NewTab( ExpAdv.root, nil, Title )
-			Tab = Editor.TabHolder:GetActiveTab( )
-			Tab.Entity = ExpAdv
-			Editor.GateTabs[ExpAdv] = Tab
-		else
-			Editor.TabHolder:SetActiveTab( Tab )
-		end
-
-		Editor:SetVisible( true )
-		Editor:MakePopup( )
-		Tab:GetPanel( ):SetCode( ExpAdv.root )
-	end
-end )
-
-vnet.Watch( "expadv.upload", function( Package )
-	local Expadv = Entity( Package:Int( ) )
-	local Player = Package:Entity( )
-	
-	if !IsValid( Expadv ) or !Expadv.ReceivePackage then return end
-	
-	-- TODO: Owner check.
-	
-	Expadv:ReceivePackage( Package )
-end, vnet.OPTION_WATCH_OVERRIDE )
 
 /* --- --------------------------------------------------------------------------------
 	@: Quota Managment
@@ -647,55 +531,8 @@ local function update( )
 end
 
 update()
+
 timer.Create( "expadv.quota", 1, 0, update )
-/* --- --------------------------------------------------------------------------------
-	@: Transmit Notice.
-   --- */
-
-if SERVER then
-	util.AddNetworkString( "expadv.notify" )
-
-	function EXPADV.Notifi( Player, Message, Type, Duration )
-		net.Start("expadv.notify")
-			net.WriteString( Message )
-			net.WriteUInt( Type or 0, 8 )
-			net.WriteFloat( Duration )
-		if Player then net.Send( Player ) else net.Broadcast( ) end
-	end
-
-	net.Receive( "expadv.notify", function(  )
-		local Player = net.ReadEntity( )
-		if !IsValid( Player ) then return end
-		EXPADV.Notifi( Player ,net.ReadString( ), net.ReadUInt( 8 ), net.ReadFloat( ) )
-	end)
-
-end
-
-if CLIENT then
-	net.Receive( "expadv.notify", function( )
-		local Msg = net.ReadString( )
-		if !Msg or Msg == "" then return end
-
-		GAMEMODE:AddNotify( Msg, net.ReadUInt( 8 ), net.ReadFloat( ) )
-		MsgN( Msg )
-	end)
-
-	function EXPADV.Notifi( Player, Message, Type, Duration )
-		if !IsValid( Player ) or !Message or Message == "" then return end
-
-		if Player == LocalPlayer( ) then
-			GAMEMODE:AddNotify( Message, Type, Duration )
-			return MsgN( Message )
-		end
-
-		net.Start("expadv.notify")
-			net.WriteEntity( Player )
-			net.WriteString( Message )
-			net.WriteUInt( Type or 0, 8 )
-			net.WriteFloat( Duration )
-		net.SendToServer( )
-	end
-end
 
 /* --- --------------------------------------------------------------------------------
 	@: Editor Animation.

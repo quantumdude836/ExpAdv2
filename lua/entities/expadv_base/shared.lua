@@ -20,13 +20,7 @@ function meta:IsExpAdv( ) return false end
 
 function ENT:IsExpAdv( ) return true end
 
-AccessorFunc( ENT, "GateName", "GateName", FORCE_STRING )
-
-/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
-	@: VNET
-   --- */
-
-require( "vnet" ) -- Nope, You may not know what this is yet :D
+AccessorFunc(ENT, "GateName", "GateName", FORCE_STRING)
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Initalize Entity
@@ -206,17 +200,7 @@ function ENT:BuildInstance( Instance, Instruction )
 		return self:OnCompileError( Error )
 	end
 
-	if CLIENT then
-		local Package = vnet.CreatePacket( "expadv.cl_loaded" )
-
-		Package:Entity( self )
-		
-		Package:Entity( LocalPlayer( ) )
-
-		Package:AddServer( )
-
-		Package:Send( )
-	end
+	if CLIENT then EXPADV.SendCodeLoaded(self) end
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------

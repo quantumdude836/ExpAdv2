@@ -258,7 +258,6 @@ if SERVER then
 
 		for _, ExpAdv in pairs( ) do
 			if IsValid( ExpAdv ) and ExpAdv.ExpAdv then
-				-- ExpAdv:LoadCodeFromPackage( Root, Files )
 				-- ikd, how i'm gona work with this yet :D
 			end
 		end

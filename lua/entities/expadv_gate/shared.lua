@@ -84,14 +84,14 @@ AccessorFunc( ENT, "ClientState", "ClientState", FORCE_NUMBER )
 AccessorFunc( ENT, "ClientLoaded", "ClientLoaded", FORCE_NUMBER )
 
 function ENT:SetupDataTables( )
-	self:AddExpVar( "FLOAT", 0, "TickQuota" )
-	self:AddExpVar( "FLOAT", 1, "StopWatch" )
-	self:AddExpVar( "FLOAT", 2, "Average" )
-	self:AddExpVar( "FLOAT", 3, "ServerState" )
-	self:AddExpVar( "FLOAT", 4, "ServerLoaded" )
+	self:AddExpVar( "FLOAT", 1, "TickQuota" )
+	self:AddExpVar( "FLOAT", 2, "StopWatch" )
+	self:AddExpVar( "FLOAT", 3, "Average" )
+	self:AddExpVar( "FLOAT", 4, "ServerState" )
+	self:AddExpVar( "FLOAT", 5, "ServerLoaded" )
 
-	self:AddExpVar( "STRING", 0, "GateName" )
-	self:AddExpVar( "ENTITY", 0, "LinkedPod" )
+	self:AddExpVar( "STRING", 1, "GateName" )
+	self:AddExpVar( "ENTITY", 1, "LinkedPod" )
 end
 
 if SERVER then

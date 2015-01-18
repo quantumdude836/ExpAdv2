@@ -73,7 +73,7 @@ cleanup.Register( "expadv" )
 
 local function IsExpAdv( Entity )
 	if !IsValid( Entity ) then return false end
-	return Entity.Base == "expadv_base"
+	return Entity.Base == "expadv_base" or Entity.ExpAdv
 end -- TODO: Use somthing other then base class comparason.
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -167,21 +167,15 @@ duplicator.RegisterEntityClass( "expadv_scr_vgui", MakeExpadvScreenDerma, "Pos",
    --- */
 
 function TOOL:LeftClick( Trace )
-	
 
 	if IsValid( Trace.Entity ) then -- and EXPADV.IsFriend( Trace.Entity, self:GetOwner( ) ) then
 		if Trace.Entity.ExpAdv and SERVER then
-			net.Start( "expadv.request" )
-			net.WriteUInt( Trace.Entity:EntIndex( ), 16 )
-			net.Send( self:GetOwner( ) )
-
+			EXPADV.RequestCode(self:GetOwner(), Trace.Entity)
 			return true
 		end
 	end
 
-	if CLIENT then
-		return true
-	end
+	if CLIENT then return true end
 
 	local Model, ExpAdv = self:GetClientInfo( "model" )
 	local Ang = Trace.HitNormal:Angle( ) + Angle( 90, 0, 0 )
@@ -218,12 +212,9 @@ function TOOL:LeftClick( Trace )
 		ExpAdv:GetPhysicsObject( ):EnableMotion( false )
 	end
 
-	
 	self:GetOwner( ):AddCleanup( "expadv", ExpAdv )
 
-	net.Start( "expadv.request" )
-		net.WriteUInt( ExpAdv:EntIndex( ), 16 )
-	net.Send( self:GetOwner( ) )
+	EXPADV.RequestCode(self:GetOwner(), ExpAdv)
 
 	return true
 end
@@ -242,13 +233,10 @@ function TOOL:RightClick( Trace )
 		self.TargetPod = Trace.Entity
 		return true
 	elseif self:GetStage() == 0 and Trace.Entity.ExpAdv then
-		net.Start( "expadv.download" )
-		net.WriteUInt( Trace.Entity:EntIndex( ), 16 )
-		net.WriteString( Trace.Entity:GetGateName( ) )
-		net.Send( self:GetOwner( ) )
+		EXPADV.SendToEditor(self:GetOwner(), Trace.Entity)
 		return true
 	elseif self:GetStage() == 1 and Trace.Entity.ExpAdv then
-		self:GetOwner():PrintMessage(HUD_PRINTTALK, "Pod linked gate.")
+		EXPADV.Notifi(self:GetOwner(), "Pod has been linked to gate.", nil, 1 )
 		Trace.Entity:LinkPod(self.TargetPod)
 		self:SetStage(0)
 		return true
