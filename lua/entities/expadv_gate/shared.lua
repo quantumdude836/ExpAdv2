@@ -92,6 +92,8 @@ function ENT:SetupDataTables( )
 
 	self:AddExpVar( "STRING", 1, "GateName" )
 	self:AddExpVar( "ENTITY", 1, "LinkedPod" )
+
+	self:ResetState(EXPADV_STATE_ONLINE)
 end
 
 if SERVER then
