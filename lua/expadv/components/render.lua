@@ -55,7 +55,7 @@ function Component.CreateFont( Base, Size )
 	Component.CreatedFonts[FontName] = true
 
 	surface.CreateFont( FontName, {
-		font = BaseFont,
+		font = Base,
 		size = Size,
 		weight = 500,
 		antialias = true,

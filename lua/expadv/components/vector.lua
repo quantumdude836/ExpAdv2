@@ -279,7 +279,7 @@ Component:AddFunctionHelper( "toLocalAxis", "e:v", "Converts a world axis to a l
    --- */
 
 Component:AddInlineFunction( "intersectRayWithOBB", "v,v,v,a,v,v", "v", "$util.IntersectRayWithOBB( @value 1, @value 2, @value 3, @value 4, @value 5, @value 6 )")
-Component:AddInlineFunction( "intersectRayWithPlane", "v,v,v,v", "n", "$util.IntersectRayWithPlane( @value 1, @value 2, @value 3, @value 4 )")
+Component:AddInlineFunction( "intersectRayWithPlane", "v,v,v,v", "v", "$util.IntersectRayWithPlane( @value 1, @value 2, @value 3, @value 4 )")
 
 Component:AddFunctionHelper( "intersectRayWithOBB", "v,v,v,a,v,v", "Performs a ray box intersection and returns position, (vector RayS tart, vector Ray Direction, vector Box Origin, angle BoxAngles, vector BoxMin, vector BoxMax)." )
 Component:AddFunctionHelper( "intersectRayWithPlane", "v,v,v,v", "Performs a ray plane intersection and returns the hit position, (vector Ray Origin, vector Ray Direction, vector Plane Position, vector Plane Normal)." )

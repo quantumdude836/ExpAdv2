@@ -138,7 +138,7 @@ elseif CLIENT then
 
 				if !tab then
 					editor:NewTab(script, nil, name)
-					tab = Editor.TabHolder:GetActiveTab()
+					tab = editor.TabHolder:GetActiveTab()
 					tab.Entity = entity
 					editor.GateTabs[entity] = tab
 				else

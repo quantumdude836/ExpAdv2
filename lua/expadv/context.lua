@@ -178,7 +178,11 @@ function EXPADV.RootContext:StartUp( Execution ) -- Function
 
 	if IsValid( self.entity ) then self.entity:StartUp( ) end
 
-	return self:Execute( "Root", Execution, self )
+	local ok, a, b = self:Execute( "Root", Execution, self )
+	if !ok then return ok, a, b end
+
+	EXPADV.CallHook( "PostStartUp", self )
+	return ok, a, b
 end
 
 -- Shuts down the context and execution.
