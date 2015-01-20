@@ -233,7 +233,7 @@ if CLIENT then
 	end )
 
 	hook.Add( "Expadv.UnregisterContext", "expadv.sound", function( Context )
-		if Context.Data.AudioCount <= 0 then return end
+		if (Context.Data.AudioCount or 0) <= 0 then return end
 		
 		for _, Channel in pairs( Context.Data.Audio ) do
 			if IsValid( Channel ) then Channel:Stop( ) end
