@@ -77,6 +77,8 @@ Component:AddVMFunction( "setFont", "s,n,c", "s",
 	end )
 
 Component:AddPreparedFunction( "setFontColor", "c", "", "$surface.SetTextColor( @value 1 )" )
+Component:AddPreparedFunction( "setFontColor", "n,n,n,n", "", "$surface.SetTextColor($Color(@value 1, @value 2, @value 3, @value 4 or 255))" )
+Component:AddPreparedFunction( "setFontColor", "n,n,n", "", "$surface.SetTextColor($Color(@value 1, @value 2, @value 3, 255))" )
 
 Component:AddInlineFunction( "getTextWidth", "s", "n", "$surface.GetTextSize( @value 1 )" )
 
@@ -85,6 +87,8 @@ Component:AddPreparedFunction( "getTextHeight", "s", "n", "@define _, tall = $su
 Component:AddFunctionHelper( "setFont", "s,n", "Sets the current font and fontsize." )
 Component:AddFunctionHelper( "setFont", "s,n,c", "Sets the current font, fontsize and font color." )
 Component:AddFunctionHelper(  "setFontColor", "c", "Sets the current font color." )
+Component:AddFunctionHelper(  "setFontColor", "n,n,n,n", "Sets the current font color." )
+Component:AddFunctionHelper(  "setFontColor", "n,n,n", "Sets the current font color." )
 Component:AddFunctionHelper(  "getTextWidth", "s", "Returns the width of drawing string using the current font." )
 Component:AddFunctionHelper(  "getTextHeight", "s", "Returns the height of drawing string using the current font." )
 

@@ -127,6 +127,8 @@ Component:AddVMFunction( "dframe", "", "df", function(Context, Trace) return Cre
 
 Component:AddFunctionHelper( "dframe", "", "Returns new dframe object." )
 
+Component:AddPreparedFunction("close", "df:", "", "@value 1:Close()")
+Component:AddFunctionHelper( "close", "df:", "Closes Derma frame." )
 Component:AddPreparedFunction("showCloseButton", "df:b", "", "@value 1:ShowCloseButton(@value 2)")
 Component:AddFunctionHelper( "showCloseButton", "df:b", "Shows/hides the close button." )
 Component:AddPreparedFunction("setDraggable", "df:b", "", "@value 1:SetDraggable(@value 2)")
@@ -384,6 +386,57 @@ Component:AddVMFunction( "dpropertysheet", "", "dps", function(Context, Trace) r
 Component:AddFunctionHelper( "dpropertysheet", "", "Returns new dpropertysheet object." )
 Component:AddFunctionHelper( "dpropertysheet", "dp", "Returns new dpropertysheet object with the given dpanel as parent." )
 Component:AddFunctionHelper( "dpropertysheet", "df", "Returns new dpropertysheet object with the given dframe as parent." )
+
+/* -----------------------------------------------------------------------------------
+	@: DListView
+--- */
+
+local ListViewClass = Component:AddClass( "dlistview", "dlv" )
+ListViewClass:ExtendClass( "dp" )
+
+ListViewClass:AddPreparedOperator( "=", "n,dlv", "", "Context.Memory[@value 1] = @value 2" )
+
+Component:AddVMFunction( "dlistview", "dp", "dlv", function(Context, Trace, Panel) return CreatePanel(Context, Trace, "DListView", Panel) end )
+Component:AddVMFunction( "dlistview", "df", "dlv", function(Context, Trace, Panel) return CreatePanel(Context, Trace, "DListView", Panel) end )
+Component:AddVMFunction( "dlistview", "", "dlv", function(Context, Trace) return CreatePanel(Context, Trace, "DListView") end )
+
+Component:AddFunctionHelper( "dlistview", "", "Returns new dlistview object." )
+Component:AddFunctionHelper( "dlistview", "dp", "Returns new dlistview object with the given dpanel as parent." )
+Component:AddFunctionHelper( "dlistview", "df", "Returns new dlistview object with the given dframe as parent." )
+
+Component:AddPreparedFunction( "setMultiSelect", "dlv:b", "", "@value 1:SetMultiSelect(@value 2)" )
+Component:AddFunctionHelper( "setMultiSelect", "dlv:b", "Sets the multiselect mode of the dlistview." )
+
+Component:AddPreparedFunction( "clear", "dlv:", "", "@value 1:Clear()" )
+Component:AddFunctionHelper( "clear", "dlv:", "Clears the list." )
+
+Component:AddPreparedFunction( "addColumn", "dlv:s", "", "@value 1:AddColumn(@value 2)" )
+Component:AddFunctionHelper( "addColumn", "dlv:s", "Adds a column to the dlistview." )
+
+Component:AddVMFunction( "addLine", "dlv:...", "", function( Context, Trace, Panel, ... )
+	local Values = { ... }
+
+	for Key, Value in pairs( Values ) do
+		if Value[2] == "s" then
+			Values[Key] = Value[1]
+		else
+			Values[Key] = EXPADV.ToString( Value[2], Value[1] )
+		end
+	end
+
+	Panel:AddLine(unpack(Values))
+end )
+Component:AddFunctionHelper( "addLine", "dlv:...", "Adds a line to the list view." )
+
+Component:AddPreparedFunction( "onRowSelected", "dlv:d", "", [[
+@value 1.OnRowSelected = function(dunno, row)
+	Context:Execute( "dlistview", @value 2, { row, "n" } )
+end
+]] )
+Component:AddFunctionHelper( "onRowSelected", "dlv:d", "Executes when a row is selected." )
+
+Component:AddInlineFunction( "getSelectedLine", "dlv:", "n", "@value 1:GetSelectedLine() or 0" )
+Component:AddFunctionHelper( "getSelectedLine", "dlv:", "Gets the index of selected line." )
 
 /* -----------------------------------------------------------------------------------
 	@: DImage
