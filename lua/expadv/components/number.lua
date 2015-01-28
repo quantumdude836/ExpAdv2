@@ -69,11 +69,11 @@ Component:AddInlineOperator( "-", "n", "n", "(-@value 1)" )
     @: Bitwise
    --- */
 
-Component:AddInlineOperator( "&", "n,n", "n", "bit.band(@value 1 , @value 2)" )
-Component:AddInlineOperator( "|", "n,n", "n", "bit.bor(@value 1 , @value 2)" )
-Component:AddInlineOperator( "^^", "n,n", "n", "bit.bxor(@value 1 , @value 2)" )
-Component:AddInlineOperator( ">>", "n,n", "n", "bit.rshift(@value 1 , @value 2)" )
-Component:AddInlineOperator( "<<", "n,n", "n", "bit.lshift(@value 1 , @value 2)" )
+Component:AddInlineOperator( "&", "n,n", "n", "$bit.band(@value 1 , @value 2)" )
+Component:AddInlineOperator( "|", "n,n", "n", "$bit.bor(@value 1 , @value 2)" )
+Component:AddInlineOperator( "^^", "n,n", "n", "$bit.bxor(@value 1 , @value 2)" )
+Component:AddInlineOperator( ">>", "n,n", "n", "$bit.rshift(@value 1 , @value 2)" )
+Component:AddInlineOperator( "<<", "n,n", "n", "$bit.lshift(@value 1 , @value 2)" )
 
 /* --- --------------------------------------------------------------------------------
     @: Assigment
