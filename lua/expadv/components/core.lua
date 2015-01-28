@@ -287,7 +287,7 @@ function EXPADV.PrintColor( Context, Tbl, ... )
 	elseif IsValid(Context.player) then
 		net.Start( "expadv.printcolor" )
 			net.WriteTable( Tbl )
-		net.Send( Player )
+		net.Send(Context.player)
 	elseif Context.entity and Context.entity.Scripted then
 		MsgC(unpack(Tbl))
 		net.Start( "expadv.printcolor" )

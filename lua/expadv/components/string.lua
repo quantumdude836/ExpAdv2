@@ -246,5 +246,5 @@ Component:AddFunctionHelper( "toChar", "n:", "Returns the character for a given 
 	@: Index
    --- */
 
-String:AddVMOperator( "get", "t,n,vr", "s", "@value 1[@value 2]" )
-String:AddVMOperator( "get", "t,n,s", "s", "@value 1[@value 2]" )
+String:AddInlineOperator( "get", "t,n,vr", "s", "@value 1[@value 2]" )
+String:AddInlineOperator( "get", "t,n,s", "s", "@value 1[@value 2]" )

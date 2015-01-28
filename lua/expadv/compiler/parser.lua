@@ -727,13 +727,11 @@ function Compiler:Expression_17( Trace, Expression, Statment )
 				if !self:AcceptToken( "com" ) then
 					self:RequireToken( "rsb", "Right square bracket (]) missing, to close indexing operator [Index]" )
 
-					if !self:AcceptToken( "ass" ) then
-						Expression = self:Compile_GET( Trace, Expression, Index )
-					elseif Statment then
-						return self:Compile_SET( Trace, Expression, Index, self:Expression( Trace ) )
-					else
-						self:TraceError( Trace, "Set operator (%s[%s]=) must not appear inside an equation", self:NiceClass( Expression, Index ) )
+					if self:CheckToken("ass", "aadd", "asub", "adiv", "amul") then
+						return self:Expression_Set( Trace, Statment, Expression, Index )
 					end
+					
+					Expression = self:Compile_GET( Trace, Expression, Index )
 
 				elseif !self:AcceptToken( "var", "func" ) then
 					self:TraceError( Trace, "Right square bracket (]) expected, to close indexing operator [Index]" )
@@ -742,14 +740,13 @@ function Compiler:Expression_17( Trace, Expression, Statment )
 
 					self:RequireToken( "rsb", "Right square bracket (]) missing, to close indexing operator [Index]" )
 
-					if !self:AcceptToken( "ass" ) then
-						Expression = self:Compile_GET( Trace, Expression, Index, Class.Short )
-					elseif Statment then
-						return self:Compile_SET( Trace, Expression, Index, self:Expression( Trace ), Class.Short )
-					else
-						self:TraceError( Trace, "Set operator (%s[%s,%s]=) must not appear inside an equation", self:NiceClass( Expression, Index, Class.Short ) )
+					if self:CheckToken("ass", "aadd", "asub", "adiv", "amul") then
+						return self:Expression_Set( Trace, Statment, Expression, Index, Class.Short )
 					end
+					
+					Expression = self:Compile_GET( Trace, Expression, Index, Class.Short )
 				end
+
 
 			end
 
@@ -778,6 +775,31 @@ function Compiler:Expression_17( Trace, Expression, Statment )
 		end
 
 	return Expression
+end
+
+/* --- --------------------------------------------------------------------------------
+	@: Statments
+   --- */
+
+function Compiler:Expression_Set( Trace, Statment, Expression, Index, Class )
+	if !Statment then
+		self:ExludeToken("ass", "Set operator (%s[%s]=) must not appear inside an equation", self:NiceClass( Expression, Index ) )
+		self:ExludeToken("aadd", "Arithmatic set operator (%s[%s]+=) must not appear inside an equation", self:NiceClass( Expression, Index ) )
+		self:ExludeToken("asub", "Arithmatic set operator (%s[%s]-=) must not appear inside an equation", self:NiceClass( Expression, Index ) )
+		self:ExludeToken("adiv", "Arithmatic set operator (%s[%s]/=) must not appear inside an equation", self:NiceClass( Expression, Index ) )
+		self:ExludeToken("amul", "Arithmatic set operator (%s[%s]+=) must not appear inside an equation", self:NiceClass( Expression, Index ) )
+		self:TraceError(Trace, "You are not looking for this compiler error!")
+	elseif self:AcceptToken("ass") then
+		return self:Compile_SET( Trace, Expression, Index, self:Expression( Trace ), Class )
+	elseif self:AcceptToken("aadd") then
+		return self:Compile_SET(Trace, Expression, Index, self:Compile_ADD(Trace, self:Compile_GET(Trace, Expression, Index, Class), self:Expression(Trace)), Class)
+	elseif self:AcceptToken("asub") then
+		return self:Compile_SET(Trace, Expression, Index, self:Compile_SUB(Trace, self:Compile_GET(Trace, Expression, Index, Class), self:Expression(Trace)), Class)
+	elseif self:AcceptToken("amul") then
+		return self:Compile_SET(Trace, Expression, Index, self:Compile_MUL(Trace, self:Compile_GET(Trace, Expression, Index, Class), self:Expression(Trace)), Class)
+	elseif self:AcceptToken("adiv") then
+		return self:Compile_SET(Trace, Expression, Index, self:Compile_DIV(Trace, self:Compile_GET(Trace, Expression, Index, Class), self:Expression(Trace)), Class)
+	end
 end
 
 /* --- --------------------------------------------------------------------------------
@@ -1154,7 +1176,7 @@ function Compiler:Statement_6( Trace )
 	if self:AcceptToken( "var" ) then
 		local Trace = self:GetTokenTrace( Trace )
 
-		if !self:CheckToken( "var", "ass", "aadd", "asub", "advi", "amul", "com" ) then
+		if !self:CheckToken( "var", "ass", "aadd", "asub", "adiv", "amul", "com" ) then
 			self:PrevToken( )
 			return self:Statement_7( Trace )
 		end
@@ -1178,7 +1200,7 @@ function Compiler:Statement_6( Trace )
 			Variables[#Variables + 1] = self.TokenData
 		end
 
-		if !Defined and !self:CheckToken( "ass", "aadd", "asub", "advi", "amul" ) then
+		if !Defined and !self:CheckToken( "ass", "aadd", "asub", "adiv", "amul" ) then
 			self:TraceError( Trace, "Incomplete assigment statment")
 		end
 

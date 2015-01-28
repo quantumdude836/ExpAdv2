@@ -613,8 +613,8 @@ end
 	@: WIP Features.
    --- */
 
-Component:AddFeature( "HUD rendering", "Drawing directly onto your heads up display.", "fugue/monitor-window-3d.png" )
-Component:AddFeature( "3D rendering", "Rendering 3D objects such as sprites in world.", "fugue/fire.png" )
+Component:AddFeature( "HUD", "Drawing directly onto your heads up display.", "fugue/monitor-window-3d.png" )
+Component:AddFeature( "3D", "Rendering 3D objects such as sprites in world.", "fugue/fire.png" )
 
 if CLIENT then
 	function Component:OnChangeFeatureAccess(Entity, Feature, Value)

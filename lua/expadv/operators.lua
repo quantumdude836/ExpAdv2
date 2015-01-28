@@ -891,11 +891,6 @@ function EXPADV.BuildLuaOperator( Operator )
 			end
 		end
 
-		-- Now lets check cpu time, note we will let the trace system below, insert our traces.
-		if Operator.FLAG == EXPADV_PREPARE or Operator.FLAG == EXPADV_INLINEPREPARE then
-			OpPrepare = string_gsub( OpPrepare, "@cpu", "Context:UpdateCPUQuota( @trace )" )
-		end
-
 		--Now lets handel traces!
 		local Uses = 0
 

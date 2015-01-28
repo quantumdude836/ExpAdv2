@@ -158,12 +158,12 @@ Component:AddFunctionHelper("voiceVolume", "ply:", "Returns the volume of the pl
 EXPADV.SharedEvents( )
 Component:AddEvent( "playerNoClip", "ply,b", "" )
 Component:AddEvent( "playerEnterVehicle", "ply,e,n", "" )
+Component:AddEvent( "playerChat", "ply,s,b", "s" )
 
 EXPADV.ServerEvents( )
 Component:AddEvent( "playerSpawn", "ply", "" )
 Component:AddEvent( "playerJoin", "ply", "" )
 Component:AddEvent( "playerQuit", "ply", "" )
-Component:AddEvent( "playerChat", "ply,s,b", "s" )
 Component:AddEvent( "playerSpray", "ply", "" )
 Component:AddEvent( "playerExitVehicle", "ply,e", "" )
 
@@ -207,7 +207,9 @@ end
    --- */
 
 if CLIENT then
-
+	hook.Add( "OnPlayerChat", "Expav.Event", function( Player, Text, Team )
+		EXPADV.CallEvent( "playerChat", Player, Text, Team )
+	end )
 end
 
 /* --- --------------------------------------------------------------------------------

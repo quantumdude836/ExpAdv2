@@ -371,11 +371,11 @@ function EXPADV.LoadCore( )
 
 	EXPADV.LoadClasses( )
 
+	EXPADV.LoadFeatures( )
+
 	EXPADV.LoadOperators( )
 
 	EXPADV.LoadFunctions( )
-
-	EXPADV.LoadFeatures( )
 	
 	EXPADV.LoadEvents( )
 
@@ -476,7 +476,8 @@ end
    -- BuildHologramModels( Table )								| Void | Called when the hologram model look up is made.
    -- OpenContextMenu( Entity, ContextMenu, Trace, Option )		| Void | Called when an ExpAdv2 context menu is created.
    -- AddComponents( )											| Void | Called when its time to add custom components.
-
+   -- PostLoadFeatures
+   
    --  function Component:OnPostLoadAliases( ) end
    --  hook.Add( "Expadv.PostLoadAliases", ... )
    -- @GitHub: Please request hooks, and return behavours via issue page.
