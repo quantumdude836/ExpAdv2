@@ -84,6 +84,16 @@ function ENT:CreateDermaObject( Panel, Parent )
 		end
 	end
 
+	if Panel.MakePopup then
+		Panel._MakePopup = Panel.MakePopup
+
+		function Panel.MakePopup(Panel)
+			Panel:SetZPos(32767)
+			Panel:SetMouseInputEnabled(true)
+			Panel:SetKeyboardInputEnabled(true)
+		end
+	end
+
 	return Panel
 end
 

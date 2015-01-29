@@ -678,6 +678,8 @@ Component:AddFunctionHelper( "playerByName", "s,b", "Returns player found by the
 	@: Constraints
    --- */
 
+EXPADV.ServerOperators()
+
 Component:AddInlineFunction( "totalConstraints", "e:", "n", "(IsValid( @value 1) and #$constraint.GetTable( @value 1 ) or 0)" )
 
 Component:AddInlineFunction( "isConstrained", "e:", "b", "$constraint.HasConstraints( @value 1 )" )

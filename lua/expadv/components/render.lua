@@ -353,7 +353,7 @@ Component:AddFunctionHelper( "toScreen", "v", "Translates the vectors position i
 Component:AddInlineFunction( "isVisible", "v", "b", "@value 1:ToScreen( ).visible" )
 Component:AddFunctionHelper( "isVisible", "v", "Returns true if the vectors position is in clients view." )
 
-Component:AddInlineFunction( "canRenderToHUD", "", "b", [[EXPADV.CanAccessFeature(Context.entity, "HUD rendering")]] )
+Component:AddInlineFunction( "canRenderToHUD", "", "b", [[EXPADV.CanAccessFeature(Context.entity, "HUD")]] )
 Component:AddFunctionHelper( "canRenderToHUD", "", "Returns true if this entity can render to clientside HUD." )
 
 /* -----------------------------------------------------------------------------------
@@ -451,7 +451,7 @@ Component:AddFunctionHelper( "popMatrix", "", "Stops rendering in current matrix
 	@: Author: Ripmax, Szymekk
    --- */
 
-Component:AddInlineFunction( "canRender3D", "", "b", [[EXPADV.CanAccessFeature(Context.entity, "3D rendering")]] )
+Component:AddInlineFunction( "canRender3D", "", "b", [[EXPADV.CanAccessFeature(Context.entity, "3DRendering")]] )
 Component:AddFunctionHelper( "canRender3D", "", "Returns true if this entity can render clientside 3D." )
 
 Component:AddInlineFunction("fov", "", "n", "$LocalPlayer():GetFOV()")
@@ -532,7 +532,7 @@ if CLIENT then
 			
 			if !IsValid(Context.entity) then continue end
 			
-			if(Context.event_drawHUD && EXPADV.CanAccessFeature(Context.entity, "HUD rendering")) then
+			if(Context.event_drawHUD && EXPADV.CanAccessFeature(Context.entity, "HUD")) then
 				Context.In2DRender = true
 				Context.Matrices = 0
 
@@ -548,7 +548,7 @@ if CLIENT then
 				Context.In2DRender = false
 			end
 			
-			if(Context.event_draw3DOverlay && EXPADV.CanAccessFeature(Context.entity, "3D rendering")) then
+			if(Context.event_draw3DOverlay && EXPADV.CanAccessFeature(Context.entity, "3DRendering")) then
 				cam.Start3D(EyePos(), EyeAngles())
 					Context.In2DRender = true
 					Context.Matrices = 0
@@ -589,7 +589,7 @@ if CLIENT then
 			
 			if !IsValid( Context.entity ) then continue end
 			
-			if(Context.event_draw3D && EXPADV.CanAccessFeature(Context.entity, "3D rendering")) then
+			if(Context.event_draw3D && EXPADV.CanAccessFeature(Context.entity, "3DRendering")) then
 				Context.In3DRender = true
 				Context.Matrices = 0
 				Context.Cams = 0
@@ -618,17 +618,17 @@ end
    --- */
 
 Component:AddFeature( "HUD", "Drawing directly onto your heads up display.", "fugue/monitor-window-3d.png" )
-Component:AddFeature( "3D", "Rendering 3D objects such as sprites in world.", "fugue/fire.png" )
+Component:AddFeature( "3DRendering", "Rendering 3D objects such as sprites in world.", "fugue/fire.png" )
 
 if CLIENT then
 	function Component:OnChangeFeatureAccess(Entity, Feature, Value)
-		if Feature == "HUD rendering" then
+		if Feature == "HUD" then
 			if Value then
 				Entity:CallEvent( "enableHUDRendering" )
 			else
 				Entity:CallEvent( "disableHUDRendering" )
 			end
-		elseif Feature == "3D rendering" then
+		elseif Feature == "3DRendering" then
 			if Value then
 				Entity:CallEvent( "enable3DRendering" )
 			else
