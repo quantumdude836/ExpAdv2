@@ -1503,8 +1503,10 @@ function PANEL:PaintRowUnderlay( Row, LinePos )
 		
 		pcall( function( ) -- For now untill we fix the invalid pattern bug.
 			for overS, overE in string_gmatch( Row, "()" .. FindQuery .. "()" ) do
+				if ( overS - 1 ) * self.FontWidth + self.BookmarkWidth + self.LineNumberWidth + self.FoldingWidth - (self.Scroll.y-1) * self.FontWidth
+					< self.FoldingWidth + self.BookmarkWidth + self.LineNumberWidth then continue end
 				surface_DrawRect( 
-					( overS - 1 ) * self.FontWidth + self.BookmarkWidth + self.LineNumberWidth + self.FoldingWidth, 
+					( overS - 1 ) * self.FontWidth + self.BookmarkWidth + self.LineNumberWidth + self.FoldingWidth - (self.Scroll.y-1) * self.FontWidth,
 					( LinePos ) * self.FontHeight, 
 					self.FontWidth * ( overE - overS ), 
 					self.FontHeight 

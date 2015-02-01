@@ -466,7 +466,7 @@ Component:AddFunctionHelper("draw3DLine", "v,v,c", "Draws 3D line (start, end, c
 Component:AddPreparedFunction("draw3DBox", "v,a,v,v,c", "", "$render.DrawBox(@value 1, @value 2, @value 3, @value 4, @value 5, true)")
 Component:AddFunctionHelper("draw3DBox", "v,a,v,v,c", "Draws 3D box (position, angle, mins, maxs, color).")
 
-Component:AddPreparedFunction("draw3DSphere", "v,n,n,n,c", "", "$render.DrawSphere(@value 1, @value 2, @value 3, @value 4, @value 5)")
+Component:AddPreparedFunction("draw3DSphere", "v,n,n,n,c", "", "$render.DrawSphere(@value 1, @value 2, $math.Clamp(@value 3,4,30), $math.Clamp(@value 4,4,30), @value 5)")
 Component:AddFunctionHelper("draw3DSphere", "v,n,n,n,c", "Draws 3D sphere.")
 
 Component:AddPreparedFunction("draw3DQuadEasy", "v,v,n,n,c,n", "", "$render.DrawQuadEasy(@value 1, @value 2, @value 3, @value 4, @value 5, @value 6)")

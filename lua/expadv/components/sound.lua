@@ -255,6 +255,10 @@ Component:AddVMFunction( "playURL", "s,s,d,d", "",
 		sound.PlayURL( URL, Flags,
 			function( Channel, Er_ID, Er_Name ) 
 				if IsValid( Channel ) then
+					if !IsValid(Context.entity) then
+						Channel:Stop()
+						return
+					end
 					Context.Data.AudioCount = Context.Data.AudioCount + 1
 					Context.Data.Audio[Context.Data.AudioCount] = Channel
 					Context:Execute( "playURL", Sucess, { Channel, "_ac" } )
@@ -279,7 +283,7 @@ Component:AddEvent( "enableSoundsFromURL", "", "" )
 Component:AddEvent( "disableSoundsFromURL", "", "" )
 
 /* -----------------------------------------------------------------------------------
-	@: WIP Features.
+	@: Features.
    --- */
 
 Component:AddFeature( "Sounds from url", "Stream audio via url feeds.", "fugue/speaker-volume.png" )
