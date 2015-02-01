@@ -290,7 +290,7 @@ if CLIENT then
 		Entity:CallEvent( "disableSoundsFromURL" )
 
 		local Context = Entity.Context
-		if !Context or Context.Data.AudioCount <= 0 then return end
+		if !Context or (Context.Data.AudioCount or 0) <= 0 then return end
 
 		for _, Channel in pairs( Context.Data.Audio ) do
 			if IsValid( Channel ) then Channel:Stop( ) end

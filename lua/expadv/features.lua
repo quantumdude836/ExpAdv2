@@ -24,6 +24,8 @@ function EXPADV.LoadFeatures( )
 
 		EXPADV.Features[Feature.Name] = Feature
 	end
+
+	EXPADV.CallHook( "PostLoadFeatures" )
 end
 
 /* --- --------------------------------------------------------------------------------

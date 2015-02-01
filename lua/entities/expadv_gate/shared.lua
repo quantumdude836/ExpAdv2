@@ -174,23 +174,15 @@ function ENT:Think( )
 
 	    if self:GetServerState(EXPADV_STATE_OFFLINE) >= EXPADV_STATE_CRASHED then SpinSpeed = 0 end
 	    
-	    self.SpinSpeed = SpinSpeed + math.Clamp( Percent - SpinSpeed, -0.1, 0.1 )
+	    self.SpinSpeed = SpinSpeed + math.Clamp( Percent - SpinSpeed, -0.33, 0.33 )
 
 	    self:SetPlaybackRate( self.SpinSpeed )
 
-	    self:ResetSequence( self:LookupSequence( self.SpinSpeed <= 0 and "idle" or "spin" ) )
+	    local Sequence = self:LookupSequence(self.SpinSpeed <= 0 and "idle" or "spin")
+	    -- if Sequence ~= self:GetSequence() then
+	    	self:ResetSequence(Sequence)
+	    -- end
 	end
-
-	if self.Compiler_Instance then
-		if self.Compiler_Instance.Running then
-			self.Compiler_Instance:Resume( )
-		else
-			self.Compiler_Instance = nil
-		end
-	end
-
-	self:NextThink(CurTime() + 1)
-	return true
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
