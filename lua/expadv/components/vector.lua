@@ -134,6 +134,17 @@ Component:AddFunctionHelper( "setZ", "v:n", "Sets the Z value of a vector" )
 Component:AddPreparedFunction( "set", "v:v", "", "@value 1:Set( @value 2 )")
 Component:AddFunctionHelper( "set", "v:v", "Sets a vector to the value of another vector" )
 
+--Changers
+Component:AddPreparedFunction( "withX", "v:n", "v", "Vector(@value 2, @value 1.y, @value 1.z)" )
+Component:AddFunctionHelper( "withX", "v:n", "Returns the value of the vector with the value of x changed." )
+
+Component:AddPreparedFunction( "withY", "v:n", "v", "Vector(@value 1.x, @value 2, @value 1.z)" )
+Component:AddFunctionHelper( "withY", "v:n", "Returns the value of the vector with the value of y changed." )
+
+Component:AddPreparedFunction( "withZ", "v:n", "v", "Vector(@value 1.x, @value 1.y, @value 2)" )
+Component:AddFunctionHelper( "withZ", "v:n", "Returns the value of the vector with the value of z changed." )
+
+
 /* --- --------------------------------------------------------------------------------
     @: Rotate
    --- */
@@ -419,6 +430,13 @@ Component:AddFunctionHelper( "setX", "v2:n", "Sets the X value of a vector2" )
 
 Component:AddPreparedFunction( "setY", "v2:n", "", "@value 1.y = @value 2" )
 Component:AddFunctionHelper( "setY", "v2:n", "Sets the Y value of a vector2" )
+
+--Changers
+Component:AddPreparedFunction( "withX", "v:n", "v", "Vector2(@value 2, @value 1.y)" )
+Component:AddFunctionHelper( "withX", "v:n", "Returns the value of the vector2 with the value of x changed." )
+
+Component:AddPreparedFunction( "withY", "v:n", "v", "Vector2(@value 1.x, @value 2)" )
+Component:AddFunctionHelper( "withY", "v:n", "Returns the value of the vector2 with the value of y changed." )
 
 /* --- --------------------------------------------------------------------------------
     @: Functions
