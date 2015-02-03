@@ -83,41 +83,75 @@ EXPADV.AddVMOperator( nil, "call", "f,s,...", "_vr",
 		return rValue
 	end)
 
-EXPADV.AddGeneratedFunction( nil, "invoke", "cls,d,...", "",
-	function( Operator, Compiler, Trace, ... )
-		
-		local Inputs = { ... }
-		local Preperation = { }
-		local Variants = { }
-		
-		for I = 1, #Inputs, 1 do
-			local Input = Inputs[I]
+/* --- -------------------------------------------------------------------------------
+	@: Invoke
+   --- */
 
-			if Input.FLAG == EXPADV_PREPARE or Input.FLAG == EXPADV_INLINEPREPARE then
-				Preperation[#Preperation + 1] = Input.Prepare
-			end
+local function buildLua(...)
+	local Inputs = { ... }
+	local Preperation = { }
+	local Outputs = { }
+	
+	for I = 1, #Inputs, 1 do
+		local Input = Inputs[I]
 
-			if I > 2 then
-				if Input.FLAG == EXPADV_INLINE or Input.FLAG == EXPADV_INLINEPREPARE then
-					if Input.Return == "_vr" then
-						Variants[#Variants + 1] = Input.Inline
-					else
-						Variants[#Variants + 1] = string.format("{%s,%q}", Input.Inline, Input.Return)
-					end
-				end
-			end
+		if Input.FLAG == EXPADV_PREPARE or Input.FLAG == EXPADV_INLINEPREPARE then
+			Preperation[#Preperation + 1] = Input.Prepare
 		end
 
-		local Function, Return, Type = Compiler:DefineVariable( ), Compiler:DefineVariable( ), Compiler:DefineVariable( )
-		local Arguments = table.concat(Variants, ",")
-		if #Variants > 0 then Arguments = "," .. Arguments end
-		
-		Preperation[#Preperation + 1] = string.format("%s = %s", Function, Inputs[2].Inline )
-		Preperation[#Preperation + 1] = string.format("%s, %s = %s( Context %s )", Return, Type, Function, Arguments )
-		Preperation[#Preperation + 1] = string.format("if %s ~= %s then Context:Throw(%s,%q,%q) end", Inputs[1].Inline, Type, Compiler:CompileTrace(Trace), "invoke", "This is not the exception, youre looking for." )
+		if Input.FLAG == EXPADV_INLINE or Input.FLAG == EXPADV_INLINEPREPARE then
+			if Input.Return == "_vr" then
+				Outputs[#Outputs + 1] = Input.Inline
+			else
+				Outputs[#Outputs + 1] = string.format("{%s,%q}", Input.Inline, Input.Return)
+			end
+		end
+	end
 
-		return { Trace = Trace, Inline = Return, Prepare = table.concat( Preperation, "\n" ), Return = Inputs[1].PointClass, FLAG = EXPADV_INLINEPREPARE }
-	end ); EXPADV.AddFunctionAlias("invoke", "cls,d")
+	return table.concat(Preperation, "\n"), Outputs
+end
+
+EXPADV.AddGeneratedFunction( nil, "invoke", "cls,d,...", "",
+	function(Operator, Compiler, Trace, Class, Delegate, ...)
+		local Prepare, Inputs = buildLua(Class, Delegate, ...)
+
+		local dVar = Compiler:DefineVariable( )
+		local Inline, tVar = Compiler:DefineVariable( ), Compiler:DefineVariable( )
+		
+		table.remove(Inputs, 1)
+		table.remove(Inputs, 1)
+
+		local Arguments = ""
+		if #Inputs > 0 then Arguments = "," .. table.concat(Inputs, ",") end
+
+		Prepare = Prepare .. "\n" .. string.format([[%s = %s]], dVar, Delegate.Inline)
+		Prepare = Prepare .. "\n" .. string.format([[%s, %s = %s(Context %s)]], Inline, tVar, dVar, Arguments)
+		Prepare = Prepare .. "\n" .. string.format([[if !%s then Context:Throw(%s, "invoke", "Delegate expected to return %s got void.") end]], Inline, Compiler:CompileTrace(Trace), Compiler:NiceClass(Class.PointClass))
+		Prepare = Prepare .. "\n" .. string.format([[if %s ~= %q then Context:Throw(%s, "invoke", "Delegate expected to return %s got " .. EXPADV.TypeName(%s) .. ".") end]], tVar, Class.PointClass, Compiler:CompileTrace(Trace), Compiler:NiceClass(Class.PointClass), tVar)
+
+		return {Trace = Trace, Inline = Inline, Prepare = Prepare, Return = Class.PointClass, FLAG = EXPADV_INLINEPREPARE}
+	end)
+EXPADV.AddFunctionAlias("invoke", "cls,d")
+
+EXPADV.AddGeneratedFunction( nil, "invoke", "d,...", "",
+	function(Operator, Compiler, Trace, Delegate, ...)
+		local Prepare, Inputs = buildLua(Delegate, ...)
+		
+		local dVar = Compiler:DefineVariable( )
+		local Inline, tVar = Compiler:DefineVariable( ), Compiler:DefineVariable( )
+		
+		table.remove(Inputs, 1)
+		
+		local Arguments = ""
+		if #Inputs > 0 then Arguments = "," .. table.concat(Inputs, ",") end
+		
+		Prepare = Prepare .. "\n" .. string.format([[%s = %s]], dVar, Delegate.Inline)
+		Prepare = Prepare .. "\n" .. string.format([[%s, %s = %s(Context %s)]], Inline, tVar, dVar, Arguments)
+		Prepare = Prepare .. "\n" .. string.format([[if %s then Context:Throw(%s, "invoke", "Delegate expected to return void got " .. EXPADV.TypeName(%s) .. ".") end]], Inline, Compiler:CompileTrace(Trace), tVar)
+		
+		return {Trace = Trace, Inline = Inline, Prepare = Prepare, Return = "", FLAG = EXPADV_INLINEPREPARE}
+	end)
+EXPADV.AddFunctionAlias("invoke", "d")
 
 /*EXPADV.AddFunctionHelper("invoke", "cls,d,...", "Executes the given delegate passing given params and returning the value (return type class, the function, params)." )
 	Not working :/
@@ -241,7 +275,7 @@ local Component = EXPADV.AddComponent( "print" , true )
 
 Component.Author = "Rusketh"
 Component.Description = "Prints stuff to your chat."
-Component:AddFeature( "print", "Prints to you..", "fugue/printer-monochrome.png" )
+Component:AddFeature( "Print", "Prints to you..", "fugue/printer-monochrome.png" )
 
 EXPADV.SharedOperators( )
 
@@ -282,7 +316,7 @@ function EXPADV.PrintColor( Context, Tbl, ... )
 	if !istable(Tbl) then Tbl = {Tbl, ...} end
 
 	if CLIENT then
-		if !EXPADV.EntityCanAccessFeature(Context.entity, "print") then return end
+		if !EXPADV.EntityCanAccessFeature(Context.entity, "Print") then return end
 		chat.AddText( unpack(Tbl) )
 	elseif IsValid(Context.player) then
 		net.Start( "expadv.printcolor" )

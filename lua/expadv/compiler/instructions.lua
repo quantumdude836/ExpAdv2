@@ -345,6 +345,10 @@ function Compiler:Compile_INC( Trace, bVarFirst, Variable )
 		end
 	end
 
+	if self.ClassCells[MemRef] then -- Tempory :D
+		self:TraceError( Trace, "Assigment operator (increment) does not support use inside class's" )
+	end
+
 	return Operator.Compile( self, Trace, Quick( MemRef, "n" ) )
 end
 
@@ -364,6 +368,10 @@ function Compiler:Compile_DEC( Trace, bVarFirst, Variable )
 		end
 	end
 
+	if self.ClassCells[MemRef] then -- Tempory :D
+		self:TraceError( Trace, "Assigment operator (decrement) does not support use inside class's" )
+	end
+	
 	return Operator.Compile( self, Trace, Quick( MemRef, "n" ) )
 end
 
@@ -373,6 +381,10 @@ function Compiler:Compile_VAR( Trace, Variable )
 	local Cell = self.Cells[ MemRef ]
 	local Class,ArryClass = Cell.Return, Cell.ArryClass
 
+	if Cell.Modifier == "class" then
+		return { Trace = Trace, Inline = string.format( "THIS.Memory[%i]", MemRef ), Return = Class, ArryClass = ArryClass, FLAG = EXPADV_INLINE, IsRaw = true, Variable = Variable, Scope = MemScope, MemRef = MemRef }
+	end
+	
 	return { Trace = Trace, Inline = string.format( "Context.Memory[%i]", MemRef ), Return = Class, ArryClass = ArryClass, FLAG = EXPADV_INLINE, IsRaw = true, Variable = Variable, Scope = MemScope, MemRef = MemRef }
 end
 
@@ -387,6 +399,10 @@ function Compiler:Compile_DELTA( Trace, Variable )
 		self:TraceError( Trace, "Delta operator ($) does not support '$%s'", self:NiceClass( Class ) )
 	end
 
+	if self.ClassCells[MemRef] then -- Tempory :D
+		self:TraceError( Trace, "Delta operator ($) does not support use inside class's" )
+	end
+
 	return Operator.Compile( self, Trace, Quick( MemRef, "n" ) )
 end
 
@@ -398,7 +414,11 @@ function Compiler:Compile_CHANGED( Trace, Variable )
 	local Operator = self:LookUpOperator( "~", "n" )
 	
 	if !Operator then
-		self:TraceError( Trace, "changed operator (~) does not support '~%s'", self:NiceClass( Class ) )
+		self:TraceError( Trace, "Changed operator (~) does not support '~%s'", self:NiceClass( Class ) )
+	end
+
+	if self.ClassCells[MemRef] then -- Tempory :D
+		self:TraceError( Trace, "Changed operator (~) does not support use inside class's" )
 	end
 
 	return Operator.Compile( self, Trace, Quick( MemRef, "n" ) )

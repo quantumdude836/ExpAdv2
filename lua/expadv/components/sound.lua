@@ -222,7 +222,7 @@ Component:AddPreparedFunction( "setVolume", "ac:n", "", [[if !IsValid( @value 1)
 @value 1:SetVolume(@value 2 * 0.01)]] )
 Component:AddFunctionHelper( "setVolume", "ac:n", "Sets the volume of a sound channel" )
 
-Component:AddInlineFunction( "canPlayFromURL", "", "b", [[EXPADV.CanAccessFeature(Context.entity, "Sounds from url")]] )
+Component:AddInlineFunction( "canPlayFromURL", "", "b", [[EXPADV.CanAccessFeature(Context.entity, "PlayURL")]] )
 Component:AddFunctionHelper( "canPlayFromURL", "", "Returns true if this entity can play audio from url." )
 
 
@@ -248,9 +248,9 @@ end
 
 EXPADV.ClientOperators()
 
-Component:AddVMFunction( "playURL", "s,s,d,d", "", 
+Component:AddVMFunction( "PlayURL", "s,s,d,d", "", 
 	function( Context, Trace, URL, Flags, Sucess, Fail )
-		if !IsValid(Context.entity) or !EXPADV.CanAccessFeature(Context.entity, "Sounds from url") then return end
+		if !IsValid(Context.entity) or !EXPADV.CanAccessFeature(Context.entity, "PlayURL") then return end
 
 		sound.PlayURL( URL, Flags,
 			function( Channel, Er_ID, Er_Name ) 
@@ -261,17 +261,17 @@ Component:AddVMFunction( "playURL", "s,s,d,d", "",
 					end
 					Context.Data.AudioCount = Context.Data.AudioCount + 1
 					Context.Data.Audio[Context.Data.AudioCount] = Channel
-					Context:Execute( "playURL", Sucess, { Channel, "_ac" } )
+					Context:Execute( "PlayURL", Sucess, { Channel, "_ac" } )
 				elseif Fail then
-					Context:Execute( "playURL", Fail, { Er_ID, "n" }, { Er_Name, "s" } )
+					Context:Execute( "PlayURL", Fail, { Er_ID, "n" }, { Er_Name, "s" } )
 				end
 			end )
 	end )
 
-EXPADV.AddFunctionAlias( "playURL", "s,s,d" )
+EXPADV.AddFunctionAlias( "PlayURL", "s,s,d" )
 
-Component:AddFunctionHelper( "playURL", "s,s,d,d", "Plays sound from 1st string URL with 2st string mode, executes 1st delegate with audio on success else 2nd delegate.")
-Component:AddFunctionHelper( "playURL", "s,s,d", "Plays sound from 1st string URL with 2st string mode executes the delegate with audio on success.")
+Component:AddFunctionHelper( "PlayURL", "s,s,d,d", "Plays sound from 1st string URL with 2st string mode, executes 1st delegate with audio on success else 2nd delegate.")
+Component:AddFunctionHelper( "PlayURL", "s,s,d", "Plays sound from 1st string URL with 2st string mode executes the delegate with audio on success.")
 
 
 /* -----------------------------------------------------------------------------------
@@ -286,7 +286,7 @@ Component:AddEvent( "disableSoundsFromURL", "", "" )
 	@: Features.
    --- */
 
-Component:AddFeature( "Sounds from url", "Stream audio via url feeds.", "fugue/speaker-volume.png" )
+Component:AddFeature( "PlayURL", "Stream audio via url feeds.", "tek/icons/iconsound.png" )
 
 if CLIENT then
 
@@ -305,7 +305,7 @@ if CLIENT then
 	end
 
 	function Component:OnChangeFeatureAccess(Entity, Feature, Value)
-		if Feature ~= "Sounds from url" then return end
+		if Feature ~= "PlayURL" then return end
 		
 		if Value then
 			Entity:CallEvent( "enableSoundsFromURL" )

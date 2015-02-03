@@ -511,7 +511,7 @@ if CLIENT then
 	end )
 end
 
-Component:AddFeature( "Derma", "Using Derma GUI components.", "fugue/block.png" )
+Component:AddFeature( "Derma", "Using Derma GUI components.", "tek/icons/iconderma.png" )
 
 if CLIENT then
 	function Component:OnChangeFeatureAccess(Entity, Feature, Value)

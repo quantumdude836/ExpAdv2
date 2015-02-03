@@ -618,7 +618,7 @@ end
    --- */
 
 Component:AddFeature( "HUD", "Drawing directly onto your heads up display.", "fugue/monitor-window-3d.png" )
-Component:AddFeature( "3DRendering", "Rendering 3D objects such as sprites in world.", "fugue/fire.png" )
+Component:AddFeature( "3DRendering", "Rendering 3D objects such as sprites in world.", "tek/icons/icon3d.png" )
 
 if CLIENT then
 	function Component:OnChangeFeatureAccess(Entity, Feature, Value)

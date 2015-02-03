@@ -332,7 +332,7 @@ do --- Net component: used to sync from server to client :D
 
 	Component:CreateSetting( "queuesize", 5 )
 
-	Component:AddVMFunction( "netBroadcast", "nst:s", "", function( Context, Trace, Stream, Name )
+	Component:AddVMFunction( "broadcast", "nst:s", "", function( Context, Trace, Stream, Name )
 		local NetMessages = (Context.Data.NetMessages or 0)
 		
 		if NetMessages + 1 > Component:ReadSetting("queuesize", 5) then
@@ -343,9 +343,9 @@ do --- Net component: used to sync from server to client :D
 
 		table.insert( NetQueue, { Context.entity, Name, Stream } ) -- Slow but meh!
 		HasQueued = true
-	end )
+	end ); EXPADV.AddFunctionAlias( "netBroadcast", "nst:s" )
 
-	Component:AddVMFunction( "netBroadcast", "nst:ply,s", "", function( Context, Trace, Stream, Player, Name )
+	Component:AddVMFunction( "send", "nst:ply,s", "", function( Context, Trace, Stream, Player, Name )
 		if !IsValid( Player ) or !Player:IsPlayer( ) then return end
 
 		local NetMessages = (Context.Data.NetMessages or 0)
@@ -358,11 +358,11 @@ do --- Net component: used to sync from server to client :D
 
 		table.insert( NetQueue, { Context.entity, Name, Stream, { Player } } ) -- Slow but meh!
 		HasQueued = true
-	end )
+	end ); EXPADV.AddFunctionAlias( "netBroadcast", "nst:ply,s" )
 
 
-	Component:AddFunctionHelper( "netBroadcast", "nst:s", "Sends a stream to clientside code on all clients." )
-	Component:AddFunctionHelper( "netBroadcast", "nst:ply,s", "Sends a stream to clientside code to client." )
+	Component:AddFunctionHelper( "broadcast", "nst:s", "Sends a stream to clientside code on all clients." )
+	Component:AddFunctionHelper( "send", "nst:ply,s", "Sends a stream to clientside code to client." )
 	
 	EXPADV.ClientOperators( )
 	

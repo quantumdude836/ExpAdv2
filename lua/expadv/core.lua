@@ -362,6 +362,7 @@ function EXPADV.LoadCore( )
 	EXPADV.AddComponentFile( "derma" )
 	EXPADV.AddComponentFile( "keyboard" )
 	EXPADV.AddComponentFile( "context" )
+	EXPADV.AddComponentFile( "android" )
 
 	EXPADV.CallHook( "AddComponents" )
 

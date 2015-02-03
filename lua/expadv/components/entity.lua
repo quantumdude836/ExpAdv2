@@ -99,8 +99,9 @@ Component:AddFunctionHelper( "validPhysics", "e:", "Returns if the given entity 
 Component:AddInlineFunction( "pos", "e:", "v", "(@value 1:IsValid() and @value 1:GetPos() or Vector(0,0,0))")
 Component:AddFunctionHelper( "pos", "e:", "Gets the position of the given entity.")
 
-Component:AddInlineFunction( "angle", "e:", "a", "(@value 1:IsValid() and @value 1:GetAngles() or Angle(0,0,0))")
-Component:AddFunctionHelper( "angle", "e:", "Gets the angle of the given entity.")
+Component:AddInlineFunction( "ang", "e:", "a", "(@value 1:IsValid() and @value 1:GetAngles() or Angle(0,0,0))")
+Component:AddFunctionHelper( "ang", "e:", "Gets the angle of the given entity.")
+EXPADV.AddFunctionAlias( "angle", "e:" )
 
 Component:AddInlineFunction( "forward", "e:", "v", "(@value 1:IsValid() and @value 1:GetForward() or Vector(0,0,0))")
 Component:AddFunctionHelper( "forward", "e:", "Gets the forward vector of the given entity.")

@@ -356,6 +356,18 @@ end
    		self.ReturnDeph = self.ReturnDeph - 1
    end
 
+   function Compiler:PushClassDeph( )
+   		self.ClassDeph = self.ClassDeph + 1
+   		self.ClassMemory[self.ClassDeph] = true
+   		self.InClass = true
+   end
+
+   function Compiler:PopClassDeph( )
+   		self.ClassMemory[self.ClassDeph] = nil
+   		self.ClassDeph = self.ClassDeph - 1
+   		self.InClass = self.ClassMemory[self.ClassDeph]
+   	end
+
 /* --- --------------------------------------------------------------------------------
 	@: Memory Cells
    --- */
@@ -447,7 +459,21 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier, Comparator )
 		return self.Cells[ MemRef ]
 	end
 
-	if Modifier == "static" then
+	if Modifier == "class" then
+		local MemRef = self.Scope[ Variable ]
+
+		if MemRef and self:TestCell( Trace, MemRef, Class, Variable, Comparator ) then
+			return self.Cells[ MemRef ]
+		end
+
+		MemRef = self:NextMemoryRef( )
+
+		self.Scope[Variable] = MemRef
+		self.ClassCells[MemRef] = MemRef
+		self.Cells[ MemRef ] = { Variable = Variable, Memory = MemRef, Scope = self.ScopeID, Return = ClassObj.Short, ClassObj = ClassObj, Modifier = "class", Server = self.IsServerScript, Client = self.IsClientScript }
+
+		return self.Cells[ MemRef ]
+	elseif Modifier == "static" then
 		local MemRef = self.Scope[ Variable ]
 
 		if MemRef and self:TestCell( Trace, MemRef, Class, Variable, Comparator ) then
@@ -690,7 +716,7 @@ function EXPADV.CreateCompiler(Script, Files)
 	self.Cells, self.InPorts, self.OutPorts, self.OutClick = { }, { }, { }, { }
 	self.FreshMemory, self.MemoryDeph, self.LambdaDeph, self.LoopDeph = { }, 0, 0, 0
 	self.ReturnOptional, self.ReturnTypes, self.ReturnDeph = { }, { }, 0
-
+	self.ClassDeph, self.ClassCells, self.ClassMemory = 0, { }, { }
 	return self
 end
 

@@ -40,7 +40,6 @@ function ENT:Initialize( )
 			self.Outputs = WireLib.CreateOutputs( self, { } )
 		end
 	end
-
 	self:ResetStatus( )
 end
 
@@ -216,6 +215,33 @@ function ENT:CallEvent( Name, ... )
 	return self.Context:Execute( "Event " .. Name, Event, ... )
 end
  
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Use.
+   --- */
+
+if SERVER then
+	util.AddNetworkString("expadv.used")
+
+	function ENT:Use(Player)
+		if !IsValid(Player) or !Player:IsPlayer() then return end
+
+		EXPADV.CallHook( "EntityUsed", self, Player )
+
+		net.Start("expadv.used")
+			net.WriteUInt(self:EntIndex(), 16)
+		net.Send(Player)
+	end
+end
+
+if CLIENT then
+	net.Receive("expadv.used", function()
+		local E = Entity(net.ReadUInt(16))
+		if IsValid(E) and E.ExpAdv then
+			EXPADV.CallHook("EntityUsed", E, LocalPlayer())
+		end
+	end)
+end
+
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Context Menu
    --- */
