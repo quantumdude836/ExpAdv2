@@ -21,7 +21,7 @@ end )
 
 Component:AddVMFunction("requestFeature", "s,b", "", function(Context, Trace, Feature, Value)
 	if !EXPADV.Features[Feature] then return end -- Todo: Exception maybe?
-	Context.Data.Features.Requested[Feature] = Value
+	Context.Data.Features[Feature] = Value
 end )
 
 function Component:OnPostLoadFeatures()
@@ -54,11 +54,13 @@ if CLIENT then
 		Gate.FeaturesPanel = FeaturesPanel
 	end
 	
+	hook.Add( "Expadv.RegisterContext", "expadv.android", function( Context )
+		Context.Data.Features = { }
+	end)
+
 	hook.Add( "Expadv.EntityUsed", "expadv.android", function( Gate )
 		local Context = Gate.Context
 		if !Context or !Context.Online then return end
-
-		Context.Data.Features = { }
 		EXPADV.RequestFeatures(Gate, Context)
 	end )
 end
