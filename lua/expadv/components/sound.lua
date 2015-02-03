@@ -248,7 +248,7 @@ end
 
 EXPADV.ClientOperators()
 
-Component:AddVMFunction( "PlayURL", "s,s,d,d", "", 
+Component:AddVMFunction( "playURL", "s,s,d,d", "", 
 	function( Context, Trace, URL, Flags, Sucess, Fail )
 		if !IsValid(Context.entity) or !EXPADV.CanAccessFeature(Context.entity, "PlayURL") then return end
 
@@ -268,10 +268,10 @@ Component:AddVMFunction( "PlayURL", "s,s,d,d", "",
 			end )
 	end )
 
-EXPADV.AddFunctionAlias( "PlayURL", "s,s,d" )
+EXPADV.AddFunctionAlias( "playURL", "s,s,d" )
 
-Component:AddFunctionHelper( "PlayURL", "s,s,d,d", "Plays sound from 1st string URL with 2st string mode, executes 1st delegate with audio on success else 2nd delegate.")
-Component:AddFunctionHelper( "PlayURL", "s,s,d", "Plays sound from 1st string URL with 2st string mode executes the delegate with audio on success.")
+Component:AddFunctionHelper( "playURL", "s,s,d,d", "Plays sound from 1st string URL with 2st string mode, executes 1st delegate with audio on success else 2nd delegate.")
+Component:AddFunctionHelper( "playURL", "s,s,d", "Plays sound from 1st string URL with 2st string mode executes the delegate with audio on success.")
 
 
 /* -----------------------------------------------------------------------------------
@@ -279,8 +279,8 @@ Component:AddFunctionHelper( "PlayURL", "s,s,d", "Plays sound from 1st string UR
    --- */
 
 EXPADV.ClientEvents( )
-Component:AddEvent( "enableSoundsFromURL", "", "" )
-Component:AddEvent( "disableSoundsFromURL", "", "" )
+Component:AddEvent( "enablePlayURL", "", "" )
+Component:AddEvent( "disablePlayURL", "", "" )
 
 /* -----------------------------------------------------------------------------------
 	@: Features.
@@ -291,7 +291,7 @@ Component:AddFeature( "PlayURL", "Stream audio via url feeds.", "tek/icons/icons
 if CLIENT then
 
 	local function DisableSounds( Entity )
-		Entity:CallEvent( "disableSoundsFromURL" )
+		Entity:CallEvent( "disablePlayURL" )
 
 		local Context = Entity.Context
 		if !Context or (Context.Data.AudioCount or 0) <= 0 then return end
@@ -308,7 +308,7 @@ if CLIENT then
 		if Feature ~= "PlayURL" then return end
 		
 		if Value then
-			Entity:CallEvent( "enableSoundsFromURL" )
+			Entity:CallEvent( "enablePlayURL" )
 		else
 			DisableSounds( Entity )
 		end
