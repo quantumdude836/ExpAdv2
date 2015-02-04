@@ -505,6 +505,113 @@ end
 Component:AddFunctionHelper( "end3D2D", "", "Stops current 3D2D rendering." )
 
 /* -----------------------------------------------------------------------------------
+	@: URL Materials
+	@: Author: Szymekk
+   --- */
+
+Component:CreateSetting("maxurlmaterials", 15)
+Component:CreateSetting("maxurlmatsize", 512)
+
+function Component:OnRegisterContext(Context)
+	Context.Data.Materials = { }
+end
+
+EXPADV.ClientOperators()
+
+local TextureSize = Component:ReadSetting("maxurlmatsize", 512)
+local HTML = HTML
+local URLQueue = { }
+local CanLoad = true
+
+local function Download(Context, Name, URL, Width, Height)
+	if IsValid(HTML) then
+		HTML:Remove()
+	end
+
+	local htmlpanel = vgui.Create("HTML")
+	htmlpanel:SetVisible(true)
+	htmlpanel:SetSize(Width, Height)
+	htmlpanel:SetPos(ScrW()-1, ScrH()-1)
+	htmlpanel:SetHTML(
+		[[		
+			<style type="text/css">
+				html 
+				{			
+					margin: 0px 0px;
+					overflow:hidden;
+				}
+			</style>
+
+			<body>
+				<img src="]] .. URL .. '"width="' .. Width .. '" height="' .. Height .. [[" />
+			</body>
+		]]
+	)
+
+	local uid = "ea2urlmaterial_" .. Name .. Context.entity:EntIndex()
+
+	local spawn, nextUpdate = RealTime(), RealTime() + 0.5
+	hook.Add("Think", uid, function()
+		if !IsValid(Context.entity) || !IsValid(htmlpanel) || RealTime() - spawn > 5 then
+			htmlpanel:Remove()
+			CanLoad = true
+			hook.Remove("Think", uid)
+			return
+		end
+
+		if RealTime() < nextUpdate then return end
+
+		nextUpdate = RealTime() + 0.1
+
+		if htmlpanel:IsLoading() then
+			return
+		end
+
+		local mat = htmlpanel:GetHTMLMaterial()
+
+		if !mat then return end
+
+		local vertex_mat = CreateMaterial("ea2urlmat_" .. Name, "UnlitGeneric", { ["$vertexcolor"] = 1, ["$vertexalpha"] = 1, ["$ignorez"] = 1, ["$nolod"] = 1 } )	
+		local tex = mat:GetTexture("$basetexture")
+		tex:Download()
+		vertex_mat:SetTexture("$basetexture", tex)				
+		Context.Data.Materials[Name] = vertex_mat
+
+		htmlpanel:Remove()
+		CanLoad = true
+		hook.Remove("Think", uid)
+	end)
+end
+
+hook.Add("Think", "EA2_UrlTexture", function()
+	if #URLQueue > 1 && CanLoad then
+		CanLoad = false
+		Download(unpack(URLQueue[#URLQueue]))
+		table.remove(URLQueue, #URLQueue)
+	end
+	if #URLQueue == 0 then CanLoad = true end
+end)
+
+Component:AddVMFunction("downloadURLMaterial", "s,s,n,n", "", function(Context, Trace, Name, URL, Width, Height)
+	if (Context.Data.Materials[Name] || #Context.Data.Materials < Component:ReadSetting("maxurlmaterials", 15)) && #URLQueue < 10 then
+		Context.Data.Materials[Name] = Context.Data.Materials[Name] or Material("debug/debugempty")
+		table.insert(URLQueue, { Context, Name, URL, math.Clamp(Width or TextureSize, 1, TextureSize), math.Clamp(Height or TextureSize, 1, TextureSize) })
+	end
+end)
+EXPADV.AddFunctionAlias("downloadURLMaterial", "s,s")
+
+Component:AddFunctionHelper("downloadURLMaterial", "s,s,n,n", "Downloads a material from specified URL (name,url,width,height).")
+
+Component:AddPreparedFunction("setURLMaterial", "s", "", [[
+if Context.Data.Materials && Context.Data.Materials[@value 1] then
+	@define mat = Context.Data.Materials[@value 1]
+	$render.SetMaterial(@mat)
+	$surface.SetMaterial(@mat)
+end
+]])
+
+
+/* -----------------------------------------------------------------------------------
 	@: Hud Event
    --- */
 
