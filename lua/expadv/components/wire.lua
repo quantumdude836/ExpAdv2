@@ -120,18 +120,16 @@ local function WriteCell( Context, Trace, WireLink, Address, Value )
 	return WireLink:WriteCell( Address, Value ) or false
 end
 
-local function ReadCell( Context, Trace, WireLink, Address, Value )
+local function ReadCell( Context, Trace, WireLink, Address )
 	if !IsValid( WireLink ) or !WireLink.ReadCell then return 0 end
-	return WireLink:ReadCell( Address, Value ) or 0
+	return WireLink:ReadCell( Address ) or 0
 end
 
 Component:AddVMFunction( "writeCell", "wl:n,n", "b", WriteCell )
-
 Component:AddVMFunction( "readCell", "wl:n", "n", ReadCell )
 
-WireLink:AddVMOperator( "set", "wl,s,n", "b", WriteCell )
-
-WireLink:AddVMOperator( "get", "wl,s", "n", ReadCell )
+WireLink:AddVMOperator( "set", "wl,n,n", "b", WriteCell )
+WireLink:AddVMOperator( "get", "wl,n", "n", ReadCell )
 
 /* --- --------------------------------------------------------------------------------
 	@: Read Array
@@ -143,7 +141,7 @@ local function ReadArray( Context, Trace, WireLink, Start, End )
 	if !IsValid( WireLink ) or !WireLink.ReadCell then return Array end
 
 	for Address = Start, Start + End do
-		Array[#Array + 1] = WireLink:WriteCell( ReadCell ) or 0
+		Array[#Array + 1] = WireLink:ReadCell( ReadCell ) or 0
 	end
 
 	return Array

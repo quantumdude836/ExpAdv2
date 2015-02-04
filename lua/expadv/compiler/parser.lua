@@ -783,11 +783,11 @@ end
 
 function Compiler:Expression_Set( Trace, Statment, Expression, Index, Class )
 	if !Statment then
-		self:ExludeToken("ass", "Set operator (%s[%s]=) must not appear inside an equation", self:NiceClass( Expression, Index ) )
-		self:ExludeToken("aadd", "Arithmatic set operator (%s[%s]+=) must not appear inside an equation", self:NiceClass( Expression, Index ) )
-		self:ExludeToken("asub", "Arithmatic set operator (%s[%s]-=) must not appear inside an equation", self:NiceClass( Expression, Index ) )
-		self:ExludeToken("adiv", "Arithmatic set operator (%s[%s]/=) must not appear inside an equation", self:NiceClass( Expression, Index ) )
-		self:ExludeToken("amul", "Arithmatic set operator (%s[%s]+=) must not appear inside an equation", self:NiceClass( Expression, Index ) )
+		self:ExcludeToken("ass", "Set operator (%s[%s]=) must not appear inside an equation", self:NiceClass( Expression, Index ) )
+		self:ExcludeToken("aadd", "Arithmatic set operator (%s[%s]+=) must not appear inside an equation", self:NiceClass( Expression, Index ) )
+		self:ExcludeToken("asub", "Arithmatic set operator (%s[%s]-=) must not appear inside an equation", self:NiceClass( Expression, Index ) )
+		self:ExcludeToken("adiv", "Arithmatic set operator (%s[%s]/=) must not appear inside an equation", self:NiceClass( Expression, Index ) )
+		self:ExcludeToken("amul", "Arithmatic set operator (%s[%s]+=) must not appear inside an equation", self:NiceClass( Expression, Index ) )
 		self:TraceError(Trace, "You are not looking for this compiler error!")
 	elseif self:AcceptToken("ass") then
 		return self:Compile_SET( Trace, Expression, Index, self:Expression( Trace ), Class )
