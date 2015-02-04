@@ -547,6 +547,7 @@ local function Download(Context, Name, URL, Width, Height)
 			</body>
 		]]
 	)
+	HTML = htmlpanel
 
 	local uid = "ea2urlmaterial_" .. Name .. Context.entity:EntIndex()
 
