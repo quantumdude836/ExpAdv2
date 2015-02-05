@@ -16,25 +16,15 @@ EXPADV.ClientOperators( )
    --- */
 
 Component.ValidFonts = {
-	["DebugFixed"] = true,
-	["DebugFixedSmall"] = true,
-	["Default"] = true,
-	["Marlett"] = true,
-	["Trebuchet18"] = true,
-	["Trebuchet24"] = true,
-	["HudHintTextLarge"] = true,
-	["HudHintTextSmall"] = true,
-	["CenterPrintText"] = true,
-	["HudSelectionText"] = true,
-	["CloseCaption_Normal"] = true,
-	["CloseCaption_Bold"] = true,
-	["CloseCaption_BoldItalic"] = true,
+	["Coolvetica"] = true,
+	["Arial"] = true,
+	["Lucida Console"] = true,
+	["Trebuchet"] = true,
+	["Courier New"] = true,
+	["Times New Roman"] = true,
 	["ChatFont"] = true,
-	["TargetID"] = true,
-	["TargetIDSmall"] = true,
-	["HL2MPTypeDeath"] = true,
-	["BudgetLabel"] = true,
-	["HL2MPTypeDeath"] = true,
+	["Marlett"] = true,
+	["Default"] = true,
 	["DermaDefault"] = true,
 	["DermaDefaultBold"] = true,
 	["DermaLarge"] = true
@@ -64,6 +54,13 @@ function Component.CreateFont( Base, Size )
 
 	return FontName
 end
+
+Component:AddVMFunction( "validFonts", "", "ar",
+	function( Context, Trace )
+		local ar = {__type = "n"}
+		for Font, _ in pairs(Component.ValidFonts) do ar[#ar + 1] = Font end
+		return ar
+	end )
 
 Component:AddVMFunction( "setFont", "s,n", "s",
 	function( Context, Trace, Base, Size )
