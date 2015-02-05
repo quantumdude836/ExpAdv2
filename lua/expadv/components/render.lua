@@ -47,8 +47,8 @@ function Component.CreateFont( Base, Size )
 	if Component.CreatedFonts[FontName] then return FontName end
 	
 	if !Component.ValidFonts[Base] then
-		Base = "default"
-		FontName = string.format( "expadv_default_%i", Size )
+		Base = "Default"
+		FontName = string.format( "expadv_Default_%i", Size )
 		if Component.CreatedFonts[FontName] then return FontName end
 	end
 
@@ -504,6 +504,14 @@ end
 
 Component:AddFunctionHelper( "end3D2D", "", "Stops current 3D2D rendering." )
 
+Component:AddPreparedFunction("renderEnableDepth", "b", "", [[
+if Context.In3DRender then
+	$render.OverrideDepthEnable(@value 1, true)
+end
+]])
+
+Component:AddFunctionHelper("renderEnableDepth", "b", "Overrides the write behaviour of all next rendering operations towards the depth buffer.")
+
 /* -----------------------------------------------------------------------------------
 	@: URL Materials
 	@: Author: Szymekk
@@ -658,16 +666,18 @@ if CLIENT then
 			
 			if(Context.event_draw3DOverlay && EXPADV.CanAccessFeature(Context.entity, "3DRendering")) then
 				cam.Start3D(EyePos(), EyeAngles())
-					Context.In2DRender = true
+					Context.In3DRender = true
 					Context.Matrices = 0
 
 					Context:Execute("Event draw3DOverlay", Context.event_draw3DOverlay)
-
+					
+					render.OverrideDepthEnable(false,false)
+					
 					for i=1, Context.Matrices do
 						cam.PopModelMatrix( )
 					end
 
-					Context.In2DRender = false
+					Context.In3DRender = false
 				cam.End3D()
 			end
 		end
@@ -704,6 +714,8 @@ if CLIENT then
 
 				Context:Execute( "Event draw3D", Context.event_draw3D )
 
+				render.OverrideDepthEnable(false,false)
+				
 				for i=1, Context.Matrices do
 					cam.PopModelMatrix( )
 				end
