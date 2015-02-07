@@ -636,7 +636,7 @@ end]] )
 
 Component:AddPreparedFunction( "setBoneAngle", "h:n,a", "", [[
 if IsValid( @value 1 ) and @value 1.player == Context.player then
-	@value 1:SetBoneAng( @value 2, @value 3 )
+	@value 1:SetBoneAngle( @value 2, @value 3 )
 end]] )
 
 Component:AddPreparedFunction( "setBoneScale", "h:n,v", "", [[
