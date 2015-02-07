@@ -227,7 +227,7 @@ function Compiler:MakeVirtual( Instruction, Force )
 
 	local Native = table.concat( {
 		"return function( Context )",
-			"setfenv( 1, Context.Enviroment )",
+			"setfenv( 1, Context:SandBox() )",
 			Instruction.Prepare or "",
 			"return " .. (Instruction.Inline or ""),
 		"end"
@@ -252,6 +252,17 @@ end
 /* --- --------------------------------------------------------------------------------
 	@: Classes.
    --- */
+function Compiler:GetUserClass(Name)
+	self.OOP = self.OOP or {}
+	if self.OOP[Name] then return self.OOP[Name] end
+
+	local Class = setmetatable( {Name = Name, Short = #self.OOP+1, DeriveFrom = "generic"}, EXPADV.BaseClassObj )
+	self.OOP[Name] = Class
+	self.OOP[Class.Short] = Class
+
+	return  Class
+end
+
 function Compiler:GetClass( Trace, ClassName, bNoError )
 	
 	local Class
@@ -260,6 +271,10 @@ function Compiler:GetClass( Trace, ClassName, bNoError )
 		Class = EXPADV.GetClass( ClassName, true )
 	end
 	
+	if self.Classes[ClassName] then
+		return self:GetUserClass(ClassName)
+	end
+
 	if !Class and bNoError then return end
 
 	if !Class then --or (Class.Name ~= ClassName and !EXPADV.ClassAliases[ ClassName ] ) then
@@ -329,11 +344,13 @@ end
 
    function Compiler:PushLambdaDeph( )
 		self:PushMemory( )
+		self:PushClassDeph(false)
    		self.LambdaDeph = self.LambdaDeph + 1
    end
 
    function Compiler:PopLambdaDeph( )
    		local Memory = self:PopMemory( )
+   		self:PopClassDeph()
    		self.LambdaDeph = self.LambdaDeph - 1
    		return Memory
    end
@@ -356,10 +373,10 @@ end
    		self.ReturnDeph = self.ReturnDeph - 1
    end
 
-   function Compiler:PushClassDeph( )
+   function Compiler:PushClassDeph(InClass)
    		self.ClassDeph = self.ClassDeph + 1
-   		self.ClassMemory[self.ClassDeph] = true
-   		self.InClass = true
+   		self.ClassMemory[self.ClassDeph] = InClass
+   		self.InClass = InClass
    end
 
    function Compiler:PopClassDeph( )
@@ -470,7 +487,8 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier, Comparator )
 
 		self.Scope[Variable] = MemRef
 		self.ClassCells[MemRef] = MemRef
-		self.Cells[ MemRef ] = { Variable = Variable, Memory = MemRef, Scope = self.ScopeID, Return = ClassObj.Short, ClassObj = ClassObj, Modifier = "class", Server = self.IsServerScript, Client = self.IsClientScript }
+		self.Cells[MemRef] = { Variable = Variable, Memory = MemRef, Scope = self.ScopeID, Return = ClassObj.Short, ClassObj = ClassObj, Modifier = "class", Server = self.IsServerScript, Client = self.IsClientScript }
+		self.curClass.Cells[MemRef] = MemRef
 
 		return self.Cells[ MemRef ]
 	elseif Modifier == "static" then
@@ -671,9 +689,9 @@ function Compiler:CheckStatus() end
 	@: Base Env
    --- */
 
+
 EXPADV.BaseEnv = {
 	__index = function( _, Value )
-			debug.Trace( )
 			error("Attempt to reach Lua environment " .. Value, 1 )
 	end, __newindex = function( _, Value )
 			error("Attempt to write to lua environment " .. Value, 1 )
@@ -688,7 +706,7 @@ local function CreateEnviroment( )
 		EXPADV = EXPADV, SERVER = SERVER, CLIENT = CLIENT,
 		Vector = Vector, Vector2 = Vector2, Angle = Angle, Color = Color, Quaternion = Quaternion,
 		pairs = pairs, ipairs = ipairs,
-		pcall = pcall, error = error, unpack = unpack,
+		pcall = pcall, error = error, unpack = unpack, setmetatable = setmetatable,
 		print = print, MsgN = MsgN, tostring = tostring, tonumber = tonumber,
 		IsValid = IsValid, Entity = Entity,
 		math = math, string = string, table = table,
@@ -716,7 +734,7 @@ function EXPADV.CreateCompiler(Script, Files)
 	self.Cells, self.InPorts, self.OutPorts, self.OutClick = { }, { }, { }, { }
 	self.FreshMemory, self.MemoryDeph, self.LambdaDeph, self.LoopDeph = { }, 0, 0, 0
 	self.ReturnOptional, self.ReturnTypes, self.ReturnDeph = { }, { }, 0
-	self.ClassDeph, self.ClassCells, self.ClassMemory = 0, { }, { }
+	self.ClassDeph, self.ClassCells, self.ClassMemory, self.Classes  = 0, { }, { }, {}
 	return self
 end
 
@@ -731,7 +749,7 @@ function EXPADV.SolidCompile(Script, Files)
 	
 	if !Status then return false, Instruction end
 
-	setmetatable(self.Enviroment, EXPADV.BaseEnv)
+	//setmetatable(self.Enviroment, EXPADV.BaseEnv)
 
 	return true, self, self:FixPlaceHolders(Instruction)
 end
@@ -762,7 +780,7 @@ function EXPADV.NewSoftCompiler(Script, Files)
 
 		if !Status then return self:OnFail(Instruction) end
 
-		setmetatable(self.Enviroment, EXPADV.BaseEnv)
+		//setmetatable(self.Enviroment, EXPADV.BaseEnv)
 
 		Instruction = self:FixPlaceHolders(Instruction)
 

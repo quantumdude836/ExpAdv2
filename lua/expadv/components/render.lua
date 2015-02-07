@@ -25,6 +25,7 @@ Component.ValidFonts = {
 	["ChatFont"] = true,
 	["Marlett"] = true,
 	["Default"] = true,
+	["Roboto"] = true,
 	["DermaDefault"] = true,
 	["DermaDefaultBold"] = true,
 	["DermaLarge"] = true

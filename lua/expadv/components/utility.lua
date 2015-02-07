@@ -58,6 +58,24 @@ Component:AddFunctionHelper( "hookCall", "s,...", "Calls the named hook, passing
 
 EXPADV.SharedOperators( )
 
+Component:AddVMFunction( "timerSimple", "n,d,...", "", function( Context, Trace, Delay, Delegate, ... )
+		local Data = Context.Data
+		Data.Timers = Data.Timers or { }
+
+		Data.Timers[#Data.Timers + 1] = {
+			Trace = Trace,
+			Delay = Delay,
+			Next = CurTime( ) + Delay,
+			Paused = false,
+			Reps = 1,
+			Count = 0,
+			Delegate = Delegate,
+			Inputs = { ... },
+		}
+	end )
+
+EXPADV.AddFunctionAlias( "timerCreate", "n,d" )
+
 Component:AddVMFunction( "timerCreate", "s,n,n,d,...", "", function( Context, Trace, Name, Delay, Reps, Delegate, ... )
 		local Data = Context.Data
 		Data.Timers = Data.Timers or { }

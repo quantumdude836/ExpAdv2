@@ -202,13 +202,13 @@ Component:AddFunctionHelper( "applyOffsetForce", "p:v,v", "Applies an offset vec
 
 Component:AddVMFunction( "applyAngForce", "p:a", "",
 	function( Context, Trace, Phys, Angle )
-
-		if Phys:IsValid() and AngleNotHuge(Angle )and EXPADV.PPCheck(Context,Phys:GetEntity( )) then
+		if Phys:IsValid() and AngleNotHuge(Angle )and EXPADV.PPCheck(Context,Phys:GetEntity()) then
 				if Angle.p != 0 or Angle.y != 0 or Angle.r != 0 then
 					
-					local up = Phys:GetUp()
-					local left = Phys:GetRight() * -1
-					local forward = Phys:GetForward()
+					local pos = Phys:GetPos()
+					local up = Phys:LocalToWorld(Vector(0,0,1)) - pos
+					local left = Phys:LocalToWorld(Vector(0,1,0)) - pos
+					local forward = Phys:LocalToWorld(Vector(1,0,0)) - pos
 					
 					if Angle.p ~= 0 then
 						local pitch = up * (Angle.p * 0.5)

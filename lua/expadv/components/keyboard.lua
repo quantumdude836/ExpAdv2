@@ -182,6 +182,26 @@ Component:AddPreparedFunction( "setKeyboardSW", "", "", "Context.Data.KB_Layout 
 Component:AddPreparedFunction( "setKeyboardNW", "", "", "Context.Data.KB_Layout = \"nw\"" )
 Component:AddPreparedFunction( "setKeyboardGE", "", "", "Context.Data.KB_Layout = \"ge\"" )
 
+Component:AddFunctionHelper("setKeyboardUk", "", "Sets the default keyboard layout for keypress events.")
+Component:AddFunctionHelper("setKeyboardUS", "", "Sets the default keyboard layout for keypress events.")
+Component:AddFunctionHelper("setKeyboardSW", "", "Sets the default keyboard layout for keypress events.")
+Component:AddFunctionHelper("setKeyboardNW", "", "Sets the default keyboard layout for keypress events.")
+Component:AddFunctionHelper("setKeyboardGE", "", "Sets the default keyboard layout for keypress events.")
+
+function Component:OnRegisterContext(Context) Context.Data.KB_Users = {} end
+
+Component:AddPreparedFunction( "setKeyboardUk", "ply:", "", "Context.Data.KB_Users[@value 1] = \"en\"" )
+Component:AddPreparedFunction( "setKeyboardUS", "ply:", "", "Context.Data.KB_Users[@value 1] = \"us\"" )
+Component:AddPreparedFunction( "setKeyboardSW", "ply:", "", "Context.Data.KB_Users[@value 1] = \"sw\"" )
+Component:AddPreparedFunction( "setKeyboardNW", "ply:", "", "Context.Data.KB_Users[@value 1] = \"nw\"" )
+Component:AddPreparedFunction( "setKeyboardGE", "ply:", "", "Context.Data.KB_Users[@value 1] = \"ge\"" )
+
+Component:AddFunctionHelper("setKeyboardUk", "ply:", "Sets the keyboard layout for a players keypress events.")
+Component:AddFunctionHelper("setKeyboardUS", "ply:", "Sets the keyboard layout for a players keypress events.")
+Component:AddFunctionHelper("setKeyboardSW", "ply:", "Sets the keyboard layout for a players keypress events.")
+Component:AddFunctionHelper("setKeyboardNW", "ply:", "Sets the keyboard layout for a players keypress events.")
+Component:AddFunctionHelper("setKeyboardGE", "ply:", "Sets the keyboard layout for a players keypress events.")
+
 /* --- --------------------------------------------------------------------------------
 @: Events.
    --- */
@@ -213,7 +233,8 @@ hook.Add( "PlayerButtonDown", "expadv.keys", function( Ply, Key )
 		local Event = Context["event_keypress"]
 		
 		if Event then
-			local Ascii = GetKey(Context.Data.KB_Layout, Key, LShift[Ply], RShift[Ply])
+			local Layout = Context.Data.KB_Users[Ply] or Context.Data.KB_Layout
+			local Ascii = GetKey(Layout, Key, LShift[Ply], RShift[Ply])
 			Context:Execute( "Event keypress", Event, Ply, Ascii )
 		end
 	end

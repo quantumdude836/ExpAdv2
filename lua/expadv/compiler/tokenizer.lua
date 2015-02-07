@@ -343,10 +343,10 @@ function Compiler:BuildToken( )
 			return self:NewToken( "each", "foreach")
 		elseif RawData == "function" then
 			return self:NewToken( "func", "function")
-		elseif RawData == "class" then
-			return self:NewToken( "cls", "class")
-		elseif RawData == "method" then
-			return self:NewToken( "meth", "method")
+		//elseif RawData == "class" then
+		//	return self:NewToken( "cls", "class")
+		//elseif RawData == "method" then
+		//	return self:NewToken( "meth", "method")
 		//elseif RawData == "switch" then
 			//return self:NewToken( "swh", "switch")
 		//elseif RawData == "case" then

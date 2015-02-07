@@ -162,7 +162,7 @@ function ENT:BuildInstance( Instance, Instruction )
 	
 	local Native = table.concat( {
 		"return function( Context )",
-		"setfenv( 1, Context.Enviroment )",
+		"setfenv( 1, Context:SandBox() )",
 			Instruction.Prepare or "",
 			Instruction.Inline or "",
 		"end"
@@ -173,6 +173,7 @@ function ENT:BuildInstance( Instance, Instruction )
 	local Compiled = CompileString( Native, "EXPADV2", false )
 
 	if isstring( Compiled ) then
+		print(Native)
 		return self:OnCompileError( Compiled, Instance )
 	end
 

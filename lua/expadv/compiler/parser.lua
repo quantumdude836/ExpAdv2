@@ -1163,6 +1163,7 @@ function Compiler:Statement_6( Trace )
 	elseif self:AcceptToken( "glo" ) then Modifier = "global"
 	elseif self:AcceptToken( "in" ) then Modifier = "input"
 	elseif self:AcceptToken( "out" ) then Modifier = "output"
+	elseif self.InClass then Modifier = "class"
 	end
 
 	if Modifier and !self:CheckToken( "var", "func" ) then
@@ -1489,10 +1490,68 @@ function Compiler:Statement_8( Trace )
 	return self:Statement_9( Trace )
 end
 
+/* --- --------------------------------------------------------------------------------
+	@: lemon
+   --- */
 
 -- Stage 9: Statment Expressions
 function Compiler:Statement_9( Trace )
 	-- MsgN( "Compiler -> Statement 9" )
+
+	/*if self:AcceptToken("cls") then
+		local Trace = self:GetTokenTrace( Trace )
+
+		self:RequireToken("var", "Class name expected, after class.")
+		local className = self.TokenData
+		self.curClass = {name = className, Cells = {}}
+		self.Classes[className] = self.curClass
+		
+		self:PushClassDeph(true)
+			self:RequireToken( "lcb", "Left curly bracket ({) missing, to open class" )
+				self:PushScope( )
+					local Sequence = self:Sequence( Trace, "rcb" )
+				self:PopScope( )
+			self:RequireToken( "rcb", "Right curly bracket (}) missing, to close class" )
+		self:PopClassDeph( )
+
+		if !self.curClass.hasConstructor then
+			self:TraceError(Trace, "Class %s requires at least 1 constructor.", className)
+		end
+		
+		local Instr = self:Compile_CLASS(Trace, className, Sequence, self.curClass.Cells)
+		
+		self.curClass = nil
+
+		return Instr
+	elseif self.InClass then
+		if self.PrepTokenData == self.curClass.name and self:AcceptToken("var") then 
+			local Trace = self:GetTokenTrace( Trace )
+
+			self:RequireToken( "lpa", "Left parenthesis ( () missing, to open constructor arguments" )
+		
+			self:PushScope( )
+			self:PushReturnDeph()
+
+			local Perams, UseVarg = self:Util_Perams( Trace )
+			
+			local Cell = self:CreateVariable( Trace, "this", self.curClass.name )
+			self:RequireToken( "rpa", "Right parenthesis () ) missing, to close constructor arguments" )
+			
+			local Sequence = self:GetBlock( Trace, "to close constructor" ) //self:Sequence( Trace, "rcb" )
+	
+			self:PopReturnDeph( )
+			self:PopScope( )
+	
+			return self:Compile_CONSTR( Trace, Cell, Perams, UseVarg, Sequence )
+		end
+	end*/
+
+	return self:Statement_10( Trace )
+end
+
+-- Stage 10: Statment Expressions
+function Compiler:Statement_10( Trace )
+	-- MsgN( "Compiler -> Statement 10" )
 	self:CheckStatus( )
 
 	if !self:HasTokens( ) then

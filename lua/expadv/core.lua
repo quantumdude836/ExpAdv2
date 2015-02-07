@@ -17,6 +17,28 @@ function EXPADV.Msg( ... )
 	MsgN( ... )
 end
 
+function describe(object, Message, first, ...)
+	if Message then
+		if first then Message = string.format(Message, first, ...) end
+		MsgN(Message)
+	end
+
+	local Type = string.lower(type(object))
+	MsgN("TYPE: ", Type)
+
+	if Type == "nil" then
+		return
+	elseif Type == "string" then
+		MsgN("LENGH: ", #object)
+		MsgN("VALUE: ", object)
+	elseif Type == "number" then
+		MsgN("VALUE: ", object)
+	elseif Type == "table" then
+		MsgN("Size: ", #object)
+		MsgN("Count: ", table.Count(object))
+		MsgN("POINTER: ", object)
+	end
+end
 /* --- --------------------------------------------------------------------------------
 	@: Sometimes We might need to convert objects into native.
    --- */

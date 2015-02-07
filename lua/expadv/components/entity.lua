@@ -101,7 +101,8 @@ Component:AddFunctionHelper( "pos", "e:", "Gets the position of the given entity
 
 Component:AddInlineFunction( "ang", "e:", "a", "(@value 1:IsValid() and @value 1:GetAngles() or Angle(0,0,0))")
 Component:AddFunctionHelper( "ang", "e:", "Gets the angle of the given entity.")
-EXPADV.AddFunctionAlias( "angle", "e:" )
+EXPADV.AddFunctionAlias( "angle", "e:" ); EXPADV.AddFunctionAlias( "angles", "e:" )
+//Rusketh do we really need these aliases?, yes we do other Rusketh.
 
 Component:AddInlineFunction( "forward", "e:", "v", "(@value 1:IsValid() and @value 1:GetForward() or Vector(0,0,0))")
 Component:AddFunctionHelper( "forward", "e:", "Gets the forward vector of the given entity.")

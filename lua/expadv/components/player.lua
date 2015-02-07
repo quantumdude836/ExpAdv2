@@ -155,6 +155,24 @@ Component:AddFunctionHelper("voiceVolume", "ply:", "Returns the volume of the pl
 	@: Player Events
    --- */
 
+EXPADV.SharedOperators( )
+
+Component:AddPreparedFunction( "playerByName", "s,b", "ply",
+[[for _, Ply in pairs($player.GetAll( )) do
+	if Ply:Name( ) == @value 1 or ( !@value 2 and Ply:Name( ):lower( ):find( @value 1:lower( ) ) ) then
+		@define result = Ply
+		break
+	end
+end
+]], "(@result or Entity(0))" )
+
+Component:AddFunctionHelper("playerByName", "s,b", "Returns the player with the given name, boolean is exact match.")
+
+
+/* --- --------------------------------------------------------------------------------
+	@: Player Events
+   --- */
+
 EXPADV.SharedEvents( )
 Component:AddEvent( "playerNoClip", "ply,b", "" )
 Component:AddEvent( "playerEnterVehicle", "ply,e,n", "" )

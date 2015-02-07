@@ -30,6 +30,7 @@ function EXPADV.BuildNewContext( Instance, Player, Entity ) -- Table, Player, En
 	Context.Data = { }
 	Context.Definitions = { }
 	
+	//Context.Classes = { }
 	Context.Cells = Instance.Cells or { }
 	Context.OutClick = Instance.OutClick or { }
 	Context.Strings = Instance.Strings or { }
@@ -45,6 +46,15 @@ function EXPADV.BuildNewContext( Instance, Player, Entity ) -- Table, Player, En
 	}
 
 	return Context
+end
+
+/* --- --------------------------------------------------------------------------------
+	@: SandBox
+   --- */
+function EXPADV.RootContext:SandBox()
+	local Env = {}
+	for k,v in pairs(self.Enviroment) do Env[k] = v end
+	return setmetatable(Env, EXPADV.BaseEnv)
 end
 
 /* --- --------------------------------------------------------------------------------

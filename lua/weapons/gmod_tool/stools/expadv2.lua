@@ -6,10 +6,10 @@ if !EXPADV then return ErrorNoHalt( "Expression Advanced 2, Failed to load tool.
 
 if CLIENT then
 	language.Add( "Tool.expadv2.name", "Expression Advanced 2" )
-	language.Add( "Tool.expadv2.desc", "Creates an ingame scriptable entity." )
-	language.Add( "Tool.expadv2.help", "Place an Expression Advanced Gate or screen." )
-	language.Add( "Tool.expadv2.0", "Place an Expession Advanced Gate or screen." )
-	language.Add( "Tool.expadv2.1", "Pod selected. Right click an Expression advanced entity to link it." )
+	language.Add( "Tool.expadv2.desc", "ExpAdv2 - Scriptable ingame gates and screens." )
+	language.Add( "Tool.expadv2.help", "LMB: Spawn ExpAdv2; RMB: Download code from ExpAdv2 || Select pod to link to ExpAdv2" )
+	language.Add( "Tool.expadv2.0", "LMB: Spawn ExpAdv2; RMB: Download code from ExpAdv2 || Select pod to link to ExpAdv2" )
+	language.Add( "Tool.expadv2.1", "Now right click the ExpAdv2 you wish to link this to." )
 	
 	language.Add( "limit_expadv", "Expression Advanced Entity limit reached." )
 	language.Add( "Undone_expadv", "Expression Advanced - Removed." )
@@ -51,6 +51,7 @@ end )
 local GateModels = { }
 
 table.insert( GateModels, "models/lemongate/lemongate.mdl" )
+table.insert( GateModels, "models/shadowscion/lemongate/gate.mdl" )
 
 if WireLib then
 	table.insert( GateModels, "models/bull/gates/processor.mdl" )
