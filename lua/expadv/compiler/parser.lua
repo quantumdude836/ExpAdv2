@@ -858,9 +858,11 @@ function Compiler:Sequence( Trace, ExitToken )
 		end
 	end
 
+	local BreakOut = self.BreakOut
+	
 	self.BreakOut = nil
 
-	return self:Compile_SEQ( Trace, Sequence )
+	return self:Compile_SEQ( Trace, Sequence, BreakOut )
 end
 
 

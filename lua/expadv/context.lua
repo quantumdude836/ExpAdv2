@@ -90,8 +90,8 @@ function EXPADV.RootContext:Execute( Location, Operation, ... ) -- String, Funct
 
 	-- Execuiton:
 
-		local Ok, Result, ResultType = pcall( Operation, Instance or self, ... )
-
+		//local Ok, Result, ResultType = pcall( Operation, self, ... )
+		local Ok, Result, ResultType = true, Operation(self, ...)
 	-- Reset Ops Monitor
 		debug.sethook( )
 

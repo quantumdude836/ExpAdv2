@@ -461,6 +461,7 @@ end
 
 local Prep_Words = {
 	["return"] = true,
+	["@return"] = true,
 	["continue"] = true,
 	["break"] = true,
 	["local"] = true,
@@ -478,18 +479,18 @@ local function ValidatePreperation( Preperation )
 
 	Line = string.Trim( Preperation )
 
-	local _, _, Word = string.find( Line, "^([a-zA-Z_][a-zA-Z0-9_]*)" )
+	local _, _, Word = string.find( Line, "^([@a-zA-Z_][a-zA-Z0-9_]*)" )
 
 	return Prep_Words[ Word ] or ( Word and string.find( Line, "[=%(]" ) )
 end
 
-function Compiler:Compile_SEQ( Trace, Instructions )
+function Compiler:Compile_SEQ( Trace, Instructions, BreakOut )
 	local Sequence = { }
 	for I = 1, #Instructions do
 		local Instruction = Instructions[I]
 
-		local LastLine = Sequence[#Sequence]
-		if LastLine == "break" or LastLine == "continue" or LastLine == "return" then
+		local LastLine = Sequence[#Sequence] or ""
+		if LastLine == "break" or LastLine == "continue" or LastLine:StartWith("return") or LastLine:StartWith("@return") then
 			continue -- It wont validate otherwise.
 		end
 
@@ -512,7 +513,7 @@ function Compiler:Compile_SEQ( Trace, Instructions )
 			end -- Somtimes the Inline will actually be required preparable code.
 		end
 	end
-	return { Trace = Trace, Return = "", Prepare = table.concat( Sequence, "\n" ),FLAG = EXPADV_PREPARE, IsSequence = true }
+	return { Trace = Trace, Return = "", Prepare = table.concat( Sequence, "\n" ),FLAG = EXPADV_PREPARE, IsSequence = true, BreakOut = BreakOut }
 end
 
 function Compiler:PrepareInline( Instruction )
@@ -818,11 +819,11 @@ function Compiler:Compile_RETURN( Trace, Expression )
 	local Expected = self.ReturnTypes[ self.ReturnDeph ] or "void"
 
 	if (Optional or Expected == "void") and !Expression then
-		return Quick( "return nil, \"void\"" )
+		return Quick( "@return nil, \"void\"" )
 	elseif Expression and Expected == "*" then
 		-- Wildcard, do nothing :D
 	elseif Expression and Expression.Return == "void" then
-		return Quick( string.format("return nil, %q", Expected))
+		return Quick( string.format("@return nil, %q", Expected))
 	elseif !Expression then
 		self:TraceError( Trace, "Can not return void here, %s expected.", self:NiceClass( Expected ) )
 	elseif Expression and Expected ~= "void" and Expression.Return ~= Expected and Expression.Return ~= "void" then
@@ -831,7 +832,7 @@ function Compiler:Compile_RETURN( Trace, Expression )
 		self:TraceError( Trace, "Can not return %s here, void expected.", self:NiceClass( Expression.Return ) )
 	end 
 
-	Expression.Inline = string.format( "return %s, %q", Expression.Inline, Expression.Return or "void" )
+	Expression.Inline = string.format( "@return %s, %q", Expression.Inline, Expression.Return or "void" )
 
 	return Expression
 end
@@ -866,13 +867,41 @@ function Compiler:Compile_EVENT( Trace, Name, Params, UseVarg, Sequence, Memory 
 
 	local Lua = string.format( "Context.event_%s = function( %s )\nif !Context.Online then return end\n%s\n%send", Name, table.concat( Inputs, "," ), Sequence.Prepare or "", Sequence.Inline or "" )
 
-	return { Trace = Trace, Prepare = Lua, FLAG = EXPADV_PREPARE }
+	return { Trace = Trace, Prepare = string.gsub(Lua, "@return", "return"), FLAG = EXPADV_PREPARE }
+end
+
+local function memory(Memory)
+	if !Memory or !next(Memory) then return end
+
+	local Cells = {}
+	for _, MemRef in pairs(Memory) do Cells[#Cells+1] = MemRef end
+
+	local CellTable = string.format("{%s}", table.concat(Cells, ","))
+
+	local PushStack = string.format([[
+		local Cells = %s
+		local Memory, Delta, Changed = {}, {}, {}
+		for _, MemRef in pairs(Cells) do
+			Memory[MemRef] = Context.Memory[MemRef]; Context.Memory[MemRef] = nil
+			Delta[MemRef] = Context.Delta[MemRef]; Context.Delta[MemRef] = nil
+			Changed[MemRef] = Context.Changed[MemRef]; Context.Changed[MemRef] = nil
+		end
+	]], CellTable)
+
+	local PopStack = string.format([[
+		for _, MemRef in pairs(Cells) do
+			Context.Memory[MemRef] = Memory[MemRef]
+			Context.Delta[MemRef] = Delta[MemRef]
+			Context.Changed[MemRef] = Changed[MemRef]
+		end
+	]], CellTable)
+
+	return PushStack, PopStack
 end
 
 function Compiler:Build_Function( Trace, Params, UseVarg, Sequence, Memory )
-	local Inputs, PreSequence = { }, { }
-
-	-- { self.TokenData, Class.Short, MemRef }
+	local PushStack, PopStack = memory(Memory)
+	local Inputs, PreSequence, PostSequence = { }, {PushStack}
 
 	local CompiledTrace = self:CompileTrace( Trace )
 
@@ -909,11 +938,25 @@ function Compiler:Build_Function( Trace, Params, UseVarg, Sequence, Memory )
 
 	table.insert( Inputs, 1, "Context" )
 
-	local Sequence = self:Compile_SEQ( Trace, { self:Compile_SEQ( Trace, PreSequence ), Sequence } )
+	if PopStack and Sequence.BreakOut ~="return" then
+		PostSequence = { Trace = Trace, Return = "", Prepare = PopStack, FLAG = EXPADV_PREPARE }
+	end
+	
+	local Sequence = self:Compile_SEQ( Trace, { self:Compile_SEQ( Trace, PreSequence ), Sequence, PostSequence } )
 
 	local Lua = string.format( "function( %s )\nif !Context.Online then return end\n%s\n%send", table.concat( Inputs, "," ), Sequence.Prepare or "", Sequence.Inline or "" )
 
-	return { Trace = Trace, Inline = Lua, Return = "f", FLAG = EXPADV_INLINE }
+	if PopStack then
+		Lua = string.gsub(Lua, "@return(.-), (.-)\n", [[
+			local Value, Type = %1, %2
+			]] .. PopStack .. [[
+			return Value, Type
+		]] )
+
+		Lua = string.gsub(Lua, "@return", string.format("%s\nreturn", PopStack))
+	end
+
+	return { Trace = Trace, Inline = string.gsub(Lua, "@return", "return" ), Return = "f", FLAG = EXPADV_INLINE }
 end
 
 

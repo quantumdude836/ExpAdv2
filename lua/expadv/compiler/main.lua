@@ -344,20 +344,20 @@ end
 
    function Compiler:PushLambdaDeph( )
 		self:PushMemory( )
-		self:PushClassDeph(false)
+		//self:PushClassDeph(false)
    		self.LambdaDeph = self.LambdaDeph + 1
    end
 
    function Compiler:PopLambdaDeph( )
    		local Memory = self:PopMemory( )
-   		self:PopClassDeph()
+   		//self:PopClassDeph()
    		self.LambdaDeph = self.LambdaDeph - 1
    		return Memory
    end
 
-   function Compiler:FlushMemory( Trace, Memory )
-		return string.format( "local Context = Context:Push( %s, %s )", EXPADV.ToLua( Trace ), EXPADV.ToLua( Memory or { } ) )
-   end
+   //function Compiler:FlushMemory( Trace, Memory )
+	//	return string.format( "local Context = Context:Push( %s, %s )", EXPADV.ToLua( Trace ), EXPADV.ToLua( Memory or { } ) )
+   //end
 
    function Compiler:PushReturnDeph( ForceClass, Optional )
    		self.ReturnDeph = self.ReturnDeph + 1
@@ -373,7 +373,7 @@ end
    		self.ReturnDeph = self.ReturnDeph - 1
    end
 
-   function Compiler:PushClassDeph(InClass)
+   /*function Compiler:PushClassDeph(InClass)
    		self.ClassDeph = self.ClassDeph + 1
    		self.ClassMemory[self.ClassDeph] = InClass
    		self.InClass = InClass
@@ -383,7 +383,7 @@ end
    		self.ClassMemory[self.ClassDeph] = nil
    		self.ClassDeph = self.ClassDeph - 1
    		self.InClass = self.ClassMemory[self.ClassDeph]
-   	end
+   	end*/
 
 /* --- --------------------------------------------------------------------------------
 	@: Memory Cells
@@ -438,10 +438,6 @@ end
    --- */
 
 function Compiler:CreateVariable( Trace, Variable, Class, Modifier, Comparator )
-	--if Comparator then
-	--	Class, Modifier, Comparator = Comparator, Class, Modifier
-	--end -- ^ omg, I <3 that lua can do this :D
-
 	local ClassObj = istable( Class ) and Class or self:GetClass( Trace, Class, false )
 
 	if self.IsServerScript and self.IsClientScript then
@@ -476,7 +472,7 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier, Comparator )
 		return self.Cells[ MemRef ]
 	end
 
-	if Modifier == "class" then
+	/*if Modifier == "class" then
 		local MemRef = self.Scope[ Variable ]
 
 		if MemRef and self:TestCell( Trace, MemRef, Class, Variable, Comparator ) then
@@ -491,7 +487,9 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier, Comparator )
 		self.curClass.Cells[MemRef] = MemRef
 
 		return self.Cells[ MemRef ]
-	elseif Modifier == "static" then
+	end*/
+
+	if Modifier == "static" then
 		local MemRef = self.Scope[ Variable ]
 
 		if MemRef and self:TestCell( Trace, MemRef, Class, Variable, Comparator ) then
