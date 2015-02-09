@@ -176,6 +176,15 @@ Component:AddFunctionHelper( "setModel", "e:s", "Sets the model of the given ent
 Component:AddPreparedFunction( "setMaterial", "e:s", "", "if(IsValid(@value 1) && EXPADV.PPCheck(Context,@value 1)) then @value 1:SetMaterial(@value 2) end")
 Component:AddFunctionHelper( "setMaterial", "e:s", "Sets the material of the given entity.")
 
+Component:AddPreparedFunction( "setBodygroup", "e:n,n", "", "if(IsValid(@value 1) && EXPADV.PPCheck(Context,@value 1)) then @value 1:SetBodygroup(@value 2, @value 3) end")
+Component:AddFunctionHelper( "setBodygroup", "e:n,n", "Sets an entities' bodygroup.")
+
+Component:AddPreparedFunction( "setBodyGroups", "e:s", "", "if(IsValid(@value 1) && EXPADV.PPCheck(Context,@value 1)) then @value 1:SetBodyGroups(@value 2) end")
+Component:AddFunctionHelper( "setBodyGroups", "e:s", "Sets the bodygroups from a string.")
+
+Component:AddPreparedFunction( "setSkin", "e:n", "", "if(IsValid(@value 1) && EXPADV.PPCheck(Context,@value 1)) then @value 1:SetSkin(@value 2) end")
+Component:AddFunctionHelper( "setSkin", "e:n", "Sets the skin of the entity.")
+
 Component:AddPreparedFunction( "setPhysProp", "e:s", "", "if(IsValid(@value 1) && EXPADV.PPCheck(Context,@value 1)) then @value 1:GetPhysicsObject():SetMaterial(@value 2) end")
 Component:AddFunctionHelper( "setPhysProp", "e:s", "Sets the physical properties of the given entity.")
 
@@ -187,6 +196,12 @@ Component:AddFunctionHelper( "setColour", "e:c", "Sets the colour of the given e
 
 Component:AddPreparedFunction( "enableDrag", "e:b", "", "if(IsValid(@value 1) && IsValid(@value 1:GetPhysicsObject()) && EXPADV.PPCheck(Context, @value 1)) then @value 1:GetPhysicsObject():EnableDrag(@value 2) end") -- Because why not :) ?
 Component:AddFunctionHelper( "enableDrag", "e:b", "Enables/disables drag on an entity.")
+
+Component:AddPreparedFunction( "setFriction", "e:n", "", "if(IsValid(@value 1) && EXPADV.PPCheck(Context, @value 1)) then @value 1:SetFriction(@value 2) end")
+Component:AddFunctionHelper( "setFriction", "e:n", "Sets how much friction an entity has when sliding against a surface. Entities default to 1 (100%) and can be higher or even negative.")
+
+Component:AddPreparedFunction( "setGravity", "e:n", "", "if(IsValid(@value 1) && EXPADV.PPCheck(Context, @value 1)) then @value 1:SetGravity(@value 2) end")
+Component:AddFunctionHelper( "setGravity", "e:n", "Sets the gravity multiplier of the entity.")
 
 /* --- --------------------------------------------------------------------------------
 	@: VEHICLES
