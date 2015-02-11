@@ -65,13 +65,11 @@ if SERVER then return end
 	@: Features
    --- */
 
-require("von")
-
 local DB = { }
 
 hook.Add( "Expadv.PostLoadCore", "expadv.features", function( )
 	if file.Exists("expadv/features.txt", "DATA") then
-		DB = von.deserialize(file.Read("expadv/features.txt", "DATA") or "")
+		DB = EXPADV.von.deserialize(file.Read("expadv/features.txt", "DATA") or "")
 	end
 end )
 
@@ -82,7 +80,7 @@ function EXPADV.SetAccessToFeature( Player, Feature, bBool )
 		local Steam = Player:SteamID()
 		DB[Steam] = DB[Steam] or { }
 		DB[Steam][Feature] = bBool and 1 or 0
-		file.Write("expadv/features.txt", von.serialize( DB ) )
+		file.Write("expadv/features.txt", EXPADV.von.serialize( DB ) )
 	end
 end
 
@@ -104,7 +102,7 @@ function EXPADV.SetGlobalAccessToFeature( Feature, bBool )
 	
 	DB["GLOBAL"] = DB["GLOBAL"] or { }
 	DB["GLOBAL"][Feature] = bBool and 1 or 0
-	file.Write("expadv/features.txt", von.serialize( DB ) )
+	file.Write("expadv/features.txt", EXPADV.von.serialize( DB ) )
 end
 
 function EXPADV.GetGlobalAccessToFeature( Feature )

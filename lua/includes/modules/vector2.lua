@@ -108,6 +108,11 @@ do
 		return Vector2( self.x, self.y )
 	end
 
+	function meta:Rotate( deg )
+		local deg = math.rad( deg )
+		return Vector2( math.cos(deg) * self.x - math.sin(deg) * self.y, math.sin(deg) * self.x + math.cos(deg) * self.y )
+	end
+
 	local setmetatable = setmetatable 
 	local Vec2 = { Zero = setmetatable({ x = 0, y = 0 }, meta) } 
 	Vec2.__index = Vec2 

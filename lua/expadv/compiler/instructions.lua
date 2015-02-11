@@ -890,6 +890,7 @@ local function memory(Memory)
 
 	local PopStack = string.format([[
 		for _, MemRef in pairs(Cells) do
+			if Memory[MemRef] == nil then continue end
 			Context.Memory[MemRef] = Memory[MemRef]
 			Context.Delta[MemRef] = Delta[MemRef]
 			Context.Changed[MemRef] = Changed[MemRef]

@@ -232,9 +232,7 @@ end
 	@: Serialization Support
    --- */
 
-require( "von" )
-
-if von then
+if EXPADV.von then
 
 	function BaseClassObj:AddSerializer( Function )
 		self.VON_Can = true
@@ -404,7 +402,7 @@ function EXPADV.LoadClasses( )
  			end
  		end
 
-		if von then
+		if EXPADV.von then
 			if !Class.VON_Serialize then
 				Class.VON_Serialize = DeriveClass.VON_Serialize
 			end

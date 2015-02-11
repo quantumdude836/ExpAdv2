@@ -5,6 +5,7 @@
 EXPADV = { }
 MsgN( "Expression advanced Two - Installing..." )
 include( "net.lua" )
+include( "von.lua" )
 
 /* --- --------------------------------------------------------------------------------
 	@: Debugging Stuff

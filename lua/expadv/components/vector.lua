@@ -474,6 +474,9 @@ Component:AddFunctionHelper( "abs", "v2:", "Returns vector with absolute values.
 Component:AddInlineFunction( "insideAABox", "v2:v2,v2", "b", "(!(@value 1.x < @value 2.x or @value 1.x > @value 3.x or @value 1.y < @value 2.y or @value 1.y > @value 3.y))" )
 Component:AddFunctionHelper( "insideAABox", "v2:v2,v2", "Returns whenever the given vector is in a box created by the 2 other vectors." )
 
+Component:AddInlineFunction( "rotate", "v2:n", "v2", "@value 1:Rotate( @value 2 )" )
+Component:AddFunctionHelper( "rotate", "v2:n", "Rotates the vector2 by the given degrees." )
+
 /* --- --------------------------------------------------------------------------------
     @: Loops
    --- */

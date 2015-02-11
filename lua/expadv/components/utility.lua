@@ -883,13 +883,13 @@ Component:AddVMFunction( "serialize", "vr", "s", function(Context, Trace, Varian
 
 	if !Serialized then return "" end
 
-	return von.serialize( Serialized ) 
+	return EXPADV.von.serialize( Serialized ) 
 end )
 
 Component:AddFunctionHelper( "serialize", "vr", "Serializes variant into string so it can be saved into file." )
 
 Component:AddVMFunction( "deserialize", "s", "vr", function(Context, Trace, VON)
-	local Ok, Obj = pcall(von.deserialize, VON)
+	local Ok, Obj = pcall(EXPADV.von.deserialize, VON)
 
 	if Ok then 
 		Obj = EXPADV.Deserialize( "vr", Obj )
@@ -914,7 +914,7 @@ function Component:OnPostRegisterClass( Name, Class )
 			local Obj = EXPADV.Serialize( "vr", {Array, Class.Short} )
 
 			if Obj then
-				local Ok, Serialized = pcall( von.serialize, Obj )
+				local Ok, Serialized = pcall( EXPADV.von.serialize, Obj )
 				if Ok then return Serialized end
 			end
 			

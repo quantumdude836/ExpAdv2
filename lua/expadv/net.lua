@@ -181,14 +181,12 @@ end
 	@: Sending Config
    --- */
 
-require("von")
-
 if SERVER then
 	function EXPADV.SendConfig(target, init)
 		net.Start("expadv.config")
 			net.WriteBit(init)
 			
-			local seralized = von.serialize(EXPADV.Config)
+			local seralized = EXPADV.von.serialize(EXPADV.Config)
 			writeCompressedString(seralized)
 
 			--net.WriteTable(EXPADV.Config)
@@ -206,7 +204,7 @@ elseif CLIENT then
 
 		local seralized = readCompressedString()
 		if !seralized then print("SERALIZING NIL?") end
-		EXPADV.Config = von.deserialize(seralized)
+		EXPADV.Config = EXPADV.von.deserialize(seralized)
 
 		--EXPADV.Config = net.ReadTable()
 
