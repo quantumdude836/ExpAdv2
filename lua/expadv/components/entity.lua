@@ -158,6 +158,24 @@ Component:AddFunctionHelper( "worldSpaceAABB", "e:", "Returns an array of two ve
 Component:AddInlineFunction( "worldSpaceCenter", "e:", "v", [[(IsValid(@Value 1) and @value 1:WorldSpaceCenter() or Vector(0, 0, 0))]])
 Component:AddFunctionHelper( "worldSpaceCenter", "e:", "Returns the center of the entity according to its collision model.")
 
+Component:AddInlineFunction( "getBodygroup", "e:n", "n", "(@value 1:IsValid() and @value 1:GetBodygroup(@value 2) or 0)" )
+Component:AddFunctionHelper( "getBodygroup", "e:n", "Gets the exact value for specific bodygroup of given entity.")
+
+Component:AddInlineFunction( "getBodyGroups", "e:", "t", "(@value 1:IsValid() and @value 1:GetBodyGroups() or \"\")" )
+Component:AddFunctionHelper( "getBodyGroups", "e:", "Returns a table containing the Body Groups for the entity.")
+
+Component:AddInlineFunction( "getBodygroupCount", "e:n", "n", "(@value 1:IsValid() and @value 1:GetBodygroupCount(@value 2) or 0)" )
+Component:AddFunctionHelper( "getBodygroupCount", "e:n", "Returns the count of possible values for this bodygroup. This is not the maximum value, since the bodygroups start with 0, not 1.")
+
+Component:AddInlineFunction( "getSkin", "e:", "n", "(@value 1:IsValid() and @value 1:GetSkin() or 0)" )
+Component:AddFunctionHelper( "getSkin", "e:", "Returns the skin index of the current skin of the entity.")
+
+Component:AddInlineFunction( "getGravity", "e:", "n", "(@value 1:IsValid() and @value 1:GetGravity() or 0)" )
+Component:AddFunctionHelper( "getGravity", "e:", "Gets the gravity multiplier of the entity.")
+
+Component:AddInlineFunction( "getFriction", "e:", "n", "(@value 1:IsValid() and @value 1:GetFriction() or 0)" )
+Component:AddFunctionHelper( "getFriction", "e:", "Returns how much friction an entity has. Entities default to 1 (100%) and can be higher or even negative.")
+
 /* --- --------------------------------------------------------------------------------
 	@: Accessors Set
    --- */
@@ -176,15 +194,6 @@ Component:AddFunctionHelper( "setModel", "e:s", "Sets the model of the given ent
 Component:AddPreparedFunction( "setMaterial", "e:s", "", "if(IsValid(@value 1) && EXPADV.PPCheck(Context,@value 1)) then @value 1:SetMaterial(@value 2) end")
 Component:AddFunctionHelper( "setMaterial", "e:s", "Sets the material of the given entity.")
 
-Component:AddPreparedFunction( "setBodygroup", "e:n,n", "", "if(IsValid(@value 1) && EXPADV.PPCheck(Context,@value 1)) then @value 1:SetBodygroup(@value 2, @value 3) end")
-Component:AddFunctionHelper( "setBodygroup", "e:n,n", "Sets an entities' bodygroup.")
-
-Component:AddPreparedFunction( "setBodyGroups", "e:s", "", "if(IsValid(@value 1) && EXPADV.PPCheck(Context,@value 1)) then @value 1:SetBodyGroups(@value 2) end")
-Component:AddFunctionHelper( "setBodyGroups", "e:s", "Sets the bodygroups from a string.")
-
-Component:AddPreparedFunction( "setSkin", "e:n", "", "if(IsValid(@value 1) && EXPADV.PPCheck(Context,@value 1)) then @value 1:SetSkin(@value 2) end")
-Component:AddFunctionHelper( "setSkin", "e:n", "Sets the skin of the entity.")
-
 Component:AddPreparedFunction( "setPhysProp", "e:s", "", "if(IsValid(@value 1) && EXPADV.PPCheck(Context,@value 1)) then @value 1:GetPhysicsObject():SetMaterial(@value 2) end")
 Component:AddFunctionHelper( "setPhysProp", "e:s", "Sets the physical properties of the given entity.")
 
@@ -196,6 +205,15 @@ Component:AddFunctionHelper( "setColour", "e:c", "Sets the colour of the given e
 
 Component:AddPreparedFunction( "enableDrag", "e:b", "", "if(IsValid(@value 1) && IsValid(@value 1:GetPhysicsObject()) && EXPADV.PPCheck(Context, @value 1)) then @value 1:GetPhysicsObject():EnableDrag(@value 2) end") -- Because why not :) ?
 Component:AddFunctionHelper( "enableDrag", "e:b", "Enables/disables drag on an entity.")
+
+Component:AddPreparedFunction( "setBodygroup", "e:n,n", "", "if(IsValid(@value 1) && EXPADV.PPCheck(Context,@value 1)) then @value 1:SetBodygroup(@value 2, @value 3) end")
+Component:AddFunctionHelper( "setBodygroup", "e:n,n", "Sets an entities' bodygroup.")
+
+Component:AddPreparedFunction( "setBodyGroups", "e:s", "", "if(IsValid(@value 1) && EXPADV.PPCheck(Context,@value 1)) then @value 1:SetBodyGroups(@value 2) end")
+Component:AddFunctionHelper( "setBodyGroups", "e:s", "Sets the bodygroups from a string.")
+
+Component:AddPreparedFunction( "setSkin", "e:n", "", "if(IsValid(@value 1) && EXPADV.PPCheck(Context,@value 1)) then @value 1:SetSkin(@value 2) end")
+Component:AddFunctionHelper( "setSkin", "e:n", "Sets the skin of the entity.")
 
 Component:AddPreparedFunction( "setFriction", "e:n", "", "if(IsValid(@value 1) && EXPADV.PPCheck(Context, @value 1)) then @value 1:SetFriction(@value 2) end")
 Component:AddFunctionHelper( "setFriction", "e:n", "Sets how much friction an entity has when sliding against a surface. Entities default to 1 (100%) and can be higher or even negative.")
