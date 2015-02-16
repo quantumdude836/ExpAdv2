@@ -22,11 +22,10 @@ VectorObj:DefaultAsLua( Vector(0, 0, 0) )
    --- */
 
 if WireLib then
-  VectorObj:WireInput( "VECTOR" )
-  VectorObj:WireOutput( "VECTOR" )
-
-  VectorObj:WireLinkOutput( )
-  VectorObj:WireLinkInput( )
+   VectorObj:WireIO( "VECTOR", nil,
+      function(Value, context)
+          return Vector( Value[1] or 0, Value[2] or 0, Value[3] or 0 )
+      end)
 end
 
 /* --- --------------------------------------------------------------------------------
@@ -186,7 +185,7 @@ Component:AddFunctionHelper( "angleEx", "v:v", "Returns the angle between two ve
     @: Useful
    --- */
 
-Component:AddInlineFunction( "cross", "v:v", "n", "@value 1:Cross( @value 2 )" )
+Component:AddInlineFunction( "cross", "v:v", "v", "@value 1:Cross( @value 2 )" )
 Component:AddFunctionHelper( "cross", "v:v", "Calculates the cross product of the 2 vectors (The vectors that defined the normal created by the 2 vectors). " )
 
 Component:AddInlineFunction( "distance", "v:v", "n", "@value 1:Distance( @value 2 )" )
@@ -312,17 +311,12 @@ Vector2Obj:CanSerialize( true )
    --- */
 
 if WireLib then
-	Vector2Obj:WireInput( "VECTOR2", function( Context, MemoryRef, InValue )
-		Context.Memory[ MemoryRef ] = Vector2(InValue[1], InValue[2])
-	end )
-
-	Vector2Obj:WireOutput( "VECTOR2", function( Context, MemoryRef )
-		local Val = Context.Memory[ MemoryRef ]
-		return {Val.x, Val.y}
-	end )
-
-  Vector2Obj:WireLinkOutput( function( Value ) return { Value.x, Value.y } end )
-  Vector2Obj:WireLinkInput( function( Value ) return Vector2( Value[1], Value[2] ) end )
+    Vector2Obj:WireIO("VECTOR2",
+        function(Value, Context) -- To Wire
+            return {Value.x, Value.y}
+        end, function(Value, context) -- From Wire
+            return Vector2(Value[1], Value[2])
+        end)
 end
 
 /* --- --------------------------------------------------------------------------------

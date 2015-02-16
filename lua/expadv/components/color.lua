@@ -13,21 +13,20 @@ Component.Description = "Adds color objects and color based functions."
 
 local ColorObj = Component:AddClass( "color", "c" )
 
-ColorObj:StringBuilder( function( Color) return string.format( "Color( %i, %i, %i, %i )", Color.r, Color.g, Color.b, Color.a ) end )
-ColorObj:DefaultAsLua( Color(255, 255, 255, 255) )
+ColorObj:StringBuilder( function(Color)
+	return string.format( "Color(%i, %i, %i, %i)", Color.r or 0, Color.g or 0, Color.b or 0, Color.a or 0)
+end )
+
+ColorObj:DefaultAsLua( Color(255, 255, 255) )
 ColorObj:CanSerialize( true )
 
 if WireLib then
-	ColorObj:WireInput( "VECTOR",
-		function( Context, MemoryRef, InValue )
-			Context.Memory[ MemoryRef ] = Color( InValue.x, InValue.y, InValue.z, 255 )
-		end )
-
-	ColorObj:WireOutput( "VECTOR",
-		function( Context, MemoryRef )
-			local Color = Context.Memory[ MemoryRef ]
-			return Vector(Color.r, Color.g, Color.b)
-		end )
+	ColorObj:WireIO("VECTOR",
+		function(Value, Context) -- To Wire
+			return Vector(Value.r, Value.g, Value.b)
+		end, function(Value, context) -- From Wire
+			return Color( Value.x or 0, Value.y or 0, Value.z or 0 )
+		end)
 end
 
 /* --- --------------------------------------------------------------------------------
@@ -74,7 +73,7 @@ Component:AddInlineOperator( "/", "n,c", "c", "Color( @value 1 / @value 2.r, @va
    --- */
 
 Component:AddInlineOperator( "color", "s", "c", "string.ToColor(@value 1)" )
-Component:AddInlineOperator( "string", "c", "s", "string.format( \"Color( %i, %i, %i, %i )\", @value 1.r or 0, @value 1.g or 0, @value 1.b or 0, @value 1.a or 0)" )
+Component:AddInlineOperator( "string", "c", "s", "string.format( \"Color(%i, %i, %i, %i)\", @value 1.r or 0, @value 1.g or 0, @value 1.b or 0, @value 1.a or 0)" )
 
 /* --- --------------------------------------------------------------------------------
 	@: Assignment

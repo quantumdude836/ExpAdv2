@@ -149,14 +149,6 @@ function EXPADV.CanAccessFeature( Entity, Feature )
 
 	if Entity.player == LocalPlayer() then return true end
 
-	if Entity.GetLinkedPod then
-		local Pod = Entity:GetLinkedPod()
-
-		if IsValid(Pod) and !(Pod:GetDriver() ~= LocalPlayer()) then
-			return true
-		end
-	end
-
 	if EXPADV.GetGlobalAccessToFeature( Feature ) then return true end
 
 	if EXPADV.GetAccessToFeature( Entity.player, Feature ) then return true end
@@ -194,8 +186,19 @@ hook.Add( "Expadv.RegisterContext", "expadv.context", function( Context )
 end )
 
 function EXPADV.EntityCanAccessFeature(Entity, Feature)
-	if !Memory[Entity] then return false end
-	return Memory[Entity][Feature] or false
+	local Access = (Memory[Entity] and Memory[Entity][Feature]) or false
+
+	if Access then
+		return true
+	elseif Entity.GetLinkedPod then
+		local Pod = Entity:GetLinkedPod()
+
+		if IsValid(Pod) and !(Pod:GetDriver() ~= LocalPlayer()) then
+			return !EXPADV.IsFeatureBlockedForEntity(Entity, Feature)
+		end
+	end
+
+	return false
 end
 
 /* --- --------------------------------------------------------------------------------

@@ -21,13 +21,12 @@ Class_Boolean:DefaultAsLua( false )
 Class_Function:DefaultAsLua( "function( ) end" )
 
 if WireLib then
-	Class_Boolean:WireOutput( "NORMAL", function( Context, MemoryRef )
-		return Context.Memory[ MemoryRef ] and 1 or 0
-	end ) 
-
-	Class_Boolean:WireInput( "NORMAL", function( Context, MemoryRef, InValue )
-		Context.Memory[ MemoryRef ] = (InValue ~= 0)
-	end )
+	Class_Boolean:WireIO("NORMAL",
+        function(Value, Context) -- To Wire
+            return Value and 1 or 0
+        end, function(Value, context) -- From Wire
+            return Value ~= 0
+        end)
 end
 
 /* --- --------------------------------------------------------------------------------
@@ -351,6 +350,7 @@ EXPADV.SharedEvents( )
 	
 EXPADV.AddEvent( nil, "tick", "", "" )
 EXPADV.AddEvent( nil, "think", "", "" )
+EXPADV.AddEvent( nil, "last", "", "" )
 
 EXPADV.ServerEvents( )
 EXPADV.AddEvent( nil, "trigger", "s,s", "" )

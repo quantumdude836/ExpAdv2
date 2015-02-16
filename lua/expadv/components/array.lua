@@ -10,7 +10,7 @@ Component.Description = "Adds array objects."
 Component:AddException( "array" )
 
 /* ---	--------------------------------------------------------------------------------
-	@: Table Class
+	@: Array Class
    ---	*/
 
 local Array = Component:AddClass( "array" , "ar" )
@@ -124,6 +124,7 @@ function Component:OnPostRegisterClass( Name, Class )
 
 	Array:AddPreparedOperator( "set", "ar,n," .. Class.Short, "", string.format([[
 		if @value 1.__type ~= %q then Context.Throw(@trace, "array", "array type missmatch, %s expected got " .. EXPADV.TypeName(@value 1.__type)) end
+		if @value 2 <= 0 or @value 2 > 512 or floor(@value 2) ~= @value 2 then Context.Throw(@trace, "array", "array index out of bounds.") end
 		]], Class.Short, Class.Name), "@value 1[@value 2] = @value 3")
 
 /* ---	--------------------------------------------------------------------------------
@@ -173,6 +174,7 @@ function Component:OnPostRegisterClass( Name, Class )
 
 	Component:AddPreparedFunction( "insert", "ar:" .. Class.Short, "", string.format([[
 		if @value 1.__type ~= %q then Context.Throw(@trace, "array", "array type missmatch, %s expected got " .. EXPADV.TypeName(@value 1.__type)) end
+		if @value 2 <= 0 or @value 2 > 512 or floor(@value 2) ~= @value 2 then Context.Throw(@trace, "array", "array index out of bounds.") end
 		]], Class.Short, Class.Name), "$table.insert(@value 1, @value 2)")
 	EXPADV.AddFunctionAlias("insert", "ar," .. Class.Short)
 
@@ -274,3 +276,11 @@ Array:AddDeserializer( function( Array )
 
 	return Clone
 end )
+
+/* ---	--------------------------------------------------------------------------------
+	@: Wire Support
+   ---	*/
+
+if WireLib then
+
+end

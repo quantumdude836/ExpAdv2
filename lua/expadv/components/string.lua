@@ -22,13 +22,7 @@ String:AddAlias( "str" )
 	@: Wire Support
    --- */
 
-if WireLib then
-	String:WireInput( "STRING" ) 
-	String:WireOutput( "STRING" )
-
-	String:WireLinkOutput( )
-	String:WireLinkInput( )
-end
+if WireLib then String:WireIO( "STRING" ) end
 
 /* --- --------------------------------------------------------------------------------
 	@: Logical and Comparison

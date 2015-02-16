@@ -13,7 +13,7 @@ AddCSLuaFile( "vars.lua" )
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Receive Code
    --- */
-   
+
 function ENT:ReceiveScript(script, name)
 	self.root = script
 	self.files = {}

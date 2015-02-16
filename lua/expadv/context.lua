@@ -155,6 +155,20 @@ function EXPADV.RootContext:Execute( Location, Operation, ... ) -- String, Funct
 	return false
 end
 
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Call Event
+   --- */
+
+function EXPADV.RootContext:CallEvent( Name, ... )	
+	if !self.Online then return false, nil end
+
+	local Event = self[ "event_" .. Name ]
+	
+	if !Event then return end
+
+	return self:Execute( "Event " .. Name, Event, ... )
+end
+
 /* --- --------------------------------------------------------------------------------
 	@: Breakouts
    --- */
@@ -198,6 +212,8 @@ end
 -- Shuts down the context and execution.
 function EXPADV.RootContext:ShutDown( )
 	if !self.Online then return end
+
+	self:CallEvent("last")
 
 	self.Online = false
 

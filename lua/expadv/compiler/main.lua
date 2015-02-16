@@ -536,7 +536,7 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier, Comparator )
 		end
 
 		if Modifier == "input" then
-			if !ClassObj.Wire_In_Type then
+			if !ClassObj.Wire_in_type then
 				self:TraceError( Trace, "Wire inputs of class %q are not supported.", Class )
 			end
 
@@ -561,7 +561,7 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier, Comparator )
 		end
 
 		if Modifier == "output" then
-			if !ClassObj.Wire_In_Type then
+			if !ClassObj.Wire_out_type then
 				self:TraceError( "Wire outputs of class %q are not supported.", Class )
 			end
 

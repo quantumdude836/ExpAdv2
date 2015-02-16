@@ -74,7 +74,7 @@ Component:AddVMFunction( "timerSimple", "n,d,...", "", function( Context, Trace,
 		}
 	end )
 
-EXPADV.AddFunctionAlias( "timerCreate", "n,d" )
+EXPADV.AddFunctionAlias( "timerSimple", "n,d" )
 
 Component:AddVMFunction( "timerCreate", "s,n,n,d,...", "", function( Context, Trace, Name, Delay, Reps, Delegate, ... )
 		local Data = Context.Data

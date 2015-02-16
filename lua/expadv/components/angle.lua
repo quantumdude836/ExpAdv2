@@ -20,12 +20,12 @@ AngObject:DefaultAsLua( Angle(0,0,0) )
 	@: Wire Support
    --- */
 
-if WireLib then
-	AngObject:WireInput( "ANGLE" )
-	AngObject:WireOutput( "ANGLE" )
-
-	AngObject:WireLinkOutput( )
-	AngObject:WireLinkInput( )
+if WireLib then AngObject:WireIO( "ANGLE",
+	function(Value, Context) -- To Wire
+        return {Value.p, Value.y, Value.r}
+    end, function(Value, context) -- From Wire
+        return Angle(Value[1], Value[2], Value[3])
+    end)
 end
 
 /* --- --------------------------------------------------------------------------------

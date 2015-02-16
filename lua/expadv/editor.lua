@@ -52,71 +52,30 @@ end )
 	Home Screen
 ---------------------------------------------------------------------------*/
 local HomeScreen = [[
-/*----------------------------------------------------
-    Expression Advanced 2 - Need to know
- 	  - Click (?) top-right for more info
-----------------------------------------------------*/
- 
-//Define Variables:
-    number var = 22;
- 
-//Define functions:
-    function number add( number a, number b ) {
-        return a + b;
-    }
- 
-//Method operator is now period (.) not colon (:):
-    entity().pos();
- 
-//For loops are now embedded:
-    for ( number i = 1; 100; 2 ) {
-        print( i );
-    }
- 
-/*----------------------------------------------------
-    Code now runs on the server and client.
-----------------------------------------------------*/
- 
-//Define serverside code:
-    server {
-        print( "SERVERSIDE" );
-    }
- 
-//Define clientside code:
-    client {
-        print( "CLIENTSIDE" );
-    }
- 
-/*----------------------------------------------------
-    Any code not defined inside one of these defintions
-    is considered both serverside and clientside.
-        (Root is serverside and clientside.)
- 
-    You can also prefix statements with server/client.
-----------------------------------------------------*/
- 
-    number Var = 22;
+/*------------------------------------------------------------------
+    Expression Advanced 2
+--------------------------------------------------------------------
+        The github repository can be found here:
+            https://github.com/Rusketh/ExpAdv2
+        
+        For a better look at the new syntax:
+            https://github.com/Rusketh/ExpAdv2/wiki/Syntax
+    
+        Expression Advanced 2 for Dummies:
+            http://goo.gl/g6WEfs it's your offical guide to ExpAdv2.
+    
+        For a list of components and Classes:
+            https://github.com/Rusketh/ExpAdv2/wiki/Components
+        	
+        The bug tracker can be found here:
+            https://github.com/Rusketh/ExpAdv2/issues
+        
+        For function requests please use the bug tracker.
+            We will add functions as they are requested.
 
-    server Var += 10;
-
-    print( Var );
- 
-/*----------------------------------------------------
-    The github repository can be found here:
-        https://github.com/Rusketh/ExpAdv2
-	
-	For a better look at the new syntax:
-		https://github.com/Rusketh/ExpAdv2/wiki/Syntax
-
-	For a list of components and Classes:
-		https://github.com/Rusketh/ExpAdv2/wiki/Components
-		
-    The bug tracker can be found here:
-        https://github.com/Rusketh/ExpAdv2/issues
- 
-    For function requests please use the bug tracker.
-        We will add functions as they are requested.
-----------------------------------------------------*/
+        DO NOT MESSAGE RUSKETH WITH BUGS ON STEAM.
+        TO REPORT A BUG USE THE BUG TRACKER ON GITHUB.
+------------------------------------------------------------------*/
 ]]
 
 /*---------------------------------------------------------------------------

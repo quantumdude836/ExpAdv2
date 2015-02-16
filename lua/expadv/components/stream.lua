@@ -237,7 +237,7 @@ Component:AddVMFunction( "transmit", "nst:e,s", "", function( Context, Trace, St
 		for k,v in pairs(Stream.T) do
 			TCopy[k] = v
 		end 
-		Target.Context:Execute( "Receive Stream " .. Name, Target.Context.Data['str_' .. Name], { { V = VCopy, T = TCopy, R = 0, W = #TCopy } , "_st" })
+		Target.Context:Execute( "Receive Stream " .. Name, Target.Context.Data['str_' .. Name], { { V = VCopy, T = TCopy, R = 0, W = #TCopy } , "_st" }, {Context.entity, "e"})
 	end
 end )
 

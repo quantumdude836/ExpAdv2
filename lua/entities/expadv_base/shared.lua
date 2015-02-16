@@ -43,6 +43,7 @@ function ENT:Initialize( )
 	self:ResetStatus( )
 end
 
+
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Status
    --- */
@@ -202,6 +203,22 @@ function ENT:BuildInstance( Instance, Instruction )
 
 	if CLIENT then EXPADV.SendCodeLoaded(self) end
 end
+
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Reload Script
+   --- */
+
+hook.Add( "Expadv.PostLoadCore", "expadv.entity", function( )
+	for _, Gate in pairs( ents.GetAll() ) do
+		if IsValid(Gate) and Gate.ExpAdv then
+			if Gate.root and Gate.root ~= "" then
+				Gate:CompileScript(Gate.root, Gate.files)
+			end
+		end
+	end
+end )
+
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Call Event

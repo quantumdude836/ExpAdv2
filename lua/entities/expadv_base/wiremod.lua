@@ -26,7 +26,7 @@ function ENT:BuildInputs( Cells, Ports )
 
 	for Variable, Reference in pairs( Ports ) do
 		local Cell = Cells[ Reference ]
-		Unsorted[ #Unsorted + 1 ] = { Variable, Cell.ClassObj.Wire_In_Type }
+		Unsorted[ #Unsorted + 1 ] = { Variable, Cell.ClassObj.Wire_in_type }
 	end
 
 	table.sort( Unsorted, SortPorts )
@@ -54,7 +54,7 @@ function ENT:BuildOutputs( Cells, Ports )
 
 	for Variable, Reference in pairs( Ports ) do
 		local Cell = Cells[ Reference ]
-		Unsorted[ #Unsorted + 1 ] = { Variable, Cell.ClassObj.Wire_Out_Type }
+		Unsorted[ #Unsorted + 1 ] = { Variable, Cell.ClassObj.Wire_out_type }
 
 		if Cell.ClassObj.HasUpdateCheck then
 			OutClick[ Reference ] = Variable
@@ -75,7 +75,7 @@ function ENT:BuildOutputs( Cells, Ports )
 	local OldPorts = self.Outputs
 
 	self.OutPorts = Ports
-	self.OutClick = OutClickt
+	self.OutClick = OutClick
 	self.DupeOutPorts = { Names, Types }
 
 	self.Outputs = WireLib.AdjustSpecialOutputs( self, Names, Types )
@@ -95,22 +95,22 @@ function ENT:LoadFromInputs( Cells )
 		if !MemRef then continue end
 
 		local Class = Cells[MemRef].ClassObj
-		if Port.Type ~= Class.Wire_In_Type then continue end
+		if Port.Type ~= Class.Wire_in_type then continue end
 
-		Class.Wire_In_Util( Context, MemRef, Port.Value )
+		Context.Memory[MemRef] = EXPADV.ConvertFromWire(Class.Short, Port.Value, Context)
 	end
 end
 
 function ENT:TriggerInput( Key, Value )
 	local Context = self.Context
-	if !self.Context then return end
+	if !Context then return end
 
 	local Reference = self.InPorts[ Key ]
 	local Cell = self.Cells[ Reference ]
-
 	if !Cell then return end
 
-	Cell.ClassObj.Wire_In_Util( self.Context, Reference, Value )
+	Context.Memory[Reference] = EXPADV.ConvertFromWire(Cell.ClassObj.Short, Value, Context)
+	
 	Context.Trigger[ Reference ] = true
 
 	self:CallEvent( "trigger", Key, Cell.ClassObj.Name )
@@ -120,7 +120,7 @@ end
 
 function ENT:TriggerOutputs( )
 		local Context = self.Context
-		if !self.Context then return end
+		if !Context then return end
 
 		local Cells = self.Cells
 
@@ -130,14 +130,14 @@ function ENT:TriggerOutputs( )
 			if Context.Memory[ Reference ] == nil then
 				continue
 			elseif Context.Trigger[ Reference ] then
-				local Value = Class.Wire_Out_Util( Context, Reference )
+				local Value = EXPADV.ConvertToWire(Class.Short, Context.Memory[Reference], Context)
 				WireLib.TriggerOutput( self, Name, Value )
 			elseif Context.OutClick[ Reference ] then
 				local Val = Context.Memory[ Reference ]
 
 				if Val and Val.HasChanged then
 					Val.HasChanged = nil
-					local Value = Class.Wire_Out_Util( Context, Reference )
+					local Value = EXPADV.ConvertToWire(Class.Short, Context.Memory[Reference], Context)
 					WireLib.TriggerOutput( self, Name, Value )
 				end
 			end

@@ -61,7 +61,7 @@ Component:AddPreparedFunction( "yield", "", "", [[if !$coroutine.running( ) then
 Component:AddVMFunction( "sleep", "n", "",
 	function( Context, Trace, Value )
 		local CoRoutine = coroutine.running( )
-		if !CoRoutine then Context:Throw( Trace, "coroutine", "Used sleep( N ) outside coroutine." ) end
+		if !CoRoutine then Context:Throw( Trace, "coroutine", "Used sleep(N) outside coroutine." ) end
 		
 		timer.Simple( Value, function( )
 			if !IsValid( Context.entity ) or !Context.entity:IsRunning( ) then return end
@@ -111,7 +111,7 @@ Component:AddVMFunction( "wait", "s", "",
 	function( Context, Trace, Value )
 		local CoRoutine = coroutine.running( )
 
-		if !CoRoutine then Context:Throw( Trace, "coroutine", "Used wait( N ) outside coroutine." ) end
+		if !CoRoutine then Context:Throw( Trace, "coroutine", "Used wait(S) outside coroutine." ) end
 		
 		if !EXPADV.Events[ Name ] then Context:Throw( Trace, "coroutine", "No such event " .. Name ) end
 

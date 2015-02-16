@@ -19,7 +19,7 @@ local WireLink = Component:AddClass( "wirelink", "wl" )
 
 WireLink:MakeServerOnly( )
 
-WireLink:WireInput( "WIRELINK" )
+WireLink:FromWire( "WIRELINK" )
 
 WireLink:ExtendClass( "e" )
 
@@ -48,8 +48,7 @@ end )
 function Component:OnPostRegisterClass( Name, Class )
 	EXPADV.ServerOperators( )
 
-	if Class.Wire_Out_Type and Class.Wire_Link_In then
-
+	if Class.Wire_in_type then
 		WireLink:AddVMOperator( "get", "wl,s," .. Class.Short, Class.Short,
 			function( Context, Trace, WireLink, Index )
 				local Value
@@ -57,8 +56,8 @@ function Component:OnPostRegisterClass( Name, Class )
 				if IsValid( WireLink ) and WireLink.Outputs then
 					local Output = WireLink.Outputs[Index]
 
-					if Output and Output.Type == Class.Wire_In_Type then
-						return Class.Wire_Link_In( Output.Value )
+					if Output and Output.Type == Class.Wire_in_type then
+						return EXPADV.ConvertFromWire(Class.Short, Output.Value, Context), nil
 					end
 				end
 
@@ -68,15 +67,14 @@ function Component:OnPostRegisterClass( Name, Class )
 			end )
 	end
 
-	if Class.Wire_Out_Type and Class.Wire_Link_Out then
-
+	if Class.Wire_out_type then
 		WireLink:AddVMOperator( "set", "wl,s," .. Class.Short, "",
 			function( Context, Trace, WireLink, Index, Value )
 				if IsValid( WireLink ) and WireLink.Inputs then
 					local Input = WireLink.Inputs[Index]
 
-					if Input and Input.Type == Class.Wire_Out_Type then
-						WireLib.TriggerInput( WireLink, Index, Class.Wire_Link_Out( Value ) )
+					if Input and Input.Type == Class.Wire_out_type then
+						WireLib.TriggerInput( WireLink, Index, EXPADV.ConvertToWire(Class.Short, Value, Context) )
 					end
 				end
 			end )

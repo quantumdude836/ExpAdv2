@@ -36,11 +36,7 @@ EntObject:DefaultAsLua( Entity(0) )
    --- */
 
 if WireLib then
-	EntObject:WireInput( "ENTITY" )
-	EntObject:WireOutput( "ENTITY" )
-
-	EntObject:WireLinkOutput( )
-	EntObject:WireLinkInput( )
+	EntObject:WireIO( "ENTITY" )
 end
 
 /* --- --------------------------------------------------------------------------------

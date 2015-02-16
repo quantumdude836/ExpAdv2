@@ -22,11 +22,7 @@ Number:AddAlias( "int" )
    --- */
 
 if WireLib then
-  Number:WireInput( "NORMAL" )
-  Number:WireOutput( "NORMAL" )
-
-  Number:WireLinkOutput( )
-  Number:WireLinkInput( )
+  Number:WireIO( "NORMAL" )
 end
 
 /* --- --------------------------------------------------------------------------------
