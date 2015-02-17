@@ -75,11 +75,12 @@ function EXPADV.RootContext:Execute( Location, Operation, ... ) -- String, Funct
 
 		local function op_counter( )
 			Status.Perf = Status.Perf + expadv_luahook
+
 			if Status.Perf > expadv_tickquota then
 				debug.sethook( )
 				error( { Trace = {0,0}, Quota = true, Msg = Message, Context = Context }, 0 )
 			end
-
+			
 			Status.BenchMark = SysTime( )
 		end
 
@@ -90,8 +91,8 @@ function EXPADV.RootContext:Execute( Location, Operation, ... ) -- String, Funct
 
 	-- Execuiton:
 
-		//local Ok, Result, ResultType = pcall( Operation, self, ... )
-		local Ok, Result, ResultType = true, Operation(self, ...)
+		local Ok, Result, ResultType = pcall( Operation, self, ... )
+
 	-- Reset Ops Monitor
 		debug.sethook( )
 
@@ -273,7 +274,6 @@ EXPADV_STATE_ONLINE = 1
 EXPADV_STATE_ALERT = 2
 EXPADV_STATE_CRASHED = 3
 EXPADV_STATE_BURNED = 4
-
 
 hook.Add( "Tick", "ExpAdv2.Performance", function( )
 	for Context, _ in pairs( EXPADV.CONTEXT_REGISTERY ) do

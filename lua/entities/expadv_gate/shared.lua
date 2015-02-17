@@ -265,7 +265,6 @@ end
 
 function ENT:NotifiOwner( Message, Type, Duration )
 	if !IsValid( self.player ) then return end
-	
 	EXPADV.Notifi( self.player, Message, Type, Duration )
 end
 

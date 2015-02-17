@@ -546,7 +546,7 @@ local SpecialCase = {
 
 function PANEL:_OnKeyCodeTyped( code ) 
 	self.Blink = RealTime( )
-	
+
 	local alt = input_IsKeyDown( KEY_LALT ) or input_IsKeyDown( KEY_RALT )
 	if alt then return end
 	
@@ -972,7 +972,8 @@ function PANEL:_OnTextChanged( )
 	local text = self.TextEntry:GetValue( )
 	self.TextEntry:SetText( "" )
 
-	if input_IsKeyDown( KEY_BACKQUOTE ) and !input_IsKeyDown( KEY_LALT ) then return end
+	//Who ever added this linek BROKE @ and ' for BRITISH USERS!
+	//if input_IsKeyDown( KEY_BACKQUOTE ) and !input_IsKeyDown( KEY_LALT ) then return end
 	
 	if ( input_IsKeyDown( KEY_LCONTROL ) or input_IsKeyDown( KEY_RCONTROL ) ) and not ( input_IsKeyDown( KEY_LALT ) or input_IsKeyDown( KEY_RALT ) ) then
 		-- ctrl+[shift+]key

@@ -218,6 +218,8 @@ end
 
 if SERVER then
 	function EXPADV.Notifi( target, message, type, duration )
+		if !message or message == "" then return end
+
 		net.Start("expadv.notify")
 			net.WriteString( message )
 			net.WriteUInt( type or 0, 8 )
@@ -236,6 +238,8 @@ if SERVER then
 		local type = net.ReadUInt(8)
 		local duration = net.ReadFloat()
 
+		if !message or message == "" then return end
+		
 		if IsValid(player) then
 			EXPADV.Notifi( player ,message, type, duration )
 		end
@@ -263,6 +267,8 @@ elseif CLIENT then
 		local message = net.ReadString()
 		local type = net.ReadUInt(8)
 		local duration = net.ReadFloat()
+
+		if !message or message == "" then return end
 
 		GAMEMODE:AddNotify(message, type, duration)
 		MsgN(message)

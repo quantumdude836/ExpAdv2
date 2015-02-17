@@ -170,16 +170,26 @@ AccessorFunc( ENT, "_pauseRender", "RenderingPaused", FORCE_BOOL )
 AccessorFunc( ENT, "_noClear", "NoClearFrame", FORCE_BOOL )
 
 function ENT:Draw( )
-	if !self:GetRenderingPaused( ) then
-			if !self.NextRender or self.NextRender <= SysTime( ) then
-			self:RenderScreen( )
-			self.NextRender = SysTime( ) + (1 / self:GetFPS( ) )
+	local Context = self.Context
+
+	if Context and Context.Online then
+		if !self:GetRenderingPaused( ) then
+				if !self.NextRender or self.NextRender <= SysTime( ) then
+				
+				local Ok, Error = pcall(self.RenderScreen, self)
+				
+				if !Ok then
+					self:LuaError( Error )
+					Context:ShutDown( )
+				end
+
+				self.NextRender = SysTime( ) + (1 / self:GetFPS( ) )
+			end
 		end
 	end
-
+	
 	self:DrawModel( )
 	self:DrawScreen( )
-
 end
 
 function ENT:DrawScreen( )
@@ -216,7 +226,6 @@ end
 
 function ENT:RenderScreen( )
 	local Context = self.Context
-
 	if !Context or !Context.Online then return end
 		
 	local Event = Context.event_drawScreen
