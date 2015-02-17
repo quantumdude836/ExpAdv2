@@ -1433,11 +1433,9 @@ function PANEL:PaintCursor( Caret )
 	end
 end 
 
-function PANEL:PaintSelection( selection )
+function PANEL:PaintSelection( selection, color )
 	local start, stop = self:MakeSelection( selection )
-
 	if ! self:PositionExists( start ) or ! self:PositionExists( stop ) then return end
-
 	local line, char = start.x, start.y 
 	local endline, endchar = stop.x, stop.y 
 	
@@ -1447,13 +1445,17 @@ function PANEL:PaintSelection( selection )
 	if char < 0 then char = 0 end
 	if endchar < 0 then endchar = 0 end
 	
-
 	for Row = line, endline do 
 		if Row > #self.Rows then break end
 		local length = #self.Rows[Row] - self.Scroll.y + 1
 		local LinePos = Row - self.Scroll.x
 		
-		surface_SetDrawColor( 0, 0, 160, 255 )
+		if color then 
+			surface_SetDrawColor( color )
+		else 
+			surface_SetDrawColor( 0, 0, 160, 255 )
+		end 
+		
 		if Row == line and line == endline then 
 			surface_DrawRect( 
 				char * self.FontWidth + self.BookmarkWidth + self.LineNumberWidth + self.FoldingWidth, 
@@ -1500,18 +1502,9 @@ function PANEL:PaintRowUnderlay( Row, LinePos )
 			Row = Row:lower( )
 		end
 		
-		surface_SetDrawColor( 128, 255, 0, 50 )
-		
 		pcall( function( ) -- For now untill we fix the invalid pattern bug.
 			for overS, overE in string_gmatch( Row, "()" .. FindQuery .. "()" ) do
-				if ( overS - 1 ) * self.FontWidth + self.BookmarkWidth + self.LineNumberWidth + self.FoldingWidth - (self.Scroll.y-1) * self.FontWidth
-					< self.FoldingWidth + self.BookmarkWidth + self.LineNumberWidth then continue end
-				surface_DrawRect( 
-					( overS - 1 ) * self.FontWidth + self.BookmarkWidth + self.LineNumberWidth + self.FoldingWidth - (self.Scroll.y-1) * self.FontWidth,
-					( LinePos ) * self.FontHeight, 
-					self.FontWidth * ( overE - overS ), 
-					self.FontHeight 
-				)
+				self:PaintSelection( { Vector2(Row, overS), Vector2(Row, overE) }, Color( 128, 255, 0, 50 ))
 			end
 		end )
 	end
@@ -1526,80 +1519,21 @@ function PANEL:PaintRowUnderlay( Row, LinePos )
 			Row = Row:lower( )
 		end
 		
-		surface_SetDrawColor( 255, 128, 0, 50 )
-		
 		pcall( function( ) -- For now untill we fix the invalid pattern bug.
 			for overS, overE in string_gmatch( Row, "()" .. ReplaceWith .. "()" ) do
-				surface_DrawRect( 
-					( overS - 1 ) * self.FontWidth + self.BookmarkWidth + self.LineNumberWidth + self.FoldingWidth, 
-					( LinePos ) * self.FontHeight, 
-					self.FontWidth * ( overE - overS ), 
-					self.FontHeight 
-				)
+				self:PaintSelection( { Vector2(Row, overS), Vector2(Row, overE) }, Color( 255, 128, 0, 50 ))
 			end
 		end )
 	end
 
 	if self:HasSelection( ) then 
-		-- Section Reference Highlighting
 		local overHighlight = self:HiglightedWord( )
 		
 		if overHighlight then
-			surface_SetDrawColor( 0, 255, 128, 50 )
-			
 			for overS, overE in string_gmatch( self.Rows[ Row ], "()" .. overHighlight .. "()" ) do
-				surface_DrawRect( 
-					( overS - 1 ) * self.FontWidth + self.BookmarkWidth + self.LineNumberWidth + self.FoldingWidth, 
-					( LinePos ) * self.FontHeight, 
-					self.FontWidth * ( overE - overS ), 
-					self.FontHeight 
-				)
+				self:PaintSelection( { Vector2(Row, overS), Vector2(Row, overE) }, Color( 0, 255, 128, 50 ))
 			end
 		end
-		--[[
-		local start, stop = self:MakeSelection( self:Selection( ) )
-		local line, char = start.x, start.y 
-		local endline, endchar = stop.x, stop.y 
-		
-		char = char - self.Scroll.y
-		endchar = endchar - self.Scroll.y
-
-		if char < 0 then char = 0 end
-		if endchar < 0 then endchar = 0 end
-		
-		local length = self.Rows[Row]:len( ) - self.Scroll.y + 1
-		
-		surface_SetDrawColor( 0, 0, 160, 255 )
-		if Row == line and line == endline then 
-			surface_DrawRect( 
-				char * self.FontWidth + self.BookmarkWidth + self.LineNumberWidth + self.FoldingWidth, 
-				( LinePos ) * self.FontHeight, 
-				self.FontWidth * ( endchar - char ), 
-				self.FontHeight 
-			 )
-		elseif Row == line then 
-			surface_DrawRect( 
-				char * self.FontWidth + self.BookmarkWidth + self.LineNumberWidth + self.FoldingWidth, 
-				( LinePos ) * self.FontHeight, 
-				self.FontWidth * math_min( self.Size.y - char + 2, length - char + 1 ), 
-				self.FontHeight 
-			 )
-		elseif Row == endline then 
-			surface_DrawRect( 
-				self.BookmarkWidth + self.LineNumberWidth + self.FoldingWidth, 
-				( LinePos ) * self.FontHeight, 
-				self.FontWidth * endchar,  
-				self.FontHeight 
-			 ) 
-		elseif Row > line and Row < endline then 
-			surface_DrawRect( 
-				self.BookmarkWidth + self.LineNumberWidth + self.FoldingWidth, 
-				( LinePos ) * self.FontHeight, 
-				self.FontWidth * math_min( self.Size.y + 2, length + 1 ),  
-				self.FontHeight 
-			 )
-		end
-		]]
 	elseif self.Params then 
 		if self.Params[1].x == Row then 
 			surface_SetDrawColor( 160, 160, 160, 255 )

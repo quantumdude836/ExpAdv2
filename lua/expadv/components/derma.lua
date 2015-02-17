@@ -140,7 +140,7 @@ Component:AddFunctionHelper("setBackgroundBlur", "df:b", "If set to true blurs b
 
 Component:AddPreparedFunction("setTitle", "df:s", "", "@value 1:SetTitle(@value 2)")
 Component:AddFunctionHelper( "setTitle", "df:s", "Sets the title of the dframe." )
-Component:AddPreparedFunction("makePopup", "df:", "", "@value 1:MakePopup()")
+Component:AddPreparedFunction("makePopup", "df:", "", "if !@value 1.ScreenDerma then @value 1:MakePopup() end")
 Component:AddFunctionHelper( "makePopup", "df:", "Makes the dframe popup on client's screen." )
 
 /* -----------------------------------------------------------------------------------
