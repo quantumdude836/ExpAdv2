@@ -927,24 +927,24 @@ function Component:OnPostRegisterClass( Name, Class )
 end
 
 /* --- --------------------------------------------------------------------------------
-	@: Jason Support, requested by jasongamer.
+	@: JSON Support, requested by Jasongamer.
 	@: This should not be considered a replacement for von.
    --- */
 
-local JasonCmp = EXPADV.AddComponent( "jason", true )
+local JSONCmp = EXPADV.AddComponent( "JSON", true )
 
-JasonCmp.Author = "Rusketh"
-JasonCmp.Description = "Adds jason support."
+JSONCmp.Author = "Rusketh"
+JSONCmp.Description = "Adds JSON support."
 
-local arrayToJason, tableToJason
+local arrayToJSON, tableToJSON
 
-local function objToJason(type, value, ch)
+local function objToJSON(type, value, ch)
 	local ch = ch or {}
 	if ch[getvalue] then return ch[getvalue] end
-	if type == "_vr" then return objToJason(value[2], value[1])  end
+	if type == "_vr" then return objToJSON(value[2], value[1])  end
 	if type == "b" || type == "n" || type == "s" || type == "v" || type == "a" || type == "c" || type == "e" || type == "_ply" then return value end
-	if type == "_ar" then return arrayToJason(value, ch) end
-	if type == "t" then return tableToJason(value, ch) end
+	if type == "_ar" then return arrayToJSON(value, ch) end
+	if type == "t" then return tableToJSON(value, ch) end
 end
 
 local luaTypes = {
@@ -965,18 +965,18 @@ local function luaToObject(object)
 	if type == "table" then return luaToTable(object), "t" end
 end
 
-function arrayToJason(value, ch)
-	local jasontbl, ch = {}, ch or {}
+function arrayToJSON(value, ch)
+	local JSONtbl, ch = {}, ch or {}
 	local type = value.__type
-	ch[value] = jasontbl
+	ch[value] = JSONtbl
 
 	for i = 1, #value do
-		local object = objToJason(type, value[i], ch)
+		local object = objToJSON(type, value[i], ch)
 		if istable(object) then ch[value[i]] = object end
-		jasontbl[i] = object
+		JSONtbl[i] = object
 	end
 
-	return jasontbl
+	return JSONtbl
 end
 
 local indexTypes = {
@@ -986,18 +986,18 @@ local indexTypes = {
 	["Player" ] = "e",
 }
 
-function tableToJason(value, ch)
-	local jasontbl, ch = {}, ch or {}
-	ch[value] = jasontbl
+function tableToJSON(value, ch)
+	local JSONtbl, ch = {}, ch or {}
+	ch[value] = JSONtbl
 
 	for index, _ in pairs(value.Look) do
 		local getvalue = value.Data[index]
-		local object = objToJason(value.Types[index], getvalue, ch)
+		local object = objToJSON(value.Types[index], getvalue, ch)
 		if istable(object) then ch[getvalue] = object end
-		jasontbl[index] = object
+		JSONtbl[index] = object
 	end
 
-	return jasontbl
+	return JSONtbl
 end
 
 function luaToTable(table)
@@ -1020,14 +1020,14 @@ end
 
 EXPADV.SharedOperators( )
 
-Component:AddVMFunction( "ArrayToJason", "ar", "s", function(Context, Trace, Array)
-	return util.TableToJSON(arrayToJason(Array))
+Component:AddVMFunction( "ArrayToJasn", "ar", "s", function(Context, Trace, Array)
+	return util.TableToJSON(arrayToJSON(Array))
 end )
 
-Component:AddVMFunction( "tableToJason", "t", "s", function(Context, Trace, Table)
-	return util.TableToJSON(tableToJason(Table))
+Component:AddVMFunction( "tableToJasn", "t", "s", function(Context, Trace, Table)
+	return util.TableToJSON(tableToJSON(Table))
 end )
 
-Component:AddVMFunction( "jasonToTable", "s", "t", function(Context, Trace, Jason)
-	return luaToTable(util.JSONToTable(Jason))
+Component:AddVMFunction( "jasnToTable", "s", "t", function(Context, Trace, JSON)
+	return luaToTable(util.JSONToTable(JSON))
 end )
