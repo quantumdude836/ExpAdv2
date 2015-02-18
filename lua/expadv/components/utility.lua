@@ -925,3 +925,109 @@ function Component:OnPostRegisterClass( Name, Class )
 
 	end
 end
+
+/* --- --------------------------------------------------------------------------------
+	@: Jason Support, requested by jasongamer.
+	@: This should not be considered a replacement for von.
+   --- */
+
+local JasonCmp = EXPADV.AddComponent( "jason", true )
+
+JasonCmp.Author = "Rusketh"
+JasonCmp.Description = "Adds jason support."
+
+local arrayToJason, tableToJason
+
+local function objToJason(type, value, ch)
+	local ch = ch or {}
+	if ch[getvalue] then return ch[getvalue] end
+	if type == "_vr" then return objToJason(value[2], value[1])  end
+	if type == "b" || type == "n" || type == "s" || type == "v" || type == "a" || type == "c" || type == "e" || type == "_ply" then return value end
+	if type == "_ar" then return arrayToJason(value, ch) end
+	if type == "t" then return tableToJason(value, ch) end
+end
+
+local luaTypes = {
+	["number"] = "n",
+	["string"] = "s",
+	["Vector"] = "v",
+	["Angle" ] = "a",
+	["Color" ] = "c",
+	["Entity" ] = "e",
+	["Player" ] = "e",
+}
+
+local luaToTable
+
+local function luaToObject(object)
+	local type = type(object)
+	if luaTypes[type] then return object, luaTypes[type] end
+	if type == "table" then return luaToTable(object), "t" end
+end
+
+function arrayToJason(value, ch)
+	local jasontbl, ch = {}, ch or {}
+	local type = value.__type
+	ch[value] = jasontbl
+
+	for i = 1, #value do
+		local object = objToJason(type, value[i], ch)
+		if istable(object) then ch[value[i]] = object end
+		jasontbl[i] = object
+	end
+
+	return jasontbl
+end
+
+local indexTypes = {
+	["number"] = "n",
+	["string"] = "s",
+	["Entity" ] = "e",
+	["Player" ] = "e",
+}
+
+function tableToJason(value, ch)
+	local jasontbl, ch = {}, ch or {}
+	ch[value] = jasontbl
+
+	for index, _ in pairs(value.Look) do
+		local getvalue = value.Data[index]
+		local object = objToJason(value.Types[index], getvalue, ch)
+		if istable(object) then ch[getvalue] = object end
+		jasontbl[index] = object
+	end
+
+	return jasontbl
+end
+
+function luaToTable(table)
+	local TABLE = { Data = { }, Types = { }, Look = { }, Size = 0, Count = 0, HasChanged = false }
+
+	for index, value in pairs(table) do
+		local keyObj, keyType = luaToObject(index)
+		TABLE.Look[keyObj] = keyObj
+
+		local valueObj, valueType = luaToObject(value)
+		TABLE.Data[keyObj] = valueObj
+		TABLE.Types[keyObj] = valueType
+
+		TABLE.Size = TABLE.Size + 1
+	end
+
+	TABLE.Count = #TABLE.Data
+	return TABLE
+end
+
+EXPADV.SharedOperators( )
+
+Component:AddVMFunction( "ArrayToJason", "ar", "s", function(Context, Trace, Array)
+	return util.TableToJSON(arrayToJason(Array))
+end )
+
+Component:AddVMFunction( "tableToJason", "t", "s", function(Context, Trace, Table)
+	return util.TableToJSON(tableToJason(Table))
+end )
+
+Component:AddVMFunction( "jasonToTable", "s", "t", function(Context, Trace, Jason)
+	return luaToTable(util.JSONToTable(Jason))
+end )
