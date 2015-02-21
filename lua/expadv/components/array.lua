@@ -169,12 +169,12 @@ function Component:OnPostRegisterClass( Name, Class )
 
 	Component:AddPreparedFunction( "insert", "ar:n," .. Class.Short, "", string.format([[
 		if @value 1.__type ~= %q then Context.Throw(@trace, "array", "array type missmatch, %s expected got " .. EXPADV.TypeName(@value 1.__type)) end
+		if @value 2 <= 0 or @value 2 > 512 or math.floor(@value 2) ~= @value 2 then Context.Throw(@trace, "array", "array index out of bounds.") end
 		]], Class.Short, Class.Name), "$table.insert(@value 1, @value 2, @value 3)")
 	EXPADV.AddFunctionAlias("insert", "ar,n," .. Class.Short)
 
 	Component:AddPreparedFunction( "insert", "ar:" .. Class.Short, "", string.format([[
 		if @value 1.__type ~= %q then Context.Throw(@trace, "array", "array type missmatch, %s expected got " .. EXPADV.TypeName(@value 1.__type)) end
-		if @value 2 <= 0 or @value 2 > 512 or math.floor(@value 2) ~= @value 2 then Context.Throw(@trace, "array", "array index out of bounds.") end
 		]], Class.Short, Class.Name), "$table.insert(@value 1, @value 2)")
 	EXPADV.AddFunctionAlias("insert", "ar," .. Class.Short)
 
