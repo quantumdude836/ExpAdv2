@@ -581,25 +581,30 @@ Component:AddFunctionHelper( "clearFilter", "rd:", "Clears the filter of the ran
 
 EXPADV.SharedOperators( )
 
-Component:AddPreparedFunction( "httpRequest", "s,d,d", "", [[$http.Fetch( @value 1,
-	function( Body )
-		Context:Execute( "http success callback", @value 2, { Body, "s" } )
-	end, function( )
-		Context:Execute( "http fail callback", @value 1 )
-	end
-)]] )
+Component:AddVMFunction( "httpRequest", "s,d,d", "", function(Context, Trace, URL, Sucess, Fail)
+	if string.find(URL, "%d%d?%d?%.%d%d?%d?%.%d%d?%d?%.%d%d?%d?") then return end
 
-Component:AddPreparedFunction( "httpPostRequest", "s,t,d,d", "", [[$http.Post( @value 1, @value 2.Data,
-	function( Body )
-		Context:Execute( "http success callback", @value 3, { Body, "s" } )
-	end, function( )
-		Context:Execute( "http fail callback", @value 4 )
-	end
-)]] )
+	http.Fetch( URL,
+		function( Body )
+			Context:Execute( "http success callback", Sucess, { Body, "s" } )
+		end, function( )
+			Context:Execute( "http fail callback", Fail )
+		end)
+end)
+
+Component:AddVMFunction( "httpRequest", "s,t,d,d", "", function(Context, Trace, URL, Tbl, Sucess, Fail)
+	if string.find(URL, "%d%d?%d?%.%d%d?%d?%.%d%d?%d?%.%d%d?%d?") then return end
+
+	http.Post( URL, Tbl.Data,
+		function( Body )
+			Context:Execute( "http success callback", Sucess, { Body, "s" } )
+		end, function( )
+			Context:Execute( "http fail callback", Fail )
+		end)
+end)
 
 Component:AddFunctionHelper( "httpRequest", "s,d,d", "Sends HTTP Request, executing 1st delegate with string Body on success or 2nd delegate on failure." )
 Component:AddFunctionHelper( "httpPostRequest", "s,t,d,d", "Sends HTTP Request with data table, executing 1st delegate with string Body on success or 2nd delegate on failure." )
-
 
 /* --- --------------------------------------------------------------------------------
 	@: Physics Control Component

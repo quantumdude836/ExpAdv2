@@ -251,6 +251,7 @@ EXPADV.ClientOperators()
 Component:AddVMFunction( "playURL", "s,s,d,d", "", 
 	function( Context, Trace, URL, Flags, Sucess, Fail )
 		if !IsValid(Context.entity) or !EXPADV.CanAccessFeature(Context.entity, "PlayURL") then return end
+		if string.find(URL, "%d%d?%d?%.%d%d?%d?%.%d%d?%d?%.%d%d?%d?") then return end
 
 		sound.PlayURL( URL, Flags,
 			function( Channel, Er_ID, Er_Name ) 

@@ -530,6 +530,8 @@ local URLQueue = { }
 local CanLoad = true
 
 local function Download(Context, Name, URL, Width, Height)
+	if string.find(URL, "%d%d?%d?%.%d%d?%d?%.%d%d?%d?%.%d%d?%d?") then return end
+
 	if IsValid(HTML) then
 		HTML:Remove()
 	end
