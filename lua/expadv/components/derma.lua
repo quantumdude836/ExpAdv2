@@ -66,7 +66,7 @@ Component:AddVMFunction( "dpanel", "", "dp", function(Context, Trace) return Cre
 Component:AddVMFunction( "dpanel", "df", "dp", function( Context, Trace, Panel ) return CreatePanel( Context, Trace, "DPanel", Panel ) end )
 
 Component:AddFunctionHelper( "dpanel", "", "Returns new dpanel object." )
-Component:AddFunctionHelper( "dpanel", "df", "Returns new dpanel object with the give dframe as parent." )
+Component:AddFunctionHelper( "dpanel", "df", "Returns new dpanel object with the given dframe as parent." )
 
 Component:AddPreparedFunction("setPos", "dp:v2", "", "@value 1:SetPos(@value 2.x, @value 2.y)")
 Component:AddFunctionHelper( "setPos", "dp:v2", "Sets the position of the dpanel." )
