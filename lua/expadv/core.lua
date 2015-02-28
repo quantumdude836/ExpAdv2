@@ -100,33 +100,48 @@ EXPADV.ToLuaTable = ToLuaTable
    --- */
 
 EXPADV.Config = { }
+EXPADV.CL_Settings = { }
 
 function EXPADV.LoadConfig( )
-	if CLIENT then return end
-
 	local Config = { }
 
-	if file.Exists( "expadv.txt", "DATA" ) then
-		Config = util.KeyValuesToTable( file.Read( "expadv.txt", "DATA" ) )
-	end
+	if SERVER then
+
+		if file.Exists( "expadv.txt", "DATA" ) then
+			Config = util.KeyValuesToTable( file.Read( "expadv.txt", "DATA" ) )
+		end
 	
-	Config.enabledcomponents = Config.enabledcomponents or { }
-	Config.components = Config.components or { }
-	Config.settings = Config.settings or { }
+		Config.enabledcomponents = Config.enabledcomponents or { }
+		Config.components = Config.components or { }
+		Config.settings = Config.settings or { }
+		EXPADV.Config = Config
 
-	EXPADV.Msg( "ExpAdv: Loaded config file, sucessfully." )
+		EXPADV.Msg( "ExpAdv: Loaded config file, sucessfully." )
+		EXPADV.CallHook( "PostLoadConfig", Config )
 
-	EXPADV.Config = Config
+	elseif CLIENT then
+		if file.Exists( "cl_expadv.txt", "DATA" ) then
+			Config = util.KeyValuesToTable( file.Read( "cl_expadv.txt", "DATA" ) )
+		end
+	
+		Config.components = Config.components or { }
+		Config.settings = Config.settings or { }
+		EXPADV.CL_Settings = Config
 
-	EXPADV.CallHook( "PostLoadConfig", Config )
+		EXPADV.Msg( "ExpAdv: Loaded config file, sucessfully." )
+		EXPADV.CallHook( "PostLoadUserSettings", Config )
+	end	
 end
 
 -- Saves the config file.
 function EXPADV.SaveConfig( )
-	if CLIENT then return end
-	EXPADV.CallHook( "PreSaveConfig", EXPADV.Config )
-
-	file.Write( "expadv.txt", util.TableToKeyValues( EXPADV.Config ) )
+	if SERVER then
+		EXPADV.CallHook( "PreSaveConfig", EXPADV.Config )
+		file.Write( "expadv.txt", util.TableToKeyValues( EXPADV.Config ) )
+	elseif CLIENT then
+		EXPADV.CallHook( "PreSaveUserSettings", EXPADV.CL_Settings )
+		file.Write( "cl_expadv.txt", util.TableToKeyValues( EXPADV.CL_Settings ) )
+	end
 end
 
 -- Creates a new setting on the config.
@@ -140,6 +155,20 @@ end
 function EXPADV.ReadSetting( Name, Default ) -- String, Obj
 	if !EXPADV.Config or !EXPADV.Config.settings then return Default end
 	return EXPADV.Config.settings[ string.lower( Name ) ] or Default
+end
+
+-- Creates a new user setting.
+function EXPADV.CreateUserSetting( Name, Default ) -- String, Obj
+	if SERVER then return end
+	Name = string.lower( Name )
+	EXPADV.CL_Settings.settings[ Name ] = EXPADV.CL_Settings.settings[ Name ] or Default
+end
+
+-- Reads a user setting.
+function EXPADV.ReadUserSetting( Name, Default ) -- String, Obj
+	if SERVER then return Default end
+	if !EXPADV.CL_Settings or !EXPADV.CL_Settings.settings then return Default end
+	return EXPADV.CL_Settings.settings[ string.lower( Name ) ] or Default
 end
 
 /* --- --------------------------------------------------------------------------------

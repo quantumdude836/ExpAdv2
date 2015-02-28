@@ -25,6 +25,9 @@ Component:AddFunctionHelper( "getVehicle", "", "Returns the Vehicle linked to th
 
 EXPADV.ServerOperators()
 
+Component:AddPreparedFunction( "setVehicle", "e", "","if EXPADV.PPCheck(Context, @value 1) then Context.entity:LinkPod(@value 1) end")
+Component:AddFunctionHelper( "setVehicle", "e", "Links the Vehicle to the expadv2 gate.")
+
 Component:AddVMFunction( "getDriver", "", "ply",
 	function(Context, Trace)
 		local Pod = GetPod( Context )

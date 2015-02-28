@@ -581,19 +581,23 @@ Component:AddFunctionHelper( "clearFilter", "rd:", "Clears the filter of the ran
 
 EXPADV.SharedOperators( )
 
-Component:AddVMFunction( "httpRequest", "s,d,d", "", function(Context, Trace, URL, Sucess, Fail)
-	if string.find(URL, "%d%d?%d?%.%d%d?%d?%.%d%d?%d?%.%d%d?%d?") then return end
+local CheckURL
 
+Component:AddVMFunction( "httpRequest", "s,d,d", "b", function(Context, Trace, URL, Sucess, Fail)
+	if !CheckURL(Context, URL) then return false end
+	
 	http.Fetch( URL,
 		function( Body )
 			Context:Execute( "http success callback", Sucess, { Body, "s" } )
 		end, function( )
 			Context:Execute( "http fail callback", Fail )
 		end)
+
+	return true
 end)
 
-Component:AddVMFunction( "httpRequest", "s,t,d,d", "", function(Context, Trace, URL, Tbl, Sucess, Fail)
-	if string.find(URL, "%d%d?%d?%.%d%d?%d?%.%d%d?%d?%.%d%d?%d?") then return end
+Component:AddVMFunction( "httpRequest", "s,t,d,d", "b", function(Context, Trace, URL, Tbl, Sucess, Fail)
+	if !CheckURL(Context, URL) then return false end
 
 	http.Post( URL, Tbl.Data,
 		function( Body )
@@ -601,10 +605,60 @@ Component:AddVMFunction( "httpRequest", "s,t,d,d", "", function(Context, Trace, 
 		end, function( )
 			Context:Execute( "http fail callback", Fail )
 		end)
+
+	return true
 end)
 
 Component:AddFunctionHelper( "httpRequest", "s,d,d", "Sends HTTP Request, executing 1st delegate with string Body on success or 2nd delegate on failure." )
 Component:AddFunctionHelper( "httpPostRequest", "s,t,d,d", "Sends HTTP Request with data table, executing 1st delegate with string Body on success or 2nd delegate on failure." )
+
+/* --- --------------------------------------------------------------------------------
+	@: HTTP Security
+   --- */
+
+local DEFAULT_BLACKLIST = {} -- TODO: Populate this :D
+
+Component:CreateUserSetting( "http_blacklist", DEFAULT_BLACKLIST )
+Component:AddFeature( "HTTPRequests", "Requests from data from http, can be used maliciously.", "tek/iconexclamation.png" )
+
+function CheckURL(Context, URL)
+
+	--If its an ip, reject it.
+	if string.find(URL, "%d%d?%d?%.%d%d?%d?%.%d%d?%d?%.%d%d?%d?") then return false end
+
+	--If its serverside allow it, this may change in future.
+	if SERVER then return true end
+	
+	--Check feature access.
+	if !EXPADV.CanAccessFeature(Context.entity, "HTTPRequests") then return false end
+
+	--Check the black list with wild cards.
+	URL = string.lower(URL)
+
+	local BlackList = Component:ReadUserSetting( "http_blacklist", DEFAULT_BLACKLIST )
+
+	for _, listed in pairs(BlackList) do
+		if string.find(URL, string.lower(listed), 0, true) then return false end
+	end
+
+	return true
+end
+
+if CLIENT then
+	concommand.Add("expadv_block_url", function(Player, _, Args)
+		local url = table.concat(Args, " ")
+
+		local BlackList = Component:ReadUserSetting( "http_blacklist", DEFAULT_BLACKLIST )
+
+		if table.HasValue(BlackList, url) then return MsgN(url, " is already blacklisted.") end
+
+		table.insert(BlackList, url)
+
+		EXPADV.SaveConfig()
+
+		MsgN(url, " has been blacklisted, you may undo this by editing 'data/cl_expadv.txt'.")
+	end)
+end
 
 /* --- --------------------------------------------------------------------------------
 	@: Physics Control Component

@@ -190,12 +190,12 @@ function EXPADV.EntityCanAccessFeature(Entity, Feature)
 
 	if Access then
 		return true
-	elseif Entity.GetLinkedPod then
+	/*elseif Entity.GetLinkedPod then
 		local Pod = Entity:GetLinkedPod()
 
 		if IsValid(Pod) and !(Pod:GetDriver() ~= LocalPlayer()) then
 			return !EXPADV.IsFeatureBlockedForEntity(Entity, Feature)
-		end
+		end -- Lets make it show the menu when they enter instead :D*/
 	end
 
 	return false
@@ -367,6 +367,6 @@ end
 
 hook.Add( "Expadv.OpenContextMenu", "expadv.features",
 	function( Entity, Menu, Trace, Option )
-		Menu:AddOption("Show Features", function() EXPADV.ShowFeatures(Entity) end)
+		Menu:AddOption("Edit Features", function() EXPADV.ShowFeatures(Entity) end)
 	end )
 

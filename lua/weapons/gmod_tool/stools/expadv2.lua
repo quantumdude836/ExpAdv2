@@ -239,6 +239,7 @@ function TOOL:RightClick( Trace )
 	elseif self:GetStage() == 1 and Trace.Entity.ExpAdv then
 		EXPADV.Notifi(self:GetOwner(), "Pod has been linked to gate.", nil, 1 )
 		Trace.Entity:LinkPod(self.TargetPod)
+		self.TargetPod = nil
 		self:SetStage(0)
 		return true
 	end

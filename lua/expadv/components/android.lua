@@ -25,6 +25,7 @@ Component:AddVMFunction("requestFeature", "s,b", "", function(Context, Trace, Fe
 end )
 
 function Component:OnPostLoadFeatures()
+	EXPADV.ClientOperators()
 	for Feature, Data in pairs(EXPADV.Features) do
 		self:AddPreparedFunction("request" .. Feature, "", "", string.format("Context.Data.Features[%q] = true", Feature))
 	end
@@ -54,18 +55,57 @@ if CLIENT then
 		Gate.FeaturesPanel = FeaturesPanel
 	end
 	
-	hook.Add( "Expadv.RegisterContext", "expadv.android", function( Context )
-		Context.Data.Features = { }
-	end)
+	hook.Add( "Expadv.RegisterContext", "expadv.android",
+		function( Context )
+			Context.Data.Features = { }
+		end)
 
-	hook.Add( "Expadv.EntityUsed", "expadv.android", function( Gate )
-		local Context = Gate.Context
-		if !Context or !Context.Online then return end
-		EXPADV.RequestFeatures(Gate, Context)
-	end )
+	hook.Add( "Expadv.EntityUsed", "expadv.android",
+		function( Gate )
+			local Context = Gate.Context
+			if !Context or !Context.Online then return end
+			EXPADV.RequestFeatures(Gate, Context)
+		end )
+
+	hook.Add( "Expadv.OpenContextMenu", "expadv.android",
+		function( Gate, Menu, Trace, Option )
+			Menu:AddOption("Veiw Features", function()
+				local Context = Gate.Context
+				if !Context or !Context.Online then return end
+				EXPADV.RequestFeatures(Gate, Context)
+			end)
+		end )
+
+	net.Receive("EXPADV.Android.Driver",
+		function()
+			local Gate = Entity(net.ReadUInt(16))
+			if IsValid(Gate) and Gate.ExpAdv then
+				local Context = Gate.Context
+				if !Context or !Context.Online then return end
+				EXPADV.RequestFeatures(Gate, Context)
+			end
+		end)
 end
 
-if SERVER then return end
+if SERVER then
+	util.AddNetworkString("EXPADV.Android.Driver")
+
+	hook.Add( "PlayerEnteredVehicle", "expadv.android", function(Ply, Pod)
+		for _, Context in pairs( EXPADV.CONTEXT_REGISTERY ) do
+			if !Context.Online or !IsValid(Context.entity) then continue end
+
+			if !Context.entity.GetLinkedPod or Context.entity:GetLinkedPod() ~= Pod then continue end
+
+			net.Start("EXPADV.Android.Driver")
+				net.WriteUInt(Context.entity:EntIndex(), 16)
+			net.Send(Ply)
+
+			return
+		end
+	end)
+
+	return -- END OF SERVER
+end
 
 /* --- --------------------------------------------------------------------------------
 	@: Materials
