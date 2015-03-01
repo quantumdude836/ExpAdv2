@@ -25,7 +25,7 @@ Array:StringBuilder( function( A ) return string.format( "array<%s,%i>", EXPADV.
 
 EXPADV.SharedOperators( )
 
-Array:AddPreparedOperator( "=", "n,ar", "", "Context.Memory[@value 1] = @value 2" ) -- Keeping this virtual, becuase i might need to add to it later :D
+Array:AddPreparedOperator( "=", "n,ar", "", "Context.Memory[@value 1] = @value 2" )
 
 Component:AddInlineOperator( "#","ar","n", "#@value 1" )
 

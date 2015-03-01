@@ -25,7 +25,7 @@ if WireLib then
         function(Value, Context) -- To Wire
             return Value and 1 or 0
         end, function(Value, context) -- From Wire
-            return Value ~= 0
+            return !(Value == 0)
         end)
 end
 

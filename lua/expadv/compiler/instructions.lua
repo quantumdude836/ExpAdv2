@@ -1040,7 +1040,13 @@ end
    --- */
 
 function Compiler:Compile_GET( Trace, Expression1, Expression2, ClassShort )
-	local Operator = self:LookUpClassOperator( Expression1.Return, "get", Expression1.Return, Expression2.Return, ClassShort or "_vr" )
+	local Operator
+
+	if ClassShort then
+		Operator = self:LookUpClassOperator( Expression1.Return, "get", Expression1.Return, Expression2.Return, ClassShort or "_vr" )
+	else
+		Operator = self:LookUpClassOperator( Expression1.Return, "get", Expression1.Return, Expression2.Return )
+	end
 
 	if !Operator and ClassShort then
 		self:TraceError( Trace, "No such operator (%s[%s,%s])", self:NiceClass( Expression1.Return, Expression2.Return, ClassShort, Expression1.Return ) )
@@ -1052,7 +1058,7 @@ function Compiler:Compile_GET( Trace, Expression1, Expression2, ClassShort )
 end
 
 function Compiler:Compile_SET( Trace, Expression1, Expression2, Expression3, ClassShort )
-	if Short and Expression3.Return ~= ClassShort then
+	if ClassShort and Expression3.Return ~= ClassShort then
 		Expression2 = self:Compile_CAST( Trace, ClassShort, Expression3, true )
 	end
 

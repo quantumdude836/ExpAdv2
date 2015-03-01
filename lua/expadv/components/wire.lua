@@ -205,3 +205,102 @@ Component:AddFunctionHelper( "outputType", "wl:s", "Returns the wiretype of an o
 Component:AddFunctionHelper( "hasInput", "wl:s", "Returns true if the linked component has an input of the specified name." )
 Component:AddFunctionHelper( "isHiSpeed", "wl:", "Returns true if the wirelinked object supports the HiSpeed interface. See wiremod wiki for more information." )
 Component:AddFunctionHelper( "inputType", "wl:s", "Returns the wiretype of an input on the linked component." )
+
+/* --- --------------------------------------------------------------------------------
+	@: Wire Array Class
+	@: For the record wiremods array classes are stupid.
+   --- */
+
+local Array = Component:AddClass( "wirearray", "wa" )
+
+Array:MakeServerOnly( )
+
+Array:WireIO( "ARRAY" )
+
+Array:DefaultAsLua({})
+
+/* --- ------------------------------------------------------------------------------*/
+
+Array:AddPreparedOperator( "=", "n,wa", "", "Context.Memory[@value 1] = @value 2" )
+
+Component:AddInlineOperator( "#","wa","n", "#@value 1" )
+
+Component:AddInlineFunction("wireArray", "", "wa", "{}")
+Component:AddFunctionHelper( "wireArray", "", "Returns an empty wire array object, this object should be used for wire array outputs only and not as an actual array." )
+
+/* --- ------------------------------------------------------------------------------*/
+
+--NORMAL:
+	Array:AddVMOperator( "get", "wa,n,n", "n",
+		function(Context, Trace, Array, Index)
+			if !isnumber(Array[Index]) then return 0 end
+			return Array[Index]
+		end)
+
+	Array:AddVMOperator( "set", "wa,n,n", "",
+		function(Context, Trace, Array, Index, Value)
+			Array[math.floor(Index)] = Value
+		end)
+
+--VECTOR:
+	Array:AddVMOperator( "get", "wa,n,v", "v",
+		function(Context, Trace, Array, Index)
+			local Value = Array[Index]
+			if !isvector(Value) and !(istable(Value) and #Value == 3) then return Vector(0,0,0) end
+			return Vector(Value[1] or 0, Value[2] or 0, Value[3] or 0)
+		end)
+
+	Array:AddVMOperator( "set", "wa,n,v", "",
+		function(Context, Trace, Array, Index, Value)
+			Array[math.floor(Index)] = Value
+		end)
+
+--ANGLE:
+	Array:AddVMOperator( "get", "wa,n,a", "a",
+		function(Context, Trace, Array, Index)
+			local Value = Array[Index]
+			if !isangle(Value) and !(istable(Value) and #Value == 3) then return Angle(0,0,0) end
+			return Angle(Value[1] or 0, Value[2] or 0, Value[3] or 0)
+		end)
+
+	Array:AddVMOperator( "set", "wa,n,a", "",
+		function(Context, Trace, Array, Index, Value)
+			Array[math.floor(Index)] = Value
+		end)
+
+--COLOR:
+	Array:AddVMOperator( "get", "wa,n,c", "c",
+		function(Context, Trace, Array, Index)
+			local Value = Array[Index]
+			if !IsColor(Value) and !(istable(Value) and #Value == 4) then return Color(0,0,0,255) end
+			return Color(Value[1] or 0, Value[2] or 0, Value[3] or 0, Value[4] or 0)
+		end)
+
+	Array:AddVMOperator( "set", "wa,n,c", "",
+		function(Context, Trace, Array, Index, Value)
+			Array[math.floor(Index)] = Value
+		end)
+
+--ENTITY:
+	Array:AddVMOperator( "get", "wa,n,c", "c",
+		function(Context, Trace, Array, Index)
+			if !isentity(Array[Index]) then return Entity(0) end
+			return Array[Index]
+		end)
+
+	Array:AddVMOperator( "set", "wa,n,c", "",
+		function(Context, Trace, Array, Index, Value)
+			Array[math.floor(Index)] = Value
+		end)
+
+--STRING:
+	Array:AddVMOperator( "get", "wa,n,s", "s",
+		function(Context, Trace, Array, Index)
+			if !isstring(Array[Index]) then return "" end
+			return Array[Index]
+		end)
+
+	Array:AddVMOperator( "set", "wa,n,s", "",
+		function(Context, Trace, Array, Index, Value)
+			Array[math.floor(Index)] = Value
+		end)
