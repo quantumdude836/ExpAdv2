@@ -63,8 +63,10 @@ end
 PanelClass:AddPreparedOperator( "=", "n,dp", "", "Context.Memory[@value 1] = @value 2" )
 
 Component:AddVMFunction( "dpanel", "", "dp", function(Context, Trace) return CreatePanel(Context, Trace, "DPanel") end )
+Component:AddVMFunction( "dpanel", "df", "dp", function( Context, Trace, Panel ) return CreatePanel( Context, Trace, "DPanel", Panel ) end )
 
 Component:AddFunctionHelper( "dpanel", "", "Returns new dpanel object." )
+Component:AddFunctionHelper( "dpanel", "df", "Returns new dpanel object with the given dframe as parent." )
 
 Component:AddPreparedFunction("setPos", "dp:v2", "", "@value 1:SetPos(@value 2.x, @value 2.y)")
 Component:AddFunctionHelper( "setPos", "dp:v2", "Sets the position of the dpanel." )
