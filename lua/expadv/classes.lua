@@ -388,9 +388,9 @@ function EXPADV.LoadClasses( )
 
  		if WireLib then
  			if !Class.Wire_in_type then Class.Wire_in_type = DeriveClass.Wire_in_type end
-			if !Class.Wire_in_func then Class.Wire_in_func = DeriveClass.Wire_in_func end
+			if !Class.Wire_in_type and !Class.Wire_in_func then Class.Wire_in_func = DeriveClass.Wire_in_func end
 			if !Class.Wire_out_type then Class.Wire_out_type = DeriveClass.Wire_out_type end
-			if !Class.Wire_out_func then Class.Wire_out_func = DeriveClass.Wire_out_func end
+			if !Class.Wire_out_type and !Class.Wire_out_func then Class.Wire_out_func = DeriveClass.Wire_out_func end
  		end
 
 		if EXPADV.von then

@@ -410,6 +410,7 @@ function EXPADV.LoadCore( )
 	EXPADV.AddComponentFile( "co-routine" )
 	EXPADV.AddComponentFile( "utility" )
 	EXPADV.AddComponentFile( "wire" )
+	EXPADV.AddComponentFile( "egp" )
 	EXPADV.AddComponentFile( "files" )
 	EXPADV.AddComponentFile( "navigation" )
 	EXPADV.AddComponentFile( "derma" )
@@ -672,6 +673,12 @@ end
 hook.Add( "Expadv.PostLoadCore", "expadv.updates", function( )
 	EXPADV.CheckForUpdates( true )
 end )
+
+if CLIENT then
+	concommand.Add( "expadv_ver", function( Player )
+		EXPADV.CheckForUpdates( true )
+	end )
+end
 
 /* --- --------------------------------------------------------------------------------
 	@: API.

@@ -55,6 +55,9 @@ local HomeScreen = [[
 /*------------------------------------------------------------------
     Expression Advanced 2
 --------------------------------------------------------------------
+        New to EXPADV2, Click (?) in the toolbar,
+            it's the easiest and fastest way to learn.
+
         The github repository can be found here:
             https://github.com/Rusketh/ExpAdv2
         

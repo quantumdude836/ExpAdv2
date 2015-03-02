@@ -322,19 +322,20 @@ function EXPADV.Editor.OpenHelper( )
 		local TabSheet = Frame:Add( "DPropertySheet" )
 		TabSheet:Dock( FILL )
 
+		local GuideTabSheet = vgui.Create( "DHTML" )
+		GuideTabSheet:OpenURL( "http://goo.gl/g6WEfs" )
+		GuideTabSheet:DockMargin( 5, 5, 5 ,5 )
+		GuideTabSheet:Dock( FILL )
+
 		local WikiTabSheet = vgui.Create( "DHTML" )
 		WikiTabSheet:OpenURL( "https://github.com/Rusketh/ExpAdv2/wiki/Syntax" )
 		WikiTabSheet:DockMargin( 5, 5, 5 ,5 )
 		WikiTabSheet:Dock( FILL )
 
-		TabSheet:AddSheet( "Syntax", WikiTabSheet, nil, true, true, "Syntax documentation." )
-
 		local ExamplesTabSheet = vgui.Create( "DHTML" )
 		ExamplesTabSheet:OpenURL( "https://github.com/Rusketh/ExpAdv2/wiki/Examples" )
 		ExamplesTabSheet:DockMargin( 5, 5, 5 ,5 )
 		ExamplesTabSheet:Dock( FILL )
-
-		TabSheet:AddSheet( "Examples", ExamplesTabSheet, nil, true, true, "Example Codes." )
 
 		local ComponentTabSheet = vgui.Create( "DPanel" )
 		ComponentTabSheet:DockMargin( 5, 5, 5 ,5 )
@@ -349,8 +350,6 @@ function EXPADV.Editor.OpenHelper( )
 		ComponentCanvas:DockMargin( 5, 5, 5 ,5 )
 		ComponentCanvas:Dock( FILL )
 
-		TabSheet:AddSheet( "Components", ComponentTabSheet, nil, true, true, "Components & Classes" )
-
 		local BrowserTabSheet = vgui.Create( "DPanel" )
 		BrowserTabSheet:DockMargin( 5, 5, 5 ,5 )
 		BrowserTabSheet:Dock( FILL )
@@ -362,7 +361,11 @@ function EXPADV.Editor.OpenHelper( )
 		local BrowserSheet = BrowserCanvas:Add( "EA_HelpPage" )
 		BrowserSheet:Dock( FILL )
 
+		TabSheet:AddSheet( "Components", ComponentTabSheet, nil, true, true, "Components & Classes" )
 		TabSheet:AddSheet( "Browser", BrowserTabSheet, nil, true, true, "Browse" )
+		TabSheet:AddSheet( "Wiki and Syntax", WikiTabSheet, nil, true, true, "Syntax documentation." )
+		TabSheet:AddSheet( "Examples", ExamplesTabSheet, nil, true, true, "Example Codes." )
+		TabSheet:AddSheet( "Tutorial", GuideTabSheet, nil, true, true, "EXPADV2 For Dummies." )
 
 	-- COMPONENTS & CLASSES:
 

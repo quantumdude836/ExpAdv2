@@ -19,7 +19,7 @@ local WireLink = Component:AddClass( "wirelink", "wl" )
 
 WireLink:MakeServerOnly( )
 
-WireLink:FromWire( "WIRELINK" )
+WireLink:WireIO( "WIRELINK" )
 
 WireLink:ExtendClass( "e" )
 

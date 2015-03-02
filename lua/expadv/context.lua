@@ -253,6 +253,8 @@ hook.Add( "Tick", "ExpAdv2.Update", function( )
 	for Context, _ in pairs( EXPADV.Updates ) do
 		if !IsValid( Context.entity ) then continue end
 
+		EXPADV.CallHook( "OnUpdateContext", Context )
+
 		local Ok, Msg = pcall( Context.entity.UpdateTick, Context.entity )
 
 		if !Ok then
