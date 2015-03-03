@@ -122,13 +122,13 @@ Component:AddInlineFunction( "getRoll", "a:", "n", "@value 1.r" )
 Component:AddFunctionHelper( "getRoll", "a:", "Gets the roll value of an angle" )
 
 --SETTERS
-Component:AddPreparedFunction( "setPitch", "a:n", "", "@value 1.p = @value 2" )
+Component:AddPreparedFunction( "setPitch", "a:n", "a", "@value 1.p = @value 2", "(@value 1)" )
 Component:AddFunctionHelper( "setPitch", "a:n", "Sets the pitch value of an angle" )
 
-Component:AddPreparedFunction( "setYaw", "a:n", "", "@value 1.y = @value 2" )
+Component:AddPreparedFunction( "setYaw", "a:n", "a", "@value 1.y = @value 2", "(@value 1)"  )
 Component:AddFunctionHelper( "setYaw", "a:n", "Sets the yaw value of an angle" )
 
-Component:AddPreparedFunction( "setRoll", "a:n", "", "@value 1.r = @value 2" )
+Component:AddPreparedFunction( "setRoll", "a:n", "a", "@value 1.r = @value 2", "(@value 1)"  )
 Component:AddFunctionHelper( "setRoll", "a:n", "Sets the roll value of an angle" )
 
 --Changers
