@@ -118,16 +118,16 @@ Component:AddInlineFunction( "getAlpha", "c:", "n", "@value 1.a")
 Component:AddFunctionHelper( "getAlpha", "c:", "Gets the alpha value of a color object")
 
 --SETTERS
-Component:AddPreparedFunction( "setRed", "c:n", "", "@value 1.r = @value 2")
+Component:AddPreparedFunction( "setRed", "c:n", "c", "@value 1.r = @value 2", "(@value 1)")
 Component:AddFunctionHelper( "setRed", "c:n", "Sets the red value of a color object")
 
-Component:AddPreparedFunction( "setGreen", "c:n", "", "@value 1.g = @value 2")
+Component:AddPreparedFunction( "setGreen", "c:n", "c", "@value 1.g = @value 2", "(@value 1)")
 Component:AddFunctionHelper( "setGreen", "c:n", "Sets the green value of a color object")
 
-Component:AddPreparedFunction( "setBlue", "c:n", "", "@value 1.b = @value 2")
+Component:AddPreparedFunction( "setBlue", "c:n", "c", "@value 1.b = @value 2", "(@value 1)")
 Component:AddFunctionHelper( "setBlue", "c:n", "Sets the blue value of a color object")
 
-Component:AddPreparedFunction( "setAlpha", "c:n", "", "@value 1.a = @value 2")
+Component:AddPreparedFunction( "setAlpha", "c:n", "c", "@value 1.a = @value 2", "(@value 1)")
 Component:AddFunctionHelper( "setAlpha", "c:n", "Sets the alpha value of a color object")
 
 /* --- --------------------------------------------------------------------------------
