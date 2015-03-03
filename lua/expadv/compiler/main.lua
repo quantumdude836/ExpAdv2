@@ -271,9 +271,9 @@ function Compiler:GetClass( Trace, ClassName, bNoError )
 		Class = EXPADV.GetClass( ClassName, true )
 	end
 	
-	if self.Classes[ClassName] then
-		return self:GetUserClass(ClassName)
-	end
+	//if self.Classes[ClassName] then
+	//	return self:GetUserClass(ClassName)
+	//end
 
 	if !Class and bNoError then return end
 

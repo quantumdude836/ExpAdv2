@@ -143,6 +143,8 @@ Component:AddFunctionHelper( "withY", "v:n", "Returns the value of the vector wi
 Component:AddPreparedFunction( "withZ", "v:n", "v", "Vector(@value 1.x, @value 1.y, @value 2)" )
 Component:AddFunctionHelper( "withZ", "v:n", "Returns the value of the vector with the value of z changed." )
 
+Component:AddPreparedFunction( "clone", "v:", "v", "Vector(@value 1.x, @value 1.y, @value 1.z)" )
+Component:AddFunctionHelper( "clone", "v:", "Returns a clone of the vector." )
 
 /* --- --------------------------------------------------------------------------------
     @: Rotate
@@ -431,6 +433,9 @@ Component:AddFunctionHelper( "withX", "v:n", "Returns the value of the vector2 w
 
 Component:AddPreparedFunction( "withY", "v:n", "v", "Vector2(@value 1.x, @value 2)" )
 Component:AddFunctionHelper( "withY", "v:n", "Returns the value of the vector2 with the value of y changed." )
+
+Component:AddPreparedFunction( "clone", "v2:", "v2", "Vector2(@value 1.x, @value 1.y)" )
+Component:AddFunctionHelper( "clone", "v2:", "Returns a clone of the vector2." )
 
 /* --- --------------------------------------------------------------------------------
     @: Functions

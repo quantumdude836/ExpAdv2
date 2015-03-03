@@ -1059,7 +1059,7 @@ end
 
 function Compiler:Compile_SET( Trace, Expression1, Expression2, Expression3, ClassShort )
 	if ClassShort and Expression3.Return ~= ClassShort then
-		Expression2 = self:Compile_CAST( Trace, ClassShort, Expression3, true )
+		Expression2 = self:Compile_CAST( Trace, EXPADV.GetClass(ClassShort, false).Name, Expression3, true )
 	end
 
 	local Operator = self:LookUpClassOperator( Expression1.Return, "set", Expression1.Return, Expression2.Return, Expression3.Return )

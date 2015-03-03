@@ -140,7 +140,7 @@ end]], "@Val" )
    --- */
 
 Component:AddPreparedFunction( "setMass", "p:n", "", [[
-if IsValid( @value 1 ) and EXPADV.PPCheck(Context, @value 1:GetEntity( ) )
+if IsValid( @value 1 ) and EXPADV.PPCheck(Context, @value 1:GetEntity( ) ) then
 	@value 1:SetMass( math.Clamp( @value 2, 0.001, 50000 ) )
 end]] )
 
