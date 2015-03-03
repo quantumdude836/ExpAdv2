@@ -244,6 +244,20 @@ end
 
 	Component:AddFunctionHelper( "sort", "ar:d", "Takes an array and sorts it, the returned array will be sorted by the provided delegate and all indexs will be numberic. The delegate will be called with 2 variants that are values on the table, return true if the first is bigger then the second this delegate must return a boolean." )
 
+	Component:AddVMFunction( "concat", "ar:s", "s",
+	function( Context, Trace, Array, Sep )
+		local Result = {}
+
+		for Index, Value in pairs(Array) do
+			if Index ~= "__type" then
+				Result[Index] = EXPADV.ToString( Array.__type, Value ) 
+			end
+		end
+
+		return string.Implode( Sep, Result )
+	end )
+
+	Component:AddFunctionHelper( "concat", "ar,s", "concatinates the array element to a string using a seperator." )
 
 /* ---	--------------------------------------------------------------------------------
 	@: VON Support
