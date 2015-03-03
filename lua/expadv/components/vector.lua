@@ -13,7 +13,7 @@ Component.Description = "Adds a 3d and a 2d vector object."
 
 local VectorObj = Component:AddClass( "vector", "v" )
 
-VectorObj:StringBuilder( function( Vector ) return string.format( "Vec( %i, %i, %i )", Vector.x, Vector.y, Vector.z ) end )
+VectorObj:StringBuilder( function( Vector ) return string.format( "Vec( %.2f, %.2f, %.2f )", Vector.x, Vector.y, Vector.z ) end )
 VectorObj:CanSerialize( true )
 VectorObj:DefaultAsLua( Vector(0, 0, 0) )
 
@@ -121,16 +121,16 @@ Component:AddInlineFunction( "getZ", "v:", "n", "@value 1.z" )
 Component:AddFunctionHelper( "getZ", "v:", "Gets the Z value of a vector" )
 
 --SETTERS
-Component:AddPreparedFunction( "setX", "v:n", "", "@value 1.x = @value 2" )
+Component:AddPreparedFunction( "setX", "v:n", "v", "@value 1.x = @value 2", "(@value 1)" )
 Component:AddFunctionHelper( "setX", "v:n", "Sets the X value of a vector" )
 
-Component:AddPreparedFunction( "setY", "v:n", "", "@value 1.y = @value 2" )
+Component:AddPreparedFunction( "setY", "v:n", "v", "@value 1.y = @value 2", "(@value 1)" )
 Component:AddFunctionHelper( "setY", "v:n", "Sets the Y value of a vector" )
 
-Component:AddPreparedFunction( "setZ", "v:n", "", "@value 1.z = @value 2" )
+Component:AddPreparedFunction( "setZ", "v:n", "v", "@value 1.z = @value 2", "(@value 1)" )
 Component:AddFunctionHelper( "setZ", "v:n", "Sets the Z value of a vector" )
 
-Component:AddPreparedFunction( "set", "v:v", "", "@value 1:Set( @value 2 )")
+Component:AddPreparedFunction( "set", "v:v", "v", "@value 1:Set( @value 2 )", "(@value 1)")
 Component:AddFunctionHelper( "set", "v:v", "Sets a vector to the value of another vector" )
 
 --Changers
