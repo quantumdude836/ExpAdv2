@@ -417,6 +417,7 @@ function EXPADV.LoadCore( )
 	EXPADV.AddComponentFile( "keyboard" )
 	EXPADV.AddComponentFile( "context" )
 	EXPADV.AddComponentFile( "android" )
+	EXPADV.AddComponentFile( "constraintcore" )
 
 	EXPADV.CallHook( "AddComponents" )
 
