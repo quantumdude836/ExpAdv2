@@ -41,7 +41,7 @@ EXPADV.AddFunctionAlias("exists", "ar,n")
 Component:AddInlineFunction( "unpack", "ar", "...", "$unpack( @value 1 )" )
 
 Component:AddPreparedFunction( "remove", "ar:n", "vr", [[
-if @value 1[@value 2] == nil then Context.Throw(@trace, "array", "array reach index " .. @value 2 .. " returned void" ) end
+if @value 1[@value 2] == nil then Context:Throw(@trace, "array", "array reach index " .. @value 2 .. " returned void" ) end
 ]], "{$table.remove(@value 1, @value 2), @value 1.__type}" )
 
 Component:AddPreparedFunction("connect", "ar:ar", "ar", [[
@@ -50,14 +50,14 @@ if @value 1.__type == @value 2.__type then
 		if v == @value 2.__type then continue end
 		@value 1[#@value 1+1] = v
 	end
-else Context.Throw(@trace, "array", "array type missmatch, " .. EXPADV.TypeName(@value 1.__type) .. " expected got " .. EXPADV.TypeName(@value 2.__type)) end
+else Context:Throw(@trace, "array", "array type missmatch, " .. EXPADV.TypeName(@value 1.__type) .. " expected got " .. EXPADV.TypeName(@value 2.__type)) end
 ]],"@value 1")
 Component:AddFunctionHelper("connect", "ar:ar", "Connects one array with another array.")
 
 Component:AddPreparedFunction("hasValue", "ar:vr", "b", [[
 	if @value 1.__type ~= "_vr" then
 		if @value 2[2] ~= @value 1.__type then
-			Context.Throw(@trace, "array", "variant not of array type, " .. @value 1.__type .. " expected got " .. EXPADV.TypeName(@value 2[2])) end
+			Context:Throw(@trace, "array", "variant not of array type, " .. @value 1.__type .. " expected got " .. EXPADV.TypeName(@value 2[2])) end
 		end
 		
 		@value 2 = @value 2[2]
@@ -114,8 +114,8 @@ function Component:OnPostRegisterClass( Name, Class )
    ---	*/
 
 	Array:AddPreparedOperator( "get", "ar,n," .. Class.Short, Class.Short, string.format([[
-		if @value 1.__type ~= %q then Context.Throw(@trace, "array", "array type missmatch, %s expected got " .. EXPADV.TypeName(@value 1.__type)) end
-		if @value 1[@value 2] == nil then Context.Throw(@trace, "array", "array reach index " .. @value 2 .. " returned void" ) end
+		if @value 1.__type ~= %q then Context:Throw(@trace, "array", "array type missmatch, %s expected got " .. EXPADV.TypeName(@value 1.__type)) end
+		if @value 1[@value 2] == nil then Context:Throw(@trace, "array", "array reach index " .. @value 2 .. " returned void" ) end
 		]], Class.Short, Class.Name), "@value 1[@value 2]")
 
 /* ---	--------------------------------------------------------------------------------
@@ -123,8 +123,8 @@ function Component:OnPostRegisterClass( Name, Class )
    ---	*/
 
 	Array:AddPreparedOperator( "set", "ar,n," .. Class.Short, "", string.format([[
-		if @value 1.__type ~= %q then Context.Throw(@trace, "array", "array type missmatch, %s expected got " .. EXPADV.TypeName(@value 1.__type)) end
-		if @value 2 <= 0 or @value 2 > 512 or math.floor(@value 2) ~= @value 2 then Context.Throw(@trace, "array", "array index out of bounds.") end
+		if @value 1.__type ~= %q then Context:Throw(@trace, "array", "array type missmatch, %s expected got " .. EXPADV.TypeName(@value 1.__type)) end
+		if @value 2 <= 0 or @value 2 > 512 or math.floor(@value 2) ~= @value 2 then Context:Throw(@trace, "array", "array index out of bounds.") end
 		]], Class.Short, Class.Name), "@value 1[@value 2] = @value 3")
 
 /* ---	--------------------------------------------------------------------------------
@@ -163,18 +163,18 @@ function Component:OnPostRegisterClass( Name, Class )
    ---	*/
 
 	Component:AddPreparedFunction( "remove" .. Class.Name, "ar:n", Class.Short, string.format([[
-		if @value 1.__type ~= %q then Context.Throw(@trace, "array", "array type missmatch, %s expected got " .. EXPADV.TypeName(@value 1.__type)) end
-		if @value 1[@value 2] == nil then Context.Throw(@trace, "array", "array reach index " .. @value 2 .. " returned void" ) end
+		if @value 1.__type ~= %q then Context:Throw(@trace, "array", "array type missmatch, %s expected got " .. EXPADV.TypeName(@value 1.__type)) end
+		if @value 1[@value 2] == nil then Context:Throw(@trace, "array", "array reach index " .. @value 2 .. " returned void" ) end
 		]], Class.Short, Class.Name), "$table.remove(@value 1, @value 2)")
 
 	Component:AddPreparedFunction( "insert", "ar:n," .. Class.Short, "", string.format([[
-		if @value 1.__type ~= %q then Context.Throw(@trace, "array", "array type missmatch, %s expected got " .. EXPADV.TypeName(@value 1.__type)) end
-		if @value 2 <= 0 or @value 2 > 512 or math.floor(@value 2) ~= @value 2 then Context.Throw(@trace, "array", "array index out of bounds.") end
+		if @value 1.__type ~= %q then Context:Throw(@trace, "array", "array type missmatch, %s expected got " .. EXPADV.TypeName(@value 1.__type)) end
+		if @value 2 <= 0 or @value 2 > 512 or math.floor(@value 2) ~= @value 2 then Context:Throw(@trace, "array", "array index out of bounds.") end
 		]], Class.Short, Class.Name), "$table.insert(@value 1, @value 2, @value 3)")
 	EXPADV.AddFunctionAlias("insert", "ar,n," .. Class.Short)
 
 	Component:AddPreparedFunction( "insert", "ar:" .. Class.Short, "", string.format([[
-		if @value 1.__type ~= %q then Context.Throw(@trace, "array", "array type missmatch, %s expected got " .. EXPADV.TypeName(@value 1.__type)) end
+		if @value 1.__type ~= %q then Context:Throw(@trace, "array", "array type missmatch, %s expected got " .. EXPADV.TypeName(@value 1.__type)) end
 		]], Class.Short, Class.Name), "$table.insert(@value 1, @value 2)")
 	EXPADV.AddFunctionAlias("insert", "ar," .. Class.Short)
 
@@ -182,7 +182,7 @@ function Component:OnPostRegisterClass( Name, Class )
 		Component:AddPreparedFunction("hasValue", "ar:" .. Class.Short, "b", [[
 			
 			if @value 1.__type ~= "]] .. Class.Short .. [[" then
-				Context.Throw(@trace, "array", "variant not of array type, "]] .. Class.Short .. [[" expected got " .. EXPADV.TypeName(@value 1.__type)) end
+				Context:Throw(@trace, "array", "variant not of array type, "]] .. Class.Short .. [[" expected got " .. EXPADV.TypeName(@value 1.__type)) end
 			end
 			
 			@value 2 = @value 2[2]
@@ -209,7 +209,7 @@ function Component:OnPostRegisterClass( Name, Class )
    ---	*/
 
    Array:AddPreparedOperator( "foreach", Array.Short .. ",n," .. Class.Short, "", [[
-   		if @value 1.__type ~= "]] ..Class.Short .. [[" then Context.Throw(@trace, "array", "array type missmatch, ]] .. Class.Name .. [[ expected got " .. EXPADV.TypeName(@value 1.__type)) end
+   		if @value 1.__type ~= "]] ..Class.Short .. [[" then Context:Throw(@trace, "array", "array type missmatch, ]] .. Class.Name .. [[ expected got " .. EXPADV.TypeName(@value 1.__type)) end
 
    		for i = 1, #@value 1 do
    			local value = @value 1[i]
@@ -244,6 +244,20 @@ end
 
 	Component:AddFunctionHelper( "sort", "ar:d", "Takes an array and sorts it, the returned array will be sorted by the provided delegate and all indexs will be numberic. The delegate will be called with 2 variants that are values on the table, return true if the first is bigger then the second this delegate must return a boolean." )
 
+	Component:AddVMFunction( "concat", "ar:s", "s",
+	function( Context, Trace, Array, Sep )
+		local Result = {}
+
+		for Index, Value in pairs(Array) do
+			if Index ~= "__type" then
+				Result[Index] = EXPADV.ToString( Array.__type, Value ) 
+			end
+		end
+
+		return string.Implode( Sep, Result )
+	end )
+
+	Component:AddFunctionHelper( "concat", "ar,s", "concatinates the array element to a string using a seperator." )
 
 /* ---	--------------------------------------------------------------------------------
 	@: VON Support

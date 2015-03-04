@@ -696,6 +696,14 @@ function CheckURL(Context, URL)
 		if string.find(URL, string.lower(listed), 0, true) then return false end
 	end
 
+	/*if IsValid(Context.entity) then
+		local Log = Context.entity.URL_LOG
+
+		if !Log then Log = {}; Context.entity.URL_LOG = Log end
+
+		Log[URL] = (Log[URL] or 0) + 1
+	end*/ -- TODO: ^^
+
 	return true
 end
 
@@ -866,14 +874,14 @@ PropComponent:AddPreparedFunction( "remove", "e:", "", "if IsValid( @value 1 ) a
 
 PropComponent:AddPreparedFunction( "setPos", "e:v", "",[[
 if IsValid( @value 1 ) and EXPADV.PPCheck(Context, @value 1 ) then
-	if !( @value 2.x ~= @value 2.x and @value 2.y ~= @value 2.y and @value 2.z ~= @value 2.z ) then
+	if !( @value 2.x ~= @value 2.x or @value 2.y ~= @value 2.y or @value 2.z ~= @value 2.z ) then
 		@value 1:SetPos( @value 2 )
 	end
 end]] )
 
 PropComponent:AddPreparedFunction( "setAng", "e:a", "",[[
 if IsValid( @value 1 ) and EXPADV.PPCheck(Context, @value 1 ) then
-	if !( @value 2.p ~= @value 2.p and @value 2.y ~= @value 2.y and @value 2.r ~= @value 2.r ) then
+	if !( @value 2.p ~= @value 2.p or @value 2.y ~= @value 2.y or @value 2.r ~= @value 2.r ) then
 		@value 1:SetAngles( @value 2 )
 	end
 end]] )
@@ -1144,4 +1152,55 @@ end )
 
 Component:AddVMFunction( "jasnToTable", "s", "t", function(Context, Trace, JSON)
 	return luaToTable(util.JSONToTable(JSON))
+end )
+
+/* --- --------------------------------------------------------------------------------
+	@: Con Commands
+   --- */
+
+local Exec
+
+if SERVER then
+	util.AddNetworkString("expadv.cmd")
+elseif CLIENT then
+	local DEFAULT_WHITELIST = {}
+	local Banned = { quit = true, lua_run_cl = true, retry = true, rcon = true, connect = true, password = true }
+	
+	Component:CreateUserSetting( "concmd_whitelist", DEFAULT_WHITELIST )
+
+	function Exec(CommandLine)
+		local WhiteList = Component:ReadUserSetting( "concmd_whitelist", DEFAULT_WHITELIST )
+
+		for Line in CommandLine:gmatch( "[^;]+" ) do
+			local Concmd = Line:match( "[^%s]+" )
+
+			if Banned[Concmd] then return false end
+
+			if #WhiteList > 0 then
+				for _, listed in pairs(WhiteList) do
+					if !WhiteList[Concmd] then return false end
+				end
+			end
+		end
+
+		LocalPlayer():ConCommand( CommandLine:gsub("%%", "%%%%"):gsub("[^ \t%w%p]", "") )
+
+		return true
+	end
+
+	net.Receive("expadv.cmd", function()
+		Exec(net.ReadString())
+	end)
+end
+
+Component:AddVMFunction( "conCommand", "s", "", function(Context, Trace, Command)
+	if SERVER then
+		net.Start("expadv.cmd")
+		net.WriteString(Command)
+		if !EXPADV.DoNetMessage(Context, net.Send, Context.player) then
+			Context:Throw( Trace, "net", "maxamum bytes reached, client did not receive concommand." )
+		end
+	elseif Context.player == LocalPlayer() then
+		Exec(Command)
+	end
 end )
