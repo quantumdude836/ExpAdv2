@@ -956,7 +956,7 @@ if SERVER then
 	
 	function ENT:MoveTo( Vector, Speed )
 		self.MOVETO = Vector
-		self.MOVESPEED = Speed * 0.01
+		self.MOVESPEED = Speed
 	end
 
 	function ENT:StopMove( )
@@ -966,7 +966,7 @@ if SERVER then
 
 	function ENT:RotateTo( Angle, Speed )
 		self.ROTATETO = Angle
-		self.ROTATESPEED = Speed * 0.01
+		self.ROTATESPEED = Speed
 	end
 
 	function ENT:StopRotate( )
@@ -993,12 +993,14 @@ if SERVER then
 	end
 
 	function ENT:Think( )
+		local TickRate =  engine.TickInterval()
+
 		if self.MOVETO and self.MOVESPEED then
 			local Pos = self:GetPos( )
 
-			Pos.x = Pos.x + math.Clamp( self.MOVETO.x - Pos.x, -self.MOVESPEED, self.MOVESPEED )
-			Pos.y = Pos.y + math.Clamp( self.MOVETO.y - Pos.y, -self.MOVESPEED, self.MOVESPEED )
-			Pos.z = Pos.z + math.Clamp( self.MOVETO.z - Pos.z, -self.MOVESPEED, self.MOVESPEED )
+			Pos.x = Pos.x + math.Clamp( self.MOVETO.x - Pos.x, -self.MOVESPEED * TickRate, self.MOVESPEED * TickRate )
+			Pos.y = Pos.y + math.Clamp( self.MOVETO.y - Pos.y, -self.MOVESPEED * TickRate, self.MOVESPEED * TickRate )
+			Pos.z = Pos.z + math.Clamp( self.MOVETO.z - Pos.z, -self.MOVESPEED * TickRate, self.MOVESPEED * TickRate )
 
 			self:SetPos( Pos )
 
@@ -1008,9 +1010,9 @@ if SERVER then
 		if self.ROTATETO and self.ROTATESPEED then
 			local Ang = self:GetAngles( )
 
-			Ang.p = Ang.p + math.Clamp( self.ROTATETO.p - Ang.p, -self.ROTATESPEED, self.ROTATESPEED )
-			Ang.y = Ang.y + math.Clamp( self.ROTATETO.y - Ang.y, -self.ROTATESPEED, self.ROTATESPEED )
-			Ang.r = Ang.r + math.Clamp( self.ROTATETO.r - Ang.r, -self.ROTATESPEED, self.ROTATESPEED )
+			Ang.p = Ang.p + math.Clamp( self.ROTATETO.p - Ang.p, -self.ROTATESPEED * TickRate, self.ROTATESPEED * TickRate )
+			Ang.y = Ang.y + math.Clamp( self.ROTATETO.y - Ang.y, -self.ROTATESPEED * TickRate, self.ROTATESPEED * TickRate )
+			Ang.r = Ang.r + math.Clamp( self.ROTATETO.r - Ang.r, -self.ROTATESPEED * TickRate, self.ROTATESPEED * TickRate )
 
 			self:SetAngles( Ang )
 
@@ -1020,17 +1022,17 @@ if SERVER then
 		if self.SCALETO and self.SCALESPEED then
 			local Scale = self:GetScale( )
 
-			Scale.x = Scale.x + math.Clamp( self.SCALETO.x - Scale.x, -self.SCALESPEED, self.SCALESPEED )
-			Scale.y = Scale.y + math.Clamp( self.SCALETO.y - Scale.y, -self.SCALESPEED, self.SCALESPEED )
-			Scale.z = Scale.z + math.Clamp( self.SCALETO.z - Scale.z, -self.SCALESPEED, self.SCALESPEED )
+			Scale.x = Scale.x + math.Clamp( self.SCALETO.x - Scale.x, -self.SCALESPEED * TickRate, self.SCALESPEED * TickRate )
+			Scale.y = Scale.y + math.Clamp( self.SCALETO.y - Scale.y, -self.SCALESPEED * TickRate, self.SCALESPEED * TickRate )
+			Scale.z = Scale.z + math.Clamp( self.SCALETO.z - Scale.z, -self.SCALESPEED * TickRate, self.SCALESPEED * TickRate )
 
 			self:SetScale( Scale )
 
 			if Pos == self.SCALETO then self:StopScale( ) end
 		end
 
-		self:NextThink( CurTime( ) )
-		return true
+		//self:NextThink( CurTime( ) )
+		//return true
 	end
 
 /*==============================================================================================

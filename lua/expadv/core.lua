@@ -576,6 +576,7 @@ hook.Add( "Expadv.PostLoadConfig", "expadv.quota", function( )
 	EXPADV.CreateSetting( "softquota", 100000 )
 	EXPADV.CreateSetting( "hardquota", 1000000 )
 	EXPADV.CreateSetting( "memorylimit", 5 )
+	EXPADV.CreateSetting( "net_max_bytes", 50000 )
 end )
 
 local function update( )
@@ -584,11 +585,32 @@ local function update( )
 	expadv_softquota = EXPADV.ReadSetting( "softquota", 100000 )
 	expadv_hardquota = EXPADV.ReadSetting( "hardquota", 1000000 )
 	expadv_memorylimit = EXPADV.ReadSetting( "memorylimit", 5 ) * 1024
+	expadv_netlimit = EXPADV.ReadSetting( "net_max_bytes", 50000 )
 end
 
 update()
 
 timer.Create( "expadv.quota", 1, 0, update )
+
+/* --- --------------------------------------------------------------------------------
+	@: Lets prevent net message spam :D
+   --- */
+
+function EXPADV.DoNetMessage(Context, func, ...)
+	local Bytes = (Context.Data.net_bytes or 0) + net.BytesWritten()
+	
+	if Bytes <= expadv_netlimit then
+		Context.Data.net_bytes = Bytes
+		return true, func(...)
+	end
+
+	return false
+end
+
+hook.Add("Expadv.UpdateContext", "expadv.netlimit",
+	function(Context)
+		Context.Data.net_bytes = nil
+	end)
 
 /* --- --------------------------------------------------------------------------------
 	@: Editor Animation.

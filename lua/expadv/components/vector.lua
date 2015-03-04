@@ -244,6 +244,8 @@ Component:AddFunctionHelper( "clamp", "v:n,n", "Clamps a vector." )
 Component:AddInlineFunction( "clamp", "v:v,v", "v", "Vector(math.Clamp(@value 1.x, @value 2.x, @value 3.x), math.Clamp(@value 1.y, @value 2.y, @value 3.y), math.Clamp(@value 1.z, @value 2.z, @value 3.z))" )
 Component:AddFunctionHelper( "clamp", "v:v,v", "Clamps a vector." )
 
+Component:AddInlineFunction( "mix", "v,v,n", "v", "Vector(@value 1.x * @value 3 + @value 2.x * (1-@value 3), @value 1.y * @value 3 + @value 2.y * (1-@value 3), @value 1.z * @value 3 + @value 2.z * (1-@value 3))" )
+Component:AddFunctionHelper( "clamp", "v:v,v", "Returns the mix of 2 vectors." )
 
 /* --- --------------------------------------------------------------------------------
     @: Headings

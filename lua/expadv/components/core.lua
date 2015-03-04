@@ -4,6 +4,7 @@
 
 EXPADV.AddException( nil, "invoke" )
 EXPADV.AddException( nil, "cast" )
+EXPADV.AddException( nil, "net" )
 
 /* --- --------------------------------------------------------------------------------
 	@: Default Classes
@@ -157,10 +158,10 @@ EXPADV.AddFunctionAlias("invoke", "d")
 */
 
 /* --- -------------------------------------------------------------------------------
-	@: NEW
+	@: NEW: Not happening now!
    --- */
 
-EXPADV.AddInlineOperator( nil, "new", "s,s,...", "_vr", "Context.Classes['@value 1']['@value 2'](nil ,@...)")
+//EXPADV.AddInlineOperator( nil, "new", "s,s,...", "_vr", "Context.Classes['@value 1']['@value 2'](nil ,@...)")
 
 
 /* --- -------------------------------------------------------------------------------
@@ -341,6 +342,16 @@ if CLIENT then
 		chat.AddText( unpack( net.ReadTable( ) ) )
 	end )
 end
+
+/* --- -------------------------------------------------------------------------------
+	@: Net
+   --- */
+
+EXPADV.AddInlineFunction( nil, "netUsage", "", "n", "(Context.Data.net_bytes or 0)" )
+EXPADV.AddFunctionHelper( nil, "netUsage", "", "Returns the current bytes used for client and server sync." )
+
+EXPADV.AddInlineFunction( nil, "netLimit", "", "n", "(expadv_netlimit or 0)" )
+EXPADV.AddFunctionHelper( nil, "netLimit", "", "Returns the max bytes that can used for client and server sync." )
 
 /* --- -------------------------------------------------------------------------------
 	@: Events
