@@ -89,7 +89,7 @@ if @value 1:IsValid() and EXPADV.PPCheck(Context,@value 1) then
 		$constraint.AdvBallsocket( @value 1, @value 2, 0, 0, @value 3, @value 4, @value 5, @value 6, @value 7.x, @value 7.y, @value 7.z, @value 8.x, @value 8.y, @value 8.x, @value 9.x, @value 9.y, @value 9.z, @value 10, @value 11 )
 	end
 end]] )
-Component:AddFunctionHelper( "advBallsocketTo", "e:e,v,v,n,n,v,v,v,n,n", "Entity 1, Entity 2, Position 1, Position 2, Forcelimit, Torquelimit, MinAngle, MaxAngle, Friction, Nocollide")
+Component:AddFunctionHelper( "advBallsocketTo", "e:e,v,v,n,n,v,v,v,n,n", "Entity 1, Entity 2, Position 1, Position 2, Forcelimit, Torquelimit, MinAngle, MaxAngle, Friction, RotationOnly, Nocollide")
 
 ----------------------------
 -- Rope
