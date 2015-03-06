@@ -440,6 +440,9 @@ Component:AddFunctionHelper( "onRowSelected", "dlv:d", "Executes when a row is s
 Component:AddInlineFunction( "getSelectedLine", "dlv:", "n", "@value 1:GetSelectedLine() or 0" )
 Component:AddFunctionHelper( "getSelectedLine", "dlv:", "Gets the index of selected line." )
 
+Component:AddInlineFunction( "getSelected", "dlv:", "t", "@value1:GetSelected() or {}" )
+Component:AddFunctionHelper( "getSelected", "dlv:", "Gets a table of currently selected lines." )
+
 /* -----------------------------------------------------------------------------------
 	@: DImage
 --- */
