@@ -363,12 +363,16 @@ Component:AddFunctionHelper( "canMakeHologram", "", "Returns true if a hologram 
 ==============================================================================================*/
 Component:AddPreparedFunction("setPos", "h:v", "",[[
 if IsValid( @value 1 ) and @value 1.player == Context.player then
-	@value 1:SetPos( @value 2 )
+	if !( @value 2.x ~= @value 2.x or @value 2.y ~= @value 2.y or @value 2.z ~= @value 2.z ) then
+		@value 1:SetPos( @value 2 )
+	end
 end]] )
 
 Component:AddPreparedFunction("moveTo", "h:v,n", "",[[
 if IsValid( @value 1 ) and @value 1.player == Context.player then
-	@value 1:MoveTo( @value 2, @value 3 )
+	if !( @value 2.x ~= @value 2.x or @value 2.y ~= @value 2.y or @value 2.z ~= @value 2.z ) then
+		@value 1:MoveTo( @value 2, @value 3 )
+	end
 end]] )
 
 Component:AddPreparedFunction("stopMove", "h:", "",[[
@@ -376,9 +380,8 @@ if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:StopMove( )
 end]] )
 
-
 Component:AddFunctionHelper( "setPos", "h:v", "Sets the postion of the hologram." )
-Component:AddFunctionHelper( "moveTo", "h:v,n", "Moves the hologram to position V at speed N" )
+Component:AddFunctionHelper( "moveTo", "h:v,n", "Moves the hologram to position V at speed (units per second)." )
 Component:AddFunctionHelper( "stopMove", "h:", "If a hologram is being moved, by a call to h:moveTo(v,) this stops it." )
 
 /*==============================================================================================
@@ -386,12 +389,16 @@ Component:AddFunctionHelper( "stopMove", "h:", "If a hologram is being moved, by
 ==============================================================================================*/
 Component:AddPreparedFunction("setAng", "h:a", "",[[
 if IsValid( @value 1 ) and @value 1.player == Context.player then
-	@value 1:SetAngles( @value 2 )
+	if !( @value 2.p ~= @value 2.p or @value 2.y ~= @value 2.y or @value 2.r ~= @value 2.r ) then
+		@value 1:SetAngles( @value 2 )
+	end
 end]] )
 
 Component:AddPreparedFunction("rotateTo", "h:a,n", "",[[
 if IsValid( @value 1 ) and @value 1.player == Context.player then
-	@value 1:RotateTo( @value 2, @value 3 )
+	if !( @value 2.p ~= @value 2.p or @value 2.y ~= @value 2.y or @value 2.r ~= @value 2.r ) then
+		@value 1:RotateTo( @value 2, @value 3 )
+	end
 end]] )
 
 Component:AddPreparedFunction("stopRotate", "h:", "",[[
@@ -400,7 +407,7 @@ if IsValid( @value 1 ) and @value 1.player == Context.player then
 end]] )
 
 Component:AddFunctionHelper( "setAng", "h:a", "Sets the angle of a hologram." )
-Component:AddFunctionHelper( "rotateTo", "h:a,n", "Animates a hologram to move to rotation A, N is speed." )
+Component:AddFunctionHelper( "rotateTo", "h:a,n", "Animates a hologram to move to rotation A, N is speed (units per second)." )
 Component:AddFunctionHelper( "stopRotate", "h:", "Stops the rotation animation of a hologram." )
 
 /*==============================================================================================
@@ -444,8 +451,8 @@ end]], "(@pos or Vector( 0, 0, 0 ))" )
 Component:AddFunctionHelper( "stopRotate", "h:", "Stops the rotation animation of a hologram." )
 Component:AddFunctionHelper("setScale", "h:v", "Sets the scale of a hologram." )
 Component:AddFunctionHelper("setScaleUnits", "h:v", "Sets the scale of a hologram in units." )
-Component:AddFunctionHelper("scaleTo", "h:v,n", "Animates a hologram to rescale to size V, N is speed." )
-Component:AddFunctionHelper("scaleToUnits", "h:v,n", "Animates a hologram to rescale to size V in units, N is speed." )
+Component:AddFunctionHelper("scaleTo", "h:v,n", "Animates a hologram to rescale to size V, N is speed (units per second)." )
+Component:AddFunctionHelper("scaleToUnits", "h:v,n", "Animates a hologram to rescale to size V in units, N is speed (units per second)." )
 Component:AddFunctionHelper("stopScale", "h:", "Stops the rescale animation of a hologram." )
 Component:AddFunctionHelper("getScale", "h:", "Returns the scale of a hologram." )
 Component:AddFunctionHelper("getScaleUnits", "h:", "Returns the scale of a hologram in units." )

@@ -81,7 +81,7 @@ Component:AddInlineOperator( "not", "s", "b", "(@value 1 == \"\")" )
 	@: Indexing
    --- */
 
-String:AddInlineOperator( "get", "s,n", "s", "string.sub(@value 1, @value 2, @value 2)" )
+String:AddInlineOperator( "get", "s,n", "s", "@value 1[@value 2]" )
 
 /* --- --------------------------------------------------------------------------------
 	@: Casting

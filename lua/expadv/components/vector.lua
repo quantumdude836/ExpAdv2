@@ -13,7 +13,7 @@ Component.Description = "Adds a 3d and a 2d vector object."
 
 local VectorObj = Component:AddClass( "vector", "v" )
 
-VectorObj:StringBuilder( function( Vector ) return string.format( "Vec( %i, %i, %i )", Vector.x, Vector.y, Vector.z ) end )
+VectorObj:StringBuilder( function( Vector ) return string.format( "Vec( %.2f, %.2f, %.2f )", Vector.x, Vector.y, Vector.z ) end )
 VectorObj:CanSerialize( true )
 VectorObj:DefaultAsLua( Vector(0, 0, 0) )
 
@@ -121,16 +121,16 @@ Component:AddInlineFunction( "getZ", "v:", "n", "@value 1.z" )
 Component:AddFunctionHelper( "getZ", "v:", "Gets the Z value of a vector" )
 
 --SETTERS
-Component:AddPreparedFunction( "setX", "v:n", "", "@value 1.x = @value 2" )
+Component:AddPreparedFunction( "setX", "v:n", "v", "@value 1.x = @value 2", "(@value 1)" )
 Component:AddFunctionHelper( "setX", "v:n", "Sets the X value of a vector" )
 
-Component:AddPreparedFunction( "setY", "v:n", "", "@value 1.y = @value 2" )
+Component:AddPreparedFunction( "setY", "v:n", "v", "@value 1.y = @value 2", "(@value 1)" )
 Component:AddFunctionHelper( "setY", "v:n", "Sets the Y value of a vector" )
 
-Component:AddPreparedFunction( "setZ", "v:n", "", "@value 1.z = @value 2" )
+Component:AddPreparedFunction( "setZ", "v:n", "v", "@value 1.z = @value 2", "(@value 1)" )
 Component:AddFunctionHelper( "setZ", "v:n", "Sets the Z value of a vector" )
 
-Component:AddPreparedFunction( "set", "v:v", "", "@value 1:Set( @value 2 )")
+Component:AddPreparedFunction( "set", "v:v", "v", "@value 1:Set( @value 2 )", "(@value 1)")
 Component:AddFunctionHelper( "set", "v:v", "Sets a vector to the value of another vector" )
 
 --Changers
@@ -143,6 +143,8 @@ Component:AddFunctionHelper( "withY", "v:n", "Returns the value of the vector wi
 Component:AddPreparedFunction( "withZ", "v:n", "v", "Vector(@value 1.x, @value 1.y, @value 2)" )
 Component:AddFunctionHelper( "withZ", "v:n", "Returns the value of the vector with the value of z changed." )
 
+Component:AddPreparedFunction( "clone", "v:", "v", "Vector(@value 1.x, @value 1.y, @value 1.z)" )
+Component:AddFunctionHelper( "clone", "v:", "Returns a clone of the vector." )
 
 /* --- --------------------------------------------------------------------------------
     @: Rotate
@@ -242,6 +244,8 @@ Component:AddFunctionHelper( "clamp", "v:n,n", "Clamps a vector." )
 Component:AddInlineFunction( "clamp", "v:v,v", "v", "Vector(math.Clamp(@value 1.x, @value 2.x, @value 3.x), math.Clamp(@value 1.y, @value 2.y, @value 3.y), math.Clamp(@value 1.z, @value 2.z, @value 3.z))" )
 Component:AddFunctionHelper( "clamp", "v:v,v", "Clamps a vector." )
 
+Component:AddInlineFunction( "mix", "v,v,n", "v", "Vector(@value 1.x * @value 3 + @value 2.x * (1-@value 3), @value 1.y * @value 3 + @value 2.y * (1-@value 3), @value 1.z * @value 3 + @value 2.z * (1-@value 3))" )
+Component:AddFunctionHelper( "clamp", "v:v,v", "Returns the mix of 2 vectors." )
 
 /* --- --------------------------------------------------------------------------------
     @: Headings
@@ -431,6 +435,9 @@ Component:AddFunctionHelper( "withX", "v:n", "Returns the value of the vector2 w
 
 Component:AddPreparedFunction( "withY", "v:n", "v", "Vector2(@value 1.x, @value 2)" )
 Component:AddFunctionHelper( "withY", "v:n", "Returns the value of the vector2 with the value of y changed." )
+
+Component:AddPreparedFunction( "clone", "v2:", "v2", "Vector2(@value 1.x, @value 1.y)" )
+Component:AddFunctionHelper( "clone", "v2:", "Returns a clone of the vector2." )
 
 /* --- --------------------------------------------------------------------------------
     @: Functions

@@ -42,7 +42,7 @@ function PANEL:Init( )
 	self.btnNewTab = self:SetupButton( "New tab", Material( "fugue/script--plus.png" ), LEFT )
 	self.btnCloseTab = self:SetupButton( "Close tab", Material( "fugue/script--minus.png" ), LEFT ) 
 	self.btnUploadPaste = self:SetupButton( "Upload code to pastebin", Material( "fugue/drive-upload.png" ), LEFT )
-	self.btnFind = self:SetupButton( "RMB: Find | RMB: Replace", Material( "fugue/binocular.png" ), LEFT )
+	self.btnFind = self:SetupButton( "LMB: Find | RMB: Replace", Material( "fugue/binocular.png" ), LEFT )
 	
 	self:AddTabNamer( )
 	

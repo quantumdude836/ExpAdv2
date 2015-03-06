@@ -301,7 +301,8 @@ end
 
 /* --- ------------------------------------------------------------------------------------ --- */
 do --- Net component: used to sync from server to client :D
-
+   --- TODO: Make this run at runtime using 'EXPADV.DoNetMessage()''
+/* --- ------------------------------------------------------------------------------------ --- */
 	local Component = EXPADV.AddComponent( "net", true )
 
 	Component.Author = "Rusketh"

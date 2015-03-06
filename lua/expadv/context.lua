@@ -258,6 +258,8 @@ hook.Add( "Tick", "ExpAdv2.Update", function( )
 		if !Ok then
 			Context.entity:LuaError( Msg )
 			Context:ShutDown( )
+		else
+			EXPADV.CallHook( "UpdateContext", Context )
 		end
 	end
 

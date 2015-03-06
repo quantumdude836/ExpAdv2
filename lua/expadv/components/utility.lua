@@ -8,6 +8,61 @@ Component.Author = "Rusketh"
 Component.Description = "Adds useful functions and objects that are not inportant enogh for there own component."
 
 /* --- --------------------------------------------------------------------------------
+	@: Server Information
+   --- */
+
+Component:AddInlineFunction( "map", "", "s", "$game.GetMap()")
+Component:AddFunctionHelper( "map", "", "Returns the current map." )
+
+Component:AddInlineFunction( "hostname", "", "s", "$GetConVar(\"hostname\"):GetString()")
+Component:AddFunctionHelper( "hostname", "", "Returns the current servers hostname." )
+
+Component:AddInlineFunction( "isLan", "", "b", "$GetConVar(\"sv_lan\"):GetBool()")
+Component:AddFunctionHelper( "isLan", "", "Returns the true is its a lan game." )
+
+Component:AddInlineFunction( "gamemode", "", "s", "$gmod.GetGamemode().Name")
+Component:AddFunctionHelper( "gamemode", "", "Returns the current gamemode." )
+
+Component:AddInlineFunction( "isSinglePlayer", "", "b", "$game.SinglePlayer()")
+Component:AddFunctionHelper( "isSinglePlayer", "", "Returns true if in a SinglePlayer game." )
+
+Component:AddInlineFunction( "isSinglePlayer", "", "b", "$game.IsDedicated()")
+Component:AddFunctionHelper( "isSinglePlayer", "", "Returns true if on a Dedicated server." )
+
+Component:AddInlineFunction( "numPlayers", "", "n", "#$player.GetAll()")
+Component:AddFunctionHelper( "numPlayers", "", "Returns the ammount of currently connected players." )
+
+Component:AddInlineFunction( "maxPlayers", "", "n", "$game.MaxPlayers()")
+Component:AddFunctionHelper( "maxPlayers", "", "Returns the ammount of max players." )
+
+Component:AddInlineFunction( "gravity", "", "n", "$GetConVar(\"sv_gravity\"):GetFloat()")
+Component:AddFunctionHelper( "gravity", "", "Returns the current servers gravity." )
+
+Component:AddInlineFunction( "propGravity", "", "n", "$physenv.GetGravity()")
+Component:AddFunctionHelper( "propGravity", "", "Returns the prop gravity." )
+
+Component:AddInlineFunction( "airDensity", "", "n", "$physenv.GetAirDensity()")
+Component:AddFunctionHelper( "airDensity", "", "Returns the air density." )
+
+Component:AddInlineFunction( "maxFrictionMass", "", "n", "$physenv.GetPerformanceSettings()[\"MaxFrictionMass\"]")
+Component:AddFunctionHelper( "maxFrictionMass", "", "Returns the max friction mass." )
+
+Component:AddInlineFunction( "minFrictionMass", "", "n", "$physenv.GetPerformanceSettings()[\"MinFrictionMass\"]")
+Component:AddFunctionHelper( "minFrictionMass", "", "Returns the min friction mass." )
+
+Component:AddInlineFunction( "speedLimit", "", "n", "$physenv.GetPerformanceSettings()[\"MaxVelocity\"]")
+Component:AddFunctionHelper( "speedLimit", "", "Returns the max velocity." )
+
+Component:AddInlineFunction( "angSpeedLimit", "", "n", "$physenv.GetPerformanceSettings()[\"MaxAngularVelocity\"]")
+Component:AddFunctionHelper( "angSpeedLimit", "", "Returns the max angular velocity." )
+
+Component:AddInlineFunction( "tickInterval", "", "n", "$engine.TickInterval()")
+Component:AddFunctionHelper( "tickInterval", "", "Returns the server tick interval." )
+
+Component:AddInlineFunction( "tickRate", "", "n", "(1/$engine.TickInterval())")
+Component:AddFunctionHelper( "tickRate", "", "Returns the server tick rate." )
+
+/* --- --------------------------------------------------------------------------------
 	@: Add A user hook system, They can add hooks to extend events, manualy.
 	@: This add no default hook, and shall encourage poeple to add there own.
    --- */
@@ -641,6 +696,14 @@ function CheckURL(Context, URL)
 		if string.find(URL, string.lower(listed), 0, true) then return false end
 	end
 
+	/*if IsValid(Context.entity) then
+		local Log = Context.entity.URL_LOG
+
+		if !Log then Log = {}; Context.entity.URL_LOG = Log end
+
+		Log[URL] = (Log[URL] or 0) + 1
+	end*/ -- TODO: ^^
+
 	return true
 end
 
@@ -811,14 +874,14 @@ PropComponent:AddPreparedFunction( "remove", "e:", "", "if IsValid( @value 1 ) a
 
 PropComponent:AddPreparedFunction( "setPos", "e:v", "",[[
 if IsValid( @value 1 ) and EXPADV.PPCheck(Context, @value 1 ) then
-	if !( @value 2.x ~= @value 2.x and @value 2.y ~= @value 2.y and @value 2.z ~= @value 2.z ) then
+	if !( @value 2.x ~= @value 2.x or @value 2.y ~= @value 2.y or @value 2.z ~= @value 2.z ) then
 		@value 1:SetPos( @value 2 )
 	end
 end]] )
 
 PropComponent:AddPreparedFunction( "setAng", "e:a", "",[[
 if IsValid( @value 1 ) and EXPADV.PPCheck(Context, @value 1 ) then
-	if !( @value 2.p ~= @value 2.p and @value 2.y ~= @value 2.y and @value 2.r ~= @value 2.r ) then
+	if !( @value 2.p ~= @value 2.p or @value 2.y ~= @value 2.y or @value 2.r ~= @value 2.r ) then
 		@value 1:SetAngles( @value 2 )
 	end
 end]] )
@@ -1089,4 +1152,55 @@ end )
 
 Component:AddVMFunction( "jasnToTable", "s", "t", function(Context, Trace, JSON)
 	return luaToTable(util.JSONToTable(JSON))
+end )
+
+/* --- --------------------------------------------------------------------------------
+	@: Con Commands
+   --- */
+
+local Exec
+
+if SERVER then
+	util.AddNetworkString("expadv.cmd")
+elseif CLIENT then
+	local DEFAULT_WHITELIST = {}
+	local Banned = { quit = true, lua_run_cl = true, retry = true, rcon = true, connect = true, password = true }
+	
+	Component:CreateUserSetting( "concmd_whitelist", DEFAULT_WHITELIST )
+
+	function Exec(CommandLine)
+		local WhiteList = Component:ReadUserSetting( "concmd_whitelist", DEFAULT_WHITELIST )
+
+		for Line in CommandLine:gmatch( "[^;]+" ) do
+			local Concmd = Line:match( "[^%s]+" )
+
+			if Banned[Concmd] then return false end
+
+			if #WhiteList > 0 then
+				for _, listed in pairs(WhiteList) do
+					if !WhiteList[Concmd] then return false end
+				end
+			end
+		end
+
+		LocalPlayer():ConCommand( CommandLine:gsub("%%", "%%%%"):gsub("[^ \t%w%p]", "") )
+
+		return true
+	end
+
+	net.Receive("expadv.cmd", function()
+		Exec(net.ReadString())
+	end)
+end
+
+Component:AddVMFunction( "conCommand", "s", "", function(Context, Trace, Command)
+	if SERVER then
+		net.Start("expadv.cmd")
+		net.WriteString(Command)
+		if !EXPADV.DoNetMessage(Context, net.Send, Context.player) then
+			Context:Throw( Trace, "net", "maxamum bytes reached, client did not receive concommand." )
+		end
+	elseif Context.player == LocalPlayer() then
+		Exec(Command)
+	end
 end )
