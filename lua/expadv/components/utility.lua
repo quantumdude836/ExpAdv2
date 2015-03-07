@@ -205,8 +205,11 @@ hook.Add( "Think", "expadv.timers", function( )
 					end
 				end
 
-				Context:Execute( "Timer " .. Name, Timer.Delegate, Timer.Inputs and unpack( Timer.Inputs ) or nil )
-
+				if Timer.Inputs and #Timer.Inputs > 0 then
+					Context:Execute( "Timer " .. Name, Timer.Delegate, unpack(Timer.Inputs) )
+				else
+					Context:Execute( "Timer " .. Name, Timer.Delegate, unpack(Timer.Inputs) )
+				end
 			end
 
 			if Count > 100 then break end
