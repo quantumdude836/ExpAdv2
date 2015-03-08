@@ -1181,7 +1181,7 @@ elseif CLIENT then
 
 			if #WhiteList > 0 then
 				for _, listed in pairs(WhiteList) do
-					if !WhiteList[Concmd] then return false end
+					if !table.HasValue(WhiteList, Concmd) then return false end
 				end
 			end
 		end
@@ -1193,6 +1193,20 @@ elseif CLIENT then
 
 	net.Receive("expadv.cmd", function()
 		Exec(net.ReadString())
+	end)
+
+	concommand.Add("expadv_allow_cmd", function(Player, _, Args)
+		local cmd = table.concat(Args, " ")
+
+		local WhiteList = Component:ReadUserSetting( "concmd_whitelist", DEFAULT_BLACKLIST )
+
+		if table.HasValue(WhiteList, cmd) then return MsgN(cmd, " is already whitelisted.") end
+
+		table.insert(WhiteList, cmd)
+
+		EXPADV.SaveConfig()
+
+		MsgN(cmd, " has been whitelisted, you may undo this by editing 'data/cl_expadv.txt'.")
 	end)
 end
 
