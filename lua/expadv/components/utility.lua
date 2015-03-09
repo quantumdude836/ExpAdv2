@@ -1145,15 +1145,15 @@ end
 
 EXPADV.SharedOperators( )
 
-Component:AddVMFunction( "ArrayToJasn", "ar", "s", function(Context, Trace, Array)
+Component:AddVMFunction( "ArrayToJSON", "ar", "s", function(Context, Trace, Array)
 	return util.TableToJSON(arrayToJSON(Array))
 end )
 
-Component:AddVMFunction( "tableToJasn", "t", "s", function(Context, Trace, Table)
+Component:AddVMFunction( "tableToJSON", "t", "s", function(Context, Trace, Table)
 	return util.TableToJSON(tableToJSON(Table))
 end )
 
-Component:AddVMFunction( "jasnToTable", "s", "t", function(Context, Trace, JSON)
+Component:AddVMFunction( "jSONToTable", "s", "t", function(Context, Trace, JSON)
 	return luaToTable(util.JSONToTable(JSON))
 end )
 
