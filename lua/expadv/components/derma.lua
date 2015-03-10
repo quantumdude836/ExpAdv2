@@ -219,8 +219,12 @@ Component:AddFunctionHelper( "dtextentry", "df", "Returns new dtextentry object 
 Component:AddPreparedFunction("onTextChanged", "dte:d", "", [[@value 1.OnTextChanged = function()
 	Context:Execute( "textentry", @value 2 )
 end]])
+Component:AddPreparedFunction("onEnter", "dte:d", "", [[@value 1.OnEnter = function()
+	Context:Execute( "textentry", @value 2 )
+end]])
 
 Component:AddFunctionHelper( "onTextChanged", "dte:d", "The given delegate will be executed when the text inside the dtextentry changes." )
+Component:AddFunctionHelper( "onEnter", "dte:d", "The given delegate will be executed when the client presses enter inside the dtextentry." )
 
 /* -----------------------------------------------------------------------------------
 	@: Check Box
@@ -439,9 +443,6 @@ Component:AddFunctionHelper( "onRowSelected", "dlv:d", "Executes when a row is s
 
 Component:AddInlineFunction( "getSelectedLine", "dlv:", "n", "@value 1:GetSelectedLine() or 0" )
 Component:AddFunctionHelper( "getSelectedLine", "dlv:", "Gets the index of selected line." )
-
-Component:AddInlineFunction( "getSelected", "dlv:", "t", "@value1:GetSelected() or {}" )
-Component:AddFunctionHelper( "getSelected", "dlv:", "Gets a table of currently selected lines." )
 
 /* -----------------------------------------------------------------------------------
 	@: DImage
