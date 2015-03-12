@@ -95,6 +95,9 @@ Component:AddFunctionHelper( "validPhysics", "e:", "Returns if the given entity 
 Component:AddInlineFunction( "pos", "e:", "v", "(@value 1:IsValid() and @value 1:GetPos() or Vector(0,0,0))")
 Component:AddFunctionHelper( "pos", "e:", "Gets the position of the given entity.")
 
+Component:AddInlineFunction( "nearestPoint", "e:", "v", "(@value 1:IsValid() and @value 1:NearestPoint() or Vector(0,0,0))")
+Component:AddFunctionHelper( "nearestPoint", "e:", "erforms a Ray OBBox intersection from the given position to the origin of the OBBox with the entity and returns the hit position on the OBBox.")
+
 Component:AddInlineFunction( "ang", "e:", "a", "(@value 1:IsValid() and @value 1:GetAngles() or Angle(0,0,0))")
 Component:AddFunctionHelper( "ang", "e:", "Gets the angle of the given entity.")
 EXPADV.AddFunctionAlias( "angle", "e:" ); EXPADV.AddFunctionAlias( "angles", "e:" )
@@ -743,10 +746,67 @@ Component:AddVMFunction( "getConstraints", "e:", "ar",
 		return Array
 	end )
 
+
+
 Component:AddFunctionHelper( "totalConstraints", "e:", "Returns the total number of contrained entites." )
 Component:AddFunctionHelper( "isConstrained", "e:", "Returns true is the entity has a constraint." )
 Component:AddFunctionHelper( "isWeldedTo", "e:", "Returns the first entity welded to the object." )
 Component:AddFunctionHelper( "getConstraints", "e:", "Returns an array of contrained entities." )
+
+/* --- --------------------------------------------------------------------------------
+	@: attachments
+   --- */
+
+EXPADV.SharedOperators()
+
+Component:AddInlineFunction( "lookupAttachment", "e:s", "n", "(IsValid(@value 1) and @value 1:LookupAttachment(@value 2) or 0)")
+
+Component:AddPreparedFunction( "attachmentPos", "e:n", "v", [[
+	if IsValid(@value 1) then
+		local attachment = @value 1:GetAttachment(@value 2)
+		if attachment then
+			@define pos = attachment.Pos
+		end
+	end
+]], "(@pos or Vector(0,0,0))" )
+
+Component:AddPreparedFunction( "attachmentPos", "e:s", "v", [[
+	if IsValid(@value 1) then
+		local attachment = @value 1:GetAttachment(@value 1:LookupAttachment(@value 2))
+		if attachment then
+			@define pos = attachment.Pos
+		end
+	end
+]], "(@pos or Vector(0,0,0))" )
+
+Component:AddPreparedFunction( "attachmentAng", "e:n", "a", [[
+	if IsValid(@value 1) then
+		local attachment = @value 1:GetAttachment(@value 2)
+		if attachment then
+			@define ang = attachment.Ang
+		end
+	end
+]], "(@ang or Angle(0,0,0))" )
+
+Component:AddPreparedFunction( "attachmentAng", "e:s", "a", [[
+	if IsValid(@value 1) then
+		local attachment = @value 1:GetAttachment(@value 1:LookupAttachment(@value 2))
+		if attachment then
+			@define ang = attachment.Ang
+		end
+	end
+]], "(@ang or Angle(0,0,0))" )
+
+Component:AddPreparedFunction( "attachments", "e:", "ar", [[
+	@define array = {__type = "s"}
+
+	if IsValid(@value 1) then
+		local atc = @value 1:GetAttachments()
+		for i = 1, #atc do
+			@array[i] = atc[i].name
+		end
+	end
+]], "@array" )
 
 /* --- --------------------------------------------------------------------------------
 	@: Trails

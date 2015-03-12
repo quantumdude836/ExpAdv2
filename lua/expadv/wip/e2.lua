@@ -12,8 +12,8 @@
 	Main.FileBar = vgui.Create("DPanel", Main.Canvas)
 	Main.ValidateBar = vgui.Create("DPanel", Main.Canvas)
 	
-	Main.CanvasLeft = vgui.Create("DPanel")//, Main.Canvas)
-	Main.CanvasRight = vgui.Create("DPanel")//, Main.Canvas)
+	Main.CanvasLeft = vgui.Create("DPanel")
+	Main.CanvasRight = vgui.Create("DPanel")
 
 	Main.Divider = vgui.Create("DHorizontalDivider", Main.Canvas)
 	Main.Divider:SetLeft(Main.CanvasLeft)
@@ -292,11 +292,6 @@
 	end
 
 	Main:SetActiveTab(Main:NewCodeTab("TEST PAGE", path, "TEST"))
-
-/* --- --------------------------------------------------------------------------------
-	@: Expression Advanced 2 - IDE(A) v2.0
-	@: Divider Drag
-   --- */
 
 /* --- --------------------------------------------------------------------------------
 	@: Expression Advanced 2 - IDE(A) v2.0
