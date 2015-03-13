@@ -142,3 +142,22 @@ if @value 1:IsValid() and EXPADV.PPCheck(Context,@value 1) then
 	end
 end]] )
 Component:AddFunctionHelper( "noCollideTo", "e:e", "Nocollide an entity to another")
+
+----------------------------
+-- Get table
+----------------------------
+Component:AddPreparedFunction("getConstraintTable","e:","t",[[
+	@define ret = {}
+	if @value 1:IsValid() then
+		for k, v in pairs( constraint.GetTable( @value 1 ) ) do
+			@ret[ k ] = {}
+			
+			@ret[ k ].LPos =  v.LPos
+			@ret[ k ].Ent1 =  v.Ent1
+			@ret[ k ].LPos1 =  v.LPos1
+			@ret[ k ].Ent2 =  v.Ent2
+			@ret[ k ].LPos2 =  v.LPos2
+			@ret[ k ].Type = v.Type
+		end
+end]], "@ret")
+
