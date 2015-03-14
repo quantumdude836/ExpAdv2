@@ -142,3 +142,46 @@ if @value 1:IsValid() and EXPADV.PPCheck(Context,@value 1) then
 	end
 end]] )
 Component:AddFunctionHelper( "noCollideTo", "e:e", "Nocollide an entity to another")
+
+----------------------------
+-- Get table
+----------------------------
+Component:AddVMFunction("getConstraintTable","e:","ar",
+function(Context, Trace, Ent)
+	local Array = {__type = "t"}
+	 
+	if IsValid(Ent) then
+		for _, data in pairs( constraint.GetTable(Ent) ) do
+			local Data, Types, Look, Size = {}, {}, {}, 0
+			 
+			for k, v in pairs(data) do
+				if k == "Constraint" then continue end
+				
+				if isstring(v) then
+					Types[k] = "s"
+				elseif isbool(v) then
+					Types[k] = "b"
+				elseif isnumber(v) then
+					Types[k] = "n"
+				elseif isvector(v) then
+					Types[k] = "v"
+				elseif isangle(v) then
+					Types[k] = "a"
+				elseif isentity(v) then
+					Types[k] = "e"
+				end
+				 
+				 if Types[k]  then
+					Data[k] = v
+					Look[k] = k
+					Size = Size + 1
+				end
+			end
+		 
+			Array[#Array + 1] = { Data = Data, Types = Types, Look = Look, Size = Size, Count = 0, HasChanged = false }
+		end
+	end
+	 
+	return Array
+end) 
+
