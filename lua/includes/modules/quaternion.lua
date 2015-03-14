@@ -132,12 +132,12 @@ do
 	function meta:RotateQuat( A, B )
 		if type( B ) == "number" then
 			local Ang = B * deg2rad * 0.5
-			local Axis = A:Garry()
+			local Axis = A
 			Axis:Normalize()
 
 			return Quaternion( cos(Ang), Axis.x * sin(Ang), Axis.y * sin(Ang), Axis.z * sin(Ang) )
 		else
-			local Axis = A:Garry()
+			local Axis = A
 			local Squared = Axis.x * Axis.x + Axis.y * Axis.y + Axis.z * Axis.z
 			if Squared == 0 then return Quaternion(0, 0, 0, 0) end
 
@@ -184,7 +184,7 @@ do
 	end
 
 	function meta:VecsToQuat( A, B )
-		local X, Z = A:Garry(), B:Garry()
+		local X, Z = A, B
 		local Y = Z:Cross(X):GetNormalized()
 
 		local Ang = X:Angle()

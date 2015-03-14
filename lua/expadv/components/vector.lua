@@ -85,7 +85,7 @@ VectorObj:AddVMOperator( "=", "n,v", "", function( Context, Trace, MemRef, Value
    local Prev = Context.Memory[MemRef] or Vector( 0, 0, 0 )
 
    Context.Memory[MemRef] = Value
-   Context.Delta[MemRef] = Prev - Value
+   Context.Delta[MemRef] = Prev - (Value or Vector(0, 0, 0))
    Context.Trigger[MemRef] = Context.Trigger[MemRef] or ( Prev ~= Value )
 end )
 
@@ -390,7 +390,7 @@ Vector2Obj:AddVMOperator( "=", "n,v2", "", function( Context, Trace, MemRef, Val
    local Prev = Context.Memory[MemRef] or Vector2( 0, 0 )
    
    Context.Memory[MemRef] = Value
-   Context.Delta[MemRef] = Prev - Value
+   Context.Delta[MemRef] = Prev - (Value or Vector2(0, 0))
    Context.Trigger[MemRef] = Context.Trigger[MemRef] or ( Prev ~= Value )
 end )
 
