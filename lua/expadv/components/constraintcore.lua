@@ -146,18 +146,42 @@ Component:AddFunctionHelper( "noCollideTo", "e:e", "Nocollide an entity to anoth
 ----------------------------
 -- Get table
 ----------------------------
-Component:AddPreparedFunction("getConstraintTable","e:","t",[[
-	@define ret = {}
-	if @value 1:IsValid() then
-		for k, v in pairs( constraint.GetTable( @value 1 ) ) do
-			@ret[ k ] = {}
-			
-			@ret[ k ].LPos =  v.LPos
-			@ret[ k ].Ent1 =  v.Ent1
-			@ret[ k ].LPos1 =  v.LPos1
-			@ret[ k ].Ent2 =  v.Ent2
-			@ret[ k ].LPos2 =  v.LPos2
-			@ret[ k ].Type = v.Type
+Component:AddVMFunction("getConstraintTable","e:","ar",
+function(Context, Trace, Ent)
+	local Array = {__type = "t"}
+	 
+	if IsValid(Ent) then
+		for _, data in pairs( constraint.GetTable(Ent) ) do
+			local Data, Types, Look, Size = {}, {}, {}, 0
+			 
+			for k, v in pairs(data) do
+				if k == "Constraint" then continue end
+				
+				if isstring(v) then
+					Types[k] = "s"
+				elseif isbool(v) then
+					Types[k] = "b"
+				elseif isnumber(v) then
+					Types[k] = "n"
+				elseif isvector(v) then
+					Types[k] = "v"
+				elseif isangle(v) then
+					Types[k] = "a"
+				elseif isentity(v) then
+					Types[k] = "e"
+				end
+				 
+				 if Types[k]  then
+					Data[k] = v
+					Look[k] = k
+					Size = Size + 1
+				end
+			end
+		 
+			Array[#Array + 1] = { Data = Data, Types = Types, Look = Look, Size = Size, Count = 0, HasChanged = false }
 		end
-end]], "@ret")
+	end
+	 
+	return Array
+end) 
 
