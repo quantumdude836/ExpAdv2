@@ -338,7 +338,7 @@ Component:AddFunctionHelper( "asinr", "n", "Returns the inverse sin of (number).
 Component:AddInlineFunction( "atanr", "n", "n", "math.atan(@value 1)" )
 Component:AddFunctionHelper( "atanr", "n", "returns the inverse tangent of (number)." )
 
-Component:AddInlineFunction( "atanr", "n,n", "n", "math.atan(@value 1, @value 2)" )
+Component:AddInlineFunction( "atanr", "n,n", "n", "math.atan2(@value 1, @value 2)" )
 Component:AddFunctionHelper( "atanr", "n,n", "Returns the inverse tangent of (number) and (number)." )
 
 Component:AddInlineFunction( "cosr", "n", "n", "math.cos(@value 1)" )
