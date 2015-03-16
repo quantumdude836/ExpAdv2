@@ -166,7 +166,7 @@ Component:AddVMFunction( "rotateAroundAxis", "v:v,n", "v",
     return Vector(
       (Cos + (x ^ 2) * (1 - Cos)) * Pos.x + (x * y * (1 - Cos) - z * Sin) * Pos.y + (x * z * (1 - Cos) + y * Sin) * Pos.z,
       (y * x* (1-Cos) + z * Sin) * Pos.x + (Cos + (y ^ 2)*(1 - Cos)) * Pos.y + (y * z * (1 - Cos) - x * Sin) * Pos.z,
-      (z * x * (1-Cos) - y * Sin) * Pos.x + (z*y*(1 - ca) + x * Sin) * Pos.y + (Cos + (z ^ 2)*(1 - Cos)) * Pos.z
+      (z * x * (1-Cos) - y * Sin) * Pos.x + (z*y*(1 - Cos) + x * Sin) * Pos.y + (Cos + (z ^ 2)*(1 - Cos)) * Pos.z
     )
   end )
 
