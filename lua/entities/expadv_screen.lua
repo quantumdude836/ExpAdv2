@@ -57,7 +57,6 @@ EXPADV.AddMonitor( "models/props/cs_office/computer_monitor.mdl", Vector( 3.3, -
 
 if WireLib then -- But Wiremods monitors do :D
 	for Mdl, Monitor in pairs( WireGPU_Monitors ) do
-		--if MonitorMdls[Mdl] then return end
 		EXPADV.AddMonitor( Mdl, Monitor.offset, Monitor.rot, Vector2( Monitor.x1, Monitor.y1 ), Vector2( Monitor.x2, Monitor.y2 ), Monitor.RS )
 	end
 end
@@ -71,6 +70,15 @@ EXPADV.SetMonitorMinMax("models/props_lab/monitor01b.mdl", Vector(6.530000686645
 EXPADV.SetMonitorMinMax("models/blacknecro/tv_plasma_4_3.mdl", Vector(0.10000213980675, -27.952558517456, 20.492000579834), Vector(0.099997863173485, 27.952558517456, -21.492000579834))
 EXPADV.SetMonitorMinMax("models/hunter/plates/plate2x2.mdl", Vector(-46.591995239258, -46.592002868652, 1.7000000476837), Vector(46.591995239258, 46.592002868652, 1.7000000476837))
 EXPADV.SetMonitorMinMax("models/kobilica/wiremonitorbig.mdl", Vector(0.20000101625919, -11.620611190796, 24.520000457764), Vector(0.19999898970127, 11.620611190796, 1.4799995422363))
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Resolution to get table
+   --- */
+
+function ENT:SetupDataTables( )
+	self.BaseClass.SetupDataTables(self)
+	self:AddExpVar("FLOAT", 6, "Resolution")
+end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: GetCursor
@@ -96,10 +104,10 @@ function ENT:GetCursor( Player )
 	local B = Ang:Up( ):Dot( Pos - Start ) / A
 
 	local HitPos = WorldToLocal( Start + Dir * B, Angle( ), Pos, Ang )
-	local X = (0.5 + HitPos.x / (Monitor.Res * 512 / Monitor.Ratio)) * 512
-	local Y = (0.5 - HitPos.y / (Monitor.Res * 512)) * 512
+	local X = (0.5 + HitPos.x / (Monitor.Res * self:GetResolution(512) / Monitor.Ratio)) * self:GetResolution(512)
+	local Y = (0.5 - HitPos.y / (Monitor.Res * self:GetResolution(512))) * self:GetResolution(512)
 			
-	if (X < 0 or X > 512 or Y < 0 or Y > 512) then return nil end
+	if (X < 0 or X > self:GetResolution(512) or Y < 0 or Y > self:GetResolution(512)) then return nil end
 
 	return Vector2( X, Y )
 end
@@ -108,7 +116,7 @@ function ENT:ScreenToLocalVector( Vec2 )
 	local Monitor = EXPADV.GetMonitor( self:GetModel( ) )
 	if !Monitor then return Vector( 0, 0, 0) end
 
-	Vec2 = (Vec2 - Vector2( 256, 256 )) * Vector2( Monitor.Res / Monitor.Ratio, Monitor.Res )
+	Vec2 = (Vec2 - Vector2(self:GetResolution(512) * 0.5, self:GetResolution(512) * 0.5)) * Vector2( Monitor.Res / Monitor.Ratio, Monitor.Res )
 
 	local Vec = Vector( Vec2.x, -Vec2.y, 0 )
 
@@ -121,7 +129,18 @@ function ENT:ScreenToWorld( Vec2 )
 	return self:LocalToWorld( self:ScreenToLocalVector( Vec2 ) )
 end
 
-if SERVER then return end
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Duplicator
+   --- */
+
+if SERVER then
+	--Vars now save themselfs!
+	return
+end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: FPS / BG
+   --- */
 
 function ENT:SetFPS( Value )
 	self.__fps = math.Clamp( math.ceil( Value ), 1, 60 )
@@ -131,35 +150,57 @@ function ENT:GetFPS( )
 	return self.__fps or 24
 end
 
+function ENT:SetBackGround(Color)
+	self.__bg = Color
+end
+
+function ENT:GetBackGround( )
+	return self.__bg or Color(50, 50, 50, 255)
+end
+
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
-	@: We need the Material and an RT
+	@: We need a render target and material
    --- */
 
-function EXPADV.CacheRenderTarget( RenderTarget )
-	if RenderTarget and !table.HasValue( EXPADV.RT_Cache, RenderTarget ) then
-		table.insert( EXPADV.RT_Cache, RenderTarget )
+EXPADV.RenderTargets = EXPADV.RenderTargets or {}
+local MaterialInfo = { ["$vertexcolor"] = 1, ["$vertexalpha"] = 1, ["$ignorez"] = 1, ["$nolod"] = 1, }
+
+function EXPADV.GetRenderTarget(Res)
+	Res = 1024 --Resolution or 512
+
+	for id, data in pairs(EXPADV.RenderTargets) do
+
+		if data.CACHED then --and data.RES == Res then
+			data.CACHED = false
+			data.CLEAR = true
+			return data
+		end
 	end
+
+	local ID = #EXPADV.RenderTargets + 1
+
+	if ID <= 32 then
+		local Data = {
+			ID = ID,
+			RES = Res,
+			CLEAR = true,
+			CACHED = false,
+			RT = GetRenderTarget( "expadv_rt_" .. ID, Res, Res ),
+			MAT = CreateMaterial( "expadv_rt_" .. ID, "UnlitGeneric", MaterialInfo ),
+		}
+
+		EXPADV.RenderTargets[ID] = Data
+
+		return Data
+	end
+
+	return nil
 end
 
-EXPADV.RT_ID = 0
-EXPADV.RT_Cache = { }
-EXPADV.RT_Mat_Cache = { }
 
-function EXPADV.GetRenderTarget( )
-	local RenderTarget = table.remove( EXPADV.RT_Cache )
-	if RenderTarget then return RenderTarget, table.remove( EXPADV.RT_Mat_Cache ) end
-
-	EXPADV.RT_ID = EXPADV.RT_ID + 1
-	if EXPADV.RT_ID > 32 then return end
-
-	return GetRenderTarget( "expadv_rt_" .. EXPADV.RT_ID, 512+16, 512+16 ), CreateMaterial( "expadv_rt_" .. EXPADV.RT_ID, "UnlitGeneric", { ["$vertexcolor"] = 1, ["$vertexalpha"] = 1, ["$ignorez"] = 1, ["$nolod"] = 1, } )
-end
-
-function EXPADV.CacheRenderTarget( RenderTarget, Material )
-	if RenderTarget and !table.HasValue( EXPADV.RT_Cache, RenderTarget ) then
-		table.insert( EXPADV.RT_Cache, RenderTarget )
-		table.insert( EXPADV.RT_Mat_Cache, Material )
-	end
+function EXPADV.CacheRenderTarget(ID)
+	local Data = EXPADV.RenderTargets[ID]
+	if Data then Data.CACHED = true end
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -169,107 +210,110 @@ end
 AccessorFunc( ENT, "_pauseRender", "RenderingPaused", FORCE_BOOL )
 AccessorFunc( ENT, "_noClear", "NoClearFrame", FORCE_BOOL )
 
-function ENT:Draw( )
-	local Context = self.Context
+function ENT:PreDrawScreen(scrAspect, scrSize) return false end
+function ENT:PostDrawScreen(scrAspect, scrSize) return false end
 
-	if Context and Context.Online then
-		if !self:GetRenderingPaused( ) then
-				if !self.NextRender or self.NextRender <= SysTime( ) then
-				
-				local Ok, Error = pcall(self.RenderScreen, self)
-				
-				if !Ok then
-					self:LuaError( Error )
-					Context:ShutDown( )
+function ENT:Draw()
+	local time = SysTime()
+	local context = self.Context
+
+	self.RT_Data = self.RT_Data or EXPADV.GetRenderTarget(self:GetResolution(512))
+
+	if !context or !context.Online then
+		if !self.IsErrorScreen then
+			--self:CreateErrorScreen(context)
+			self.IsErrorScreen = true
+		end
+	elseif !self:GetRenderingPaused() and (!self.NextRender or self.NextRender <= time) then
+		self:DoScreenUpdate(context)
+		self.IsErrorScreen = false
+		self.NextRender = time + (1 / self:GetFPS())
+	end
+
+	self:DrawModel( )
+
+	local monitor = EXPADV.GetMonitor(self:GetModel())
+	
+	if monitor then
+			local scrSize = self:GetResolution(512)
+			local pos, ang, res = self:LocalToWorld(monitor.Off), self:LocalToWorldAngles(monitor.Rot), monitor.Res
+
+			if monitor.Max and monitor.Min then
+				pos = self:LocalToWorld(monitor.Max)
+			end
+
+			if scrSize == 256 then
+				res = res * 2
+			elseif scrSize == 1024 then
+				res = res * 0.5
+			end
+			
+			local rtData = self.RT_Data
+			local aspect = 1 / monitor.Ratio
+			local offset = (monitor.Min and monitor.Max) and 0 or -(scrSize*0.5) * aspect
+			
+			local scrAspect = scrSize * aspect
+			local endUV = scrSize / rtData.RES
+
+			cam.Start3D2D(pos, ang, res)
+				surface.SetDrawColor(self:GetBackGround())
+				surface.DrawRect(offset, offset, scrAspect, scrAspect)
+
+				if !self:PreDrawScreen(scrAspect, scrSize) and rtData then
+					-- If our predrawscreen returns false, we render the screen.
+
+					local prev = rtData.MAT:GetTexture("$basetexture")
+								 rtData.MAT:SetTexture("$basetexture", rtData.RT)
+
+					surface.SetDrawColor(255, 255, 255, 255)
+					surface.SetMaterial(rtData.MAT)
+					surface.DrawTexturedRectUV(offset, offset, scrAspect, scrAspect, 0, 0, endUV, endUV)
+
+					rtData.MAT:SetTexture("$basetexture", prev)
 				end
 
-				self.NextRender = SysTime( ) + (1 / self:GetFPS( ) )
-			end
-		end
+				self:PostDrawScreen(scrAspect, scrSize)
+
+			cam.End3D2D( )
 	end
-	
-	self:DrawModel( )
-	self:DrawScreen( )
 end
 
-function ENT:DrawScreen( )
-	local Monitor = EXPADV.GetMonitor( self:GetModel( ) )
-	if !Monitor then return end
+function ENT:DoScreenUpdate(context)
+	local rtData = self.RT_Data
+	local scrSize = self:GetResolution(512)
+	local event = context.event_drawScreen
 
-	local Position, Angles, Resolution = self:LocalToWorld( Monitor.Off ), self:LocalToWorldAngles( Monitor.Rot ), Monitor.Res
-	
-	if Monitor.Max and Monitor.Min then Position = self:LocalToWorld( Monitor.Max ) end
+	if event and rtData then
+		render.PushRenderTarget(rtData.RT, 0, 0, scrSize + 16, scrSize + 16)
+		render.OverrideAlphaWriteEnable(true, true)
 
-	cam.Start3D2D( Position, Angles, Resolution )
-		local Aspect = 1 / Monitor.Ratio
-		local Offset = (Monitor.Min and Monitor.Max) and 0 or -256 * Aspect
-		
-		surface.SetDrawColor( 0, 0,0 ,255 )
-		surface.DrawRect( Offset, Offset, 512 * Aspect, 512 * Aspect )
-
-		if self.PreDrawScreen then self:PreDrawScreen(512 * Aspect, 512 * Aspect) end
-
-		if self.RenderTarget and self.RenderMat then
-			local Previous = self.RenderMat:GetTexture( "$basetexture" )
-			self.RenderMat:SetTexture( "$basetexture", self.RenderTarget )
-
-			surface.SetDrawColor( 255, 255, 255, 255 )
-			surface.SetMaterial( self.RenderMat )
-			surface.DrawTexturedRect( Offset, Offset, 512 * Aspect, 512 * Aspect )
-
-			self.RenderMat:SetTexture( "$basetexture", Previous )
+		if rtData.CLEAR or !self:GetNoClearFrame() then
+			render.ClearDepth()
+			render.Clear(0, 0, 0, 0)
+			rtData.CLEAR = false
 		end
 
-		if self.PostDrawScreen then self:PostDrawScreen(512 * Aspect, 512 * Aspect) end
-	cam.End3D2D( )
-end
+		cam.Start2D( )
 
-function ENT:RenderScreen( )
-	local Context = self.Context
-	if !Context or !Context.Online then return end
-		
-	local Event = Context.event_drawScreen
-	if !Event then return end -- No event, so why bother?
-	
-	if !self.RenderTarget or !self.RenderMat then
-		self.ForceClear = true
-		self.RenderTarget, self.RenderMat = EXPADV.GetRenderTarget( )
-		if !self.RenderTarget or !self.RenderMat then return end
-	end --^ No free rt, so no point.
+			surface.SetDrawColor(255, 255, 255, 255)
+			surface.SetTextColor(0, 0, 0, 255)
+			
+			context.In2DRender = true
+			context.Matrices = 0
 
-	local _ScrW, _ScrH = ScrW( ), ScrH( )
-	local PreviousRT = render.GetRenderTarget( )
-	render.SetRenderTarget( self.RenderTarget )
-	render.SetViewPort( 8, 8, 512, 512 )
-	
+			context:Execute("Event drawScreen", event, scrSize, scrSize)
 
-	if !self:GetNoClearFrame( ) or self.ForceClear then
-		render.Clear( 0, 0, 0, 255 )
-		self.ForceClear = nil
-	end
-
-	cam.Start2D( )
-
-		surface.SetDrawColor( 255, 255, 255, 255 )
-		surface.SetTextColor( 0, 0, 0, 255 )
-		
-		Context.In2DRender = true
-		Context.Matrices = 0
-
-		Context:Execute( "Event drawScreen", Event, 512, 512 )
-
-		if Context.Matrices > 0 then
-			for i=1, Context.Matrices do
-				cam.PopModelMatrix( )
+			if context.Matrices > 0 then
+				for i=1, context.Matrices do cam.PopModelMatrix() end
 			end
-		end
-		
-		Context.In2DRender = false
+			
+			context.In2DRender = false
 
-	cam.End2D( )
+		cam.End2D( )
 
-	render.SetViewPort( 0, 0, _ScrW, _ScrH )
-	render.SetRenderTarget( PreviousRT )
+		render.OverrideAlphaWriteEnable(false)
+		render.PopRenderTarget()
+	end
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------

@@ -62,7 +62,7 @@ function ENT:LinkPod(Pod)
 	self:SetLinkedPod(Pod)
 end
 
-hook.Add( "Expadv.BuildDupeInfo", "expadv.pod", function( Ent, DupeTable )
+/*hook.Add( "Expadv.BuildDupeInfo", "expadv.pod", function( Ent, DupeTable )
 	if !Ent.GetLinkedPod then return end
 	DupeTable.Pod = Ent:GetLinkedPod()
 end )
@@ -71,5 +71,5 @@ hook.Add( "Expadv.PasteDupeInfo", "expadv.pod", function( Ent, DupeTable, FromID
 	if !Ent.SetLinkedPod then return end
 	if !DupeTable.Pod then return end
 	Ent:LinkPod(FromID(DupeTable.Pod))
-end )
+end ) --TODO: This doesnt work :(*/
 

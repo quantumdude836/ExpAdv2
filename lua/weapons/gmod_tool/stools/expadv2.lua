@@ -40,6 +40,7 @@ TOOL.ClientConVar.derma			= 0
 TOOL.ClientConVar.weld		 	= 0
 TOOL.ClientConVar.weldworld 	= 0
 TOOL.ClientConVar.frozen		= 0
+TOOL.ClientConVar.resolution	= 512
 
 hook.Add( "Expadv.PostLoadConfig", "Expadv.Tool", function( )
 	EXPADV.CreateSetting( "limit", 20 )
@@ -111,7 +112,7 @@ duplicator.RegisterEntityClass( "expadv_gate", MakeExpadv, "Pos", "Ang", "Model"
 	@: Make Screen Entity
    --- */
 
-local function MakeExpadvScreen( Player, Position, Angle, Model, InPorts, OutPorts )
+local function MakeExpadvScreen( Player, Position, Angle, Model, InPorts, OutPorts, Resolution )
 	if Player:GetCount( "expadv" ) > EXPADV.ReadSetting( "limit", 20 ) then
 		Player:LimitHit( "Expression Advanced entity limit reached." )
 		return nil
@@ -135,9 +136,9 @@ local function MakeExpadvScreen( Player, Position, Angle, Model, InPorts, OutPor
 	return ExpAdv
 end
 
-duplicator.RegisterEntityClass( "expadv_screen", MakeExpadvScreen, "Pos", "Ang", "Model", "DupeInPorts", "DupeOutPorts" )
+duplicator.RegisterEntityClass( "expadv_screen", MakeExpadvScreen, "Pos", "Ang", "Model", "DupeInPorts", "DupeOutPorts")
 
-local function MakeExpadvScreenDerma( Player, Position, Angle, Model, InPorts, OutPorts )
+local function MakeExpadvScreenDerma( Player, Position, Angle, Model, InPorts, OutPorts, Resolution )
 	if Player:GetCount( "expadv" ) > EXPADV.ReadSetting( "limit", 20 ) then
 		Player:LimitHit( "Expression Advanced entity limit reached." )
 		return nil
@@ -161,7 +162,7 @@ local function MakeExpadvScreenDerma( Player, Position, Angle, Model, InPorts, O
 	return ExpAdv
 end
 
-duplicator.RegisterEntityClass( "expadv_scr_vgui", MakeExpadvScreenDerma, "Pos", "Ang", "Model", "DupeInPorts", "DupeOutPorts" )
+duplicator.RegisterEntityClass( "expadv_scr_vgui", MakeExpadvScreenDerma, "Pos", "Ang", "Model", "DupeInPorts", "DupeOutPorts")
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Left Click
@@ -182,13 +183,18 @@ function TOOL:LeftClick( Trace )
 	local Ang = Trace.HitNormal:Angle( ) + Angle( 90, 0, 0 )
 
 	if self:GetClientNumber( "screen" ) == 1 then
+
 		if self:GetClientNumber( "derma" ) == 1 then
-			ExpAdv = MakeExpadvScreenDerma( self:GetOwner( ), Trace.HitPos, Ang, Model )
+			ExpAdv = MakeExpadvScreenDerma( self:GetOwner( ), Trace.HitPos, Ang, Model, nil, nil, Resolution )
 		else
-			ExpAdv = MakeExpadvScreen( self:GetOwner( ), Trace.HitPos, Ang, Model )
+			ExpAdv = MakeExpadvScreen( self:GetOwner( ), Trace.HitPos, Ang, Model, nil, nil, Resolution )
+		end
+
+		if IsValid(ExpAdv) then
+			ExpAdv:SetResolution(self:GetClientNumber( "resolution" ) or 512)
 		end
 	else
-		ExpAdv = MakeExpadv( self:GetOwner( ), Trace.HitPos, Ang, Model )
+		ExpAdv = MakeExpadv( self:GetOwner( ), Trace.HitPos, Ang, Model, nil, nil )
 	end
 
 	if !IsValid( ExpAdv ) then return false end
@@ -267,6 +273,29 @@ if CLIENT then
 		local CheckFroze = CPanel:CheckBox( "Create Frozen", "expadv2_frozen" )
 		local CheckWorld = CPanel:CheckBox( "Create Welded to World", "expadv2_weldworld" )
 
+
+		local ResLabel = vgui.Create("DLabel")
+		ResLabel:SetText("Screen Resolution:")
+		ResLabel:SetDark()
+
+		local Resolution = vgui.Create( "DComboBox" )
+		Resolution:SetValue(512)
+		Resolution:AddChoice("256", 256)
+		Resolution:AddChoice("512", 512)
+		Resolution:AddChoice("1024", 1024)
+		--Because you cant see the text, or change the text color lets get hacky :D
+		function Resolution:Paint(w, h)
+			surface.SetDrawColor(50, 50, 50, 255)
+			surface.DrawRect(0, 0, w, h)
+		end
+
+		Resolution.OnSelect = function(self, index, value)
+			RunConsoleCommand( "expadv2_resolution", value )
+		end
+
+		CPanel:AddItem(ResLabel)
+		CPanel:AddItem(Resolution)
+
 		local function AddModel( Mdl, IsScreen )
 			local Icon = vgui.Create( "SpawnIcon", PropList )
 			Icon:SetModel( Mdl )
@@ -276,7 +305,9 @@ if CLIENT then
 			Icon.DoClick = function( ) 			
 				RunConsoleCommand( "expadv2_screen", IsScreen and 1 or 0 )
 				RunConsoleCommand( "expadv2_model", Mdl )
-				Screen:SetValue( IsScreen )
+				Screen:SetValue(IsScreen)
+				Resolution:SetVisible(IsScreen)
+				ResLabel:SetVisible(IsScreen)
 			end
 
 			PropList.List:AddItem( Icon )

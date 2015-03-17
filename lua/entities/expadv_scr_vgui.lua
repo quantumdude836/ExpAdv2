@@ -107,7 +107,7 @@ function ENT:Initialize()
 
 	self.Panel = self:CreateDermaObject( "DPanel" )
 	self.Panel:SetPos(0,0)
-	self.Panel:SetSize(512, 512)
+	self.Panel:SetSize(self:GetResolution(512), self:GetResolution(512))
 	self.Panel:SetDrawBackground(false)
 	self.Panel:SetPaintedManually( true )
 
@@ -136,7 +136,7 @@ function ENT:OnRemove()
 	return self.BaseClass.BaseClass.OnRemove( self )
 end
 
-function ENT:PostDrawScreen( Width, Height )
+function ENT:PostDrawScreen(_, scrRes)
 	if !ValidPanel(self.Panel) then return end
 
 	self:checkHover( self.Panel )

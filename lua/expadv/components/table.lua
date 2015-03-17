@@ -216,6 +216,10 @@ Component:AddFunctionHelper( "keys", "t:", "Returns an array of indexs on the ta
 			end
 	end
 	
+	Table:AddVMOperator( "get", "t,n", "vr", Get )
+	Table:AddVMOperator( "get", "t,s", "vr", Get )
+	Table:AddVMOperator( "get", "t,e", "vr", Get )
+
 	Table:AddVMOperator( "get", "t,n,vr", "vr", Get )
 	Table:AddVMOperator( "get", "t,s,vr", "vr", Get )
 	Table:AddVMOperator( "get", "t,e,vr", "vr", Get )

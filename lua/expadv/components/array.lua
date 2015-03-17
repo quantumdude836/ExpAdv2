@@ -95,6 +95,11 @@ Component:AddFunctionHelper( "unpack", "ar", "Unpacks an array to a vararg." )
 Component:AddFunctionHelper( "unpack", "ar,n", "Unpacks an array to a vararg, staring at index N." )
 
 
+Array:AddPreparedOperator( "get", "ar,n", "vr", [[
+	if @value 1[@value 2] == nil then Context:Throw(@trace, "array", "array reach index " .. @value 2 .. " returned void" ) end
+	]], "{@value 1[@value 2], @value 1.__type}")
+
+
 function Component:OnPostRegisterClass( Name, Class )
 
 	if Name == "generic" or Name == "function" or Name == "class" then return end

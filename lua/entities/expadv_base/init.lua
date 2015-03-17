@@ -21,7 +21,9 @@ function ENT:ReceiveScript(script, name)
 	if script ~= "" then
 		self:CompileScript( self.root, self.files )
 
-		EXPADV.SendToClient(nil, self, script, self.player)
+		timer.Simple(1, function()
+			EXPADV.SendToClient(nil, self, script, self.player)
+		end)
 
 		hook.Add( "PlayerInitialSpawn", self, function(self, player)
 			timer.Simple(5, function()

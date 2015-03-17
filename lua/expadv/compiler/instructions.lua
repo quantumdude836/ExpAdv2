@@ -1043,7 +1043,7 @@ function Compiler:Compile_GET( Trace, Expression1, Expression2, ClassShort )
 	local Operator
 
 	if ClassShort then
-		Operator = self:LookUpClassOperator( Expression1.Return, "get", Expression1.Return, Expression2.Return, ClassShort or "_vr" )
+		Operator = self:LookUpClassOperator( Expression1.Return, "get", Expression1.Return, Expression2.Return, ClassShort)
 	else
 		Operator = self:LookUpClassOperator( Expression1.Return, "get", Expression1.Return, Expression2.Return )
 	end
