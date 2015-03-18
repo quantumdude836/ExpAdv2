@@ -72,15 +72,6 @@ EXPADV.SetMonitorMinMax("models/hunter/plates/plate2x2.mdl", Vector(-46.59199523
 EXPADV.SetMonitorMinMax("models/kobilica/wiremonitorbig.mdl", Vector(0.20000101625919, -11.620611190796, 24.520000457764), Vector(0.19999898970127, 11.620611190796, 1.4799995422363))
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
-	@: Resolution to get table
-   --- */
-
-function ENT:SetupDataTables( )
-	self.BaseClass.SetupDataTables(self)
-	self:AddExpVar("FLOAT", 6, "Resolution")
-end
-
-/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: GetCursor
    --- */
 
@@ -127,15 +118,6 @@ end
 
 function ENT:ScreenToWorld( Vec2 )
 	return self:LocalToWorld( self:ScreenToLocalVector( Vec2 ) )
-end
-
-/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
-	@: Duplicator
-   --- */
-
-if SERVER then
-	--Vars now save themselfs!
-	return
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------

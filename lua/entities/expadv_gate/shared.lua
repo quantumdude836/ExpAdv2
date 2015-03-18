@@ -90,6 +90,10 @@ function ENT:SetupDataTables( )
 	self:AddExpVar( "FLOAT", 4, "ServerState" )
 	self:AddExpVar( "FLOAT", 5, "ServerLoaded" )
 
+	if self.Screen then
+		self:AddExpVar("FLOAT", 6, "Resolution")
+	end
+	
 	self:AddExpVar( "STRING", 1, "GateName" )
 	self:AddExpVar( "ENTITY", 1, "LinkedPod" )
 
