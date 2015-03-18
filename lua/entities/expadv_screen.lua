@@ -210,6 +210,7 @@ end
 AccessorFunc( ENT, "_pauseRender", "RenderingPaused", FORCE_BOOL )
 AccessorFunc( ENT, "_noClear", "NoClearFrame", FORCE_BOOL )
 
+function ENT:GetResolution(Default) return Default or 512 end
 function ENT:PreDrawScreen(scrAspect, scrSize) return false end
 function ENT:PostDrawScreen(scrAspect, scrSize) return false end
 
