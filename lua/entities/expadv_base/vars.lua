@@ -474,18 +474,34 @@ end
  if SERVER then
 
 	hook.Add( "Expadv.BuildDupeInfo", "expadv.screen", function( Ent, DupeTable )
-		DupeTable.ExpVars = ExpVars[Ent:EntIndex()]
+		if ExpVars[Ent:EntIndex()] then
+			local DupeVars = {}
+			DupeTable.ExpVars = DupeVars
+
+			for Type, Vars in pairs(ExpVars[Ent:EntIndex()]) do
+				local VarTable = {}
+				DupeVars[Type] = VarTable
+
+				for ID, Value in pairs(Vars) do
+					if Type == "ENTITY" then
+						if !IsValid(Value) then continue end
+						Value = Value:EntIndex()
+					end
+
+					VarTable[ID] = Value
+				end
+			end
+		end
 	end )
 
 	hook.Add( "Expadv.PasteDupeInfo", "expadv.screen", function( Ent, DupeTable, FromID )
 		if DupeTable.ExpVars then
-			timer.Simple(0.0001, function()
-				for Type, Vars in pairs(DupeTable.ExpVars) do
-					for ID, Value in pairs(Vars) do
-						Ent:SetExpVar(Type, ID, Value, true)
-					end
+			for Type, Vars in pairs(DupeTable.ExpVars) do
+				for ID, Value in pairs(Vars) do
+					if Type == "ENTITY" then Value = FromID(Value) end
+					Ent:SetExpVar(Type, ID, Value, true)
 				end
-			end)
+			end
 		end
 	end )
  end
