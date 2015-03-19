@@ -312,8 +312,52 @@ Component:AddVMFunction( "print", "...", "",
 
 		EXPADV.PrintColor( Context, Values )
 	end )
+	
+local function printTable(Context, t, indent, done )
+	done = done or {}
+	indent = indent or 0
+	local keys = table.GetKeys( t.Data )
+
+	table.sort( keys, function( a, b )
+		if ( isnumber( a ) && isnumber( b ) ) then return a < b end
+		return tostring( a ) < tostring( b )
+	end )
+
+	for i = 1, #keys do
+		local key = keys[ i ]
+		local obj_type = t.Types[ key ]
+		local value = t.Data[ key ]
+
+		if  ( istable( value ) && !done[ value ] ) then
+
+			done[ value ] = true
+			EXPADV.PrintColor( Context, string.rep( "\t", indent ) .. tostring( key ) .. ":" )
+			printTable ( Context, value, indent + 1, done )
+
+		else
+			EXPADV.PrintColor( Context, string.rep( "\t", indent ) .. tostring( key ) .. "\t=\t" .. EXPADV.ToString( obj_type, value ) )
+		end
+	end
+end
+	
+	
+Component:AddVMFunction( "printTable", "t", "",
+	function( Context, Trace, Table )
+		printTable(Context, Table)
+	end )
+	
+Component:AddVMFunction( "printArray", "ar", "",
+	function( Context, Trace, Array )
+
+		for I=1, #Array do
+			EXPADV.PrintColor( Context, "[ " .. I .. " ] = " .. EXPADV.ToString( Array.__type, Array[I] ) )
+		end
+
+	end )
 
 Component:AddFunctionHelper( "printColor", "...", "Prints the contents of ( ... ) to chat seperated with a space using colors." )
+Component:AddFunctionHelper( "printTable", "t", "Prints the contents of a table to chat" )
+Component:AddFunctionHelper( "printTable", "ar", "Prints the contents of an array to chat" )
 Component:AddFunctionHelper( "print", "...", "Prints the contents of ( ... ) to chat seperated with a space." )
 
 if SERVER then util.AddNetworkString( "expadv.printcolor" ) end
