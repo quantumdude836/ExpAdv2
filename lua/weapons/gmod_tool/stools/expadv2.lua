@@ -318,7 +318,7 @@ if CLIENT then
 			AddModel( Model, false )
 		end
 
-		for Model, _ in pairs( EXPADV.GetMonitors( ) ) do
+		for Model, _ in pairs( EXPADV.Monitors ) do
 			AddModel( Model, true )
 		end
 

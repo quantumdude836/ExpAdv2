@@ -713,6 +713,84 @@ local function CreateEnviroment( )
 end
 
 /* --- --------------------------------------------------------------------------------
+	@: Debugging
+   --- */
+
+/*local time, stack, bench, calls
+
+function DebugStart(Name)
+	stack = {Name}
+	bench = {[Name] = 0}
+	calls = {[Name] = 1}
+	time = SysTime()
+end
+
+function DebugPush(Name)
+	local Time = SysTime()
+	local Pos = #stack
+	local Type = stack[Pos]
+
+	if Type then bench[Type] = (bench[Type] or 0) + ((Time - time) * 1000000) end
+
+	stack[Pos + 1] = Name
+	calls[Name] = (calls[Name] or 0) + 1
+	
+	time = SysTime()
+end
+
+function DebugPop()
+	local Time = SysTime()
+	local Pos = #stack
+	local Type = stack[Pos]
+	if Type then bench[Type] = (bench[Type] or 0) + ((Time - time) * 1000000) end
+	stack[Pos - 1] = nil
+	time = SysTime()
+end
+
+function DebugStop()
+	MsgN("Compiler Debug Results:")
+	
+	local TotalCalls, TotalTime = 0, 0
+
+	local Order = {}
+
+	for k,_ in pairs(bench) do Order[#Order + 1] = k end
+	table.sort(Order, function(a,b)
+		return (bench[a] or 0) > (bench[b] or 0)
+	end)
+
+	for _, Name in pairs(Order) do
+		local Time = bench[Name] or 0
+		local Count = calls[Name] or 0
+		MsgN(Name, ":")
+		MsgN("\tTimes Called: ", Count)
+		MsgN("\tOverall Time: ", Time, "us")
+		MsgN("\tAverage Time:  ", Time / Count, "us")
+
+		TotalCalls = TotalCalls + Count
+		TotalTime = TotalTime + Time
+	end
+
+	MsgN("Overall Results:")
+	MsgN("\tTimes Called: ", TotalCalls)
+	MsgN("\tOverall Time: ", TotalTime, "us")
+	MsgN("\tAverage Time:  ", TotalTime / TotalCalls, "us")
+end
+
+for name, func in pairs(Compiler) do
+	if isfunction(func) then
+
+		Compiler[name] = function(self, ...)
+			DebugPush(name)
+				local a, b, c, d, e = func(self, ...)
+			DebugPop()
+
+			return a, b, c, d, e
+		end
+	end
+end*/
+
+/* --- --------------------------------------------------------------------------------
 	@: Compile Code
    --- */
 
@@ -737,6 +815,8 @@ function EXPADV.CreateCompiler(Script, Files)
 end
 
 function EXPADV.SolidCompile(Script, Files)
+	//DebugStart("SolidCompile")
+
 	local self = EXPADV.CreateCompiler(Script, Files)
 	
 	self:StartTokenizer( )
@@ -744,6 +824,8 @@ function EXPADV.SolidCompile(Script, Files)
 	EXPADV.CallHook("PreCompileScript", self, Script, Files)
 		
 	local Status, Instruction = pcall(self.Sequence, self, {0, 0})
+	
+	//DebugStop()
 	
 	if !Status then return false, Instruction end
 
@@ -769,7 +851,7 @@ function EXPADV.NewSoftCompiler(Script, Files)
 
 	self.Thread = coroutine.create(function()
 		self:StartTokenizer( )
-	
+		
 		EXPADV.CallHook("PreCompileScript", self, Script, Files)
 			
 		local Status, Instruction = pcall(self.Sequence, self, {0, 0})
@@ -894,3 +976,5 @@ end)
    --- */
    
 EXPADV.CallHook( "PostLoadCompiler", Compiler.RawTokens )
+
+

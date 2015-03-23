@@ -19,6 +19,7 @@ AddCSLuaFile( "expadv/events.lua" )
 AddCSLuaFile( "expadv/directives.lua" )
 AddCSLuaFile( "expadv/cppi.lua" )
 AddCSLuaFile( "expadv/context.lua" )
+AddCSLuaFile( "expadv/monitors.lua" )
 
 AddCSLuaFile( "expadv/compiler/main.lua" )
 AddCSLuaFile( "expadv/compiler/tokenizer.lua" )
