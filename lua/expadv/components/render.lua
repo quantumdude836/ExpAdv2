@@ -58,7 +58,7 @@ end
 
 Component:AddVMFunction( "validFonts", "", "ar",
 	function( Context, Trace )
-		local ar = {__type = "n"}
+		local ar = {__type = "s"}
 		for Font, _ in pairs(Component.ValidFonts) do ar[#ar + 1] = Font end
 		return ar
 	end )
@@ -84,11 +84,11 @@ Component:AddPreparedFunction( "getTextHeight", "s", "n", "@define _, tall = $su
 
 Component:AddFunctionHelper( "setFont", "s,n", "Sets the current font and fontsize." )
 Component:AddFunctionHelper( "setFont", "s,n,c", "Sets the current font, fontsize and font color." )
-Component:AddFunctionHelper(  "setFontColor", "c", "Sets the current font color." )
-Component:AddFunctionHelper(  "setFontColor", "n,n,n,n", "Sets the current font color." )
-Component:AddFunctionHelper(  "setFontColor", "n,n,n", "Sets the current font color." )
-Component:AddFunctionHelper(  "getTextWidth", "s", "Returns the width of drawing string using the current font." )
-Component:AddFunctionHelper(  "getTextHeight", "s", "Returns the height of drawing string using the current font." )
+Component:AddFunctionHelper( "setFontColor", "c", "Sets the current font color." )
+Component:AddFunctionHelper( "setFontColor", "n,n,n,n", "Sets the current font color." )
+Component:AddFunctionHelper( "setFontColor", "n,n,n", "Sets the current font color." )
+Component:AddFunctionHelper( "getTextWidth", "s", "Returns the width of drawing string using the current font." )
+Component:AddFunctionHelper( "getTextHeight", "s", "Returns the height of drawing string using the current font." )
 
 /* -----------------------------------------------------------------------------------
 	@: Text

@@ -57,7 +57,7 @@ Component:AddFunctionHelper("connect", "ar:ar", "Connects one array with another
 Component:AddPreparedFunction("hasValue", "ar:vr", "b", [[
 	if @value 1.__type ~= "_vr" then
 		if @value 2[2] ~= @value 1.__type then
-			Context:Throw(@trace, "array", "variant not of array type, " .. @value 1.__type .. " expected got " .. EXPADV.TypeName(@value 2[2])) end
+			Context:Throw(@trace, "array", "variant not of array type, " .. @value 1.__type .. " expected got " .. EXPADV.TypeName(@value 2[2]))
 		end
 		
 		@value 2 = @value 2[2]
