@@ -222,7 +222,7 @@ local function SetModel( Context, Trace, Entity, Model )
 			Entity:SetModel( "models/holograms/" .. ValidModel .. ".mdl" )
 		end
 
-	elseif !Component:ReadSetting( "model_any", true ) or !util.IsValidModel( Model ) then
+	elseif !Component:ReadSetting( "model_any", true ) then //or !util.IsValidModel( Model ) then
 		Context:Throw( Trace, "hologram", "Invalid model set " .. Model )
 	elseif Entity.IsHologram and Entity.player == Context.player then
 		Entity:SetModel( ValidModel or Model )

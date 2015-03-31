@@ -41,6 +41,10 @@ WireLink:AddVMOperator( "=", "n,wl", "", function( Context, Trace, MemRef, Value
 	Context.Memory[MemRef] = Value
 end )
 
+Component:AddInlineOperator( "->i", "?", "b", [[(Context.entity.Inputs["@value 1"].Src ~= nil)]] )
+
+Component:AddInlineOperator( "->o", "?", "b", [[(#Context.entity.Outputs["@value 1"].Connected > 0)]] )
+
 /* --- --------------------------------------------------------------------------------
 	@: WireLink Get
    --- */

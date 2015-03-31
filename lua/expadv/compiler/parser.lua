@@ -652,6 +652,15 @@ function Compiler:Expression_Variable( Trace )
 		
 		return self:Compile_DELTA( Trace, self.TokenData )
 	
+	elseif WireLib and self:AcceptToken( "wc" ) then -- Wiremod IO connection.
+		local Trace = self:GetTokenTrace( Trace )
+
+		self:ExcludeWhiteSpace( "Connect operator (->) must not be succeeded by white space" )
+		
+		self:RequireToken( "var", "variable expected, after Connect operator (->)" )
+		
+		return self:Compile_CONNECT( Trace, self.TokenData )
+
 	elseif self:AcceptToken( "var" ) then
 		local Trace = self:GetTokenTrace( Trace )
 

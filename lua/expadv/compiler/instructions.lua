@@ -406,6 +406,28 @@ function Compiler:Compile_DELTA( Trace, Variable )
 	return Operator.Compile( self, Trace, Quick( MemRef, "n" ) )
 end
 
+function Compiler:Compile_CONNECT( Trace, Variable )
+	
+	local MemRef, MemScope = self:FindCell( Trace, Variable, true )
+	
+	if !MemRef then
+		self:TraceError( Trace, "Variable %s does not exist", Variable )
+	end
+
+	local Operator 
+	local Modifier = self.Cells[ MemRef ].Modifier
+	
+	if Modifier and Modifier == "input" then
+		Operator = self:LookUpOperator( "->i" )
+	elseif Modifier and Modifier == "output" then
+		Operator = self:LookUpOperator( "->o" )
+	else
+		self:TraceError( Trace, "Connect operator (->) can only reach inport or outport." )
+	end
+
+	return Operator.Compile( self, Trace, Quick( Variable, "s" ) )
+end
+
 function Compiler:Compile_CHANGED( Trace, Variable )
 	local MemRef, MemScope = self:FindCell( Trace, Variable, true )
 
