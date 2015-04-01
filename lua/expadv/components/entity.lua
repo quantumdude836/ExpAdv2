@@ -151,10 +151,10 @@ Component:AddFunctionHelper( "boxMax", "e:", "Gets the collision bounding max si
 Component:AddInlineFunction( "boxMin", "e:", "v", "(@value 1:IsValid() and @value 1:OBBMins() or Vector(0,0,0))")
 Component:AddFunctionHelper( "boxMin", "e:", "Gets the collision bounding min size for the given entity.")
 
-Component:AddInlineFunction( "worldSpaceAABB", "e:", "ar", [[(IsValid(@Value 1) and {__type = "v", @value 1:WorldSpaceAABB()} or {__type = "v"})]])
+Component:AddInlineFunction( "worldSpaceAABB", "e:", "ar", [[(IsValid(@value 1) and {__type = "v", @value 1:WorldSpaceAABB()} or {__type = "v"})]])
 Component:AddFunctionHelper( "worldSpaceAABB", "e:", "Returns an array of two vectors representing the minimum and maximum extent of the entity's bounding box.")
 
-Component:AddInlineFunction( "worldSpaceCenter", "e:", "v", [[(IsValid(@Value 1) and @value 1:WorldSpaceCenter() or Vector(0, 0, 0))]])
+Component:AddInlineFunction( "worldSpaceCenter", "e:", "v", [[(IsValid(@value 1) and @value 1:WorldSpaceCenter() or Vector(0, 0, 0))]])
 Component:AddFunctionHelper( "worldSpaceCenter", "e:", "Returns the center of the entity according to its collision model.")
 
 Component:AddInlineFunction( "getBodygroup", "e:n", "n", "(@value 1:IsValid() and @value 1:GetBodygroup(@value 2) or 0)" )
