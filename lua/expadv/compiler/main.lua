@@ -940,7 +940,7 @@ function EXPADV.StepCompilerQueue()
 	if count > 10 then count = 10 end
 
 	local finished = {}
-	local speed = ((engine.TickInterval() * 0.4) / count)
+	local speed = ((engine.TickInterval() * 0.8) / count) -- was 0.4 now 0.8
 	local nextSpeed = speed -- Allows us to make the most of this :D
 
 	-- MsgN("processing ", count, " out of ", #Queue)
