@@ -623,7 +623,7 @@ end]] )
 Component:AddPreparedFunction( "parentBone", "h:e,n", "", [[
 if IsValid( @value 1 ) and @value 1.player == Context.player and IsValid( @value 2 )then
 	@value 1:SetParent(@value 2)
-	@value 1:SetParentPhysNum(@value 3)
+	$timer.Simple(0.1, function() @value 1:SetParentPhysNum(@value 3) end)
 end]] )
 
 Component:AddPreparedFunction( "parentBone", "h:h,n", "", [[
@@ -722,6 +722,11 @@ if IsValid( @value 1 ) then
 	@define val = @value 1:GetBoneCount( )
 end]], "( @val or 0 )" )
 
+Component:AddPreparedFunction( "boneParent", "h:n", "n", [[
+if IsValid( @value 1 ) then
+	@define val = @value 1:GetBoneParent(@value 2 - 1) + 1
+end]], "( @val or 0 )" )
+
 Component:AddFunctionHelper( "setBonePos", "h:n,v", "Sets the position of bone N on the hologram." )
 Component:AddFunctionHelper( "setBoneAngle", "h:n,a", "Sets the angle of bone N on the hologram." )
 Component:AddFunctionHelper( "setBoneScale", "h:n,v", "Sets the scale of bone N on the hologram." )
@@ -730,6 +735,7 @@ Component:AddFunctionHelper( "getBonePos", "h:n", "Gets the position of bone N o
 Component:AddFunctionHelper( "getBoneAng", "h:n", "Gets the angle of bone N on hologram." )
 Component:AddFunctionHelper( "getBoneScale", "h:n", "Gets the scale of bone N on hologram." )
 Component:AddFunctionHelper( "boneCount", "h:", "Returns the ammount of bones of a hologram." )
+Component:AddFunctionHelper( "boneParent", "h:n", "The bode ID of the bone to get parent of." )
 
 /*==============================================================================================
     Section: Animation

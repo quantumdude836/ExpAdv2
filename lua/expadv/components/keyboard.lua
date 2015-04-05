@@ -208,7 +208,10 @@ Component:AddFunctionHelper("setKeyboardGE", "ply:", "Sets the keyboard layout f
 
 EXPADV.SharedEvents( )
 Component:AddEvent( "keypress", "ply,n", "" )
+EXPADV.AddEventHelper("keypress", "Called when a player presses a key, gives both the player and the ascii char pressed.")
+
 Component:AddEvent( "keyrelease", "ply,n", "" )
+EXPADV.AddEventHelper("keyrelease", "Called when a player releases a key, gives both the player and the ascii char released.")
 
 local LShift, RShift = { }, { }
 

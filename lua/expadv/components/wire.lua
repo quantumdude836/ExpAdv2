@@ -211,6 +211,14 @@ Component:AddFunctionHelper( "isHiSpeed", "wl:", "Returns true if the wirelinked
 Component:AddFunctionHelper( "inputType", "wl:s", "Returns the wiretype of an input on the linked component." )
 
 /* --- --------------------------------------------------------------------------------
+	@: Events
+   --- */
+
+EXPADV.ServerEvents()
+Component:AddEvent("trigger", "s,s", "" )
+EXPADV.AddEventHelper("trigger", "Called when a wire input is triggered, provides the inputs name and its class.")
+
+/* --- --------------------------------------------------------------------------------
 	@: Wire Array Class
 	@: For the record wiremods array classes are stupid.
    --- */

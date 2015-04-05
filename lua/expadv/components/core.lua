@@ -408,7 +408,6 @@ EXPADV.AddEvent( nil, "think", "", "" )
 EXPADV.AddEvent( nil, "last", "", "" )
 
 EXPADV.ServerEvents( )
-EXPADV.AddEvent( nil, "trigger", "s,s", "" )
 EXPADV.AddEvent( nil, "clientLoaded", "ply", "" )
 EXPADV.AddEvent( nil, "dupePasted" )
 

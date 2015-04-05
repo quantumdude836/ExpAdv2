@@ -640,12 +640,19 @@ end
 EXPADV.ClientEvents( )
 
 Component:AddEvent( "drawScreen", "n,n", "" )
+EXPADV.AddEventHelper("drawScreen", "Use this event to draw to a screen, the width and height are provided.")
+
 Component:AddEvent( "drawHUD", "n,n", "" )
+EXPADV.AddEventHelper("drawHUD", "Use this event to draw to localplayers hud, the width and height of the game window are provided.")
+
 Component:AddEvent( "enableHUDRendering", "", "" )
 Component:AddEvent( "disableHUDRendering", "", "" )
 
 Component:AddEvent( "draw3DOverlay", "", "" )
+
 Component:AddEvent( "draw3D", "", "" )
+EXPADV.AddEventHelper("draw3D", "Use this event to render 3d objects in world.")
+
 Component:AddEvent( "enable3DRendering", "", "" )
 Component:AddEvent( "disable3DRendering", "", "" )
 
