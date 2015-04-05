@@ -601,6 +601,42 @@ if IsValid( @value 1 ) and @value 1.player == Context.player and IsValid( @value
 	@value 1:SetParent(@value 2)
 end]] )
 
+Component:AddPreparedFunction( "parentAttachment", "h:e,s", "", [[
+if IsValid( @value 1 ) and @value 1.player == Context.player and IsValid( @value 2 )then
+	@value 1:SetParent(@value 2)
+	@value 1:Fire("SetParentAttachmentMaintainOffset", @value 3, 0)
+end]] )
+
+Component:AddPreparedFunction( "parentAttachment", "h:h,s", "", [[
+if IsValid( @value 1 ) and @value 1.player == Context.player and IsValid( @value 2 )then
+	@value 1:SetParent(@value 2)
+	@value 1:Fire("SetParentAttachmentMaintainOffset", @value 3, 0)
+end]] )
+
+Component:AddPreparedFunction( "parentAttachment", "h:p,s", "", [[
+if IsValid( @value 1 ) and @value 1.player == Context.player and IsValid( @value 2 )then
+	@value 1:SetParent(@value 2)
+	@value 1:Fire("SetParentAttachmentMaintainOffset", @value 3, 0)
+end]] )
+
+Component:AddPreparedFunction( "parentBone", "h:e,n", "", [[
+if IsValid( @value 1 ) and @value 1.player == Context.player and IsValid( @value 2 )then
+	@value 1:SetParent(@value 2)
+	@value 1:SetParentPhysNum(@value 3)
+end]] )
+
+Component:AddPreparedFunction( "parentBone", "h:h,n", "", [[
+if IsValid( @value 1 ) and @value 1.player == Context.player and IsValid( @value 2 )then
+	@value 1:SetParent(@value 2)
+	@value 1:SetParentPhysNum(@value 3)
+end]] )
+
+Component:AddPreparedFunction( "parentBone", "h:p,n", "", [[
+if IsValid( @value 1 ) and @value 1.player == Context.player and IsValid( @value 2 )then
+	@value 1:SetParent(@value 2)
+	@value 1:SetParentPhysNum(@value 3)
+end]] )
+
 Component:AddPreparedFunction( "unparent", "h:", "", [[
 if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:SetParent( nil )
@@ -629,6 +665,12 @@ end]], "(@val or $Entity(0))" )
 Component:AddFunctionHelper( "parent", "h:e", "Sets the parent entity of a hologram." )
 Component:AddFunctionHelper( "parent", "h:h", "Sets the parent hologram of a hologram." )
 Component:AddFunctionHelper( "parent", "h:p", "Sets the parent physics object of a hologram." )
+Component:AddFunctionHelper( "parentAttachment", "h:e,s", "Sets the parent entity of a hologram with an attachment name." )
+Component:AddFunctionHelper( "parentAttachment", "h:h,s", "Sets the parent hologram of a hologram with an attachment name." )
+Component:AddFunctionHelper( "parentAttachment", "h:p,s", "Sets the parent physics object of a hologram with an attachment name." )
+Component:AddFunctionHelper( "parentBone", "h:e,n", "Sets the parent entity of a hologram with an bone index." )
+Component:AddFunctionHelper( "parentBone", "h:h,n", "Sets the parent hologram of a hologram with an bone index." )
+Component:AddFunctionHelper( "parentBone", "h:p,n", "Sets the parent physics object of a hologram with an bone index." )
 Component:AddFunctionHelper( "unparent", "h:", "Unparents H from its parent." )
 Component:AddFunctionHelper( "getParentHolo", "h:", "Returns the parent hologram of a hologram." )
 Component:AddFunctionHelper( "getParent", "h:", "Returns the parent entity of a hologram." )
