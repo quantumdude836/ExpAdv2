@@ -175,15 +175,29 @@ Component:AddFunctionHelper("playerByName", "s,b", "Returns the player with the 
 
 EXPADV.SharedEvents( )
 Component:AddEvent( "playerNoClip", "ply,b", "" )
+EXPADV.AddEventHelper("playerNoClip", "Called when a player starts or stops noclipping.")
+
 Component:AddEvent( "playerEnterVehicle", "ply,e,n", "" )
+EXPADV.AddEventHelper("playerEnterVehicle", "Called when a player enters a vehicle the 3rd argument is the players role.")
+
 Component:AddEvent( "playerChat", "ply,s,b", "s" )
+EXPADV.AddEventHelper("playerChat", "Called when a player talks in chat the 3rd arument is teamchat and your can return a string to change the message.")
 
 EXPADV.ServerEvents( )
 Component:AddEvent( "playerSpawn", "ply", "" )
+EXPADV.AddEventHelper("playerSpawn", "Called when a player respawns.")
+
 Component:AddEvent( "playerJoin", "ply", "" )
+EXPADV.AddEventHelper("playerJoin", "Called when a player joins the server.")
+
 Component:AddEvent( "playerQuit", "ply", "" )
+EXPADV.AddEventHelper("playerQuit", "Called when a player leaves the server.")
+
 Component:AddEvent( "playerSpray", "ply", "" )
+EXPADV.AddEventHelper("playerSpray", "Called when a player sprays.")
+
 Component:AddEvent( "playerExitVehicle", "ply,e", "" )
+EXPADV.AddEventHelper("playerExitVehicle", "Called when a player exits a vehicle.")
 
 /* --- --------------------------------------------------------------------------------
 	@: Server Hooks

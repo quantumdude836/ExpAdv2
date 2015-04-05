@@ -128,11 +128,17 @@ end
 
 function ENT:OnRemove()
 	self:RestoreGuiMouse()
-	EXPADV.CacheRenderTarget( self.RenderTarget, self.RenderMat )
+	EXPADV.CacheRenderTarget(self.RT_Data)
 
 	if self.Panel and self.Panel:IsValid() then self.Panel:Remove() end
 
-	return self.BaseClass.BaseClass.OnRemove( self )
+	EXPADV.CacheRenderTarget(self.RT_Data)
+	
+	hook.Remove( "PlayerInitialSpawn", self )
+
+	if !self:IsRunning( ) then return end
+	
+	self.Context:ShutDown( )
 end
 
 function ENT:PostDrawScreen(_, scrRes)

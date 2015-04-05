@@ -27,8 +27,8 @@ function ENT:ReceiveScript(script, name)
 
 		hook.Add( "PlayerInitialSpawn", self, function(self, player)
 			timer.Simple(5, function()
-				if IsValid(player) then
-					EXPADV.SendToClient(player, self, self.root, self.files) 
+				if IsValid(player) and !EXPADV.CallHook("SyncCodeToNewPlayer", self, player) then
+					EXPADV.SendToClient(player, self, self.root, self.files)
 				end
 			end)
 		end)

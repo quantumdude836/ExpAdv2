@@ -28,6 +28,7 @@ end
    --- */
 
 local Temp_Events = { }
+local Temp_Descriptions = { }
 
 function EXPADV.AddEvent( Component, Name, Input, Return )
 	Temp_Events[ #Temp_Events + 1 ] = {  
@@ -39,6 +40,10 @@ function EXPADV.AddEvent( Component, Name, Input, Return )
 		Input = Input,
 		Return = Return
 	}
+end
+
+function EXPADV.AddEventHelper(Name, Description)
+	Temp_Descriptions[Name] = Description
 end
 
 function EXPADV.LoadEvents( )
@@ -124,6 +129,8 @@ function EXPADV.LoadEvents( )
 
 		-- Do we still need to load this?
 		if ShouldNotLoad then continue end
+
+		Event.Description = Temp_Descriptions[Event.Name]
 
 		EXPADV.Msg( "Registered Event: " .. Event.Signature )
 
