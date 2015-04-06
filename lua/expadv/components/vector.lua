@@ -247,6 +247,9 @@ Component:AddFunctionHelper( "clamp", "v:v,v", "Clamps a vector." )
 Component:AddInlineFunction( "mix", "v,v,n", "v", "Vector(@value 1.x * @value 3 + @value 2.x * (1-@value 3), @value 1.y * @value 3 + @value 2.y * (1-@value 3), @value 1.z * @value 3 + @value 2.z * (1-@value 3))" )
 Component:AddFunctionHelper( "clamp", "v:v,v", "Returns the mix of 2 vectors." )
 
+Component:AddInlineFunction( "inrange", "v,v,v", "b", "((@value 1.x > @value 2.x and @value 1.x < @value 3.x) and (@value 1.y > @value 2.y and @value 1.y < @value 3.y) and (@value 1.z > @value 2.z and @value 1.z < @value 3.z))")
+Component:AddFunctionHelper( "inrange", "v,v,v", "Returns if the first vector is inrange of the other 2 vectors." )
+
 /* --- --------------------------------------------------------------------------------
     @: Headings
    --- */
@@ -477,6 +480,9 @@ Component:AddFunctionHelper( "insideAABox", "v2:v2,v2", "Returns whenever the gi
 
 Component:AddInlineFunction( "rotate", "v2:n", "v2", "@value 1:Rotate( @value 2 )" )
 Component:AddFunctionHelper( "rotate", "v2:n", "Rotates the vector2 by the given degrees." )
+
+Component:AddInlineFunction( "inrange", "v2,v2,v2", "b", "((@value 1.x > @value 2.x and @value 1.x < @value 3.x) and (@value 1.y > @value 2.y and @value 1.y < @value 3.y))")
+Component:AddFunctionHelper( "inrange", "v2,v2,v2", "Returns if the first vector2 is inrange of the other 2 vector2s." )
 
 /* --- --------------------------------------------------------------------------------
     @: Loops
