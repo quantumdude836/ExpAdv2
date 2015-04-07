@@ -383,7 +383,7 @@ Component:AddPreparedFunction( "angVel", "e:", "a",
 [[if(@value 1:IsValid() && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType( )== $MOVETYPE_VPHYSICS) then
 	@define vel = @value 1:GetPhysicsObject():GetAngleVelocity()
 	@define avel = Angle(@vel.y, @vel.z, @vel.x)
-end]], "@avel" )
+end]], "(@avel or Angle(0,0,0))" )
 
 Component:AddFunctionHelper( "angVel", "e:", "Returns the angular velocity of the given entity.")
 
