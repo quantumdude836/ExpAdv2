@@ -1174,6 +1174,7 @@ function Compiler:Statement_6( Trace )
 	elseif self:AcceptToken( "glo" ) then Modifier = "global"
 	elseif self:AcceptToken( "in" ) then Modifier = "input"
 	elseif self:AcceptToken( "out" ) then Modifier = "output"
+	//elseif self:AcceptToken( "syn" ) then Modifier = "synced"
 	elseif self.InClass then Modifier = "class"
 	end
 

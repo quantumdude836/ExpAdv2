@@ -263,6 +263,8 @@ hook.Add( "Tick", "ExpAdv2.Update", function( )
 		end
 	end
 
+	EXPADV.CallHook( "PostUpdateAll", EXPADV.Updates )
+
 	EXPADV.Updates = { }
 end )
 

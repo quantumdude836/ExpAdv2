@@ -592,3 +592,70 @@ Table:AddDeserializer( function( Table )
 
 	return Clone
 end )
+
+/* ---	--------------------------------------------------------------------------------
+	@: Net Support
+   ---	*/
+
+Table:NetWrite(function(Table)
+	for key, type in pairs(Table.Types) do
+		local Class = EXPADV.ClassShorts[type]
+		if !Class or !Class.WriteToNet then continue end
+
+		local val = Table.Data[key]
+		if val == nil then continue end
+
+		net.WriteBool(true)
+		net.WriteType(key)
+		net.WriteString(type)
+		Class.WriteToNet(val)
+
+		print("Wrote Table:",key, type, val)
+	end
+
+	net.WriteBool(false)
+end)
+
+Table:NetRead(function()
+	local Size, Types, Data, Look = 0, {}, {}, {}
+
+	while net.ReadBool() do
+		local key = net.ReadType(net.ReadUInt(8))
+		local type = net.ReadString()
+
+		local Class = EXPADV.ClassShorts[type]
+
+		Look[key] = key
+		Types[key] = type
+		Data[key] = Class.ReadFromNet()
+	end
+	
+	return { Data = Data, Types = Types, Look = Look, Size = Size, Count = #Data, HasChanged = true }
+end)
+
+/* ---	--------------------------------------------------------------------------------
+	@: Stream methods
+   ---	*/
+
+Component:AddVMFunction( "writeTable", "st:t", "", function( Context, Trace, Stream, Obj )
+	Stream.W = Stream.W + 1
+	if Stream.W >= 128 then Context:Throw( Trace, "stream", "Failed to write table to stream, maxamum stream size achived (128)" ) end
+	Stream.V[Stream.W] = table.Copy(Obj)
+	Stream.T[Stream.W] = "t"
+end )
+
+Component:AddFunctionHelper( "writeTable", "st:t", "Appends a table to the stream object." )
+
+Component:AddVMFunction( "readTable", "st:", "t", function( Context, Trace, Stream )
+	Stream.R = Stream.R + 1
+	
+	if !Stream.T[Stream.R] then
+		Context:Throw( Trace, "stream", "Failed to read table from stream, stream returned void." )
+	elseif Stream.T[Stream.R] ~= "t" then
+		Context:Throw( Trace, "stream", "Failed to read table from stream, stream returned " .. EXPADV.TypeName( Stream.T[Stream.R] )  .. "." )
+	end
+
+	return Stream.V[Stream.R]
+end )
+
+Component:AddFunctionHelper( "readTable", "st:", "Reads a table from the stream object." )

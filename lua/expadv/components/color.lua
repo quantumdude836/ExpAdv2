@@ -30,6 +30,13 @@ if WireLib then
 end
 
 /* --- --------------------------------------------------------------------------------
+  @: Sync
+   --- */
+
+ColorObj:NetWrite(net.WriteColor)
+ColorObj:NetRead(net.ReadColor)
+
+/* --- --------------------------------------------------------------------------------
 	@: Logical and Comparison
    --- */
 

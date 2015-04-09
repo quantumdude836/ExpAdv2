@@ -182,7 +182,10 @@ function ENT:BuildInstance( Instance, Instruction )
 
 	local Context = self:CreateContext( Instance, self.player )
 	
-	self.Cells = Instance.Cells 
+	self.Cells = Instance.Cells
+
+	self.SyncQueue = {}
+	self.SyncVars = Instance.SyncVars
 
 	local Ok, Error = pcall( function( )
 		if WireLib and SERVER then
@@ -206,8 +209,36 @@ function ENT:BuildInstance( Instance, Instruction )
 	if CLIENT then EXPADV.SendCodeLoaded(self) end
 end
 
-
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Synced Variables
+   --- */
+
+function ENT:SyncVariables( )
+		local Context = self.Context
+		if !Context then return end
+
+		local Cells = self.Cells
+
+		for _, Reference in pairs( self.SyncVars ) do
+			local Class = Cells[ Reference ].ClassObj
+			local Value = Context.Memory[ Reference ]
+
+			if Value == nil then
+				continue
+			elseif Context.Trigger[Reference] then
+				self.SyncQueue[Reference] = true
+				self.SyncQueued = true
+			elseif Context.OutClick[Reference] then
+				if Value.HasChanged then
+					self.SyncQueue[Reference] = true
+					self.SyncQueued = true
+					Val.HasChanged = nil
+				end
+			end
+		end
+end
+
+/* --- ---------------------------------------------------------------------------------------------------------------------------------------------
 	@: Reload Script
    --- */
 
@@ -235,6 +266,74 @@ function ENT:CallEvent( Name, ... )
 	return self.Context:Execute( "Event " .. Name, Event, ... )
 end
  
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Sync Variables - WIP
+   --- */
+/*
+if SERVER then
+	util.AddNetworkString("expadv.syncmem")
+
+	hook.Add( "Expadv.PostUpdateAll", "expadv.entity", function(Updates)
+		net.Start("expadv.syncmem")
+			for Context, _ in pairs( Updates ) do
+				local Gate = Context.entity
+				if !IsValid( Gate ) or !Gate.SyncQueued then continue end
+
+				net.WriteUInt(Gate:EntIndex(), 16)
+
+				for Reference, _ in pairs(self.SyncQueue) do
+					local Cell = Gate.Cells[ Reference ]
+					local Value = Context.Memory[ Reference ]
+
+					if !Cell or Value == nil then continue end
+					net.WriteUInt(Reference, 16)
+					net.WriteString(Cell.ClassObj.Short)
+					Cell.ClassObj.WriteToNet(Value)
+
+					print("Sent: ", Gate, Reference, Cell.ClassObj.Short, Value)
+				end
+
+				net.WriteUInt(0, 16)
+
+				Gate.SyncQueue = { }
+				Gate.SyncQueued = false
+			end
+			
+			net.WriteUInt(0, 16)
+
+		net.Broadcast()
+	end )
+end
+
+if CLIENT then
+	local Cache = {}
+
+	net.Receive("expadv.syncmem", function()
+		local eID = net.ReadUInt(16)
+
+		while eID ~= 0 do
+			local Cache = Cache[eID] or {}
+
+			local Reference = net.ReadUInt(16)
+
+			while Reference ~= 0 do
+				local Short = net.ReadShort()
+				local Class = EXPADV.ClassShorts[Short] 
+				Cache[eID] = Class.ReadFromNet()
+				Reference = net.ReadUInt(16)
+				print("Got: ", eID, Reference, Short, Cache[eID])
+			end
+
+			Cache[eID] = Cache
+
+			eID = net.ReadUInt(16)
+		end
+
+		//MsgN("Recived Sync Values")
+		//PrintTable(Cache)
+	end)
+end
+*/
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Use.
    --- */

@@ -21,9 +21,14 @@ Number:AddAlias( "int" )
     @: Wire Support
    --- */
 
-if WireLib then
-  Number:WireIO( "NORMAL" )
-end
+if WireLib then Number:WireIO( "NORMAL" ) end
+
+/* --- --------------------------------------------------------------------------------
+  @: Sync
+   --- */
+
+Number:NetWrite(net.WriteFloat)
+Number:NetRead(net.ReadFloat)
 
 /* --- --------------------------------------------------------------------------------
     @: Logical and Comparison

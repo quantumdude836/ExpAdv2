@@ -14,11 +14,13 @@ local Class_Boolean   = EXPADV.AddClass( nil, "boolean", "b" )
 local Class_Function  = EXPADV.AddClass( nil, "function", "f" )
 local Class_Delgate   = EXPADV.AddClass( nil, "delegate", "d" )
 local Class_Exception = EXPADV.AddClass( nil, "exception", "ex" )
-local Class_Class = EXPADV.AddClass( nil, "class", "cls" ) --Nope: Not what you think it is.
+local Class_Class 	  = EXPADV.AddClass( nil, "class", "cls" ) -- Nope: Not what you think it is.
 
 Class_Boolean:AddAlias( "bool" )
 Class_Boolean:CanSerialize( true )
 Class_Boolean:DefaultAsLua( false )
+Class_Boolean:NetWrite(net.WriteBool)
+Class_Boolean:NetRead(net.ReadBool)
 Class_Function:DefaultAsLua( "function( ) end" )
 
 if WireLib then

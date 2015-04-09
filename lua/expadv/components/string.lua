@@ -25,6 +25,22 @@ String:AddAlias( "str" )
 if WireLib then String:WireIO( "STRING" ) end
 
 /* --- --------------------------------------------------------------------------------
+	@: Sync
+   --- */
+
+String:NetWrite(function(Str)
+	local len = #Str
+	if len > 512 then Str = Str.sub(1, 512) end
+
+	net.WriteUInt(len, 11)
+	net.WriteData(Str, len)
+end)
+
+String:NetRead(function()
+	return net.ReadString(net.ReadUInt(11))
+end)
+
+/* --- --------------------------------------------------------------------------------
 	@: Logical and Comparison
    --- */
 

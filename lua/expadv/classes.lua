@@ -236,6 +236,18 @@ function EXPADV.ToString( Short, Obj ) -- String, Obj
 end
 
 /* --- --------------------------------------------------------------------------------
+	@: Net Functionality
+   --- */
+
+function BaseClassObj:NetWrite(func)
+	self.WriteToNet = func
+end
+
+function BaseClassObj:NetRead(func)
+	self.ReadFromNet = func
+end
+
+/* --- --------------------------------------------------------------------------------
 	@: Serialization Support
    --- */
 
@@ -410,6 +422,9 @@ function EXPADV.LoadClasses( )
 		if Class.MetaTable ~= DeriveClass.MetaTable then
 			Class.MetaTable = DeriveClass.MetaTable
 		end
+
+		if !Class.WriteToNet then Class.WriteToNet = DeriveClass.WriteToNet end
+		if !Class.ReadFromNet then Class.ReadFromNet = DeriveClass.ReadFromNet end
  	end
 
  	for Name, Class in pairs( EXPADV.Classes ) do

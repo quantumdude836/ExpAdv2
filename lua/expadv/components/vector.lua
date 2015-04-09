@@ -29,6 +29,13 @@ if WireLib then
 end
 
 /* --- --------------------------------------------------------------------------------
+  @: Sync
+   --- */
+
+VectorObj:NetWrite(net.WriteVector)
+VectorObj:NetRead(net.ReadVector)
+
+/* --- --------------------------------------------------------------------------------
 	  @: Logical and Comparison
    --- */
 
@@ -325,6 +332,20 @@ if WireLib then
             return Vector2(Value[1], Value[2])
         end)
 end
+
+/* --- --------------------------------------------------------------------------------
+  @: Sync
+   --- */
+
+Vector2Obj:NetWrite(function(v2)
+  net.WriteFloat(v2.x)
+  net.WriteFloat(v2.y)
+end)
+
+Vector2Obj:NetRead(function()
+  return Vector2(net.ReadFloat(), net.ReadFloat())
+end)
+
 
 /* --- --------------------------------------------------------------------------------
 	  @: Logical and Comparison

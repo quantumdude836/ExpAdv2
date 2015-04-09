@@ -40,6 +40,13 @@ if WireLib then
 end
 
 /* --- --------------------------------------------------------------------------------
+  @: Sync
+   --- */
+
+EntObject:NetWrite(net.WriteEntity)
+EntObject:NetRead(net.ReadEntity)
+
+/* --- --------------------------------------------------------------------------------
 	@: Logical and Comparison
    --- */
 

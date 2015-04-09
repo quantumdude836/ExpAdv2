@@ -297,9 +297,65 @@ Array:AddDeserializer( function( Array )
 end )
 
 /* ---	--------------------------------------------------------------------------------
-	@: Wire Support
+	@: Net Support
    ---	*/
 
-if WireLib then
+Array:NetWrite(function(array)
+	net.WriteString(array.__type)
+	local Class = EXPADV.ClassShorts[array.__type]
 
-end
+	if !Class or !Class.WriteToNet then
+
+		for index, value in pairs(array) do
+			if index == "__type" then continue end
+			net.WriteBool(true)
+			net.WriteInt(index, 32)
+			Class.WriteToNet(value)
+		end
+	
+	end
+
+	net.WriteBool(false)
+end)
+
+Array:NetRead(function()
+	local type = net.ReadString()
+	local array = {__type = type}
+	
+	local Class = EXPADV.ClassShorts[type]
+
+	if !Class or !Class.ReadFromNet then
+		while net.ReadBool() do
+			array[net.ReadInt(32)] = Class.ReadFromNet()
+		end
+	end
+
+	return array
+end)
+
+/* ---	--------------------------------------------------------------------------------
+	@: Stream methods
+   ---	*/
+
+Component:AddVMFunction( "writeArray", "st:ar", "", function( Context, Trace, Stream, Obj )
+	Stream.W = Stream.W + 1
+	if Stream.W >= 128 then Context:Throw( Trace, "stream", "Failed to write array to stream, maxamum stream size achived (128)" ) end
+	Stream.V[Stream.W] = table.Copy(Obj)
+	Stream.T[Stream.W] = "_ar"
+end )
+
+Component:AddFunctionHelper( "writeArray", "st:ar", "Appends an array to the stream object." )
+
+Component:AddVMFunction( "readArray", "st:", "ar", function( Context, Trace, Stream )
+	Stream.R = Stream.R + 1
+	
+	if !Stream.T[Stream.R] then
+		Context:Throw( Trace, "stream", "Failed to read array from stream, stream returned void." )
+	elseif Stream.T[Stream.R] ~= "_ar" then
+		Context:Throw( Trace, "stream", "Failed to read array from stream, stream returned " .. EXPADV.TypeName( Stream.T[Stream.R] )  .. "." )
+	end
+
+	return Stream.V[Stream.R]
+end )
+
+Component:AddFunctionHelper( "readArray", "st:", "Reads an array from the stream object." )

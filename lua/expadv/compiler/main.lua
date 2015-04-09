@@ -526,12 +526,34 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier, Comparator )
 		return self.Global[ MemRef ]
 	end
 
+	if Modifier == "synced" then
+		if !ClassObj.WriteToNet or !ClassObj.ReadFromNet then
+			self:TraceError( Trace, "Synced variables of class %q are not supported.", Class )
+		end
+
+		local MemRef = self.Scope[ Variable ]
+
+		if MemRef and self:TestCell( Trace, MemRef, Class, Variable, Comparator ) then
+			return self.Cells[ MemRef ]
+		end
+
+		MemRef = self:NextMemoryRef( )
+
+		self.Scope[Variable] = MemRef
+
+		self.SyncVars[MemRef] = MemRef
+		
+		self.Cells[ MemRef ] = { Variable = Variable, Memory = MemRef, Scope = self.ScopeID, Return = ClassObj.Short, ClassObj = ClassObj, Modifier = "synced", Server = self.IsServerScript, Client = self.IsClientScript }
+
+		return self.Cells[ MemRef ]
+	end
+
 	if WireLib then
 		if Modifier == "input" or Modifier == "output" then
 			if Variable[1] ~= Variable[1]:upper( ) then
 				self:TraceError( Trace, "Wire %s's require captialization.", Modifier )
-			elseif self.IsClientScript then
-				self:TraceError( Trace, "Wire %s's can not be used clientside.", Modifier )
+			elseif self.IsClientScript and (!ClassObj.WriteToNet or !ClassObj.ReadFromNet) then
+				self:TraceError( Trace, "Wire %s's of type %s can not appear clientside.", Modifier, Variable)
 			end
 		end
 
@@ -547,7 +569,7 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier, Comparator )
 			else
 				MemRef = self:NextMemoryRef( )
 
-				self.Cells[ MemRef ] = { Variable = Variable, Memory = MemRef, Scope = 0, Return = ClassObj.Short, ClassObj = ClassObj, Modifier = "input", Server = true, Client = false }
+				self.Cells[ MemRef ] = { Variable = Variable, Memory = MemRef, Scope = 0, Return = ClassObj.Short, ClassObj = ClassObj, Modifier = "input", Server = true, Client = self.IsClientScript }
 				self.InPorts[ Variable ] = MemRef
 			end
 
@@ -807,7 +829,7 @@ function EXPADV.CreateCompiler(Script, Files)
 	
 	self:BuildScopes()
 	self.Delta, self.Memory = { }, { }
-	self.Cells, self.InPorts, self.OutPorts, self.OutClick = { }, { }, { }, { }
+	self.Cells, self.SyncVars, self.InPorts, self.OutPorts, self.OutClick = { }, { }, { }, { }, { }
 	self.FreshMemory, self.MemoryDeph, self.LambdaDeph, self.LoopDeph = { }, 0, 0, 0
 	self.ReturnOptional, self.ReturnTypes, self.ReturnDeph = { }, { }, 0
 	self.ClassDeph, self.ClassCells, self.ClassMemory, self.Classes  = 0, { }, { }, {}

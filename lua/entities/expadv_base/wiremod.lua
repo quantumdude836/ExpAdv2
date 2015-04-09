@@ -115,7 +115,12 @@ function ENT:TriggerInput( Key, Value )
 
 	self:CallEvent( "trigger", Key, Cell.ClassObj.Name )
 
-	Context.Trigger[ Reference ] = false
+	Context.Trigger[Reference] = false
+
+	if Cell.Client and Cell.ClassObj.ReadFromNet then
+		self.SyncQueue[Reference] = true
+		self.SyncQueued = true
+	end
 end
 
 function ENT:TriggerOutputs( )

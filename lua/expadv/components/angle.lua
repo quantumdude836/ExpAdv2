@@ -29,6 +29,13 @@ if WireLib then AngObject:WireIO( "ANGLE",
 end
 
 /* --- --------------------------------------------------------------------------------
+  @: Sync
+   --- */
+
+AngObject:NetWrite(net.WriteAngle)
+AngObject:NetRead(net.ReadAngle)
+
+/* --- --------------------------------------------------------------------------------
 	@: Assignment
    --- */
 

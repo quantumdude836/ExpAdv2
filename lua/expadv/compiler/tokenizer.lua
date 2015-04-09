@@ -391,6 +391,8 @@ function Compiler:BuildToken( )
 			return self:NewToken( "out", "output" )
 		elseif RawData == "static" then
 			return self:NewToken( "stc", "static" )
+		elseif RawData == "synced" then
+			return self:NewToken( "syn", "synced" )
 
 	-- SERVER && CLIENT:
 
