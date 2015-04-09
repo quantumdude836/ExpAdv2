@@ -240,7 +240,7 @@ function Compiler:MakeVirtual( Instruction, Force )
 	end
 
 	self.VMInstructions[ID] = Compiled( )
-	self.NativeLog[ "Instructions " .. ID ] = Natvie
+	self.NativeLog[ID] = Natvie
 
 	local Instr = self:NewLuaInstruction( Trace, Instruction, nil, string.format( "Context.Instructions[%i]( Context )", ID ) )
 
@@ -835,6 +835,25 @@ function EXPADV.SolidCompile(Script, Files)
 end
 
 /* --- --------------------------------------------------------------------------------
+	@: Soft compiler setting.
+   --- */
+
+EXPADV.CreateSetting( "compile_threads", 10 )
+EXPADV.CreateSetting( "compile_rate", 60 )
+
+local function compileRate()
+	local rate = EXPADV.ReadSetting( "compile_rate", 60 )
+
+	if rate <= 0 then
+		return 0, false
+	elseif rate > 99 then
+		return 0.99, true
+	end
+	
+	return rate / 100, true
+end
+
+/* --- --------------------------------------------------------------------------------
 	@: Soft compiler, uses a coroutine to pretend its threaded.
    --- */
 
@@ -860,8 +879,6 @@ function EXPADV.NewSoftCompiler(Script, Files)
 
 		if !Status then return self:OnFail(Instruction) end
 
-		//setmetatable(self.Enviroment, EXPADV.BaseEnv)
-
 		Instruction = self:FixPlaceHolders(Instruction)
 
 		self:OnCompletion(Instruction)
@@ -881,8 +898,6 @@ function SoftCompiler:Resume(Seconds)
 	function self:CheckStatus()
 		if Hault then coroutine.yield() end
 	end -- I wish I could do this from the above hook :(
-
-
 
 	Time = SysTime()
 	debug.sethook(hook, "", 500)
@@ -935,12 +950,15 @@ end
 
 
 function EXPADV.StepCompilerQueue()
+
 	local count = #Queue
 	if count == 0 then return end
-	if count > 10 then count = 10 end
+
+	local threads = EXPADV.ReadSetting( "compile_threads", 10 )
+	if count > threads then count = threads end
 
 	local finished = {}
-	local speed = ((engine.TickInterval() * 0.8) / count) -- was 0.4 now 0.8
+	local speed = ((engine.TickInterval() * compileRate()) / count) -- was 0.4 now 0.8
 	local nextSpeed = speed -- Allows us to make the most of this :D
 
 	-- MsgN("processing ", count, " out of ", #Queue)

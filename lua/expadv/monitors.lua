@@ -46,6 +46,8 @@ else -- No Wire so we need to add these manualy.
 	EXPADV.Addmonitor("Panel 2x2",         "models/hunter/plates/plate2x2.mdl",              0   , 1.7  , 0  , 0.182 , -48     , 48     , -48    , 48    , true)
 	EXPADV.Addmonitor("Panel 0.5x0.5",     "models/hunter/plates/plate05x05.mdl",            0   , 1.7  , 0  , 0.045 , -48     , 48     , -48    , 48    , true)
 end
+	
+//EXPADV.Addmonitor("Lemon Gate",         	"models/lemongate/lemongate.mdl",              	 0.8 , 0.63 , 0  , 0.019 , -5.02   , 5.02   , -5.02  , 5.02   , true)
 
 /* --- --------------------------------------------------------------------------------
 	@: Helpers

@@ -8,6 +8,8 @@ ENT.Base 			= "expadv_gate"
 ENT.ExpAdv 			= true
 ENT.Screen 			= true
 
+ENT.EXPADV_SCREEN	= ENT
+
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Resolution
    --- */
@@ -169,6 +171,7 @@ function EXPADV.GetRenderTarget(Res)
 
 		if data.CACHED then --and data.RES == Res then
 			data.CACHED = false
+			data.BLANK = true
 			data.CLEAR = true
 			return data
 		end
@@ -176,11 +179,12 @@ function EXPADV.GetRenderTarget(Res)
 
 	local ID = #rtTable + 1
 
-	if ID <= 32 then
+	if ID <= 15 then
 		local Data = {
 			ID = ID,
 			RES = Res,
 			CLEAR = true,
+			BLANK = true,
 			CACHED = false,
 			RT = GetRenderTarget( "expadv_rt_" .. Res .. "_" .. ID, Res, Res ),
 			MAT = CreateMaterial( "expadv_rt_" .. Res .. "_" .. ID, "UnlitGeneric", MaterialInfo ),
@@ -200,8 +204,38 @@ function EXPADV.CacheRenderTarget(RT)
 		if !rtTable then return end
 		
 		local Data = rtTable[RT.ID]
-		if Data then Data.CACHED = true end
+		
+		if Data then
+			Data.CACHED = true
+			Data.BLANK = true
+		end
 	end
+end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: ClearRT
+   --- */
+
+local MAT_256	= Material("omicron/lembulb_256.png")
+local MAT_512	= Material("omicron/lembulb_512.png")
+local MAT_1024	= Material("omicron/lembulb_1024.png")
+
+hook.Add( "Expadv.UnregisterContext", "expadv.screen", function( Context )
+	local gate = Context.entity
+
+	if IsValid(gate) and gate.Screen then
+		local RT_Data = gate.RT_Data
+		if !RT_Data then return end
+		RT_Data.CLEAR = true
+		RT_Data.BLANK = true
+	end
+end )
+
+function ENT:ClearScreen()
+	local RT_Data = self.RT_Data
+	if !RT_Data then return end
+	RT_Data.CLEAR = true
+	RT_Data.BLANK = true
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -214,6 +248,25 @@ AccessorFunc( ENT, "_noClear", "NoClearFrame", FORCE_BOOL )
 function ENT:GetResolution() return self.RT_Data and self.RT_Data.RES or 512 end
 function ENT:PreDrawScreen(scrAspect, scrSize) return false end
 function ENT:PostDrawScreen(scrAspect, scrSize) return false end
+
+function ENT:PreDrawScreen(scrAspect, scrSize)
+	if self.RT_Data and !self.RT_Data.BLANK then return false end
+
+	surface.SetDrawColor(255, 255, 255, 255)
+	
+	if scrSize == 256 then
+		surface.SetMaterial(MAT_256)
+	elseif scrSize == 512 then
+		surface.SetMaterial(MAT_512)
+	elseif scrSize == 1024 then
+		surface.SetMaterial(MAT_1024)
+	end
+
+	surface.DrawTexturedRect(0, 0, scrAspect, scrAspect)
+
+	return true
+end
+
 
 function ENT:Draw()
 	local time = SysTime()
@@ -263,7 +316,7 @@ function ENT:Draw()
 
 					surface.SetDrawColor(255, 255, 255, 255)
 					surface.SetMaterial(rtData.MAT)
-					surface.DrawTexturedRect(0, 0, scrAspect, scrAspect) //UV(0, 0, scrAspect, scrAspect, 0, 0, endUV, endUV)
+					surface.DrawTexturedRect(0, 0, scrAspect, scrAspect)
 
 					rtData.MAT:SetTexture("$basetexture", prev)
 				end
@@ -297,7 +350,7 @@ function ENT:DoScreenUpdate(context)
 			context.In2DRender = true
 			context.Matrices = 0
 
-			context:Execute("Event drawScreen", event, scrSize, scrSize)
+			local Ok, Value, Type = context:Execute("Event drawScreen", event, scrSize, scrSize)
 
 			if context.Matrices > 0 then
 				for i=1, context.Matrices do cam.PopModelMatrix() end
@@ -309,6 +362,13 @@ function ENT:DoScreenUpdate(context)
 
 		render.OverrideAlphaWriteEnable(false)
 		render.PopRenderTarget()
+
+
+		if Ok and !(Type ~= "b") and Value ~= nil then
+			self:SetNoClearFrame(!Value)
+		end
+		
+		rtData.BLANK = false
 	end
 end
 

@@ -7,12 +7,18 @@ ENT.Base 					= "expadv_base"
 ENT.ExpAdv 					= true
 ENT.AutomaticFrameAdvance  	= true
 
+ENT.EXPADV_GATE				= ENT
+
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Queded Compiler
    --- */
 
 function ENT:CompileScript(Root, Files)
 
+	if EXPADV.ReadSetting( "compile_rate", 60 ) <= 0 then
+		return self.EXPADV_BASE.CompileScript(self, Root, Files)
+	end
+	
 	if self:IsRunning( ) then
 		self.Context:ShutDown( )
 		EXPADV.UnregisterContext( self.Context )
