@@ -401,18 +401,21 @@ Component:AddInlineFunction( "radius", "e:", "n","(@value 1:IsValid() and @value
 Component:AddFunctionHelper( "radius", "e:", "Returns the bounding radius of the given entity.")
 
 /* --- --------------------------------------------------------------------------------
-	@: Is Somthing
+	@: Is Something
    --- */
-EXPADV.ServerOperators()
+EXPADV.SharedOperators()
 
 Component:AddInlineFunction( "isNPC", "e:", "b", "(IsValid(@value 1) and @value 1:IsNPC())")
-Component:AddFunctionHelper( "isNPC", "e", "returns true is the entity is an npc.")
+Component:AddFunctionHelper( "isNPC", "e", "returns true if the entity is an NPC.")
 
 Component:AddInlineFunction( "isPlayer", "e:", "b", "(IsValid(@value 1) and @value 1:IsPlayer())")
-Component:AddFunctionHelper( "isPlayer", "e", "returns true is the entity is a player.")
+Component:AddFunctionHelper( "isPlayer", "e", "returns true if the entity is a player.")
 
 Component:AddInlineFunction( "isVehicle", "e:", "b", "(IsValid(@value 1) and @value 1:IsVehicle())")
-Component:AddFunctionHelper( "isVehicle", "e", "returns true is the entity is a Vehicle.")
+Component:AddFunctionHelper( "isVehicle", "e", "returns true if the entity is a vehicle.")
+
+Component:AddInlineFunction( "isRagdoll", "e:", "b", "(IsValid(@value 1) and @value 1:IsRagDoll())")
+Component:AddFunctionHelper( "isRagdoll", "e", "returns true if the entity is a ragdoll.")
 
 /* --- --------------------------------------------------------------------------------
 	@: Physics Setters
@@ -536,6 +539,9 @@ Component:AddFunctionHelper( "isWeapon", "e:", "Returns if the entity is a weapo
 
 Component:AddInlineFunction( "health", "e:", "n", "(@value 1:IsValid() and @value 1:Health() or 0)")
 Component:AddFunctionHelper( "health", "e:", "Returns the health of the entity.")
+
+Component:AddInlineFunction( "maxHealth", "e:", "n", "(@value 1:IsValid() and @Value 1:GetMaxHealth() or 0)")
+Component:AddFunctionHelper( "maxHealth", "e:", "Returns the maximum health of the entity.")
 
 Component:AddPreparedFunction( "elevation", "e:v", "n", [[
 	if(IsValid(@value 1)) then
