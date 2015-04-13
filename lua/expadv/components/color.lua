@@ -146,3 +146,10 @@ Component:AddFunctionHelper( "hsv2rgb", "n,n,n", "Converts hsv color to regular 
 
 Component:AddInlineFunction( "rgb2hsv", "n,n,n", "c", "$ColorToHSV(@value 1, @value 2, @value 3)")
 Component:AddFunctionHelper( "rgb2hsv", "n,n,n", "Converts regular color to hsv color")
+
+/* --- --------------------------------------------------------------------------------
+    @: Useful
+   --- */
+
+Component:AddInlineFunction( "mix", "c,c,n", "c", "Color(@value 1.r * @value 3 + @value 2.r * (1-@value 3), @value 1.g * @value 3 + @value 2.g * (1-@value 3), @value 1.b * @value 3 + @value 2.b * (1-@value 3), @value 1.a * @value 3 + @value 2.a * (1-@value 3))")
+Component:AddFunctionHelper( "mix", "c,c,n", "Returns the mix of 2 colors")
