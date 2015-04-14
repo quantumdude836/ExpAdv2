@@ -35,7 +35,7 @@ Component:AddInlineOperator( "#", "st", "n", "(@value 1.Write - @value 1.R)")
 
 EXPADV.SharedOperators( )
 
-Component:AddVMFunction( "writeBool", "st:b", "", function( Context, Trace, Steam, Obj )
+Component:AddVMFunction( "writeBool", "st:b", "", function( Context, Trace, Stream, Obj )
 	Stream.W = Stream.W + 1
 	if Stream.W >= 128 then Context:Throw( Trace, "stream", "Failed to write number to stream, maximum stream size achived (128)" ) end
 	Stream.V[Stream.W] = Obj or false
