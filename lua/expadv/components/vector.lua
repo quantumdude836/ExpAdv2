@@ -39,12 +39,12 @@ VectorObj:NetRead(net.ReadVector)
 	  @: Logical and Comparison
    --- */
 
-Component:AddInlineOperator( "==", "v,v", "b", "(@value 1 == @value 2)" )
-Component:AddInlineOperator( "!=", "v,v", "b", "(@value 1 ~= @value 2)" )
-Component:AddInlineOperator( ">", "v,v", "b", "(@value 1 > @value 2)" )
-Component:AddInlineOperator( "<", "v,v", "b", "(@value 1 < @value 2)" )
-Component:AddInlineOperator( ">=", "v,v", "b", "(@value 1 >= @value 2)" )
-Component:AddInlineOperator( "<=", "v,v", "b", "(@value 1 <= @value 2)" )
+Component:AddInlineOperator( "==", "v,v", "b",  "(@value 1.x == @value 2.x && @value 1.y == @value 2.y && @value 1.z == @value 2.z)")
+Component:AddInlineOperator( "!=", "v,v", "b",  "(@value 1.x ~= @value 2.x || @value 1.y ~= @value 2.y || @value 1.z ~= @value 2.z)")
+Component:AddInlineOperator( ">", "v,v", "b",   "(@value 1.x > @value 2.x && @value 1.y > @value 2.y && @value 1.z > @value 2.z)")
+Component:AddInlineOperator( "<", "v,v", "b",   "(@value 1.x < @value 2.x && @value 1.y < @value 2.y && @value 1.z < @value 2.z)")
+Component:AddInlineOperator( ">=", "v,v", "b",  "(@value 1.x >= @value 2.x && @value 1.y >= @value 2.y && @value 1.z >= @value 2.z)")
+Component:AddInlineOperator( "<=", "v,v", "b",  "(@value 1.x <= @value 2.x && @value 1.y <= @value 2.y && @value 1.z <= @value 2.z)")
 
 /* --- --------------------------------------------------------------------------------
 	  @: Arithmetic

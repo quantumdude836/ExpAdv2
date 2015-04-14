@@ -180,6 +180,18 @@ function Compiler:Compile_LEQ( Trace, Expression1, Expression2 )
 	return Operator.Compile( self, Trace, Expression1, Expression2 )
 end
 
+function Compiler:Compile_INRANGE( Trace, Min, Value, Max )
+	local Definition = self:DefineVariable( )
+	
+	local LTH = self:Compile_LTH( Trace, Quick(Definition, Value.Return), Max )
+	local GTH = self:Compile_GTH( Trace, Quick(Definition, Value.Return), Min )
+	local AND = self:Compile_AND(Trace, LTH, GTH)
+
+	local Prepare = string.format("%s\n%s = %s\n%s", Value.Prepare||"", Definition, Value.Inline, AND.Prepare||"")
+	return self:NewLuaInstruction( Trace, AND, Prepare, AND.Inline ) -- This should work nicely :D
+end
+
+
 function Compiler:Compile_BSHR( Trace, Expression1, Expression2 )
 	local Operator = self:LookUpOperator( ">>", Expression1.Return, Expression2.Return )
 

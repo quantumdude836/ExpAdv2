@@ -348,7 +348,13 @@ function Compiler:Expression_8( Trace )
 
 	while self:CheckToken( "lth", "leq", "gth", "geq" ) do
 		if self:AcceptToken( "lth" ) then
-			Expression = self:Compile_LTH( self:GetTokenTrace( Trace ), Expression, self:Expression_9( Trace ) )
+			local Exp2 = self:Expression_9( Trace )
+
+			if !self:AcceptToken( "gth" ) then
+				Expression = self:Compile_LTH( self:GetTokenTrace( Trace ), Expression, Exp2 )
+			else
+				Expression = self:Compile_INRANGE( self:GetTokenTrace( Trace ), Expression, Exp2, self:Expression_9( Trace ) )
+			end
 		elseif self:AcceptToken( "leq" ) then
 			Expression = self:Compile_LEQ( self:GetTokenTrace( Trace ), Expression, self:Expression_9( Trace ) )
 		elseif self:AcceptToken( "gth" ) then

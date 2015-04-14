@@ -40,9 +40,9 @@ ColorObj:NetRead(net.ReadColor)
 	@: Logical and Comparison
    --- */
 
-Component:AddInlineOperator( "==", "c,c", "b", "(@value 1 == @value 2)" )
+Component:AddInlineOperator( "==", "c,c", "b", "(@value 1.r == @value 2.r && @value 1.g == @value 2.g && @value 1.b == @value 2.b && @value 1.a == @value 2.a)" )
 
-Component:AddInlineOperator( "!=", "c,c", "b", "(@value 1 ~= @value 2)" )
+Component:AddInlineOperator( "!=", "c,c", "b", "(@value 1.r ~= @value 2.r || @value 1.g ~= @value 2.g || @value 1.b ~= @value 2.b || @value 1.a ~= @value 2.a)" )
 
 /* --- --------------------------------------------------------------------------------
 	@: Operators
