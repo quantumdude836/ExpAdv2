@@ -540,7 +540,7 @@ Component:AddFunctionHelper( "isWeapon", "e:", "Returns if the entity is a weapo
 Component:AddInlineFunction( "health", "e:", "n", "(@value 1:IsValid() and @value 1:Health() or 0)")
 Component:AddFunctionHelper( "health", "e:", "Returns the health of the entity.")
 
-Component:AddInlineFunction( "maxHealth", "e:", "n", "(@value 1:IsValid() and @Value 1:GetMaxHealth() or 0)")
+Component:AddInlineFunction( "maxHealth", "e:", "n", "(@value 1:IsValid() and @value 1:GetMaxHealth() or 0)")
 Component:AddFunctionHelper( "maxHealth", "e:", "Returns the maximum health of the entity.")
 
 Component:AddPreparedFunction( "elevation", "e:v", "n", [[
