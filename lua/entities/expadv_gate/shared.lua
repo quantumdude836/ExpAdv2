@@ -155,12 +155,10 @@ function ENT:SetState( State )
 	if SERVER then
 		self:SetServerState( State )
 	elseif CLIENT then
+		debug.Trace()
+		MsgN("CLIENT: " .. State)
 		self:SetClientState( State )
 	end
-end
-
-function ENT:PostStartUp( )
-	self:SetState( EXPADV_STATE_ONLINE )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------

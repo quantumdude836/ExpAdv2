@@ -216,9 +216,13 @@ end
 	@: ClearRT
    --- */
 
-local MAT_256	= Material("omicron/lembulb_256.png")
-local MAT_512	= Material("omicron/lembulb_512.png")
-local MAT_1024	= Material("omicron/lembulb_1024.png")
+local SCR_256	= Material("omicron/lembulb_256.png")
+local SCR_512	= Material("omicron/lembulb_512.png")
+local SCR_1024	= Material("omicron/lembulb_1024.png")
+
+local ERR_256	= Material("tanknut/bsodx256.png")
+local ERR_512	= Material("tanknut/bsodx512.png")
+local ERR_1024	= Material("tanknut/bsodx1024.png")
 
 hook.Add( "Expadv.UnregisterContext", "expadv.screen", function( Context )
 	local gate = Context.entity
@@ -250,16 +254,36 @@ function ENT:PreDrawScreen(scrAspect, scrSize) return false end
 function ENT:PostDrawScreen(scrAspect, scrSize) return false end
 
 function ENT:PreDrawScreen(scrAspect, scrSize)
-	if self.RT_Data and !self.RT_Data.BLANK then return false end
+	local State = self:GetClientState(EXPADV_STATE_OFFLINE)
+
+	if State >= EXPADV_STATE_CRASHED then
+		surface.SetDrawColor(255, 255, 255, 255)
+		
+		if scrSize == 256 then
+			surface.SetMaterial(ERR_256)
+		elseif scrSize == 512 then
+			surface.SetMaterial(ERR_512)
+		elseif scrSize == 1024 then
+			surface.SetMaterial(ERR_1024)
+		end
+
+		surface.DrawTexturedRect(0, 0, scrAspect, scrAspect)
+
+		return true
+	elseif State <= EXPADV_STATE_OFFLINE then
+		-- Do nothing:
+	elseif self.RT_Data and !self.RT_Data.BLANK then
+		return false
+	end
 
 	surface.SetDrawColor(255, 255, 255, 255)
 	
 	if scrSize == 256 then
-		surface.SetMaterial(MAT_256)
+		surface.SetMaterial(SCR_256)
 	elseif scrSize == 512 then
-		surface.SetMaterial(MAT_512)
+		surface.SetMaterial(SCR_512)
 	elseif scrSize == 1024 then
-		surface.SetMaterial(MAT_1024)
+		surface.SetMaterial(SCR_1024)
 	end
 
 	surface.DrawTexturedRect(0, 0, scrAspect, scrAspect)
@@ -275,10 +299,7 @@ function ENT:Draw()
 	if !self.RT_Data then return self:DrawModel() end
 
 	if !context or !context.Online then
-		if !self.IsErrorScreen then
-			--self:CreateErrorScreen(context)
-			self.IsErrorScreen = true
-		end
+		//DO: Nothing
 	elseif !self:GetRenderingPaused() and (!self.NextRender or self.NextRender <= time) then
 		self:DoScreenUpdate(context)
 		self.IsErrorScreen = false
