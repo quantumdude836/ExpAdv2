@@ -30,21 +30,28 @@ Component:AddFunctionHelper( "stream", "", "Creates an empty stream object." )
 Component:AddInlineOperator( "#", "st", "n", "(@value 1.Write - @value 1.R)")
 
 /* --- --------------------------------------------------------------------------------
-	@: Read Methods
+	@: Write Methods
    --- */
 
 EXPADV.SharedOperators( )
 
+Component:AddVMFunction( "writeBool", "st:b", "", function( Context, Trace, Steam, Obj )
+	Stream.W = Stream.W + 1
+	if Stream.W >= 128 then Context:Throw( Trace, "stream", "Failed to write number to stream, maximum stream size achived (128)" ) end
+	Stream.V[Stream.W] = Obj or false
+	Stream.T[Stream.W] = "b"
+end )
+
 Component:AddVMFunction( "writeNumber", "st:n", "", function( Context, Trace, Stream, Obj )
 	Stream.W = Stream.W + 1
-	if Stream.W >= 128 then Context:Throw( Trace, "stream", "Failed to write number to stream, maxamum stream size achived (128)" ) end
+	if Stream.W >= 128 then Context:Throw( Trace, "stream", "Failed to write number to stream, maximum stream size achived (128)" ) end
 	Stream.V[Stream.W] = Obj or 0
 	Stream.T[Stream.W] = "n"
 end )
 
 Component:AddVMFunction( "writeString", "st:s", "", function( Context, Trace, Stream, Obj )
 	Stream.W = Stream.W + 1
-	if Stream.W >= 128 then Context:Throw( Trace, "stream", "Failed to write string to stream, maxamum stream size achived (128)" ) end
+	if Stream.W >= 128 then Context:Throw( Trace, "stream", "Failed to write string to stream, maximum stream size achived (128)" ) end
 	Stream.V[Stream.W] = Obj or ""
 	Stream.T[Stream.W] = "s"
 end )
@@ -52,7 +59,7 @@ end )
 Component:AddVMFunction( "writeEntity", "st:e", "", function( Context, Trace, Stream, Obj )
 	Stream.W = Stream.W + 1
 	if !IsValid(Obj) then Context:Throw( Trace, "stream", "Failed to write entity to stream, entity is invalid" ) end
-	if Stream.W >= 128 then Context:Throw( Trace, "stream", "Failed to write entity to stream, maxamum stream size achived (128)" ) end
+	if Stream.W >= 128 then Context:Throw( Trace, "stream", "Failed to write entity to stream, maximum stream size achived (128)" ) end
 	Stream.V[Stream.W] = Obj
 	Stream.T[Stream.W] = "e"
 end )
@@ -60,46 +67,47 @@ end )
 Component:AddVMFunction( "writePlayer", "st:ply", "", function( Context, Trace, Stream, Obj )
 	Stream.W = Stream.W + 1
 	if !IsValid(Obj) then Context:Throw( Trace, "stream", "Failed to write player to stream, player is invalid" ) end
-	if Stream.W >= 128 then Context:Throw( Trace, "stream", "Failed to write entity to stream, maxamum stream size achived (128)" ) end
+	if Stream.W >= 128 then Context:Throw( Trace, "stream", "Failed to write entity to stream, maximum stream size achived (128)" ) end
 	Stream.V[Stream.W] = Obj
 	Stream.T[Stream.W] = "_ply"
 end )
 
 Component:AddVMFunction( "writeVector", "st:v", "", function( Context, Trace, Stream, Obj )
 	Stream.W = Stream.W + 1
-	if Stream.W >= 128 then Context:Throw( Trace, "stream", "Failed to write vector to stream, maxamum stream size achived (128)" ) end
+	if Stream.W >= 128 then Context:Throw( Trace, "stream", "Failed to write vector to stream, maximum stream size achived (128)" ) end
 	Stream.V[Stream.W] = Obj
 	Stream.T[Stream.W] = "v"
 end )
 
 Component:AddVMFunction( "writeVector2", "st:v2", "", function( Context, Trace, Stream, Obj )
 	Stream.W = Stream.W + 1
-	if Stream.W >= 128 then Context:Throw( Trace, "stream", "Failed to write vector to stream, maxamum stream size achived (128)" ) end
+	if Stream.W >= 128 then Context:Throw( Trace, "stream", "Failed to write vector to stream, maximum stream size achived (128)" ) end
 	Stream.V[Stream.W] = {Obj.x, Obj.y}
 	Stream.T[Stream.W] = "_v2"
 end )
 
 Component:AddVMFunction( "writeAngle", "st:a", "", function( Context, Trace, Stream, Obj )
 	Stream.W = Stream.W + 1
-	if Stream.W >= 128 then Context:Throw( Trace, "stream", "Failed to write angle to stream, maxamum stream size achived (128)" ) end
+	if Stream.W >= 128 then Context:Throw( Trace, "stream", "Failed to write angle to stream, maximum stream size achived (128)" ) end
 	Stream.V[Stream.W] = Obj
 	Stream.T[Stream.W] = "a"
 end )
 
 Component:AddVMFunction( "writeColor", "st:c", "", function( Context, Trace, Stream, Obj )
 	Stream.W = Stream.W + 1
-	if Stream.W >= 128 then Context:Throw( Trace, "stream", "Failed to write color to stream, maxamum stream size achived (128)" ) end
+	if Stream.W >= 128 then Context:Throw( Trace, "stream", "Failed to write color to stream, maximum stream size achived (128)" ) end
 	Stream.V[Stream.W] = Color( Obj.r, Obj.g, Obj.b, Obj.a )
 	Stream.T[Stream.W] = "c"
 end )
 
 Component:AddVMFunction( "writeStream", "st:st", "", function( Context, Trace, Stream, Obj )
 	Stream.W = Stream.W + 1
-	if Stream.W >= 128 then Context:Throw( Trace, "stream", "Failed to write stream to stream, maxamum stream size achived (128)" ) end
+	if Stream.W >= 128 then Context:Throw( Trace, "stream", "Failed to write stream to stream, maximum stream size achived (128)" ) end
 	Stream.V[Stream.W] = Obj
 	Stream.T[Stream.W] = "_st"
 end ); EXPADV.AddFunctionAlias( "writeStream", "st:nst" )
 
+Component:AddFunctionHelper( "writeBool", "st:b", "Appends a bool to the stream object." )
 Component:AddFunctionHelper( "writeNumber", "st:n", "Appends a number to the stream object." )
 Component:AddFunctionHelper( "writeString", "st:s", "Appends a string to the stream object." )
 Component:AddFunctionHelper( "writeEntity", "st:e", "Appends an entity to the stream object." )
@@ -113,6 +121,18 @@ Component:AddFunctionHelper( "writeStream", "st:st", "Appends a stream to the st
 /* --- --------------------------------------------------------------------------------
 	@: Read Methods
    --- */
+
+Component:AddVMFunction( "readBool", "st:", "b", function( Context, Trace, Stream )
+	Stream.R = Stream.R + 1
+	
+	if !Stream.T[Stream.R] then
+		Context:Throw( Trace, "stream", "Failed to read bool from stream, stream returned void." )
+	elseif Stream.T[Stream.R] ~= "b" then
+		Context:Throw( Trace, "stream", "Failed to read bool from stream, stream returned " .. EXPADV.TypeName( Stream.T[Stream.R] )  .. "." )
+	end
+
+	return Stream.V[Stream.R]
+end )
 
 Component:AddVMFunction( "readNumber", "st:", "n", function( Context, Trace, Stream )
 	Stream.R = Stream.R + 1
