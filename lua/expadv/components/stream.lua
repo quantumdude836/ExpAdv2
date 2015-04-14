@@ -251,6 +251,7 @@ Component:AddVMFunction( "readStream", "st:", "st", function( Context, Trace, St
 	return Stream.V[Stream.R]
 end )
 
+Component:AddFunctionHelper( "readBool", "st:", "Reads a bool from the stream object." )
 Component:AddFunctionHelper( "readNumber", "st:", "Reads a number from the stream object." )
 Component:AddFunctionHelper( "readString", "st:", "Reads a string from the stream object." )
 Component:AddFunctionHelper( "readEntity", "st:", "Reads an entity from the stream object." )
