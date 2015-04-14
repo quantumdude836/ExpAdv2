@@ -155,8 +155,6 @@ function ENT:SetState( State )
 	if SERVER then
 		self:SetServerState( State )
 	elseif CLIENT then
-		debug.Trace()
-		MsgN("CLIENT: " .. State)
 		self:SetClientState( State )
 	end
 end
