@@ -30,6 +30,8 @@ local function stopSound(Context, Index, Fade)
 	Context.Data.SoundCount = Context.Data.SoundCount - 1
 end
 
+EXPADV.GAME_SOUNDS = EXPADV.GAME_SOUNDS or {}
+
 local function playSound(Context, Ent, Duration, Index, Fade, File)
 	if(!Ent || !IsValid(Ent)) then Ent = Context.entity end
 	local maxsounds = Component:ReadSetting("maximumsounds", 10)
@@ -44,8 +46,13 @@ local function playSound(Context, Ent, Duration, Index, Fade, File)
 	if(Context.Data.Sound[Index]) then stopSound(Context, Index, 0) end
 	
 	local newSound = CreateSound(Ent, File)
+
+	EXPADV.GAME_SOUNDS[#EXPADV.GAME_SOUNDS+1] = newSound
+
 	Context.Data.Sound[Index] = newSound
+
 	newSound:Play()
+
 	Context.Data.SoundCount = Context.Data.SoundCount + 1
 	
 	if(Duration == 0 and Fade == 0) then return end
@@ -248,6 +255,8 @@ end
 
 EXPADV.ClientOperators()
 
+EXPADV.URL_SOUNDS = EXPADV.URL_SOUNDS or {}
+
 Component:AddVMFunction( "playURL", "s,s,d,d", "", 
 	function( Context, Trace, URL, Flags, Sucess, Fail )
 		if !IsValid(Context.entity) or !EXPADV.CanAccessFeature(Context.entity, "PlayURL") then return end
@@ -256,10 +265,13 @@ Component:AddVMFunction( "playURL", "s,s,d,d", "",
 		sound.PlayURL( URL, Flags,
 			function( Channel, Er_ID, Er_Name ) 
 				if IsValid( Channel ) then
+					EXPADV.URL_SOUNDS[#EXPADV.URL_SOUNDS+1] = Channel
+
 					if !IsValid(Context.entity) then
 						Channel:Stop()
 						return
 					end
+
 					Context.Data.AudioCount = Context.Data.AudioCount + 1
 					Context.Data.Audio[Context.Data.AudioCount] = Channel
 					Context:Execute( "PlayURL", Sucess, { Channel, "_ac" } )
@@ -318,4 +330,25 @@ if CLIENT then
 	hook.Add( "Expadv.UnregisterContext", "expadv.soundurl", function( Context )
 		DisableSounds(Context.entity)
 	end )
+
+	concommand.Add("expadv_stopsound", function()
+		local new = {}
+
+		for _, Sound in pairs(EXPADV.URL_SOUNDS) do
+			if IsValid(Sound) then
+				Sound:Stop()
+				new[#new+1] = Sound
+			end
+		end
+
+		EXPADV.URL_SOUNDS = new
+
+		for _, Sound in pairs(EXPADV.GAME_SOUNDS) do
+			Sound:Stop()
+		end
+
+		EXPADV.GAME_SOUNDS = {}
+
+		MsgN("Sounds stopped.")
+	end)
 end
