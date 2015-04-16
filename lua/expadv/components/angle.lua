@@ -213,9 +213,9 @@ Component:AddInlineFunction( "toLocal", "e:a", "a", "(IsValid( @value 1 ) and @v
 Component:AddFunctionHelper( "toWorld", "e:a", "Converts an angle to a world angle." )
 Component:AddFunctionHelper( "toLocal", "e:a", "Converts a world angle to a local angle." )
 
-Component:AddVMFunction("toWorldAng", "v,a,v,a", "a", "@define Pos, Ang = LocalToWorld(@value 1, @value 2, @value 3, @value 4)", "@Ang" )
+Component:AddPreparedFunction("toWorldAng", "v,a,v,a", "a", "@define Pos, Ang = $LocalToWorld(@value 1, @value 2, @value 3, @value 4)", "@Ang" )
 Component:AddFunctionHelper("toWorldAng", "v,a,v,a", "Translates the specified position and angle from the specified coordinate system into worldspace coordinates.")
 
-Component:AddVMFunction("toLocalAng", "v,a,v,a", "a", "@define Pos, Ang = WorldToLocal(@value 1, @value 2, @value 3, @value 4)", "@Ang" )
+Component:AddPreparedFunction("toLocalAng", "v,a,v,a", "a", "@define Pos, Ang = $WorldToLocal(@value 1, @value 2, @value 3, @value 4)", "@Ang" )
 Component:AddFunctionHelper("toLocalAng", "v,a,v,a", "Translates the specified position and angle into the specified coordinate system.")
 
