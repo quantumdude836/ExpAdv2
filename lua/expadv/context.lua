@@ -66,14 +66,13 @@ EXPADV.Updates = { }
 local SysTime = SysTime
 local debug_sethook = debug.sethook
 
--- Safely execute a function on this context.
-function EXPADV.RootContext:Execute( Location, Operation, ... ) -- String, Function, ...
-	
+-- Has to be called before an execution,
+-- All quota managment depends on this!
+function EXPADV.RootContext:PreExecute(op_counter)
 	local Status = self.Status
 
-	-- Ops monitoring:
-
-		local function op_counter( )
+	if !op_counter then
+		op_counter = function( )
 			Status.Perf = Status.Perf + expadv_luahook
 
 			if Status.Perf > expadv_tickquota then
@@ -83,22 +82,50 @@ function EXPADV.RootContext:Execute( Location, Operation, ... ) -- String, Funct
 			
 			Status.BenchMark = SysTime( )
 		end
+	end
 
-		Status.MemoryMark = collectgarbage("count")
-		Status.BenchMark = SysTime( )
+	Status.HookFunc = op_counter
+	Status.MemoryMark = collectgarbage("count")
+	Status.BenchMark = SysTime( )
 		
-		debug_sethook( op_counter, "", expadv_luahook )
+	debug_sethook( op_counter, "", expadv_luahook )
+end
 
-	-- Execuiton:
+-- Should always be called after an execution.
+-- Otherwise things will break.
+function EXPADV.RootContext:PostExecute()
+	debug_sethook( )
 
-		local Ok, Result, ResultType = pcall( Operation, self, ... )
+	local Status = self.Status
+	Status.StopWatch = Status.StopWatch + (SysTime( ) - Status.BenchMark)
+	Status.Memory = Status.Memory + (collectgarbage("count") - Status.MemoryMark)
+end
 
-	-- Reset Ops Monitor
-		debug.sethook( )
+function EXPADV.RootContext:CheckExecutionQuota()
+	local Status = self.Status
 
-		Status.StopWatch = Status.StopWatch + (SysTime( ) - Status.BenchMark)
-		Status.Memory = Status.Memory + (collectgarbage("count") - Status.MemoryMark)
+	if (Status.Counter + Status.Perf - expadv_softquota) > expadv_hardquota then
 
+		if IsValid( self.entity ) then self.entity:HitHardQuota( ) end
+		
+		self:ShutDown( )
+
+		return false
+
+	elseif Status.Memory > expadv_memorylimit then
+		self.entity:ScriptError( "Memory limit exceeded" )
+
+		self:ShutDown( )
+
+		return false
+	end
+
+	return true
+end
+
+-- Handels the results from an execution.
+-- PostExecute should always be called before this.
+function EXPADV.RootContext:HandelResult(Ok, Result, ResultType)
 	if !Ok and isstring( Result ) then
 		if IsValid( self.entity ) then -- This is the only way, :(
 			if Result:find("attempt to perform arithmetic on a nil value") then
@@ -117,28 +144,16 @@ function EXPADV.RootContext:Execute( Location, Operation, ... ) -- String, Funct
 		return false
 	end
 
+	if !Ok and Result.Terminate then
+		return false
+	end
+
 	if Ok or Result.Exit then
-
-		if (Status.Counter + Status.Perf - expadv_softquota) > expadv_hardquota then
-
-			if IsValid( self.entity ) then self.entity:HitHardQuota( ) end
-			
-			self:ShutDown( )
-
-			return false
-
-		elseif Status.Memory > expadv_memorylimit then
-			self.entity:ScriptError( "Memory limit exceeded" )
-
-			self:ShutDown( )
-
-			return false
-		end
-
+		if !self:CheckExecutionQuota() then return false end
+		
 		EXPADV.Updates[self] = true
 
 		return true, Result, ResultType
-
 	end
 
 	if !IsValid( self.entity ) then
@@ -154,6 +169,17 @@ function EXPADV.RootContext:Execute( Location, Operation, ... ) -- String, Funct
 	self:ShutDown( )
 
 	return false
+end
+
+-- Safely execute a function on this context.
+function EXPADV.RootContext:Execute( Location, Operation, ... ) -- String, Function, ...
+	self:PreExecute()
+
+	local Ok, Result, ResultType = pcall( Operation, self, ... )
+
+	self:PostExecute()
+
+	return self:HandelResult(Ok, Result, ResultType)
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -177,6 +203,11 @@ end
 -- Exits the currently executing code.
 function EXPADV.RootContext:Exit( )
 	error( { Exit = true, Context = self }, 0 )
+end
+
+-- Used to shut down the gate internally.
+function EXPADV.RootContext:Terminate( )
+	error( { Terminate = true, Context = self }, 0 )
 end
 
 -- Throws an exception

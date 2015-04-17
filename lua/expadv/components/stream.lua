@@ -364,7 +364,7 @@ if CLIENT then
 
 		if !Delegate then return end
 
-		Ent.Context:Execute( "Receive Stream " .. Name, Delegate, {Stream, "_st" } )
+		Ent.Context:Execute( "Receive Stream " .. Name, Delegate, {Stream, "_nst" } )
 	end)
 end
 
@@ -401,7 +401,7 @@ if SERVER then
 
 		if !Delegate then return end
 
-		Ent.Context:Execute( "Receive Stream " .. Name, Delegate, {Stream, "_st"}, {client, "_ply"} )
+		Ent.Context:Execute( "Receive Stream " .. Name, Delegate, {Stream, "_nst"}, {client, "_ply"} )
 	end)
 end
 
