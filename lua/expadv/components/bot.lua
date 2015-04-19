@@ -136,25 +136,25 @@ Component:AddPreparedFunction( "clearStuck", "lc:", "", "@value 1:ClearStuck()")
 Component:AddInlineFunction( "getAcceleration", "lc:", "n", "@value 1:GetAcceleration()")
 	Component:AddFunctionHelper( "getAcceleration", "lc:", "Returns the acceleration speed." )
 
-Component:AddPreparedFunction( "setAcceleration", "lc:n", "", "@value 1:SetAcceleration(@value 1)")
+Component:AddPreparedFunction( "setAcceleration", "lc:n", "", "@value 1:SetAcceleration(@value 2)")
 	Component:AddFunctionHelper( "setAcceleration", "lc:", "Sets the acceleration speed." )
 
 Component:AddInlineFunction( "getCurrentAcceleration", "lc:", "v", "@value 1:GetCurrentAcceleration()")
 	Component:AddFunctionHelper( "getCurrentAcceleration", "lc:", "Returns the current acceleration as a vector." )
 
-Component:AddPreparedFunction( "setDesiredSpeed", "lc:n", "", "@value 1:SetDesiredSpeed(@value 1)")
+Component:AddPreparedFunction( "setDesiredSpeed", "lc:n", "", "@value 1:SetDesiredSpeed(@value 2)")
 	Component:AddFunctionHelper( "setDesiredSpeed", "lc:", "Sets movement speed." )
 
 Component:AddInlineFunction( "getDeathDropHeight", "lc:", "n", "@value 1:GetDeathDropHeight()")
 	Component:AddFunctionHelper( "getDeathDropHeight", "lc:", "Gets the height the bot is scared to fall from." )
 
-Component:AddPreparedFunction( "setDeathDropHeight", "lc:n", "", "@value 1:SetDeathDropHeight(@value 1)")
+Component:AddPreparedFunction( "setDeathDropHeight", "lc:n", "", "@value 1:SetDeathDropHeight(@value 2)")
 	Component:AddFunctionHelper( "setDeathDropHeight", "lc:", "Sets the height the bot is scared to fall from." )
 
 Component:AddInlineFunction( "getDeceleration", "lc:", "n", "@value 1:GetDeceleration()")
 	Component:AddFunctionHelper( "getDeceleration", "lc:", "Gets the deceleration speed." )
 
-Component:AddPreparedFunction( "setDeceleration", "lc:n", "", "@value 1:SetDeceleration(@value 1)")
+Component:AddPreparedFunction( "setDeceleration", "lc:n", "", "@value 1:SetDeceleration(@value 2)")
 	Component:AddFunctionHelper( "setDeceleration", "lc:", "Sets the deceleration speed." )
 
 Component:AddInlineFunction( "getGroundMotionVector", "lc:", "v", "@value 1:GetGroundMotionVector()")
@@ -163,13 +163,13 @@ Component:AddInlineFunction( "getGroundMotionVector", "lc:", "v", "@value 1:GetG
 Component:AddInlineFunction( "getJumpHeight", "lc:", "n", "@value 1:GetJumpHeight()")
 	Component:AddFunctionHelper( "getJumpHeight", "lc:", "Gets the height of the bot's jump." )
 
-Component:AddPreparedFunction( "setJumpHeight", "lc:n", "", "@value 1:SetJumpHeight(@value 1)")
+Component:AddPreparedFunction( "setJumpHeight", "lc:n", "", "@value 1:SetJumpHeight(@value 2)")
 	Component:AddFunctionHelper( "setJumpHeight", "lc:", "Sets the height of the bot's jump." )
 
 Component:AddInlineFunction( "getStepHeight", "lc:", "n", "@value 1:GetStepHeight()")
 	Component:AddFunctionHelper( "getStepHeight", "lc:", "Gets the max height the bot can step up." )
 
-Component:AddPreparedFunction( "setStepHeight", "lc:n", "", "@value 1:SetStepHeight(@value 1)")
+Component:AddPreparedFunction( "setStepHeight", "lc:n", "", "@value 1:SetStepHeight(@value 2)")
 	Component:AddFunctionHelper( "setStepHeight", "lc:", "Sets the max height the bot can step up." )
 
 Component:AddInlineFunction( "isAttemptingToMove", "lc:", "b", "@value 1:IsAttemptingToMove()")
