@@ -419,6 +419,7 @@ function EXPADV.LoadCore( )
 	EXPADV.AddComponentFile( "context" )
 	EXPADV.AddComponentFile( "android" )
 	EXPADV.AddComponentFile( "constraintcore" )
+	EXPADV.AddComponentFile( "bot" )
 
 	EXPADV.CallHook( "AddComponents" )
 

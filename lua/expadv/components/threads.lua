@@ -24,7 +24,7 @@ end
 
 local PauseThread
 
-local _context, _running, _ops = nil, nil, false
+local _context, _running, _ops, _ex = nil, nil, false, false
 
 EXPADV.coroutine = {}
 
@@ -75,6 +75,21 @@ EXPADV.coroutine.resume = function(c, t, ...) return ResumeThread(c, nil, t,...)
 Component:AddVMFunction("resume", "cr:", "b", ResumeThread)
 
 Component:AddVMFunction("resume", "cr:...", "b", ResumeThread)
+
+/*--------------------------------------------------------------------------------------------------------------------*/
+
+-- Used to run code from an external thread like nextbot.
+-- This will use the origonal coroutine.wait and prevent invalid use.
+
+EXPADV.coroutine.resume2 = function(c, t, ...)
+	local e = _ex
+	
+	e = true
+
+	local b = ResumeThread(c, nil, t,...)
+
+	_ex = e
+end
 
 /*--------------------------------------------------------------------------------------------------------------------*/
 
@@ -165,7 +180,7 @@ Component:AddVMFunction( "sleep", "n", "", function(Context, Trace, Time)
 	if !thread then throw(Context, Trace, "sleep") end
 
 	-- This thread is from nextbot or somthing.
-	if _ops then return PauseThread(Time) end
+	if _ex then return PauseThread(Time) end
 
 	timer.Simple( Time, function( )
 		if IsValid(Context.entity) and Context.entity:IsRunning( ) then
@@ -187,7 +202,7 @@ Component:AddVMFunction( "wait", "s", "", function( Context, Trace, Event )
 
 	if !thread then throw(Context, Trace, "sleep") end
 	
-	if ops then Context:Throw(Trace, "coroutine", "Tryed to wait outside of waitable coroutine.") end
+	if _ex then Context:Throw(Trace, "coroutine", "Tryed to wait outside of waitable coroutine.") end
 
 	if !EXPADV.Events[Event] then Context:Throw( Trace, "coroutine", "Tryed to wait for non existing event " .. Event .. ".") end
 
