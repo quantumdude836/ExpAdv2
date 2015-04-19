@@ -44,6 +44,8 @@ end
 
 function ENT:BehaveUpdate(Interval)
 	if self.BehaveThread and self:IsRunning() then
+		self:CallEvent("behavourUpdate", Interval)
+
 		self.Inthread = true
 		EXPADV.coroutine.resume2(self.Context, self.BehaveThread)
 		self.Inthread = false
@@ -75,7 +77,7 @@ end
 	@: Movment
    --- */
 
-function ENT:MoveToPos( pos, lookahead, tolerance, maxage, repath )
+function ENT:MoveToPos(pos, lookahead, tolerance, maxage, repath)
 	local path = Path( "Follow" )
 
 	path:SetMinLookAheadDistance( lookahead or 300 )
@@ -108,6 +110,36 @@ function ENT:MoveToPos( pos, lookahead, tolerance, maxage, repath )
 	return "ok"
 end
 
+function ENT:ChaseTarget(ent, lookahead, tolerance)
+	local path = Path("Chase")
+	path:SetMinLookAheadDistance(lookahead or 300)
+	path:SetGoalTolerance(tolerance or 20)
+
+	path:Compute(self, ent:GetPos())
+
+	if !path:IsValid()then 
+		return "failed"
+	end
+
+	while path:IsValid() do
+
+		path:Compute(self, ent:GetPos())
+		
+		path:Chase(self, ent)
+		
+		-- If we're stuck then call the HandleStuck function and abandon
+		if ( self.loco:IsStuck() ) then
+
+			self:HandleStuck();
+			return "stuck"
+		end
+
+		coroutine.yield()
+	end
+
+	return "ok"
+end
+
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Animation
    --- */
@@ -133,7 +165,10 @@ function ENT:PlaySequenceAndWait( name, speed )
 
 	-- wait for it to finish
 	coroutine.wait( len / speed )
+end
 
+function ENT:PlaySceneAndWait( scene )
+	coroutine.wait(self:PlayScene(scene)) 
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------

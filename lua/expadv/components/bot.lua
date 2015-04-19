@@ -22,7 +22,10 @@ Component:AddException("bot")
 EXPADV.ServerEvents( )
 
 Component:AddEvent( "behavour", "lc", "" )
-EXPADV.AddEventHelper("behavour", "Use this event to control a bot gates behavour.")
+EXPADV.AddEventHelper("behavour", "Use this event to control a bot gates behavour, this event is a coroutine.")
+
+Component:AddEvent( "behavourUpdate", "n", "" )
+EXPADV.AddEventHelper("behavourUpdate", "Called before the behavour thread resumes.")
 
 Component:AddEvent( "handelStuck", "lc", "" )
 EXPADV.AddEventHelper("handelStuck", "this event is called when the bot is stuck.")
@@ -95,15 +98,49 @@ Component:AddVMFunction( "moveTo", "v,n,n,n,n", "s", function( Context, Trace, P
 end )
 
 Component:AddFunctionHelper( "moveTo", "v,n,n,n,n", "To be called in the behaviour event only. Will yield until the bot has reached the goal or is stuck." )
-//EXPADV.AddHelperInPut("Position", "Minimum look ahead distance.")
-//EXPADV.AddHelperInPut("Lookahead ", "How close we must be to the goal before it can be considered complete.")
-//EXPADV.AddHelperInPut("Tolerance", ".")
+//EXPADV.AddHelperInPut("Position", "This is the goal we aim to go to.")
+//EXPADV.AddHelperInPut("Lookahead ", "Minimum look ahead distance.")
+//EXPADV.AddHelperInPut("Tolerance", "How close we must be to the goal before it can be considered complete.")
 //EXPADV.AddHelperInPut("Max Age", "Maximum age of the path before it times out.")
 //EXPADV.AddHelperInPut("Repath", "Rebuilds the path after this number of seconds.")
 EXPADV.AddFunctionAlias("moveTo", "v,n,n,n")
 EXPADV.AddFunctionAlias("moveTo", "v,n,n")
 EXPADV.AddFunctionAlias("moveTo", "v,n")
 EXPADV.AddFunctionAlias("moveTo", "v")
+
+Component:AddVMFunction( "chaseTarget", "e,n,n", "s", function( Context, Trace, Ent, Look, Tolerance )
+	local self = Context.entity
+
+	Thorw(self, Context, Trace, "moveTo", true)
+
+	return self:ChaseTarget(Ent, Look, Tolerance) or ""
+end )
+
+Component:AddFunctionHelper( "chaseTarget", "e,n,n", "To be called in the behaviour event only. Will yield until the bot has reached the entity or is stuck." )
+//EXPADV.AddHelperInPut("Entity", "This is what we are chasing.")
+//EXPADV.AddHelperInPut("Lookahead ", "Minimum look ahead distance.")
+//EXPADV.AddHelperInPut("Tolerance", "How close we must be to the goal before it can be considered complete.")
+EXPADV.AddFunctionAlias("chaseTarget", "e,n")
+EXPADV.AddFunctionAlias("chaseTarget", "e")
+
+Component:AddVMFunction( "runSequence", "s,n", "", function( Context, Trace, Name, Speed )
+	local self = Context.entity
+
+	Thorw(self, Context, Trace, "runSequence", true)
+
+	return self:PlaySequenceAndWait(Name, Speed)
+end )
+Component:AddFunctionHelper( "runSequence", "s,n", "To be called in the behaviour event only. Plays an animation sequence and waits for it to end before returning." )
+
+Component:AddVMFunction( "runScene", "s", "", function( Context, Trace, Name, Speed )
+	local self = Context.entity
+
+	Thorw(self, Context, Trace, "runScene", true)
+
+	return self:PlaySceneAndWait(Name)
+end )
+
+Component:AddFunctionHelper( "runScene", "s", "To be called in the behaviour event only. Plays a scene and waits for it to end before returning." )
 
 /*----------------------------------------------------------------------------------------------------------------------------------------*/
 
