@@ -28,7 +28,7 @@ Component:AddEvent( "behaviorUpdate", "n", "" )
 EXPADV.AddEventHelper("behaviorUpdate", "Called before the behavour thread resumes.")
 
 Component:AddEvent( "handleStuck", "lc", "" )
-EXPADV.AddEventHelper("handlelStuck", "this event is called when the bot is stuck.")
+EXPADV.AddEventHelper("handleStuck", "this event is called when the bot is stuck.")
 
 Component:AddEvent( "feetLeaveGround", "", "" )
 EXPADV.AddEventHelper("feetLeaveGround", "this event is called when the bot's feet has left the ground.")
