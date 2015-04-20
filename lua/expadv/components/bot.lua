@@ -1,8 +1,8 @@
-local function Thorw(entity, Context, Trace, Name, Thread)
+local function Throw(entity, Context, Trace, Name, Thread)
 	if !IsValid(entity) or !entity.NextBot then
 		Context:Throw(Trace, "bot", "Tried to use " .. Name .. "() on none bot.")
 	elseif Thread and !entity.Inthread then
-		Context:Throw(Trace, "bot", "Tried to use " .. Name .. "() outside bot's behavour event.")
+		Context:Throw(Trace, "bot", "Tried to use " .. Name .. "() outside bot's behavior event.")
 	end
 end
 
@@ -21,14 +21,14 @@ Component:AddException("bot")
 
 EXPADV.ServerEvents( )
 
-Component:AddEvent( "behavour", "lc", "" )
-EXPADV.AddEventHelper("behavour", "Use this event to control a bot gates behavour, this event is a coroutine.")
+Component:AddEvent( "behavior", "lc", "" )
+EXPADV.AddEventHelper("behavior", "Use this event to control a bot gates behavour, this event is a coroutine.")
 
-Component:AddEvent( "behavourUpdate", "n", "" )
-EXPADV.AddEventHelper("behavourUpdate", "Called before the behavour thread resumes.")
+Component:AddEvent( "behaviorUpdate", "n", "" )
+EXPADV.AddEventHelper("behaviorUpdate", "Called before the behavour thread resumes.")
 
-Component:AddEvent( "handelStuck", "lc", "" )
-EXPADV.AddEventHelper("handelStuck", "this event is called when the bot is stuck.")
+Component:AddEvent( "handleStuck", "lc", "" )
+EXPADV.AddEventHelper("handlelStuck", "this event is called when the bot is stuck.")
 
 Component:AddEvent( "feetLeaveGround", "", "" )
 EXPADV.AddEventHelper("feetLeaveGround", "this event is called when the bot's feet has left the ground.")
@@ -66,7 +66,7 @@ end ); 	Component:AddFunctionHelper( "getActivity", "", "Returns the currently r
 Component:AddVMFunction( "getRangeTo", "v", "n", function( Context, Trace, Pos )
 	local self = Context.entity
 	
-	Thorw(self, Context, Trace, "getRangeTo")
+	Throw(self, Context, Trace, "getRangeTo")
 
 	return self:GetRangeTo(Pos)
 end ); 	Component:AddFunctionHelper( "getRangeTo", "v", "Returns the distance to an entity or position." )
@@ -74,7 +74,7 @@ end ); 	Component:AddFunctionHelper( "getRangeTo", "v", "Returns the distance to
 Component:AddVMFunction( "getRangeSquaredTo", "v", "n", function( Context, Trace, Pos )
 	local self = Context.entity
 	
-	Thorw(self, Context, Trace, "getRangeSquaredTo")
+	Throw(self, Context, Trace, "getRangeSquaredTo")
 
 	return self:GetRangeSquaredTo(Pos)
 end ); 	Component:AddFunctionHelper( "getRangeSquaredTo", "v", "Returns the distance to an entity or position. It is supposed to return a squared distance, however.." )
@@ -83,7 +83,7 @@ end ); 	Component:AddFunctionHelper( "getRangeSquaredTo", "v", "Returns the dist
 
 Component:AddVMFunction( "handleStuck", "", "", function( Context, Trace  )
 	local self = Context.entity
-	Thorw(self, Context, Trace, "handleStuck", true)
+	Throw(self, Context, Trace, "handleStuck", true)
 	return self:HandleStuck()
 end )
 
@@ -92,7 +92,7 @@ Component:AddFunctionHelper( "handleStuck", "", "This calls the handleStuck even
 Component:AddVMFunction( "moveTo", "v,n,n,n,n", "s", function( Context, Trace, Pos, Look, Tolerance, Age, Repath )
 	local self = Context.entity
 
-	Thorw(self, Context, Trace, "moveTo", true)
+	Throw(self, Context, Trace, "moveTo", true)
 
 	return self:MoveToPos(Pos, Look, Tolerance, Age, Repath) or ""
 end )
@@ -111,7 +111,7 @@ EXPADV.AddFunctionAlias("moveTo", "v")
 Component:AddVMFunction( "chaseTarget", "e,n,n", "s", function( Context, Trace, Ent, Look, Tolerance )
 	local self = Context.entity
 
-	Thorw(self, Context, Trace, "moveTo", true)
+	Throw(self, Context, Trace, "moveTo", true)
 
 	return self:ChaseTarget(Ent, Look, Tolerance) or ""
 end )
@@ -126,7 +126,7 @@ EXPADV.AddFunctionAlias("chaseTarget", "e")
 Component:AddVMFunction( "runSequence", "s,n", "", function( Context, Trace, Name, Speed )
 	local self = Context.entity
 
-	Thorw(self, Context, Trace, "runSequence", true)
+	Throw(self, Context, Trace, "runSequence", true)
 
 	return self:PlaySequenceAndWait(Name, Speed)
 end )
@@ -135,7 +135,7 @@ Component:AddFunctionHelper( "runSequence", "s,n", "To be called in the behaviou
 Component:AddVMFunction( "runScene", "s", "", function( Context, Trace, Name, Speed )
 	local self = Context.entity
 
-	Thorw(self, Context, Trace, "runScene", true)
+	Throw(self, Context, Trace, "runScene", true)
 
 	return self:PlaySceneAndWait(Name)
 end )
@@ -153,7 +153,7 @@ end )
 Component:AddVMFunction( "getLocomotion", "", "lc", function( Context, Trace )
 	local self = Context.entity
 	
-	Thorw(self, Context, Trace, "getLocomotion")
+	Throw(self, Context, Trace, "getLocomotion")
 
 	return self.loco
 end ); Component:AddFunctionHelper( "getLocomotion", "", "Returns the bots Locomotion object." )
@@ -244,7 +244,7 @@ Component:AddPreparedFunction( "Invalidate", "pth:", "", "@value 1:Invalidate()"
 Component:AddVMFunction( "update", "pth:", "", function( Context, Trace, Path )
 	local self = Context.entity
 	
-	Thorw(self, Context, Trace, "path:update()", true)
+	Throw(self, Context, Trace, "path:update()", true)
 
 	Path:Update(self)
 end ); Component:AddFunctionHelper( "update", "pth:", "Move the bot along the path." )
@@ -253,7 +253,7 @@ end ); Component:AddFunctionHelper( "update", "pth:", "Move the bot along the pa
 Component:AddVMFunction( "compute", "pth:v", "", function( Context, Trace, Path, Vec )
 	local self = Context.entity
 	
-	Thorw(self, Context, Trace, "path:compute(vector)", true)
+	Throw(self, Context, Trace, "path:compute(vector)", true)
 
 	Path:Compute(self, Vec)
 end ); Component:AddFunctionHelper( "compute", "pth:v", "Computes the path to the position." )
@@ -261,7 +261,7 @@ end ); Component:AddFunctionHelper( "compute", "pth:v", "Computes the path to th
 Component:AddVMFunction( "chase", "pth:e", "", function( Context, Trace, Path, Entity )
 	local self = Context.entity
 	
-	Thorw(self, Context, Trace, "path:chase(entity)", true)
+	Throw(self, Context, Trace, "path:chase(entity)", true)
 
 	Path:Chase(self, Entity)
 end ); Component:AddFunctionHelper( "chase", "pth:e", "Updates the path to chase the entity." )
