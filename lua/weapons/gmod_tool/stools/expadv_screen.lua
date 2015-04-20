@@ -15,7 +15,7 @@ end
 	@: Tool Information
    --- */
 
-	TOOL.Name						= "Screen"
+	TOOL.Name						= "Screen - ExpAdv2"
 	TOOL.Category					= "Expadv2"
 
 if WireLib then

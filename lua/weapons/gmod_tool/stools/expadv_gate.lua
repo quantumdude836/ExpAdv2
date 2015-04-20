@@ -20,7 +20,7 @@ end
 	@: Tool Information
    --- */
 
-	TOOL.Name						= "Gate"
+	TOOL.Name						= "Gate - ExpAdv2"
 	TOOL.Category					= "Expadv2"
 
 if WireLib then

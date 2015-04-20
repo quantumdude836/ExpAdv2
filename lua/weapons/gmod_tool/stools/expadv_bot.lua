@@ -15,7 +15,7 @@ end
 	@: Tool Information
    --- */
 
-	TOOL.Name						= "Bot"
+	TOOL.Name						= "Bot - ExpAdv2"
 	TOOL.Category					= "Expadv2"
 
 if WireLib then
