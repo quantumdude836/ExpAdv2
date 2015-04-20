@@ -26,11 +26,11 @@ function ENT:Initialize( )
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
-	@: Bahavour Thread
+	@: Behavior Thread
    --- */
 
 function ENT:BehaveStart()
-	--MsgN("Behavour started")
+	--MsgN("Behavior started")
 	-- We dont do anything here.
 	-- The script needs to upload and run first.
 end
@@ -38,13 +38,13 @@ end
 function ENT:PostStartUp( )
 	--MsgN("Script Loaded")
 	self.BehaveThread = coroutine.create(function()
-		self:CallEvent("behavour", self.loco)
+		self:CallEvent("behavior", self.loco)
 	end)
 end
 
 function ENT:BehaveUpdate(Interval)
 	if self.BehaveThread and self:IsRunning() then
-		self:CallEvent("behavourUpdate", Interval)
+		self:CallEvent("behaviorUpdate", Interval)
 
 		self.Inthread = true
 		EXPADV.coroutine.resume2(self.Context, self.BehaveThread)
@@ -57,7 +57,7 @@ end
    --- */
 
 function ENT:HandleStuck()
-	self:CallEvent("handelStuck", self.loco)
+	self:CallEvent("handleStuck", self.loco)
 	self.loco:ClearStuck()
 end
 
