@@ -46,7 +46,7 @@ EXPADV.ServerOperators( )
 Component:AddVMFunction( "startActivity", "s", "", function( Context, Trace, Activity )
 	local self = Context.entity
 
-	Thorw(self, Context, Trace, "startActivity")
+	Throw(self, Context, Trace, "startActivity")
 
 	if !BOT_ACTIONS[Activity] then return end
 
@@ -56,7 +56,7 @@ end ); 	Component:AddFunctionHelper( "startActivity", "s", "Start doing an activ
 Component:AddVMFunction( "getActivity", "", "s", function( Context, Trace )
 	local self = Context.entity
 	
-	Thorw(self, Context, Trace, "getActivity")
+	Throw(self, Context, Trace, "getActivity")
 
 	return BOT_ACTIONS[self:GetActivity()] or ""
 end ); 	Component:AddFunctionHelper( "getActivity", "", "Returns the currently running activity; (see http://wiki.garrysmod.com/page/Enums/ACT)." )

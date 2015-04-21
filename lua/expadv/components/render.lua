@@ -329,13 +329,15 @@ end]], "(@fps or 0)" )
 
 Component:AddFunctionHelper( "getFPS", "", "Returns the fps of the screen." )
 
-Component:AddPreparedFunction( "setBackGroundColor", "c", "", [[if IsValid( Context.entity ) and Context.entity.Screen then Context.entity:SetBackGround(@value 1) end]] )
+Component:AddPreparedFunction( "setBackgroundColor", "c", "", [[if IsValid( Context.entity ) and Context.entity.Screen then Context.entity:SetBackGround(@value 1) end]] )
+EXPADV.AddFunctionAlias("setBackGroundColor", "c")
 
 Component:AddFunctionHelper( "setBackGroundColor", "c", "Sets the background color of the screen, setting alpha to 0 makes it transparent." )
 
-Component:AddPreparedFunction( "getBackGroundColor", "", "c", [[if IsValid( Context.entity ) and Context.entity.Screen then 
+Component:AddPreparedFunction( "getBackgroundColor", "", "c", [[if IsValid( Context.entity ) and Context.entity.Screen then 
 	@define col = Context.entity:GetBackGround() 
 end]], "(@col or Color(0,0,0,255)" )
+EXPADV.AddFunctionAlias("getBackGroundColor", "")
 
 Component:AddFunctionHelper( "getBackGroundColor", "", "Returns the background color of the screen." )
 
