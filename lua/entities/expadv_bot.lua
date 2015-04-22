@@ -111,17 +111,25 @@ function ENT:MoveToPos(pos, lookahead, tolerance, maxage, repath)
 end
 
 function ENT:ChaseTarget(ent, lookahead, tolerance)
+	if !IsValid(ent) then
+		return
+	end
+
 	local path = Path("Chase")
 	path:SetMinLookAheadDistance(lookahead or 300)
 	path:SetGoalTolerance(tolerance or 20)
 
 	path:Compute(self, ent:GetPos())
 
-	if !path:IsValid()then 
+	if !path:IsValid() then 
 		return "failed"
 	end
 
 	while path:IsValid() do
+
+		if !!IsValid(ent) then
+			return "failed"
+		end
 
 		path:Compute(self, ent:GetPos())
 		

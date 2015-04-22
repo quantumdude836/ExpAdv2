@@ -361,7 +361,7 @@ Component:AddFunctionHelper( "convertUnit", "s,s,n", "Converts the number from u
 EXPADV.SharedOperators( )
 
 Component:AddPreparedFunction( "sortVectorsByDistance", "ar,v", "", [[
-	if @value 1.__type ~= "v" then self:Throw( @trace, "invoke", "sortVectorsByDistance #1, entity array exspected." ) end
+	if @value 1.__type ~= "v" then Context:Throw( @trace, "invoke", "sortVectorsByDistance #1, entity array exspected." ) end
 	$table.sort( @value 1,
 		function( A, B )
 			return A:Distance( @value 2 ) < B:Distance( @value 2 )

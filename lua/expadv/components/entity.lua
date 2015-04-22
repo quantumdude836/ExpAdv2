@@ -700,7 +700,7 @@ end]], "@Results" )
 Component:AddFunctionHelper( "findInCone", "s,v,v,n,a", "Returns an array with entities found in the given cone by the given model (Model, Position, Direction, Length, Angle)." )
 
 Component:AddPreparedFunction( "sortEntitiesByDistance", "ar,v", "", [[
-if @value 1.__type ~= "e" then self:Throw( @trace, "invoke", "sortEntitiesByDistance #1, entity array exspected." ) end
+if @value 1.__type ~= "e" then Context:Throw( @trace, "invoke", "sortEntitiesByDistance #1, entity array exspected." ) end
 $table.sort( @value 1,
 	function( A, B )
 		return A:GetPos():Distance( @value 2 ) < B:GetPos():Distance( @value 2 )
