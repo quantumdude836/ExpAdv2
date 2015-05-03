@@ -15,11 +15,12 @@ end
 	@: Tool Information
    --- */
 
-	TOOL.Name						= "Screen - ExpAdv2"
+	TOOL.Name						= "ExpAdv2 Screen"
 	TOOL.Category					= "Expadv2"
 
 if WireLib then
 	TOOL.Tab						= "Wire"
+		TOOL.Wire_MultiCategories	= { "Expadv2", "Visuals/Screens" }
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------

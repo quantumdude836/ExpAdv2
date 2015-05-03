@@ -609,8 +609,6 @@ Table:NetWrite(function(Table)
 		net.WriteType(key)
 		net.WriteString(type)
 		Class.WriteToNet(val)
-
-		print("Wrote Table:",key, type, val)
 	end
 
 	net.WriteBool(false)

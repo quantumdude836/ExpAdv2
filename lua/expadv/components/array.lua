@@ -304,7 +304,7 @@ Array:NetWrite(function(array)
 	net.WriteString(array.__type)
 	local Class = EXPADV.ClassShorts[array.__type]
 
-	if !Class or !Class.WriteToNet then
+	if Class and Class.WriteToNet then
 
 		for index, value in pairs(array) do
 			if index == "__type" then continue end
@@ -324,7 +324,7 @@ Array:NetRead(function()
 	
 	local Class = EXPADV.ClassShorts[type]
 
-	if !Class or !Class.ReadFromNet then
+	if Class and Class.ReadFromNet then
 		while net.ReadBool() do
 			array[net.ReadInt(32)] = Class.ReadFromNet()
 		end

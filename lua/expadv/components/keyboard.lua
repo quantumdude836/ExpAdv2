@@ -261,3 +261,54 @@ hook.Add( "PlayerButtonUp", "expadv.keys", function( Ply, Key )
 		end
 	end
 end )
+
+/* --- --------------------------------------------------------------------------------
+@: Keyboard Mode.
+   --- */
+
+EXPADV.ClientOperators()
+
+local PNL
+
+local func = function(ply, bind, pressed)
+	if bind == "+attack" or bind ==  "+attack2" then return nil end
+	return true
+end
+
+Component:AddFeature( "LockInput", "Blocks user input, Useful for virtual keyboards.", "tek/iconexclamation.png" )
+
+Component:AddVMFunction( "lockInput", "b", "", 
+	function( Context, Trace, bool )
+		if CLIENT and !IsValid(Context.entity) or !EXPADV.CanAccessFeature(Context.entity, "LockInput") then return end
+		
+		if bool and !IsValid(PNL) then
+			-- Just jacked this from the wire keyboard :D
+			PNL = vgui.Create("DShape")
+			PNL:SetColor(Color(0, 0, 0, 192))
+			PNL:SetType("Rect")
+
+			local label = vgui.Create("DLabel", PNL)
+			label:SetText("An EXPADV2 gate has locked your keyboard, press Left-Alt to exit.")
+			label:SizeToContents()
+			label:SetPos(6, 6)
+			PNL:SizeToChildren(true, true)
+			label:SetPos(2, 2)
+
+			PNL:CenterHorizontal()
+			PNL:CenterVertical(0.95)
+
+			hook.Add("PlayerBindPress", "expadv.keys", func)
+		elseif !bool and IsValid(PNL) then
+			hook.Remove("PlayerBindPress", "expadv.keys")
+			PNL:Remove()
+		end
+	end )
+
+if CLIENT then
+	hook.Add( "Think", "expadv.keys", function()
+		if IsValid(PNL) and input.IsKeyDown(KEY_LALT) then 
+			hook.Remove("PlayerBindPress", "expadv.keys")
+			PNL:Remove()
+		end
+	end)
+end

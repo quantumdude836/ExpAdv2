@@ -38,6 +38,8 @@ end
 EXPADV.ClientEvents()
 
 Component:AddEvent("requestFeatures", "", "b") -- Return true to show the display.
+Component:AddEvent("acceptedFeatures", "", "")
+Component:AddEvent("rejectedFeatures", "", "")
 
 if CLIENT then
 	function EXPADV.RequestFeatures(Gate, Context)
@@ -156,6 +158,7 @@ function PANEL:Init()
 		end
 
 		self.entity.Context.Data.FeatureRequestMade = true
+		self.entity:CallEvent( "acceptedFeatures" )
 		self:Remove()
 	end
 
@@ -170,7 +173,8 @@ function PANEL:Init()
 	end
 
 	function self.btnClose.DoClick()
-		self.entity.Context.Data.FeatureRequestMade = true
+		self.entity:CallEvent( "rejectedFeatures" )
+		//self.entity.Context.Data.FeatureRequestMade = true
 		self:Remove()
 	end
 end

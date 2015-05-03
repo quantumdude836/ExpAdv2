@@ -20,11 +20,12 @@ end
 	@: Tool Information
    --- */
 
-	TOOL.Name						= "Gate - ExpAdv2"
+	TOOL.Name						= "ExpAdv2 Gate"
 	TOOL.Category					= "Expadv2"
 
 if WireLib then
 	TOOL.Tab						= "Wire"
+	TOOL.Wire_MultiCategories		= { "Expadv2", "Chips, Gates" }
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
