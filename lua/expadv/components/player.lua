@@ -168,6 +168,51 @@ end
 
 Component:AddFunctionHelper("playerByName", "s,b", "Returns the player with the given name, boolean is exact match.")
 
+/* --- --------------------------------------------------------------------------------
+	@: Weapon functions
+   --- */
+
+EXPADV.SharedOperators( )
+
+Component:AddPreparedFunction("weapon", "e:", "e", [[
+if IsValid(@value 1) and (@value 1:IsPlayer() or @value 1:IsNPC()) then
+	@define wep = @value 1:GetActiveWeapon()
+end
+]], "(@wep or Entity(0))")
+
+Component:AddPreparedFunction("weapon", "e:s", "e", [[
+if IsValid(@value 1) and (@value 1:IsPlayer() or @value 1:IsNPC()) then
+	@define wep = @value 1:GetActiveWeapon(@value 2)
+end
+]], "(@wep or Entity(0))")
+
+Component:AddInlineFunction( "primaryAmmoType", "e:", "s", "((@value 1:IsValid() and @value 1:IsWeapon()) and @value 1:GetPrimaryAmmoType() or \"\")" )
+
+Component:AddInlineFunction( "secondaryAmmoType", "e:", "s", "((@value 1:IsValid() and @value 1:IsWeapon()) and @value 1:GetSecondaryAmmoType() or \"\")" )
+
+Component:AddPreparedFunction("ammoCount", "e:s", "n", [[
+if IsValid(@value 1) and @value 1:IsPlayer() then
+	@define count = @value 1:GetAmmoCount(@value 2)
+end
+]], "(@count or 0)")
+
+Component:AddInlineFunction( "clip1", "e:", "n", "((@value 1:IsValid() and @value 1:IsWeapon()) and @value 1:Clip1() or 0)" )
+Component:AddInlineFunction( "clip2", "e:", "n", "((@value 1:IsValid() and @value 1:IsWeapon()) and @value 1:Clip2() or 0)" )
+
+Component:AddVMFunction( "tool", "ply:", "s", function(Context, Trace, Ply)
+	if !IsValid(Ply) or !Ply:IsPlayer() then
+		return ""
+	end
+
+	local Wep = Ply:GetActiveWeapon()
+	
+	if !IsValid(Wep) or Wep:GetClass() ~= "gmod_tool" then
+		return ""
+	end
+
+	return Wep.Mode
+end)
+
 
 /* --- --------------------------------------------------------------------------------
 	@: Player Events
