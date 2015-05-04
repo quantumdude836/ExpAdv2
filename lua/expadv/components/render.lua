@@ -634,7 +634,6 @@ if Context.Data.Materials && Context.Data.Materials[@value 1] then
 end
 ]])
 
-
 /* -----------------------------------------------------------------------------------
 	@: Hud Event
    --- */
@@ -756,7 +755,7 @@ if CLIENT then
 end
 
 /* -----------------------------------------------------------------------------------
-	@: WIP Features.
+	@: Features.
    --- */
 
 Component:AddFeature( "HUD", "Drawing directly onto your heads up display.", "fugue/monitor-window-3d.png" )

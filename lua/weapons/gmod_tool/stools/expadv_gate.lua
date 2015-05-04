@@ -25,7 +25,7 @@ end
 
 if WireLib then
 	TOOL.Tab						= "Wire"
-	TOOL.Wire_MultiCategories		= { "Expadv2", "Chips, Gates" }
+	TOOL.Wire_MultiCategories		= { "Chips, Gates" }
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------

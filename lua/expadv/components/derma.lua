@@ -114,6 +114,22 @@ Component:AddFunctionHelper("onPaint", "dp:d", "Replaces the paint event of the 
 PanelClass:AddPreparedOperator( "=", "n,dp", "", "Context.Memory[@value 1] = @value 2" )
 
 /* -----------------------------------------------------------------------------------
+	@: Added functionality
+--- */
+
+Component:AddPreparedFunction("setVariant", "dp:vr", "", "@value 1.Variant = @value 2")
+Component:AddFunctionHelper( "setVariant", "dp:vr", "Attaches an object to this panel." )
+
+Component:AddPreparedFunction("getVariant", "dp:", "vr", "@value 1.Variant or {0, 'n'}")
+Component:AddFunctionHelper( "getVariant", "dp:", "Returns the object attached to this panel." )
+
+Component:AddPreparedFunction("setPaintedManually", "dp:b", "vr", "@value 1:SetPaintedManually(@value 2)")
+Component:AddFunctionHelper( "setPaintedManually", "dp:b", "Sets this panel to paint outside of itself." )
+
+Component:AddPreparedFunction("paintManual", "dp:", "vr", "@value 1:PaintManual()")
+Component:AddFunctionHelper( "paintManual", "dp:", "Manually paints this panel." )
+
+/* -----------------------------------------------------------------------------------
 	@: Frame
 --- */
 
@@ -469,6 +485,54 @@ Component:AddVMFunction( "cursorImage", "", "dimg", function(Context, Trace)
 end )
 
 Component:AddFunctionHelper( "cursorImage", "", "Returns the cursor image. " )
+
+/* -----------------------------------------------------------------------------------
+	@: DModelPanel
+--- */
+
+local DModelClass = Component:AddClass( "dmodel", "dmdl" )
+
+DModelClass:ExtendClass( "dp" )
+
+DModelClass:AddPreparedOperator( "=", "n,dmdl", "", "Context.Memory[@value 1] = @value 2" )
+
+Component:AddVMFunction( "dmodel", "dp", "dmdl", function(Context, Trace, Panel) return CreatePanel(Context, Trace, "DModelPanel", Panel) end )
+Component:AddVMFunction( "dmodel", "df", "dmdl", function(Context, Trace, Panel) return CreatePanel(Context, Trace, "DModelPanel", Panel) end )
+Component:AddVMFunction( "dmodel", "", "dmdl", function(Context, Trace) return CreatePanel(Context, Trace, "DModelPanel") end )
+
+Component:AddPreparedFunction( "setModel", "dmdl:s", "", [[if IsValid(@value 1) then
+	@value 1:SetModel(@value 2)
+end]] )
+
+Component:AddInlineFunction( "getModel", "dmdl:", "s", [[(IsValid(@value 1) and (@value 1:GetModel() or "") or "")]] )
+
+Component:AddPreparedFunction( "startScene", "dmdl:s", "", [[if IsValid(@value 1) then
+	@value 1:StartScene(@value 2)
+end]] )
+
+Component:AddPreparedFunction( "setFOV", "dmdl:n", "", [[if IsValid(@value 1) then
+	@value 1:SetFOV(@value 2)
+end]] )
+
+Component:AddInlineFunction( "getFOV", "dmdl:", "n", [[(IsValid(@value 1) and (@value 1:GetFOV() or 0) or 0)]] )
+
+Component:AddPreparedFunction( "setCamPos", "dmdl:v", "", [[if IsValid(@value 1) then
+	@value 1:SetCamPos(@value 2)
+end]] )
+
+Component:AddInlineFunction( "getCamPos", "dmdl:", "v", [[(IsValid(@value 1) and (@value 1:GetCamPos() or Vector(0,0,0)) or Vector(0,0,0))]] )
+
+Component:AddPreparedFunction( "setLookatPos", "dmdl:v", "", [[if IsValid(@value 1) then
+	@value 1:SetLookatPos(@value 2)
+end]] )
+
+Component:AddInlineFunction( "getLookatPos", "dmdl:", "v", [[(IsValid(@value 1) and (@value 1:GetLookatPos() or Vector(0,0,0)) or Vector(0,0,0))]] )
+
+Component:AddPreparedFunction( "setLookAngle", "dmdl:a", "", [[if IsValid(@value 1) then
+	@value 1:SetLookAngle(@value 2)
+end]] )
+
+Component:AddInlineFunction( "getLookAngle", "dmdl:", "v", [[(IsValid(@value 1) and (@value 1:GetLookAngle() or Angle(0,0,0)) or Angle(0,0,0))]] )
 
 /* -----------------------------------------------------------------------------------
 	@: Functions for all classes
