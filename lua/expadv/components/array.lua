@@ -20,12 +20,35 @@ Array:DefaultAsLua( function( ) return {__type="void"} end )
 Array:StringBuilder( function( A ) return string.format( "array<%s,%i>", EXPADV.TypeName(A.__type), #A ) end )
 
 /* ---	--------------------------------------------------------------------------------
+	@: Wire Support
+   ---	*/
+
+if WireLib then 
+	Array:WireIO( "STATICARRAY",
+		function(Value, Context) -- To Wire
+	        return table.Copy(Value)
+	    end, function(Value, context) -- From Wire
+	        return table.Copy(Value)
+	    end)
+	
+	if SERVER then
+		WireLib.DT.STATICARRAY = {
+			Zero = {__type = "n"}
+		}
+	end
+end
+
+/* ---	--------------------------------------------------------------------------------
 	@: Basic Operators
    ---	*/
 
 EXPADV.SharedOperators( )
 
-Array:AddPreparedOperator( "=", "n,ar", "", "Context.Memory[@value 1] = @value 2" )
+Array:AddVMOperator( "=", "n,ar", "", function( Context, Trace, MemRef, Value )
+   local Prev = Context.Memory[MemRef]
+   Context.Memory[MemRef] = Value
+   Context.Trigger[MemRef] = Context.Trigger[MemRef] or ( Prev ~= Value )
+end )
 
 Component:AddInlineOperator( "#","ar","n", "#@value 1" )
 
@@ -42,6 +65,7 @@ Component:AddInlineFunction( "unpack", "ar", "...", "$unpack( @value 1 )" )
 
 Component:AddPreparedFunction( "remove", "ar:n", "vr", [[
 if @value 1[@value 2] == nil then Context:Throw(@trace, "array", "array reach index " .. @value 2 .. " returned void" ) end
+Context.TrigMan[@value 1] = true
 ]], "{$table.remove(@value 1, @value 2), @value 1.__type}" )
 
 Component:AddPreparedFunction("connect", "ar:ar", "ar", [[
@@ -130,6 +154,7 @@ function Component:OnPostRegisterClass( Name, Class )
 	Array:AddPreparedOperator( "set", "ar,n," .. Class.Short, "", string.format([[
 		if @value 1.__type ~= %q then Context:Throw(@trace, "array", "array type missmatch, %s expected got " .. EXPADV.TypeName(@value 1.__type)) end
 		if @value 2 <= 0 or @value 2 > 512 or math.floor(@value 2) ~= @value 2 then Context:Throw(@trace, "array", "array index out of bounds.") end
+		Context.TrigMan[@value 1] = true
 		]], Class.Short, Class.Name), "@value 1[@value 2] = @value 3")
 
 /* ---	--------------------------------------------------------------------------------
@@ -170,16 +195,19 @@ function Component:OnPostRegisterClass( Name, Class )
 	Component:AddPreparedFunction( "remove" .. Class.Name, "ar:n", Class.Short, string.format([[
 		if @value 1.__type ~= %q then Context:Throw(@trace, "array", "array type missmatch, %s expected got " .. EXPADV.TypeName(@value 1.__type)) end
 		if @value 1[@value 2] == nil then Context:Throw(@trace, "array", "array reach index " .. @value 2 .. " returned void" ) end
+		Context.TrigMan[@value 1] = true
 		]], Class.Short, Class.Name), "$table.remove(@value 1, @value 2)")
 
 	Component:AddPreparedFunction( "insert", "ar:n," .. Class.Short, "", string.format([[
 		if @value 1.__type ~= %q then Context:Throw(@trace, "array", "array type missmatch, %s expected got " .. EXPADV.TypeName(@value 1.__type)) end
 		if @value 2 <= 0 or @value 2 > 512 or math.floor(@value 2) ~= @value 2 then Context:Throw(@trace, "array", "array index out of bounds.") end
+		Context.TrigMan[@value 1] = true
 		]], Class.Short, Class.Name), "$table.insert(@value 1, @value 2, @value 3)")
 	EXPADV.AddFunctionAlias("insert", "ar,n," .. Class.Short)
 
 	Component:AddPreparedFunction( "insert", "ar:" .. Class.Short, "", string.format([[
 		if @value 1.__type ~= %q then Context:Throw(@trace, "array", "array type missmatch, %s expected got " .. EXPADV.TypeName(@value 1.__type)) end
+		Context.TrigMan[@value 1] = true
 		]], Class.Short, Class.Name), "$table.insert(@value 1, @value 2)")
 	EXPADV.AddFunctionAlias("insert", "ar," .. Class.Short)
 
@@ -305,14 +333,12 @@ Array:NetWrite(function(array)
 	local Class = EXPADV.ClassShorts[array.__type]
 
 	if Class and Class.WriteToNet then
-
-		for index, value in pairs(array) do
-			if index == "__type" then continue end
+		for i, value in pairs(array) do
+			if i == "__type" then continue end
 			net.WriteBool(true)
-			net.WriteInt(index, 32)
+			net.WriteInt(i, 32)
 			Class.WriteToNet(value)
 		end
-	
 	end
 
 	net.WriteBool(false)
@@ -321,12 +347,12 @@ end)
 Array:NetRead(function()
 	local type = net.ReadString()
 	local array = {__type = type}
-	
 	local Class = EXPADV.ClassShorts[type]
 
 	if Class and Class.ReadFromNet then
 		while net.ReadBool() do
-			array[net.ReadInt(32)] = Class.ReadFromNet()
+			local i = net.ReadInt(32)
+			array[i] = Class.ReadFromNet()
 		end
 	end
 

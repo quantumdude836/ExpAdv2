@@ -49,16 +49,11 @@ end
 
 
 function ENT:BuildOutputs( Cells, Ports )
-	local OutClick = { }
 	local Unsorted = { }
 
 	for Variable, Reference in pairs( Ports ) do
 		local Cell = Cells[ Reference ]
 		Unsorted[ #Unsorted + 1 ] = { Variable, Cell.ClassObj.Wire_out_type }
-
-		if Cell.ClassObj.HasUpdateCheck then
-			OutClick[ Reference ] = Variable
-		end
 	end
 
 	table.sort( Unsorted, SortPorts )
@@ -75,7 +70,6 @@ function ENT:BuildOutputs( Cells, Ports )
 	local OldPorts = self.Outputs
 
 	self.OutPorts = Ports
-	self.OutClick = OutClick
 	self.DupeOutPorts = { Names, Types }
 
 	self.Outputs = WireLib.AdjustSpecialOutputs( self, Names, Types )
@@ -124,27 +118,24 @@ function ENT:TriggerInput( Key, Value )
 end
 
 function ENT:TriggerOutputs( )
-		local Context = self.Context
-		if !Context then return end
+	local Context = self.Context
+	if !Context then return end
 
-		local Cells = self.Cells
+	local Cells = self.Cells
 
-		for Name, Reference in pairs( self.OutPorts ) do
-			local Class = Cells[ Reference ].ClassObj
+	for Name, MemRef in pairs( self.OutPorts ) do
+		local Class = Cells[MemRef].ClassObj
+		local Value = Context.Memory[MemRef]
 
-			if Context.Memory[ Reference ] == nil then
-				continue
-			elseif Context.Trigger[ Reference ] then
-				local Value = EXPADV.ConvertToWire(Class.Short, Context.Memory[Reference], Context)
-				WireLib.TriggerOutput( self, Name, Value )
-			elseif Context.OutClick[ Reference ] then
-				local Val = Context.Memory[ Reference ]
-
-				if Val and Val.HasChanged then
-					Val.HasChanged = nil
-					local Value = EXPADV.ConvertToWire(Class.Short, Context.Memory[Reference], Context)
-					WireLib.TriggerOutput( self, Name, Value )
-				end
-			end
+		if Value == nil then continue end
+		//TODO: Possibly output default Value here :D
+			
+		if Context.Trigger[MemRef] or Context.TrigMan[Value] then
+			local WireVal = EXPADV.ConvertToWire(Class.Short, Value, Context)
+			
+			WireLib.TriggerOutput( self, Name, WireVal )
 		end
+	end
+
+	Context.TrigMan = {}
 end

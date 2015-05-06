@@ -30,14 +30,14 @@ if WireLib then String:WireIO( "STRING" ) end
 
 String:NetWrite(function(Str)
 	local len = #Str
-	if len > 512 then Str = Str.sub(1, 512) end
+	if len > 32767 then Str = Str.sub(1, 32767) end
 
-	net.WriteUInt(len, 11)
+	net.WriteUInt(len, 15)
 	net.WriteData(Str, len)
 end)
 
 String:NetRead(function()
-	return net.ReadString(net.ReadUInt(11))
+	return net.ReadData(net.ReadUInt(15))
 end)
 
 /* --- --------------------------------------------------------------------------------

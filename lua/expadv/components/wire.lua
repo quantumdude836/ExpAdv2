@@ -233,7 +233,11 @@ Array:DefaultAsLua({})
 
 /* --- ------------------------------------------------------------------------------*/
 
-Array:AddPreparedOperator( "=", "n,wa", "", "Context.Memory[@value 1] = @value 2" )
+Array:AddVMOperator( "=", "n,wa", "", function( Context, Trace, MemRef, Value )
+   local Prev = Context.Memory[MemRef]
+   Context.Memory[MemRef] = Value
+   Context.Trigger[MemRef] = Context.Trigger[MemRef] or ( Prev ~= Value )
+end )
 
 Component:AddInlineOperator( "#","wa","n", "#@value 1" )
 
@@ -252,6 +256,7 @@ Component:AddFunctionHelper( "wireArray", "", "Returns an empty wire array objec
 	Array:AddVMOperator( "set", "wa,n,n", "",
 		function(Context, Trace, Array, Index, Value)
 			Array[math.floor(Index)] = Value
+			Context.TrigMan[Array] = true
 		end)
 
 --VECTOR:
@@ -265,6 +270,7 @@ Component:AddFunctionHelper( "wireArray", "", "Returns an empty wire array objec
 	Array:AddVMOperator( "set", "wa,n,v", "",
 		function(Context, Trace, Array, Index, Value)
 			Array[math.floor(Index)] = Value
+			Context.TrigMan[Array] = true
 		end)
 
 --ANGLE:
@@ -278,6 +284,7 @@ Component:AddFunctionHelper( "wireArray", "", "Returns an empty wire array objec
 	Array:AddVMOperator( "set", "wa,n,a", "",
 		function(Context, Trace, Array, Index, Value)
 			Array[math.floor(Index)] = Value
+			Context.TrigMan[Array] = true
 		end)
 
 --COLOR:
@@ -291,6 +298,7 @@ Component:AddFunctionHelper( "wireArray", "", "Returns an empty wire array objec
 	Array:AddVMOperator( "set", "wa,n,c", "",
 		function(Context, Trace, Array, Index, Value)
 			Array[math.floor(Index)] = Value
+			Context.TrigMan[Array] = true
 		end)
 
 --ENTITY:
@@ -303,6 +311,7 @@ Component:AddFunctionHelper( "wireArray", "", "Returns an empty wire array objec
 	Array:AddVMOperator( "set", "wa,n,c", "",
 		function(Context, Trace, Array, Index, Value)
 			Array[math.floor(Index)] = Value
+			Context.TrigMan[Array] = true
 		end)
 
 --STRING:
@@ -315,4 +324,81 @@ Component:AddFunctionHelper( "wireArray", "", "Returns an empty wire array objec
 	Array:AddVMOperator( "set", "wa,n,s", "",
 		function(Context, Trace, Array, Index, Value)
 			Array[math.floor(Index)] = Value
+			Context.TrigMan[Array] = true
 		end)
+
+/* --- --------------------------------------------------------------------------------
+	@: Wire Array's are dumb lets make them easier to use.
+   --- */
+
+Component:AddVMFunction( "numberArray", "wa", "ar",
+	function(Context, Trace, WireArray)
+		local Array = {__type = "n"}
+
+		for k, v in pairs(WireArray) do
+			if !isnumber(v) then continue end
+			Array[k] = v
+		end
+
+		return Array
+	end)
+
+Component:AddVMFunction( "stringArray", "wa", "ar",
+	function(Context, Trace, WireArray)
+		local Array = {__type = "s"}
+
+		for k, v in pairs(WireArray) do
+			if !isstring(v) then continue end
+			Array[k] = v
+		end
+
+		return Array
+	end)
+
+Component:AddVMFunction( "entityArray", "wa", "ar",
+	function(Context, Trace, WireArray)
+		local Array = {__type = "e"}
+
+		for k, v in pairs(WireArray) do
+			if !isentity(v) then continue end
+			Array[k] = v
+		end
+
+		return Array
+	end)
+
+Component:AddVMFunction( "vectorArray", "wa", "ar",
+	function(Context, Trace, WireArray)
+		local Array = {__type = "v"}
+
+		for k, v in pairs(WireArray) do
+			if !(isvector(v) or (istable(v) and #v == 3)) then continue end
+			Array[k] = Vector(v[1] or 0, v[2] or 0, v[3] or 0)
+		end
+
+		return Array
+	end)
+
+Component:AddVMFunction( "vector2Array", "wa", "ar",
+	function(Context, Trace, WireArray)
+		local Array = {__type = "v"}
+
+		for k, v in pairs(WireArray) do
+			if !(istable(v) and #v == 2) then continue end
+			Array[k] = Vector2(v[1] or 0, v[2] or 0)
+		end
+
+		return Array
+	end)
+
+Component:AddVMFunction( "angleArray", "wa", "ar",
+	function(Context, Trace, WireArray)
+		local Array = {__type = "a"}
+
+		for k, v in pairs(WireArray) do
+			if !(isangle(v) or (istable(v) and #v == 3)) then continue end
+			Array[k] = Angle(v[1] or 0, v[2] or 0, v[3] or 0)
+		end
+
+		return Array
+	end)

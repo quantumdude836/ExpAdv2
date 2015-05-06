@@ -159,11 +159,15 @@ EXPADV.AddFunctionAlias("invoke", "d")
 	Not working :/
 */
 
-/* --- -------------------------------------------------------------------------------
-	@: NEW: Not happening now!
+/* --- --------------------------------------------------------------------------------
+	@: Client and Server
    --- */
 
-//EXPADV.AddInlineOperator( nil, "new", "s,s,...", "_vr", "Context.Classes['@value 1']['@value 2'](nil ,@...)")
+EXPADV.AddInlineFunction( nil,  "server", "", "b", "$SERVER" )
+EXPADV.AddFunctionHelper( nil, "server", "", "Returns true if running serverside." )
+
+EXPADV.AddInlineFunction( nil, "client", "", "b", "$CLIENT" )
+EXPADV.AddFunctionHelper( nil, "client", "", "Returns true if running clientside." )
 
 
 /* --- -------------------------------------------------------------------------------

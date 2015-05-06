@@ -271,13 +271,9 @@ function Compiler:GetClass( Trace, ClassName, bNoError )
 		Class = EXPADV.GetClass( ClassName, true )
 	end
 	
-	//if self.Classes[ClassName] then
-	//	return self:GetUserClass(ClassName)
-	//end
-
 	if !Class and bNoError then return end
 
-	if !Class then --or (Class.Name ~= ClassName and !EXPADV.ClassAliases[ ClassName ] ) then
+	if !Class then
 		if bNoError then return end
 		self:TraceError( Trace, "No such class %q", ClassName or "Error" )
 	end
@@ -344,20 +340,14 @@ end
 
    function Compiler:PushLambdaDeph( )
 		self:PushMemory( )
-		//self:PushClassDeph(false)
-   		self.LambdaDeph = self.LambdaDeph + 1
+		self.LambdaDeph = self.LambdaDeph + 1
    end
 
    function Compiler:PopLambdaDeph( )
    		local Memory = self:PopMemory( )
-   		//self:PopClassDeph()
    		self.LambdaDeph = self.LambdaDeph - 1
    		return Memory
    end
-
-   //function Compiler:FlushMemory( Trace, Memory )
-	//	return string.format( "local Context = Context:Push( %s, %s )", EXPADV.ToLua( Trace ), EXPADV.ToLua( Memory or { } ) )
-   //end
 
    function Compiler:PushReturnDeph( ForceClass, Optional )
    		self.ReturnDeph = self.ReturnDeph + 1
@@ -372,18 +362,6 @@ end
    		self.ReturnTypes[ self.ReturnDeph ] = nil
    		self.ReturnDeph = self.ReturnDeph - 1
    end
-
-   /*function Compiler:PushClassDeph(InClass)
-   		self.ClassDeph = self.ClassDeph + 1
-   		self.ClassMemory[self.ClassDeph] = InClass
-   		self.InClass = InClass
-   end
-
-   function Compiler:PopClassDeph( )
-   		self.ClassMemory[self.ClassDeph] = nil
-   		self.ClassDeph = self.ClassDeph - 1
-   		self.InClass = self.ClassMemory[self.ClassDeph]
-   	end*/
 
 /* --- --------------------------------------------------------------------------------
 	@: Memory Cells
@@ -472,23 +450,6 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier, Comparator )
 		return self.Cells[ MemRef ]
 	end
 
-	/*if Modifier == "class" then
-		local MemRef = self.Scope[ Variable ]
-
-		if MemRef and self:TestCell( Trace, MemRef, Class, Variable, Comparator ) then
-			return self.Cells[ MemRef ]
-		end
-
-		MemRef = self:NextMemoryRef( )
-
-		self.Scope[Variable] = MemRef
-		self.ClassCells[MemRef] = MemRef
-		self.Cells[MemRef] = { Variable = Variable, Memory = MemRef, Scope = self.ScopeID, Return = ClassObj.Short, ClassObj = ClassObj, Modifier = "class", Server = self.IsServerScript, Client = self.IsClientScript }
-		self.curClass.Cells[MemRef] = MemRef
-
-		return self.Cells[ MemRef ]
-	end*/
-
 	if Modifier == "static" then
 		local MemRef = self.Scope[ Variable ]
 
@@ -526,7 +487,7 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier, Comparator )
 		return self.Global[ MemRef ]
 	end
 
-	if Modifier == "synced" then
+	/*if Modifier == "synced" then
 		if !ClassObj.WriteToNet or !ClassObj.ReadFromNet then
 			self:TraceError( Trace, "Synced variables of class %q are not supported.", Class )
 		end
@@ -546,13 +507,13 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier, Comparator )
 		self.Cells[ MemRef ] = { Variable = Variable, Memory = MemRef, Scope = self.ScopeID, Return = ClassObj.Short, ClassObj = ClassObj, Modifier = "synced", Server = self.IsServerScript, Client = self.IsClientScript }
 
 		return self.Cells[ MemRef ]
-	end
+	end*/
 
 	if WireLib then
 		if Modifier == "input" or Modifier == "output" then
 			if Variable[1] ~= Variable[1]:upper( ) then
 				self:TraceError( Trace, "Wire %s's require captialization.", Modifier )
-			elseif self.IsClientScript and (!ClassObj.WriteToNet or !ClassObj.ReadFromNet) then
+			elseif self.IsClientScript then -- and (!ClassObj.WriteToNet or !ClassObj.ReadFromNet) then
 				self:TraceError( Trace, "Wire %s's of type %s can not appear clientside.", Modifier, Variable)
 			end
 		end
@@ -596,8 +557,6 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier, Comparator )
 
 				self.Cells[ MemRef ] = { Variable = Variable, Memory = MemRef, Scope = 0, Return = ClassObj.Short, ClassObj = ClassObj, Modifier = "output", Server = true, Client = false }
 				self.OutPorts[ Variable ] = MemRef
-
-				if ClassObj.HasUpdateCheck then self.OutClick[ MemRef ] = true end
 			end
 
 			if self.Scope[ Variable ] then
@@ -829,7 +788,7 @@ function EXPADV.CreateCompiler(Script, Files)
 	
 	self:BuildScopes()
 	self.Delta, self.Memory = { }, { }
-	self.Cells, self.SyncVars, self.InPorts, self.OutPorts, self.OutClick = { }, { }, { }, { }, { }
+	self.Cells, self.SyncVars, self.InPorts, self.OutPorts = { }, { }, { }, { }
 	self.FreshMemory, self.MemoryDeph, self.LambdaDeph, self.LoopDeph = { }, 0, 0, 0
 	self.ReturnOptional, self.ReturnTypes, self.ReturnDeph = { }, { }, 0
 	self.ClassDeph, self.ClassCells, self.ClassMemory, self.Classes  = 0, { }, { }, {}

@@ -54,7 +54,7 @@ end
 
 -- Overrides the changed check to use 'Obj.HasChanged == true'
 function BaseClassObj:UsesHasChanged( )
-	self.HasUpdateCheck = true
+	print("Depricated use of Class:UsesHasChanged() for " .. self.Name)
 end
 
 /* --- --------------------------------------------------------------------------------

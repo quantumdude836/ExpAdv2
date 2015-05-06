@@ -22,6 +22,7 @@ function EXPADV.BuildNewContext( Instance, Player, Entity ) -- Table, Player, En
 	local Context = setmetatable( { player = Player, entity = Entity, Online = false }, EXPADV.RootContext )
 
 	Context.Trigger = { }
+	Context.TrigMan = { }
 	Context.Changed = { }
 
 	Context.Memory = {  }
@@ -30,9 +31,7 @@ function EXPADV.BuildNewContext( Instance, Player, Entity ) -- Table, Player, En
 	Context.Data = { }
 	Context.Definitions = { }
 	
-	//Context.Classes = { }
 	Context.Cells = Instance.Cells or { }
-	Context.OutClick = Instance.OutClick or { }
 	Context.Strings = Instance.Strings or { }
 	Context.Traces = Instance.Traces or { }
 	Context.Instructions = Instance.VMInstructions or { }
