@@ -936,6 +936,101 @@ end]], "(@disp or \"\")")
 
 Component:AddFunctionHelper( "npcGetRelationship", "e:e", "Gets the npc's relationship with another entity as a string.")
    
+/* --- --------------------------------------------------------------------------------
+	@: Bones
+   --- */
+
+EXPADV.SharedOperators()
+
+Component:AddVMFunction( "setBoneJiggle", "e:n,b", "",
+	function(Context, Trace, Entity, Bone, Bool)
+		if IsValid(Entity) then
+			if Bone < 1 or Bone > Entity:GetBoneCount( ) then return end
+			if !EXPADV.PPCheck(Context, Entity) then return end
+			Entity:ManipulateBoneJiggle( Bone - 1, Bool and 1 or 0 )
+		end
+	end)
+
+Component:AddVMFunction( "getBoneJiggle", "e:n", "b",
+	function(Context, Trace, Entity, Bone)
+		if IsValid(Entity) then
+			if Bone < 1 or Bone > Entity:GetBoneCount( ) then return false end
+			if !EXPADV.PPCheck(Context, Entity) then return false end
+			return Entity:GetManipulateBoneJiggle( Bone - 1)
+		end
+
+		return false
+	end)
+
+Component:AddVMFunction( "setBonePos", "e:n,v", "",
+	function(Context, Trace, Entity, Bone, Vec)
+		if IsValid(Entity) then
+			if Bone < 1 or Bone > Entity:GetBoneCount( ) then return end
+			if !EXPADV.PPCheck(Context, Entity) then return end
+			Entity:ManipulateBonePosition( Bone - 1, Vec)
+		end
+	end)
+
+Component:AddVMFunction( "getBonePos", "e:n", "v",
+	function(Context, Trace, Entity, Bone)
+		if IsValid(Entity) then
+			if Bone < 1 or Bone > Entity:GetBoneCount( ) then return Vector(0,0,0) end
+			if !EXPADV.PPCheck(Context, Entity) then return Vector(0,0,0) end
+			return Entity:GetManipulateBonePosition( Bone - 1)
+		end
+
+		return Vector(0,0,0)
+	end)
+
+Component:AddVMFunction( "setBoneScale", "e:n,v", "",
+	function(Context, Trace, Entity, Bone, Vec)
+		if IsValid(Entity) then
+			if Bone < 1 or Bone > Entity:GetBoneCount( ) then return end
+			if !EXPADV.PPCheck(Context, Entity) then return end
+			Entity:ManipulateBoneScale( Bone - 1, Vec)
+		end
+	end)
+
+Component:AddVMFunction( "getBoneScale", "e:n", "v",
+	function(Context, Trace, Entity, Bone)
+		if IsValid(Entity) then
+			if Bone < 1 or Bone > Entity:GetBoneCount( ) then return Vector(0,0,0) end
+			if !EXPADV.PPCheck(Context, Entity) then return Vector(0,0,0) end
+			return Entity:GetManipulateBoneScale( Bone - 1)
+		end
+
+		return Vector(0,0,0)
+	end)
+
+Component:AddVMFunction( "setBoneAng", "e:n,a", "",
+	function(Context, Trace, Entity, Bone, Ang)
+		if IsValid(Entity) then
+			if Bone < 1 or Bone > Entity:GetBoneCount( ) then return end
+			if !EXPADV.PPCheck(Context, Entity) then return end
+			Entity:ManipulateBoneAngles( Bone - 1, Ang)
+		end
+	end)
+
+Component:AddVMFunction( "getBoneAng", "e:n", "a",
+	function(Context, Trace, Entity, Bone)
+		if IsValid(Entity) then
+			if Bone < 1 or Bone > Entity:GetBoneCount( ) then return Angle(0,0,0) end
+			if !EXPADV.PPCheck(Context, Entity) then return Angle(0,0,0) end
+			return Entity:GetManipulateBoneAngles( Bone - 1)
+		end
+
+		return Angle(0,0,0)
+	end)
+
+Component:AddFunctionHelper( "setBonePos", "e:n,v", "Sets the position of bone N on the entity." )
+Component:AddFunctionHelper( "setBoneAngle", "e:n,a", "Sets the angle of bone N on the entity." )
+Component:AddFunctionHelper( "setBoneScale", "e:n,v", "Sets the scale of bone N on the entity." )
+Component:AddFunctionHelper( "jiggleBone", "e:n,b", "Makes the bone N on the entity jiggle about when B is true." )
+Component:AddFunctionHelper( "getBonePos", "e:n", "Gets the position of bone N on entity." )
+Component:AddFunctionHelper( "getBoneAng", "e:n", "Gets the angle of bone N on entity." )
+Component:AddFunctionHelper( "getBoneScale", "e:n", "Gets the scale of bone N on entity." )
+Component:AddFunctionHelper( "boneCount", "e:", "Returns the ammount of bones of a entity." )
+Component:AddFunctionHelper( "boneParent", "e:n", "The bode ID of the bone to get parent of." )
 
 /* --- --------------------------------------------------------------------------------
 	@: Entity Events
