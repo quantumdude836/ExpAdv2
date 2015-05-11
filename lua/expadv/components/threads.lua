@@ -38,11 +38,11 @@ EXPADV.coroutine.needsops = function() return _ops end
 
 EXPADV.SharedOperators( )
 
-Component:AddInlineFunction("isDead", "cr:", "b", "($coroutine.status(@value 1) == \"dead\"")
+Component:AddInlineFunction("isDead", "cr:", "b", "($coroutine.status(@value 1) == \"dead\")")
 
-Component:AddInlineFunction("isSuspended", "cr:", "b", "($coroutine.status(@value 1) == \"suspended\"")
+Component:AddInlineFunction("isSuspended", "cr:", "b", "($coroutine.status(@value 1) == \"suspended\")")
 
-Component:AddInlineFunction("isRunning", "cr:", "b", "($coroutine.status(@value 1) == \"running\"")
+Component:AddInlineFunction("isRunning", "cr:", "b", "($coroutine.status(@value 1) == \"running\")")
 
 /*--------------------------------------------------------------------------------------------------------------------*/
 
