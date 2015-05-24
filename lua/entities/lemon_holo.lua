@@ -125,10 +125,12 @@ function ENT:OnRemove( )
 	INFOTABLE[ self:EntIndex( ) ] = nil
 	RemoveQueue[ self:EntIndex( ) ] = true
 
-	if IsValid( self.player ) then
-		self.player:SetNWInt( "lemon.holograms", self.player:GetNWInt( "lemon.holograms", 0 ) - 1 )
-	end
+	self:LowerCount()
 end
+
+function ENT:LowerCount()
+end
+
 /*==============================================================================================
     Section: Queue System
 ==============================================================================================*/
@@ -688,10 +690,6 @@ if SERVER then
 		local Y = math.Clamp( Scale.y, -ScaleLimit, ScaleLimit )
 		local Z = math.Clamp( Scale.z, -ScaleLimit, ScaleLimit )
 
-		--MsgN( "Set Scale:")
-		--MsgN( "-Origonal: ", Scale )
-		--MsgN( "-Clamped: ", Vector(X,Y,Z) )
-
 		if self.INFO.SCALEX ~= X then
 			self.INFO.SCALEX = X
 			self.SYNC_SCALEX = true
@@ -956,21 +954,37 @@ if SERVER then
 	
 	function ENT:MoveTo( Vector, Speed )
 		self.MOVETO = Vector
+		self.MOVEDIR = nil
 		self.MOVESPEED = Speed
+	end
+
+	function ENT:StartMove( Dir )
+		self.MOVETO = nil
+		self.MOVESPEED = nil
+		self.MOVEDIR = Dir
 	end
 
 	function ENT:StopMove( )
 		self.MOVETO = nil
+		self.MOVEDIR = nil
 		self.MOVESPEED = nil
 	end
 
 	function ENT:RotateTo( Angle, Speed )
 		self.ROTATETO = Angle
+		self.ROTATEAXIS = nil
 		self.ROTATESPEED = Speed
+	end
+
+	function ENT:StartRotate( Angle )
+		self.ROTATETO = nil
+		self.ROTATESPEED = nil
+		self.ROTATEAXIS = Angle
 	end
 
 	function ENT:StopRotate( )
 		self.ROTATETO = nil
+		self.ROTATEAXIS = nil
 		self.ROTATESPEED = nil
 	end
 
@@ -995,7 +1009,9 @@ if SERVER then
 	function ENT:Think( )
 		local TickRate =  engine.TickInterval()
 
-		if self.MOVETO and self.MOVESPEED then
+		if self.MOVEDIR then
+			self:SetPos(self:LocalToWorld(self.MOVEDIR * TickRate))
+		elseif self.MOVESPEED and self.MOVETO then
 			local Pos = self:GetPos( )
 
 			Pos.x = Pos.x + math.Clamp( self.MOVETO.x - Pos.x, -self.MOVESPEED * TickRate, self.MOVESPEED * TickRate )
@@ -1004,10 +1020,15 @@ if SERVER then
 
 			self:SetPos( Pos )
 
-			if Pos == self.MOVETO then self:StopMove( ) end
+			if Pos == self.MOVETO then
+				self:StopMove( )
+				if self.PostFinishMove then self:PostFinishMove() end
+			end
 		end
 
-		if self.ROTATETO and self.ROTATESPEED then
+		if self.ROTATEAXIS then
+			self:SetAngles(self:LocalToWorldAngles(self.ROTATEAXIS * TickRate))
+		elseif self.ROTATESPEED and self.ROTATETO then
 			local Ang = self:GetAngles( )
 
 			Ang.p = Ang.p + math.Clamp( self.ROTATETO.p - Ang.p, -self.ROTATESPEED * TickRate, self.ROTATESPEED * TickRate )
@@ -1016,7 +1037,10 @@ if SERVER then
 
 			self:SetAngles( Ang )
 
-			if Ang == self.ROTATETO then self:StopRotate( ) end
+			if Ang == self.ROTATETO then
+				self:StopRotate( )
+				if self.PostFinishRotate then self:PostFinishRotate() end
+			end
 		end
 
 		if self.SCALETO and self.SCALESPEED then
@@ -1028,11 +1052,11 @@ if SERVER then
 
 			self:SetScale( Scale )
 
-			if Pos == self.SCALETO then self:StopScale( ) end
+			if Pos == self.SCALETO then
+				self:StopScale( )
+				if self.PostFinishScalethen then self:PostFinishScale() end
+			end
 		end
-
-		//self:NextThink( CurTime( ) )
-		//return true
 	end
 
 /*==============================================================================================

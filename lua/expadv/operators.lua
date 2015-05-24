@@ -362,6 +362,16 @@ function EXPADV.AddFunctionHelper( Component, Name, Input, Description )
 end
 
 /* --- --------------------------------------------------------------------------------
+	@: PreCompile Callback
+   --- */
+
+local Temp_Callbacks = { }
+
+function EXPADV.AddFunctionPreCompile( Component, Name, Input, Function )
+	Temp_Callbacks[string_format( "%s(%s)", Name, Input or "" )] = Function
+end
+
+/* --- --------------------------------------------------------------------------------
 	@: Load our functions
    --- */
 
@@ -406,10 +416,10 @@ function EXPADV.LoadFunctions( )
 			Operator.Return = Class.Short
 		end
 
-		-- Get Helper Data
+		-- Get Helper Data and callback
 
 		Operator.Description = Temp_HelperData[string_format( "%s(%s)", Operator.Name, Operator.Input or "" )]
-
+		Operator.Precompile = Temp_Callbacks[string_format( "%s(%s)", Operator.Name, Operator.Input or "" )]
 		-- Second we check the input types, and build our signatures!
 		local ShouldNotLoad = false
 
@@ -515,6 +525,8 @@ function EXPADV.LoadFunctions( )
 	end
 
 	if CLIENT then Temp_HelperData = nil end
+	
+	Temp_Callbacks = nil
 
 	EXPADV.CallHook( "PostLoadFunctions" )
 end

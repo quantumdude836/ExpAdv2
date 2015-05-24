@@ -130,6 +130,8 @@ function BaseComponent:CreateSetting( Name, Default ) -- String, Obj
 	Name = string.lower( Name )
 
 	Config[ Name ] = Config[ Name ] or Default
+
+	return Default
 end
 
 -- Reads a setting from the config.
@@ -153,6 +155,8 @@ function BaseComponent:CreateUserSetting( Name, Default ) -- String, Obj
 	Name = string.lower( Name )
 
 	Config[ Name ] = Config[ Name ] or Default
+
+	return Default
 end
 
 -- Reads a setting from the config.

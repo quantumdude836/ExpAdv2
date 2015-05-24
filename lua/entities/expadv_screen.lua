@@ -408,6 +408,7 @@ end
    --- */
 
 function ENT:GetOverlayPos( )
-	return self:ScreenToWorld( Vector2( 512, 256 ) )
+	local res = self:GetResolution(512)
+	return self:ScreenToWorld( Vector2(res, res * 0.5) )
 end
 

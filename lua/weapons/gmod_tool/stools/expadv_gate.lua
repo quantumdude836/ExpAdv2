@@ -49,6 +49,7 @@ local GateModels = { }
 
 table.insert( GateModels, "models/lemongate/lemongate.mdl" )
 table.insert( GateModels, "models/shadowscion/lemongate/gate.mdl" )
+table.insert( GateModels, "models/mandrac/wire/e3.mdl" )
 
 if WireLib then
 	table.insert( GateModels, "models/bull/gates/processor.mdl" )
