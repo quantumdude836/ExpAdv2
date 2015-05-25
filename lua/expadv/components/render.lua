@@ -121,12 +121,14 @@ Component:AddFunctionHelper( "drawTextAlignedRight", "v2,s", "Draws a line of te
 
 Component:AddPreparedFunction( "getTextureSize", "s", "n", "$surface.GetTextureSize( $surface.GetTextureID( @value 1 ) )" )
 Component:AddPreparedFunction( "setDrawTexture", "s", "", "$surface.SetTexture( $surface.GetTextureID( @value 1 ) )" )
+Component:AddPreparedFunction( "noDrawTexture", "", "", "$draw.NoTexture()" )
 Component:AddPreparedFunction( "setDrawColor", "n,n,n,n", "", "$surface.SetDrawColor( @value 1, @value 2, @value 3, @value 4 )" )
 EXPADV.AddFunctionAlias( "setDrawColor", "n,n,n" )
 EXPADV.AddFunctionAlias( "setDrawColor", "c" )
 
 Component:AddFunctionHelper( "getTextureSize", "s", "Returns the size of a texture" )
 Component:AddFunctionHelper( "setDrawTexture", "s", "Sets the texture used for rendering polys and boxs" )
+Component:AddFunctionHelper( "noDrawTexture", "", "Removes the draw texture." )
 Component:AddFunctionHelper( "setDrawColor", "n,n,n,n", "Sets the color used for next draw operations" )
 
 /* -----------------------------------------------------------------------------------
@@ -145,16 +147,50 @@ Component:AddFunctionHelper( "drawLine", "v2,v2", "Draws a line between 2 points
 
 Component:AddPreparedFunction( "drawBox", "v2,v2", "", "$surface.DrawRect( @value 1.x, @value 1.y, @value 2.x, @value 2.y )" )
 
+Component:AddPreparedFunction( "drawBox", "v2,v2,n", "", [[
+	$draw.NoTexture()
+	$surface.DrawTexturedRectRotated( @value 1.x, @value 1.y, @value 2.x, @value 2.y, @value 3 )
+]])
+
+Component:AddPreparedFunction( "drawBox", "v2,v2,n", "", [[
+	$draw.NoTexture()
+	$surface.DrawTexturedRectRotated( @value 1.x, @value 1.y, @value 2.x, @value 2.y, @value 3 )
+]])
+
+Component:AddPreparedFunction( "drawBox", "v2,v2,n,v2", "", [[
+	$draw.NoTexture()
+
+	@define c = math.cos(math.rad(@value 3))
+	@define s = math.sin(math.rad(@value 3))
+
+	@define x = @value 4.y * @s - @value 4.x * @c
+	@define y = @value 4.y * @c + @value 4.x * @s
+
+	$surface.DrawTexturedRectRotated( @value 1.x + @x, @value 1.y + @y, @value 2.x, @value 2.y, @value 3 )
+]])
+
 Component:AddPreparedFunction( "drawTexturedBox", "v2,v2", "", "$surface.DrawTexturedRect( @value 1.x, @value 1.y, @value 2.x, @value 2.y )" )
 
 Component:AddPreparedFunction( "drawTexturedBox", "v2,v2,n", "", "$surface.DrawTexturedRectRotated( @value 1.x, @value 1.y, @value 2.x, @value 2.y, @value 3 )" )
 
 Component:AddPreparedFunction( "drawTexturedBox", "v2,v2,n,n,n,n", "", "$surface.DrawTexturedRectUV( @value 1.x, @value 1.y, @value 2.x, @value 2.y, @value 3, @value 4, @value 5, @value 6 )" )
 
+Component:AddPreparedFunction( "drawTexturedBox", "v2,v2,n,v2", "", [[
+	@define c = math.cos(math.rad(@value 3))
+	@define s = math.sin(math.rad(@value 3))
+
+	@define x = @value 4.y * @s - @value 4.x * @c
+	@define y = @value 4.y * @c + @value 4.x * @s
+
+	$surface.DrawTexturedRectRotated( @value 1.x + @x, @value 1.y + @y, @value 2.x, @value 2.y, @value 3 )
+]])
 
 Component:AddFunctionHelper( "drawBox", "v2,v2", "Draws a box ( Position, Size )." )
+Component:AddFunctionHelper( "drawBox", "v2,v2,n", "Draws a rotated box ( Position, Size, Angle )" )
+Component:AddFunctionHelper( "drawBox", "v2,v2,n,v2", "Draws a rotated box ( Position, Size, Angle, Origin of rotation )" )
 Component:AddFunctionHelper( "drawTexturedBox", "v2,v2", "Draws a textured box ( Position, Size )." )
 Component:AddFunctionHelper( "drawTexturedBox", "v2,v2,n", "Draws a rotated textured box ( Position, Size, Angle )." )
+Component:AddFunctionHelper( "drawTexturedBox", "v2,v2,n,v2", "Draws a rotated textured box ( Position, Size, Angle, Origin of rotation )" )
 Component:AddFunctionHelper( "drawTexturedBox", "v2,v2,n,n,n,n", "Draws a textured box with uv co-ordinates ( Position, Size, U1, V1, U2, V2 )." )
 
 /* -----------------------------------------------------------------------------------
@@ -200,7 +236,7 @@ local function Counterclockwise( a, b, c )
 end
  
 local function DrawPoly(Array)
-	render.CullMode(Counterclockwise(unpack(Array)) and MATERIAL_CULLMODE_CCW or MATERIAL_CULLMODE_CW )
+	render.CullMode(Counterclockwise(Array[1], Array[2], Array[3]) and MATERIAL_CULLMODE_CCW or MATERIAL_CULLMODE_CW )
 	surface.DrawPoly(Array)
 	render.CullMode(MATERIAL_CULLMODE_CCW)
 end

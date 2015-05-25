@@ -120,7 +120,7 @@ PanelClass:AddPreparedOperator( "=", "n,dp", "", "Context.Memory[@value 1] = @va
 Component:AddPreparedFunction("setVariant", "dp:vr", "", "@value 1.Variant = @value 2")
 Component:AddFunctionHelper( "setVariant", "dp:vr", "Attaches an object to this panel." )
 
-Component:AddPreparedFunction("getVariant", "dp:", "vr", "@value 1.Variant or {0, 'n'}")
+Component:AddInlineFunction("getVariant", "dp:", "vr", "@value 1.Variant or {0, 'n'}")
 Component:AddFunctionHelper( "getVariant", "dp:", "Returns the object attached to this panel." )
 
 Component:AddPreparedFunction("setPaintedManually", "dp:b", "vr", "@value 1:SetPaintedManually(@value 2)")

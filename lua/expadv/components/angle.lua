@@ -201,7 +201,7 @@ Component:AddFunctionHelper( "snapToRoll", "a:n", "Snaps the angle's roll to nea
 	@: Casting
    --- */
 
-Component:AddInlineOperator( "string", "a", "s", [[string.format("Ang<%i,%i,%i>",@value 1.p, @value 1.y, @value 1.r)]] )
+Component:AddInlineOperator( "string", "a", "s", [[string.format("Ang<%i, %i, %i>",@value 1.p, @value 1.y, @value 1.r)]] )
 
 /* --- --------------------------------------------------------------------------------
     @: World and Axis
