@@ -341,7 +341,7 @@ local function CreateOptions( )
 	
 	local Cvars = Panel:Add( "DHorizontalScroller" )
 	Cvars:Dock( TOP ) 
-	Cvars:DockMargin( 10, 5, 10, 0 )
+	Cvars:DockMargin( 10, 9, 10, 0 )
 	Cvars:AddPanel( kinect )
 	Cvars:AddPanel( Talk )
 	--Cvars:AddPanel( Console )
@@ -351,10 +351,17 @@ local function CreateOptions( )
 	CC:SetText( "Enable code completion " ) 
 	CC:SetConVar( "expadv_editor_codecompletion" )
 	CC:Dock( TOP ) 
-	CC:DockMargin( 10, 0, 10, 5 )
+	CC:DockMargin( 10, 0, 10, 9 )
 	CC:SizeToContents( )
 	
-	Panel:SetSize( 300, 315 ) 
+	local AInd = Panel:Add( "DCheckBoxLabel" ) 
+	AInd:SetText( "Enable auto indentation " ) 
+	AInd:SetConVar( "expadv_editor_autoindent" )
+	AInd:Dock( TOP ) 
+	AInd:DockMargin( 10, 0, 10, 9 )
+	AInd:SizeToContents( )
+	
+	Panel:SetSize( 300, 342 ) 
 	Panel:SetPos( cookie.GetNumber( "eaoptions_x", ScrW( ) / 2 - Panel:GetWide( ) / 2 ), cookie.GetNumber( "eaoptions_y", ScrH( ) / 2 - Panel:GetTall( ) / 2 ) ) 
 	
 	return Panel 
