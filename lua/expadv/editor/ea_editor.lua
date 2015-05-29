@@ -742,7 +742,7 @@ function PANEL:_OnKeyCodeTyped( code )
 					self:SetSelection( "\n" .. string_rep( "    ", math_floor( Count / 4 ) )  .. "    " )
 				end 
 			else 
-				if string_match( string_sub( Line, 1, self.Caret.y - 1 ), "{") then 
+				if string_match( string_sub( Line, 1, self.Caret.y - 1 ), "{") and cvars.Bool("expadv_editor_autoindent") then  
 					self:SetSelection( "\n" .. string_rep( "    ", math_floor( Count / 4 ) )  .. "    " )
 				else 
 					self:SetSelection( "\n" .. string_rep( "    ", math_floor( Count / 4 ) )  )
@@ -1752,5 +1752,7 @@ function PANEL:CloseCodeCompletionWindow( )
 end
 
 CreateClientConVar( "expadv_editor_codecompletion", 1, true )
+
+CreateClientConVar( "expadv_editor_autoindent", 1, true ) //Automatic Indentation
 
 vgui.Register( "EA_Editor", PANEL, "EditablePanel" ) 
