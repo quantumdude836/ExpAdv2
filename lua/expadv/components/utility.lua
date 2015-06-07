@@ -437,7 +437,7 @@ function Ranger:DoTrace( Context, Start, End, Distance )
 			Ignore_World = false
 			TraceData.mask = MASK_WATER
 		else
-			TraceData.mask = Bor( MASK_WATER, CONTENTS_SOLID )
+			TraceData.mask = bit.bor( MASK_WATER, CONTENTS_SOLID )
 		end
 	elseif self.Ignore_Entities then
 		if Ignore_World then
