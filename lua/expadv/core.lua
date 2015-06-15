@@ -420,6 +420,7 @@ function EXPADV.LoadCore( )
 	EXPADV.AddComponentFile( "android" )
 	EXPADV.AddComponentFile( "constraintcore" )
 	EXPADV.AddComponentFile( "bot" )
+	--EXPADV.AddComponentFile( "pathfinder" )
 
 	EXPADV.CallHook( "AddComponents" )
 
@@ -575,21 +576,19 @@ end )
    --- */
 
 hook.Add( "Expadv.PostLoadConfig", "expadv.quota", function( )
-	EXPADV.CreateSetting( "hookrate", 500 )
-	EXPADV.CreateSetting( "tickquota", 250000 )
-	EXPADV.CreateSetting( "softquota", 100000 )
-	EXPADV.CreateSetting( "hardquota", 1000000 )
-	EXPADV.CreateSetting( "memorylimit", 5 )
-	EXPADV.CreateSetting( "net_max_bytes", 50000 )
+	EXPADV.CreateSetting("tick_cpu", 32000) -- Estimate, to be balanced.
+	EXPADV.CreateSetting("soft_cpu", 12000) -- Estimate, to be balanced.
+	EXPADV.CreateSetting("hard_cpu", 50000) -- Estimate, to be balanced.
+	EXPADV.CreateSetting("memorylimit", 5)
+	EXPADV.CreateSetting("net_max_bytes", 50000)
 end )
 
 local function update( )
-	expadv_luahook   = EXPADV.ReadSetting( "hookrate", 500 )
-	expadv_tickquota = EXPADV.ReadSetting( "tickquota", 250000 )
-	expadv_softquota = EXPADV.ReadSetting( "softquota", 100000 )
-	expadv_hardquota = EXPADV.ReadSetting( "hardquota", 1000000 )
-	expadv_memorylimit = EXPADV.ReadSetting( "memorylimit", 5 ) * 1024
-	expadv_netlimit = EXPADV.ReadSetting( "net_max_bytes", 50000 )
+	expadv_tick_cpu = EXPADV.ReadSetting("tick_cpu", 32000)
+	expadv_soft_cpu = EXPADV.ReadSetting("soft_cpu", 12000)
+	expadv_hard_cpu = EXPADV.ReadSetting("hard_cpu", 50000)
+	expadv_memorylimit = EXPADV.ReadSetting("memorylimit", 5) * 1024
+	expadv_netlimit = EXPADV.ReadSetting("net_max_bytes", 50000)
 end
 
 update()

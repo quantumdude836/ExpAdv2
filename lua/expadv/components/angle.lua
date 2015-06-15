@@ -219,3 +219,18 @@ Component:AddFunctionHelper("toWorldAng", "v,a,v,a", "Translates the specified p
 Component:AddPreparedFunction("toLocalAng", "v,a,v,a", "a", "@define Pos, Ang = $WorldToLocal(@value 1, @value 2, @value 3, @value 4)", "@Ang" )
 Component:AddFunctionHelper("toLocalAng", "v,a,v,a", "Translates the specified position and angle into the specified coordinate system.")
 
+
+/* --- --------------------------------------------------------------------------------
+    @: Loops
+   --- */
+
+AngObject:AddPreparedOperator( "for", "a,a,a,?", "", [[
+   for p = @value 1.p, @value 2.p, @value 3.p do
+      for y = @value 1.y, @value 2.y, @value 3.y do
+         for r = @value 1.r, @value 2.r, @value 3.r do
+            local i = Angle(p,y,r) 
+            @prepare 4
+         end
+      end
+   end
+]] )

@@ -380,7 +380,7 @@ Ranger:AddPreparedOperator( "=", "n,rd", "", "Context.Memory[@value 1] = @value 
 
 local ZeroVec = Vector( 0, 0 , 0 )
 
-local Ranger = { Start = ZeroVec, End = ZeroVec, Default_Zero = false, Ignore_World = false, Hit_Water = false, Ignore_Entities = false, Mins = false, Maxs = false, FilterFunc = false }
+local Ranger = { Start = ZeroVec, End = ZeroVec, Default_Zero = false, Ignore_World = false, Hit_Water = false, Ignore_Entities = false, User_Mask = false, Mins = false, Maxs = false, FilterFunc = false }
 
 Ranger.Result = { }
 
@@ -430,14 +430,16 @@ function Ranger:DoTrace( Context, Start, End, Distance )
 		end
 	end
 	
-	if self.Hit_Water then
+	if self.User_Mask then
+		TraceData.mask = self.User_Mask
+	elseif self.Hit_Water then
 		if !self.Ignore_Entities then
 			TraceData.mask = -1
 		elseif Ignore_World then
 			Ignore_World = false
 			TraceData.mask = MASK_WATER
 		else
-			TraceData.mask = Bor( MASK_WATER, CONTENTS_SOLID )
+			TraceData.mask = bit.bor( MASK_WATER, CONTENTS_SOLID )
 		end
 	elseif self.Ignore_Entities then
 		if Ignore_World then
@@ -480,22 +482,30 @@ EXPADV.SharedOperators( )
 Component:AddVMFunction( "ranger", "", "rd", function( ) return setmetatable( { Filter = { } }, Ranger ) end )
 
 -- Set up a ranger.
-Component:AddPreparedFunction( "ignoreEntities", "rd:b", "", "@value 1.Ignore_Entities = @value 2" )
+Component:AddPreparedFunction( "ignoreEntities", "rd:b", "", "@value 1.Ignore_Entities = @value 2\n @value 1.User_Mask = nil" )
 
-Component:AddPreparedFunction( "defaultZero", "rd:b", "", "@value 1.Default_Zero = @value 2" )
+Component:AddPreparedFunction( "defaultZero", "rd:b", "", "@value 1.Default_Zero = @value 2\n @value 1.User_Mask = nil" )
 
-Component:AddPreparedFunction( "ignoreWorld", "rd:b", "", "@value 1.Ignore_World = @value 2" )
+Component:AddPreparedFunction( "ignoreWorld", "rd:b", "", "@value 1.Ignore_World = @value 2\n @value 1.User_Mask = nil" )
 
-Component:AddPreparedFunction( "hitWater", "rd:b", "", "@value 1.Hit_Water = @value 2" )
+Component:AddPreparedFunction( "hitWater", "rd:b", "", "@value 1.Hit_Water = @value 2\n @value 1.User_Mask = nil" )
+
+Component:AddPreparedFunction( "setMask", "rd:n", "", "@value 1.User_Mask = @value 2" )
+Component:AddPreparedFunction( "removeMask", "rd:", "", "@value 1.User_Mask = nil" )
 
 -- Get
-Component:AddPreparedFunction( "ignoreEntities", "rd:", "b", "@value 1.Ignore_Entities" )
+Component:AddInlineFunction( "ignoreEntities", "rd:", "b", "@value 1.Ignore_Entities" )
 
-Component:AddPreparedFunction( "defaultZero", "rd:", "b", "@value 1.Default_Zero" )
+Component:AddInlineFunction( "defaultZero", "rd:", "b", "@value 1.Default_Zero" )
 
-Component:AddPreparedFunction( "ignoreWorld", "rd:", "b", "@value 1.Ignore_World" )
+Component:AddInlineFunction( "ignoreWorld", "rd:", "b", "@value 1.Ignore_World" )
 
-Component:AddPreparedFunction( "hitWater", "rd:", "b", "@value 1.Hit_Water" )
+Component:AddInlineFunction( "hitWater", "rd:", "b", "@value 1.Hit_Water" )
+
+Component:AddInlineFunction( "getMask", "rd:", "n", "(@value 1.User_Mask or 0)" )
+
+
+
 
 -- Hull Trace
 Component:AddPreparedFunction( "setHull", "rd:v,v", "", [[
@@ -1221,3 +1231,50 @@ Component:AddVMFunction( "conCommand", "s", "", function(Context, Trace, Command
 		Exec(Command)
 	end
 end )
+
+/* --- --------------------------------------------------------------------------------
+	@: Masks
+   --- */
+
+Component:AddInlineFunction("maskAll", "", "n", "$MASK_ALL")
+Component:AddFunctionHelper("maskAll", "", "Anything that is not empty space.")
+Component:AddInlineFunction("maskBlockLineOFSight", "", "n", "$MASK_BLOCKLOS")
+Component:AddFunctionHelper("maskBlockLineOFSight", "", "Anything that blocks line of sight for AI.")
+Component:AddInlineFunction("maskBlockNPCLineOfSight", "", "n", "$MASK_BLOCKLOS_AND_NPCS")
+Component:AddFunctionHelper("maskBlockNPCLineOfSight", "", "Anything that blocks line of sight for AI or NPCs.")
+Component:AddInlineFunction("maskMovingWater", "", "n", "$MASK_CURRENT")
+Component:AddFunctionHelper("maskMovingWater", "", "Water that is moving (may not work).")
+Component:AddInlineFunction("maskDeadSolid", "", "n", "$MASK_DEADSOLID")
+Component:AddFunctionHelper("maskDeadSolid", "", "Anything that blocks corpse movement.")
+Component:AddInlineFunction("maskBlockNPCMovement", "", "n", "$MASK_NPCSOLID")
+Component:AddFunctionHelper("maskBlockNPCMovement", "", "Anything that blocks NPC movement.")
+Component:AddInlineFunction("maskNPCSolidOnly", "", "n", "$MASK_NPCSOLID_BRUSHONLY")
+Component:AddFunctionHelper("maskNPCSolidOnly", "", "Anything that blocks NPC movement, except other NPCs.")
+Component:AddInlineFunction("maskWorldEntity", "", "n", "$MASK_NPCWORLDSTATIC")
+Component:AddFunctionHelper("maskWorldEntity", "", "The world entity.")
+Component:AddInlineFunction("maskOpaque", "", "n", "$MASK_OPAQUE")
+Component:AddFunctionHelper("maskOpaque", "", "Anything that blocks lighting.")
+Component:AddInlineFunction("maskOpaqueAndNPC", "", "n", "$MASK_OPAQUE_AND_NPCS")
+Component:AddFunctionHelper("maskOpaqueAndNPC", "", "Anything that blocks lighting, including NPCs.")
+Component:AddInlineFunction("maskPlayerSolid", "", "n", "$MASK_PLAYERSOLID")
+Component:AddFunctionHelper("maskPlayerSolid", "", "Anything that blocks player movement.")
+Component:AddInlineFunction("maskPlayerSolidBrush", "", "n", "$MASK_PLAYERSOLID_BRUSHONLY")
+Component:AddFunctionHelper("maskPlayerSolidBrush", "", "World + Brushes + Player Clips.")
+Component:AddInlineFunction("maskShot", "", "n", "$MASK_SHOT")
+Component:AddFunctionHelper("maskShot", "", "Anything that stops a bullet (including hitboxes).")
+Component:AddInlineFunction("maskShotNoHitbox", "", "n", "$MASK_SHOT_HULL")
+Component:AddFunctionHelper("maskShotNoHitbox", "", "Anything that stops a bullet (excluding hitboxes).")
+Component:AddInlineFunction("maskShotPortal", "", "n", "$MASK_SHOT_PORTAL")
+Component:AddFunctionHelper("maskShotPortal", "", "Solids except for grates.")
+Component:AddInlineFunction("maskSolid", "", "n", "$MASK_SOLID")
+Component:AddFunctionHelper("maskSolid", "", "Anything that is (normally) solid.")
+Component:AddInlineFunction("maskSolidBrush", "", "n", "$MASK_SOLID_BRUSHONLY")
+Component:AddFunctionHelper("maskSolidBrush", "", "World + Brushes.")
+Component:AddInlineFunction("maskSplitAreaPortal", "", "n", "$MASK_SPLITAREAPORTAL")
+Component:AddFunctionHelper("maskSplitAreaPortal", "", "Things that split area portals.")
+Component:AddInlineFunction("maskVisible", "", "n", "$MASK_VISIBLE")
+Component:AddFunctionHelper("maskVisible", "", "Anything that blocks line of sight for players.")
+Component:AddInlineFunction("maskVisibleAndNPC", "", "n", "$MASK_VISIBLE_AND_NPCS")
+Component:AddFunctionHelper("maskVisibleAndNPC", "", "Anything that blocks line of sight for players, including NPCs.")
+Component:AddInlineFunction("maskWater", "", "n", "$MASK_WATER")
+Component:AddFunctionHelper("maskWater", "", "Anything that has water-like physics.")

@@ -22,7 +22,7 @@ function Meta:Det( )
 	return ( self[1] * self[4] - self[3] * self[2] )
 end
 
-local function Meta:Inverse( )
+function Meta:Inverse( )
 	local Det = ( self[1] * self[4] - self[3] * self[2] )
 	
 	if Det == 0 then
@@ -197,7 +197,7 @@ function Meta:Element( B, C )
 	end
 
 	return self[D + (E - 1) * 2]
-end)
+end
 
 function Meta:SetElement( B, C, D )
 	local E, F

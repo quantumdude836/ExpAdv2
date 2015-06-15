@@ -153,3 +153,18 @@ Component:AddFunctionHelper( "rgb2hsv", "n,n,n", "Converts regular color to hsv 
 
 Component:AddInlineFunction( "mix", "c,c,n", "c", "Color(@value 1.r * @value 3 + @value 2.r * (1-@value 3), @value 1.g * @value 3 + @value 2.g * (1-@value 3), @value 1.b * @value 3 + @value 2.b * (1-@value 3), @value 1.a * @value 3 + @value 2.a * (1-@value 3))")
 Component:AddFunctionHelper( "mix", "c,c,n", "Returns the mix of 2 colors")
+
+/* --- --------------------------------------------------------------------------------
+    @: Loops
+   --- */
+
+ColorObj:AddPreparedOperator( "for", "c,c,c,?", "", [[
+   for b = @value 1.b, @value 2.b, @value 3.b do
+      for g = @value 1.g, @value 2.g, @value 3.g do
+         for r = @value 1.r, @value 2.r, @value 3.r do
+            local i = Color(r,g,b) 
+            @prepare 4
+         end
+      end
+   end
+]] )

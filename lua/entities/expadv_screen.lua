@@ -254,7 +254,7 @@ function ENT:PreDrawScreen(scrAspect, scrSize) return false end
 function ENT:PostDrawScreen(scrAspect, scrSize) return false end
 
 function ENT:PreDrawScreen(scrAspect, scrSize)
-	local State = self:GetClientState(EXPADV_STATE_OFFLINE)
+	local State = self:GetCL_State(EXPADV_STATE_OFFLINE)
 
 	if State >= EXPADV_STATE_CRASHED then
 		surface.SetDrawColor(255, 255, 255, 255)

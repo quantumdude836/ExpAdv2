@@ -61,20 +61,23 @@ local ResumeThread = function(Context, Trace, Thread, ...)
 
 	coroutine.wait = PauseThread
 
-	local b = resume(Thread, ...)
+	local b, e = resume(Thread, ...)
+
+	if !b then
+		if isstring(e) then Context:Throw(Trace, "coroutine", e) end
+		error(e, 0)
+	end
 
 	coroutine.wait = wait
 
 	_context, _running, _ops = c, t, o
-
-	return b
 end
 
 EXPADV.coroutine.resume = function(c, t, ...) return ResumeThread(c, nil, t,...) end
 
-Component:AddVMFunction("resume", "cr:", "b", ResumeThread)
+Component:AddVMFunction("resume", "cr:", "", ResumeThread)
 
-Component:AddVMFunction("resume", "cr:...", "b", ResumeThread)
+Component:AddVMFunction("resume", "cr:...", "", ResumeThread)
 
 /*--------------------------------------------------------------------------------------------------------------------*/
 
@@ -86,7 +89,7 @@ EXPADV.coroutine.resume2 = function(c, t, ...)
 	
 	e = true
 
-	local b = ResumeThread(c, nil, t,...)
+	ResumeThread(c, nil, t,...)
 
 	_ex = e
 end

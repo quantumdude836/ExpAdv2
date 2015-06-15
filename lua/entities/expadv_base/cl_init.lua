@@ -23,8 +23,9 @@ end
 	@: Render
    --- */
 
+
 function ENT:Draw( )
-	self:DrawModel( )
+	self:DrawModel()
 end
 
 function ENT:GetOverlayPos( )

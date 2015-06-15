@@ -286,8 +286,6 @@ Component:AddFunctionHelper( "hologram", "n", "Returns the hologram with the id 
 local function NewHolo( Context, Trace, Model, Position, Angle )
 	local ent, ply = Context.entity, Context.player
 	local rate, count = RateCounter[ply] or 0, PlayerCounter[ply] or 0
-	
-	MsgN(">>", rate, " / ", count)
 
 	if rate >= expadv_hologram_rate then
 		Context:Throw(Trace, "hologram", "Hologram cooldown reached.")
@@ -850,6 +848,17 @@ Component:AddFunctionHelper( "getAnimationName", "h:n", "Returns the name of the
 Component:AddFunctionHelper( "setAnimationRate", "h:n", "Sets the animation rate of a hologram." )
 
 /*==============================================================================================
+    Section: All
+==============================================================================================*/
+Component:AddPreparedFunction("holograms", "", "ar",[[
+@define Array = {__type = "h"}
+for _, h in pairs(Context.Data.Holos) do
+	@Array[#@Array + 1] = h
+end]], "@Array") 
+
+Component:AddFunctionHelper( "holograms", "", "Returns an array of every hologram created by the gate." )
+
+/*==============================================================================================
     Section: Remove
 ==============================================================================================*/
 Component:AddPreparedFunction( "remove", "h:", "", [[
@@ -858,6 +867,13 @@ if IsValid( @value 1 ) and @value 1.player == Context.player then
 end]] )
 
 Component:AddFunctionHelper( "remove", "h:", "Removes the hologram." )
+
+Component:AddPreparedFunction("removeHolograms", "", "",[[
+for _, h in pairs(Context.Data.Holos) do
+	if IsValid(@value 1) then h:Remove() end
+end]]) 
+
+Component:AddFunctionHelper( "removeHolograms", "", "Removes every hologram created by the gate." )
 
 /*==============================================================================================
     Section: Player Blocking, Does not work on the entity.

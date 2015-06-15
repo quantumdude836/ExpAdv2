@@ -38,9 +38,10 @@ function EXPADV.BuildNewContext( Instance, Player, Entity ) -- Table, Player, En
 	Context.Enviroment = Instance.Enviroment or error( "No safe guard.", 0 )
 
 	Context.Status = {
-		Perf = 0,
-		Counter = 0,
-		StopWatch = 0,
+		Soft = 0,
+		Tick = 0,
+		Tick_Counter = 0,
+		Average = 0,
 		Memory = 0,
 	}
 
@@ -72,22 +73,17 @@ function EXPADV.RootContext:PreExecute(op_counter)
 
 	if !op_counter then
 		op_counter = function( )
-			Status.Perf = Status.Perf + expadv_luahook
-
-			if Status.Perf > expadv_tickquota then
-				debug.sethook( )
+			if (SysTime() - Status.BenchMark) * 1000000 > expadv_tick_cpu then
+				debug.sethook()
 				error( { Trace = {0,0}, Quota = true, Msg = Message, Context = Context }, 0 )
 			end
-			
-			Status.BenchMark = SysTime( )
 		end
 	end
 
 	Status.HookFunc = op_counter
 	Status.MemoryMark = collectgarbage("count")
 	Status.BenchMark = SysTime( )
-		
-	debug_sethook( op_counter, "", expadv_luahook )
+	debug_sethook( op_counter, "", 500 )
 end
 
 -- Should always be called after an execution.
@@ -96,16 +92,16 @@ function EXPADV.RootContext:PostExecute()
 	debug_sethook( )
 
 	local Status = self.Status
-	Status.StopWatch = Status.StopWatch + (SysTime( ) - Status.BenchMark)
+	Status.Tick = Status.Tick + (SysTime() - Status.BenchMark)
 	Status.Memory = Status.Memory + (collectgarbage("count") - Status.MemoryMark)
 end
 
 function EXPADV.RootContext:CheckExecutionQuota()
 	local Status = self.Status
 
-	if (Status.Counter + Status.Perf - expadv_softquota) > expadv_hardquota then
+	if Status.Tick * 1000000 > expadv_tick_cpu then
 
-		if IsValid( self.entity ) then self.entity:HitHardQuota( ) end
+		if IsValid( self.entity ) then self.entity:HitTickQuota( ) end
 		
 		self:ShutDown( )
 
@@ -309,29 +305,22 @@ EXPADV_STATE_ALERT = 2
 EXPADV_STATE_CRASHED = 3
 EXPADV_STATE_BURNED = 4
 
+local NextHook = 0
+
 hook.Add( "Tick", "ExpAdv2.Performance", function( )
-	for Context, _ in pairs( EXPADV.CONTEXT_REGISTERY ) do
-		if !Context.Online then continue end
+	if CurTime() > NextHook then
+		NextHook = CurTime() + 0.030303
 
-		local status = Context.Status
-
-		local Counter = status.Counter or 0
-
-		Counter = Counter + status.Perf - expadv_softquota
-		
-		if Counter < 0 then Counter = 0 end
-
-		status.Counter = Counter
-
-		if IsValid(Context.entity) and Context.entity.CalculateOps then
-			if Context.entity.CalculateOps(Context.entity, Context) then continue end
+		for Context, _ in pairs( EXPADV.CONTEXT_REGISTERY ) do
+			if !Context.Online then continue end
+			
+			if IsValid(Context.entity) and Context.entity.CalculateOps then
+				Context.entity.CalculateOps(Context.entity, Context)
+			end
 		end
-
-		status.Perf = 0
-		status.Memory = 0
-		status.StopWatch = 0
 	end
 end )
+
 
 /* --- --------------------------------------------------------------------------------
 	@: Reloading.

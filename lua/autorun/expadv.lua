@@ -31,6 +31,7 @@ AddCSLuaFile( "expadv/von.lua" )
 AddCSLuaFile( "includes/modules/vector2.lua" )
 AddCSLuaFile( "includes/modules/matrix2.lua" )
 AddCSLuaFile( "includes/modules/quaternion.lua" )
+//AddCSLuaFile( "includes/modules/pathfinder.lua" )
 
 AddCSLuaFile( "expadv/editor/ea_button.lua" )
 AddCSLuaFile( "expadv/editor/ea_filemenu.lua" )

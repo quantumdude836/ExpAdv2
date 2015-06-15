@@ -189,96 +189,57 @@ local Component = EXPADV.AddComponent( "performance" , true )
 Component.Author = "Rusketh"
 Component.Description = "Allows for monitoring performance and usage."
 
-EXPADV.SharedOperators( )
+EXPADV.SharedOperators()
 
-Component:AddInlineFunction( "ops", "", "n", "math.Round(Context.Status.Perf)" )
-Component:AddFunctionHelper( "ops", "", "Returns the current ops status." )
+Component:AddInlineFunction( "cpuTime", "", "n", "(($SysTime( ) - Context.Status.BenchMark) * 1000000)" )
+Component:AddFunctionHelper( "cpuTime", "", "Returns the amount of cpu time used so far in the current execution in microseconds." )
 
-Component:AddInlineFunction( "opCounter", "", "n", "math.ceil(Context.Status.Perf + Context.Status.Counter)" )
-Component:AddFunctionHelper( "opCounter", "", "Returns the current opCounter status." )
+Component:AddInlineFunction( "cpuAverage", "", "n", "(Context.Status.Average * 1000000)" )
+Component:AddFunctionHelper( "cpuAverage", "", "Returns the amount of cpu time used on average in microseconds." )
 
-Component:AddInlineFunction( "cpuUsage", "", "n", "($SysTime( ) - Context.Status.BenchMark)" )
-Component:AddFunctionHelper( "cpuUsage", "", "Returns the current cpuUsage status." )
+Component:AddInlineFunction( "tickQuota", "", "n", "EXPADV.ReadSetting(\"tick_cpu\", 32000)" )
+Component:AddFunctionHelper( "tickQuota", "", "Returns the size of the tick quota in microseconds." )
 
-Component:AddInlineFunction( "cpuStopWatch", "", "n", "Context.Status.StopWatch" )
-Component:AddFunctionHelper( "cpuStopWatch", "", "Returns the current cpuStopWatch status." )
-// Not sure about these.
+Component:AddInlineFunction( "softQuota", "", "n", "EXPADV.ReadSetting(\"soft_cpu\",  4000)" )
+Component:AddFunctionHelper( "softQuota", "", "Returns the size of the soft quota in microseconds." )
 
-		--------------------------------------------------------------
+Component:AddInlineFunction( "hardQuota", "", "n", "EXPADV.ReadSetting(\"hard_cpu\", 50000)" )
+Component:AddFunctionHelper( "hardQuota", "", "Returns the size of the hard quota in microseconds." )
 
-Component:AddVMFunction( "perf", "", "b",
+Component:AddVMFunction( "quota", "", "b", --This function curently doesnt work to good
 	function( Context, Trace )
-		if Context.Status.Perf + Context.Status.Counter > expadv_hardquota - expadv_tickquota then
+		if (SysTime( ) - Context.Status.BenchMark) * 1000000 > (expadv_hard_cpu - expadv_tick_cpu) then
 			return false
-		elseif Context.Status.Perf >= expadv_softquota * 2 then
+		elseif Context.Status.Tick * 1000000 >= expadv_soft_cpu * 2 then
 			return false
 		end
 
 		return true
 	end )
 
-Component:AddFunctionHelper( "perf", "", "Returns true if the current qouta is below limit." )
+Component:AddFunctionHelper( "quota", "", "Returns true if the current qouta is below limit." )
 	
-Component:AddVMFunction( "perf", "n", "b",
+Component:AddVMFunction( "quota", "n", "b", --This function curently doesnt work
 	function( Context, Trace, Value )
-		Value = math.Clamp( Value, 0, 100 )
+		Value = math.Clamp( Value, 1, 100 )
 
-		if Context.Status.Perf + Context.Status.Counter >= (expadv_hardquota - expadv_tickquota) * Value * 0.01 then
+		if (SysTime( ) - Context.Status.BenchMark) * 1000000 >= (expadv_hard_cpu - expadv_tick_cpu) * Value then
 			return false
 		elseif Value == 100 then
-			if Context.Status.Perf >= expadv_softquota * 2 then
+			if Context.Status.Tick * 1000000 >= expadv_soft_cpu * 2 then
 				return false
 			end
-		elseif Context.Status.Perf >= expadv_softquota * Value * 0.01 then
+		elseif Context.Status.Tick * 1000000 >= expadv_soft_cpu * 2 * Value * 0.01 then
 			return false
 		end
 
 		return true
 	end )
 
-Component:AddFunctionHelper( "perf", "n", "Returns true if the given number is below qouta limit." )
-		--------------------------------------------------------------
+Component:AddFunctionHelper( "quota", "n", "Returns true if the given number (in microseconds) is below qouta limit." )
 
-Component:AddVMFunction( "minquota", "", "n",
-	function( Context, Trace )
-		if Context.Status.Perf < expadv_softquota then
-			return math.floor(expadv_softquota - Context.Status.Perf)
-		else
-			return 0
-		end
-	end )
-
-Component:AddFunctionHelper( "minquota", "", "Returns the minQuota." )
-	
-Component:AddVMFunction( "maxquota", "", "n",
-	function( Context, Trace )
-		local Perf = Context.Status.Perf
-
-		if Perf >= expadv_tickquota then return 0 end
-
-		local tickquota = expadv_tickquota - Perf
-		local hardquota = expadv_hardquota - Context.Status.Counter - Perf + expadv_softquota
-			
-		if hardquota < tickquota then return math.floor(hardquota) end
-		
-		return math.floor(tickquota)
-	end )
-
-Component:AddFunctionHelper( "maxquota", "", "Returns the maxQuota." )
-	
-Component:AddVMFunction( "softQuota", "", "n",
-	function( Context, Trace )
-		return expadv_softquota
-	end )
-
-Component:AddFunctionHelper( "softQuota", "", "Returns the softQuota." )
-	
-Component:AddVMFunction( "hardQuota", "", "n",
-	function( Context, Trace )
-		return expadv_hardquota
-	end )
-	
-Component:AddFunctionHelper( "hardQuota", "", "Returns the hardQouta." )
+EXPADV.AddDepricatedFunction(Component, "perf", "", "n", "quota", "")
+EXPADV.AddDepricatedFunction(Component, "perf", "n", "n", "quota", "n")
 
 /* --- --------------------------------------------------------------------------------
 	@: Printing

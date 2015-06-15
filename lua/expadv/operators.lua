@@ -367,9 +367,28 @@ end
 
 local Temp_Callbacks = { }
 
-function EXPADV.AddFunctionPreCompile( Component, Name, Input, Function )
+function EXPADV.AddFunctionPrecompile( Component, Name, Input, Function )
 	Temp_Callbacks[string_format( "%s(%s)", Name, Input or "" )] = Function
 end
+
+function EXPADV.AddDepricatedFunction(Component, Name, Input, Return, Name2, Input2)
+	EXPADV.AddPreparedFunction( Component, Name, Input, Return, "")
+	
+	EXPADV.AddFunctionPrecompile( Component, Name, Input, function(Compiler, Trace, Operator)
+		if !Name2 then
+			Compiler:TraceError( Trace, "%s is depricated.", Operator.Signature )
+		else
+			Compiler:TraceError( Trace, "%s is depricated use %s(%s) instead.", Operator.Signature, Name2, Input2 or "" )
+		end
+	end)
+
+	if !Name2 then
+		EXPADV.AddFunctionHelper( Component, Name, Input, "This function is depricated." )
+	else
+		EXPADV.AddFunctionHelper( Component, Name, Input, string.format("This function is depricated use %s(%s) instead.", Name2, Input2 or "") )
+	end
+end
+
 
 /* --- --------------------------------------------------------------------------------
 	@: Load our functions
@@ -420,6 +439,7 @@ function EXPADV.LoadFunctions( )
 
 		Operator.Description = Temp_HelperData[string_format( "%s(%s)", Operator.Name, Operator.Input or "" )]
 		Operator.Precompile = Temp_Callbacks[string_format( "%s(%s)", Operator.Name, Operator.Input or "" )]
+		
 		-- Second we check the input types, and build our signatures!
 		local ShouldNotLoad = false
 
@@ -609,6 +629,10 @@ function EXPADV.CanBuildOperator( Compiler, Trace, Operator )
 		Compiler:TraceError( Trace, "%s Must not appear in serverside scripts.", Operator.Signature )
 	elseif  Compiler.IsClientScript and !Operator.LoadOnClient then
 		Compiler:TraceError( Trace, "%s Must not appear in clientside scripts.", Operator.Signature )
+	end
+
+	if Operator.Precompile then
+		Operator.Precompile( Compiler, Trace, Operator )
 	end
 end
 
@@ -1140,3 +1164,9 @@ function EXPADV.GenerateOperatorDescription( Operator )
 		end
 	]]
 end
+
+EXPADV.AddPreparedFunction(nil, "lemons", "", "", "")
+	
+EXPADV.AddFunctionPrecompile(nil, "lemons", "", function(Compiler, Trace, Operator)
+	Compiler:TraceError( Trace, "Thi-s i-s not the keyword your looking for, %s.", string.gsub(Compiler.player:Name(), "s", "-s" ))
+end)

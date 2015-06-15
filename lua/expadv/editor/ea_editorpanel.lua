@@ -699,7 +699,7 @@ function PANEL:DoValidate( Goto, Code )
 		return false
 	end
 
-	local Status, Instance, Instruction = EXPADV.SolidCompile(Code, Files or {})
+	local Status, Instance, Instruction = EXPADV.SolidCompile(Code, Files or {}, nil, LocalPlayer())
 
 	if !Status then
 		self:OnValidateError(Goto, Instance)
