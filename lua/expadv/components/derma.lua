@@ -522,14 +522,14 @@ end]] )
 
 Component:AddInlineFunction( "getCamPos", "dmdl:", "v", [[(IsValid(@value 1) and (@value 1:GetCamPos() or Vector(0,0,0)) or Vector(0,0,0))]] )
 
-Component:AddPreparedFunction( "setLookatPos", "dmdl:v", "", [[if IsValid(@value 1) then
-	@value 1:SetLookatPos(@value 2)
+Component:AddPreparedFunction( "setLookAtPos", "dmdl:v", "", [[if IsValid(@value 1) then
+	@value 1:SetLookAt(@value 2)
 end]] )
 
 Component:AddInlineFunction( "getLookatPos", "dmdl:", "v", [[(IsValid(@value 1) and (@value 1:GetLookatPos() or Vector(0,0,0)) or Vector(0,0,0))]] )
 
-Component:AddPreparedFunction( "setLookAngle", "dmdl:a", "", [[if IsValid(@value 1) then
-	@value 1:SetLookAngle(@value 2)
+Component:AddPreparedFunction( "setLookAng", "dmdl:a", "", [[if IsValid(@value 1) then
+	@value 1:SetLookAng(@value 2)
 end]] )
 
 Component:AddInlineFunction( "getLookAngle", "dmdl:", "v", [[(IsValid(@value 1) and (@value 1:GetLookAngle() or Angle(0,0,0)) or Angle(0,0,0))]] )
