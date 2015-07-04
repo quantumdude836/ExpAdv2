@@ -210,7 +210,7 @@ Component:AddVMFunction( "tool", "ply:", "s", function(Context, Trace, Ply)
 		return ""
 	end
 
-	return Wep.Mode
+	return Wep.Mode or ""
 end)
 
 

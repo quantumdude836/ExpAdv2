@@ -14,7 +14,7 @@ Component.Description = "Read and write files."
 	@: Settings
    --- */
 
-Component:CreateSetting( "max_filesize", 300 )
+Component:CreateSetting( "max_filesize", 5000 )
 
 /* --- --------------------------------------------------------------------------------
 	@: functions
@@ -73,7 +73,7 @@ Component:AddVMFunction( "readFile", "s", "s",
 
 Component:AddVMFunction( "writeFile", "s,s", "",
 	function( Context, Trace, Path, File )
-		if #File < Component:ReadSetting( "max_filesize", 300 ) then
+		if #File < Component:ReadSetting( "max_filesize", 5000 ) then
 
 			local ValidPath = GetValidPath( Context, Path, true )
 			print( "Valid Path:", ValidPath)

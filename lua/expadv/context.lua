@@ -129,7 +129,7 @@ function EXPADV.RootContext:HandelResult(Ok, Result, ResultType)
 				Result = "attempt to reach void"
 			elseif Result:find("attempt to call a nil value") then
 				Result = "attempt to call void"
-			end 
+			end
 
 			self.entity:ScriptError( Result )
 		end

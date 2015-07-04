@@ -230,8 +230,7 @@ local ToStringLookUp = { }
 
 -- Used during execution to translate class objects to strings.
 function EXPADV.ToString( Short, Obj ) -- String, Obj
-	if Short == "void" then return "void" end
-
+	if !Short or Short == "void" then return "void" end
 	return ToStringLookUp[Short]( Obj )
 end
 

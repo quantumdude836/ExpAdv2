@@ -988,11 +988,11 @@ end]] )
    --- */
 
 PropComponent:AddFunctionHelper( "parent", "e:e", "Sets the parent entity of E." )
-PropComponent:AddFunctionHelper( "destroy", "e:", "Creates an array." )
+PropComponent:AddFunctionHelper( "destroy", "e:", "Destroys an entity." )
 PropComponent:AddFunctionHelper( "setNotSolid", "e:b", "Changes the solidity of an entity." )
 PropComponent:AddFunctionHelper( "noSpawnEffect", "b", "Makes propcore use an effect when spawning props." )
 PropComponent:AddFunctionHelper( "enableGravity", "e:b", "Enables gravity on entity E." )
-PropComponent:AddFunctionHelper( "destroy", "e:v,b", "Creates an array." )
+PropComponent:AddFunctionHelper( "destroy", "e:v,b", "Destroys an entity." )
 PropComponent:AddFunctionHelper( "freeze", "p:b", "Sets B to true to freeze a physics object." )
 PropComponent:AddFunctionHelper( "freeze", "e:b", "Sets B to true to freeze an entity." )
 PropComponent:AddFunctionHelper( "unparent", "e:", "Unparents E from its parent." )
