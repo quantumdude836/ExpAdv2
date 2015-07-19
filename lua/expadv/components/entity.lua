@@ -634,7 +634,7 @@ end]], "@Results" )
 
 Component:AddFunctionHelper( "findInBox", "v,v", "Returns an array with entities found in the given box (1st corner, 2nd corner)." )
 
-Component:AddPreparedFunction( "findInCone", "v,v,n,a", "ar", [[
+Component:AddPreparedFunction( "findInCone", "v,v,n,n", "ar", [[
 @define Results = { __type = "e" }
 for _, Ent in pairs( $ents.FindInCone( @value 1, @value 2, @value 3, @value 4)) do
 	if Ent:IsValid() and !EXPADV.EntitySearchFilter[Ent:GetClass( )] then
@@ -642,7 +642,7 @@ for _, Ent in pairs( $ents.FindInCone( @value 1, @value 2, @value 3, @value 4)) 
 	end
 end]], "@Results" )
 
-Component:AddFunctionHelper( "findInCone", "v,v,n,a", "Returns an array with entities found in the given cone (Position, Direction, Length, Angle)." )
+Component:AddFunctionHelper( "findInCone", "v,v,n,n", "Returns an array with entities found in the given cone (Position, Direction, Length, Angle)." )
 
 /***********************************************************************************************/
 
@@ -688,7 +688,7 @@ end]], "@Results" )
 
 Component:AddFunctionHelper( "findInBox", "s,v,v", "Returns an array with entities found in the given box by the given model (Model, 1st corner, 2nd corner)." )
 
-Component:AddPreparedFunction( "findInCone", "s,v,v,n,a", "ar", [[
+Component:AddPreparedFunction( "findInCone", "s,v,v,n,n", "ar", [[
 @define Results = { __type = "e" }
 for _, Ent in pairs( $ents.FindInCone( @value 2, @value 3, @value 4, @value 5)) do
 	local Class = Ent:GetClass( )
@@ -697,7 +697,7 @@ for _, Ent in pairs( $ents.FindInCone( @value 2, @value 3, @value 4, @value 5)) 
 	end
 end]], "@Results" )
 
-Component:AddFunctionHelper( "findInCone", "s,v,v,n,a", "Returns an array with entities found in the given cone by the given model (Model, Position, Direction, Length, Angle)." )
+Component:AddFunctionHelper( "findInCone", "s,v,v,n,n", "Returns an array with entities found in the given cone by the given model (Model, Position, Direction, Length, Angle)." )
 
 Component:AddPreparedFunction( "sortEntitiesByDistance", "ar,v", "", [[
 if @value 1.__type ~= "e" then Context:Throw( @trace, "invoke", "sortEntitiesByDistance #1, entity array exspected." ) end
