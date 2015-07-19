@@ -103,14 +103,14 @@ function EXPADV.RootContext:CheckExecutionQuota()
 
 		if IsValid( self.entity ) then self.entity:HitTickQuota( ) end
 		
-		self:ShutDown( )
+		self:ShutDown( true )
 
 		return false
 
 	elseif Status.Memory > expadv_memorylimit then
 		self.entity:ScriptError( "Memory limit exceeded" )
 
-		self:ShutDown( )
+		self:ShutDown( true )
 
 		return false
 	end
@@ -237,10 +237,10 @@ function EXPADV.RootContext:StartUp( Execution ) -- Function
 end
 
 -- Shuts down the context and execution.
-function EXPADV.RootContext:ShutDown( )
+function EXPADV.RootContext:ShutDown( bNoLast )
 	if !self.Online then return end
 
-	self:CallEvent("last")
+	if not bNoLast then self:CallEvent("last") end 
 
 	self.Online = false
 
