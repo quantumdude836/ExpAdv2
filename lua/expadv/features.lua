@@ -239,7 +239,7 @@ function EXPADV.ShowFeatures(Entity)
 	function Label.Think()
 		if !IsValid(Entity) then return end
 		local Counter = Entity.ClientTickQuota or 0
-			local Line = string.format( "Quota: %s, %i%% (usage %s @ %s us)", EXPADV.Shorten( Counter ), (Counter / expadv_hardquota) * 100, EXPADV.Shorten(Entity.ClientAverage or 0 ), EXPADV.Shorten(Entity.ClientStopWatch or 0) )
+			local Line = string.format( "Quota: %s, %i%% (usage %s @ %s us)", EXPADV.Shorten( Counter ), (Counter / (expadv_hardquota or 1) ) * 100, EXPADV.Shorten(Entity.ClientAverage or 0 ), EXPADV.Shorten(Entity.ClientStopWatch or 0) )
 		Label:SetText(string.format("Owner: %s\nScript: %s\n%s\nEntity: %s", IsValid(Owner) and Owner:Name() or "Unkown", Entity:GetGateName() or "generic", Line, tostring(Entity)))
 	end
 
