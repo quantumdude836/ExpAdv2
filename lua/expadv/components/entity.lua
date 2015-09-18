@@ -102,7 +102,7 @@ Component:AddFunctionHelper( "validPhysics", "e:", "Returns if the given entity 
 Component:AddInlineFunction( "pos", "e:", "v", "(@value 1:IsValid() and @value 1:GetPos() or Vector(0,0,0))")
 Component:AddFunctionHelper( "pos", "e:", "Gets the position of the given entity.")
 
-Component:AddInlineFunction( "nearestPoint", "e:", "v", "(@value 1:IsValid() and @value 1:NearestPoint() or Vector(0,0,0))")
+Component:AddInlineFunction( "nearestPoint", "e:", "v", "(@value 1:IsValid() and @value 1:NearestPoint(@value 2) or Vector(0,0,0))")
 Component:AddFunctionHelper( "nearestPoint", "e:", "erforms a Ray OBBox intersection from the given position to the origin of the OBBox with the entity and returns the hit position on the OBBox.")
 
 Component:AddInlineFunction( "ang", "e:", "a", "(@value 1:IsValid() and @value 1:GetAngles() or Angle(0,0,0))")
