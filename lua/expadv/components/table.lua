@@ -111,7 +111,6 @@ Component:AddPreparedFunction("hasValue", "t:vr", "b", [[
 	@define found = false
 	@value 2 = @value 2[1]
 	for k, v in pairs(@value 1.Data) do
-		print(v)
 		if (v == @value 2) then
 			@found = true
 			break
