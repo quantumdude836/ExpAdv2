@@ -30,6 +30,8 @@ local function stopSound(Context, Index, Fade)
 	Context.Data.SoundCount = Context.Data.SoundCount - 1
 end
 
+EXPADV.GAME_SOUNDS = EXPADV.GAME_SOUNDS or {}
+
 local function playSound(Context, Ent, Duration, Index, Fade, File)
 	if(!Ent || !IsValid(Ent)) then Ent = Context.entity end
 	local maxsounds = Component:ReadSetting("maximumsounds", 10)
@@ -44,8 +46,13 @@ local function playSound(Context, Ent, Duration, Index, Fade, File)
 	if(Context.Data.Sound[Index]) then stopSound(Context, Index, 0) end
 	
 	local newSound = CreateSound(Ent, File)
+
+	EXPADV.GAME_SOUNDS[#EXPADV.GAME_SOUNDS+1] = newSound
+
 	Context.Data.Sound[Index] = newSound
+
 	newSound:Play()
+
 	Context.Data.SoundCount = Context.Data.SoundCount + 1
 	
 	if(Duration == 0 and Fade == 0) then return end
@@ -222,7 +229,7 @@ Component:AddPreparedFunction( "setVolume", "ac:n", "", [[if !IsValid( @value 1)
 @value 1:SetVolume(@value 2 * 0.01)]] )
 Component:AddFunctionHelper( "setVolume", "ac:n", "Sets the volume of a sound channel" )
 
-Component:AddInlineFunction( "canPlayFromURL", "", "b", [[EXPADV.CanAccessFeature(Context.entity, "Sounds from url")]] )
+Component:AddInlineFunction( "canPlayFromURL", "", "b", [[EXPADV.CanAccessFeature(Context.entity, "PlayURL")]] )
 Component:AddFunctionHelper( "canPlayFromURL", "", "Returns true if this entity can play audio from url." )
 
 
@@ -233,7 +240,7 @@ if CLIENT then
 	end )
 
 	hook.Add( "Expadv.UnregisterContext", "expadv.sound", function( Context )
-		if Context.Data.AudioCount <= 0 then return end
+		if (Context.Data.AudioCount or 0) <= 0 then return end
 		
 		for _, Channel in pairs( Context.Data.Audio ) do
 			if IsValid( Channel ) then Channel:Stop( ) end
@@ -248,18 +255,28 @@ end
 
 EXPADV.ClientOperators()
 
+EXPADV.URL_SOUNDS = EXPADV.URL_SOUNDS or {}
+
 Component:AddVMFunction( "playURL", "s,s,d,d", "", 
 	function( Context, Trace, URL, Flags, Sucess, Fail )
-		if !IsValid(Context.entity) or !EXPADV.CanAccessFeature(Context.entity, "Sounds from url") then return end
+		if !IsValid(Context.entity) or !EXPADV.CanAccessFeature(Context.entity, "PlayURL") then return end
+		if string.find(URL, "%d%d?%d?%.%d%d?%d?%.%d%d?%d?%.%d%d?%d?") then return end
 
 		sound.PlayURL( URL, Flags,
 			function( Channel, Er_ID, Er_Name ) 
 				if IsValid( Channel ) then
+					EXPADV.URL_SOUNDS[#EXPADV.URL_SOUNDS+1] = Channel
+
+					if !IsValid(Context.entity) then
+						Channel:Stop()
+						return
+					end
+
 					Context.Data.AudioCount = Context.Data.AudioCount + 1
 					Context.Data.Audio[Context.Data.AudioCount] = Channel
-					Context:Execute( "playURL", Sucess, { Channel, "_ac" } )
+					Context:Execute( "PlayURL", Sucess, { Channel, "_ac" } )
 				elseif Fail then
-					Context:Execute( "playURL", Fail, { Er_ID, "n" }, { Er_Name, "s" } )
+					Context:Execute( "PlayURL", Fail, { Er_ID, "n" }, { Er_Name, "s" } )
 				end
 			end )
 	end )
@@ -275,22 +292,22 @@ Component:AddFunctionHelper( "playURL", "s,s,d", "Plays sound from 1st string UR
    --- */
 
 EXPADV.ClientEvents( )
-Component:AddEvent( "enableSoundsFromURL", "", "" )
-Component:AddEvent( "disableSoundsFromURL", "", "" )
+Component:AddEvent( "enablePlayURL", "", "" )
+Component:AddEvent( "disablePlayURL", "", "" )
 
 /* -----------------------------------------------------------------------------------
-	@: WIP Features.
+	@: Features.
    --- */
 
-Component:AddFeature( "Sounds from url", "Stream audio via url feeds.", "fugue/speaker-volume.png" )
+Component:AddFeature( "PlayURL", "Stream audio via url feeds.", "tek/icons/iconsound.png" )
 
 if CLIENT then
 
 	local function DisableSounds( Entity )
-		Entity:CallEvent( "disableSoundsFromURL" )
+		Entity:CallEvent( "disablePlayURL" )
 
 		local Context = Entity.Context
-		if !Context or Context.Data.AudioCount <= 0 then return end
+		if !Context or (Context.Data.AudioCount or 0) <= 0 then return end
 
 		for _, Channel in pairs( Context.Data.Audio ) do
 			if IsValid( Channel ) then Channel:Stop( ) end
@@ -301,10 +318,10 @@ if CLIENT then
 	end
 
 	function Component:OnChangeFeatureAccess(Entity, Feature, Value)
-		if Feature ~= "Sounds from url" then return end
+		if Feature ~= "PlayURL" then return end
 		
 		if Value then
-			Entity:CallEvent( "enableSoundsFromURL" )
+			Entity:CallEvent( "enablePlayURL" )
 		else
 			DisableSounds( Entity )
 		end
@@ -313,4 +330,25 @@ if CLIENT then
 	hook.Add( "Expadv.UnregisterContext", "expadv.soundurl", function( Context )
 		DisableSounds(Context.entity)
 	end )
+
+	concommand.Add("expadv_stopsound", function()
+		local new = {}
+
+		for _, Sound in pairs(EXPADV.URL_SOUNDS) do
+			if IsValid(Sound) then
+				Sound:Stop()
+				new[#new+1] = Sound
+			end
+		end
+
+		EXPADV.URL_SOUNDS = new
+
+		for _, Sound in pairs(EXPADV.GAME_SOUNDS) do
+			Sound:Stop()
+		end
+
+		EXPADV.GAME_SOUNDS = {}
+
+		MsgN("Sounds stopped.")
+	end)
 end

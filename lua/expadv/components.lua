@@ -130,6 +130,8 @@ function BaseComponent:CreateSetting( Name, Default ) -- String, Obj
 	Name = string.lower( Name )
 
 	Config[ Name ] = Config[ Name ] or Default
+
+	return Default
 end
 
 -- Reads a setting from the config.
@@ -143,6 +145,32 @@ function BaseComponent:ReadSetting( Name, Default ) -- String, Obj
 	return Config[ Name ] or Default
 end
 
+function BaseComponent:CreateUserSetting( Name, Default ) -- String, Obj
+	if SERVER then return end
+
+	local Config = EXPADV.CL_Settings.components[self.Name] or { }
+	
+	EXPADV.CL_Settings.components[self.Name] = Config
+	
+	Name = string.lower( Name )
+
+	Config[ Name ] = Config[ Name ] or Default
+
+	return Default
+end
+
+-- Reads a setting from the config.
+function BaseComponent:ReadUserSetting( Name, Default ) -- String, Obj
+	if SERVER then return Default end
+	
+	local Config = EXPADV.CL_Settings.components[self.Name] or { }
+	
+	EXPADV.CL_Settings.components[self.Name] = Config
+	
+	Name = string.lower( Name )
+
+	return Config[ Name ] or Default
+end
 
 /* --- --------------------------------------------------------------------------------
 	@: New Component

@@ -36,12 +36,15 @@ EntObject:DefaultAsLua( Entity(0) )
    --- */
 
 if WireLib then
-	EntObject:WireInput( "ENTITY" )
-	EntObject:WireOutput( "ENTITY" )
-
-	EntObject:WireLinkOutput( )
-	EntObject:WireLinkInput( )
+	EntObject:WireIO( "ENTITY" )
 end
+
+/* --- --------------------------------------------------------------------------------
+  @: Sync
+   --- */
+
+EntObject:NetWrite(net.WriteEntity)
+EntObject:NetRead(net.ReadEntity)
 
 /* --- --------------------------------------------------------------------------------
 	@: Logical and Comparison
@@ -99,8 +102,13 @@ Component:AddFunctionHelper( "validPhysics", "e:", "Returns if the given entity 
 Component:AddInlineFunction( "pos", "e:", "v", "(@value 1:IsValid() and @value 1:GetPos() or Vector(0,0,0))")
 Component:AddFunctionHelper( "pos", "e:", "Gets the position of the given entity.")
 
-Component:AddInlineFunction( "angle", "e:", "a", "(@value 1:IsValid() and @value 1:GetAngles() or Angle(0,0,0))")
-Component:AddFunctionHelper( "angle", "e:", "Gets the angle of the given entity.")
+Component:AddInlineFunction( "nearestPoint", "e:", "v", "(@value 1:IsValid() and @value 1:NearestPoint(@value 2) or Vector(0,0,0))")
+Component:AddFunctionHelper( "nearestPoint", "e:", "erforms a Ray OBBox intersection from the given position to the origin of the OBBox with the entity and returns the hit position on the OBBox.")
+
+Component:AddInlineFunction( "ang", "e:", "a", "(@value 1:IsValid() and @value 1:GetAngles() or Angle(0,0,0))")
+Component:AddFunctionHelper( "ang", "e:", "Gets the angle of the given entity.")
+EXPADV.AddFunctionAlias( "angle", "e:" ); EXPADV.AddFunctionAlias( "angles", "e:" )
+//Rusketh do we really need these aliases?, yes we do other Rusketh.
 
 Component:AddInlineFunction( "forward", "e:", "v", "(@value 1:IsValid() and @value 1:GetForward() or Vector(0,0,0))")
 Component:AddFunctionHelper( "forward", "e:", "Gets the forward vector of the given entity.")
@@ -150,6 +158,30 @@ Component:AddFunctionHelper( "boxMax", "e:", "Gets the collision bounding max si
 Component:AddInlineFunction( "boxMin", "e:", "v", "(@value 1:IsValid() and @value 1:OBBMins() or Vector(0,0,0))")
 Component:AddFunctionHelper( "boxMin", "e:", "Gets the collision bounding min size for the given entity.")
 
+Component:AddInlineFunction( "worldSpaceAABB", "e:", "ar", [[(IsValid(@value 1) and {__type = "v", @value 1:WorldSpaceAABB()} or {__type = "v"})]])
+Component:AddFunctionHelper( "worldSpaceAABB", "e:", "Returns an array of two vectors representing the minimum and maximum extent of the entity's bounding box.")
+
+Component:AddInlineFunction( "worldSpaceCenter", "e:", "v", [[(IsValid(@value 1) and @value 1:WorldSpaceCenter() or Vector(0, 0, 0))]])
+Component:AddFunctionHelper( "worldSpaceCenter", "e:", "Returns the center of the entity according to its collision model.")
+
+Component:AddInlineFunction( "getBodygroup", "e:n", "n", "(@value 1:IsValid() and @value 1:GetBodygroup(@value 2) or 0)" )
+Component:AddFunctionHelper( "getBodygroup", "e:n", "Gets the exact value for specific bodygroup of given entity.")
+
+Component:AddInlineFunction( "getBodyGroups", "e:", "t", "(@value 1:IsValid() and @value 1:GetBodyGroups() or \"\")" )
+Component:AddFunctionHelper( "getBodyGroups", "e:", "Returns a table containing the Body Groups for the entity.")
+
+Component:AddInlineFunction( "getBodygroupCount", "e:n", "n", "(@value 1:IsValid() and @value 1:GetBodygroupCount(@value 2) or 0)" )
+Component:AddFunctionHelper( "getBodygroupCount", "e:n", "Returns the count of possible values for this bodygroup. This is not the maximum value, since the bodygroups start with 0, not 1.")
+
+Component:AddInlineFunction( "getSkin", "e:", "n", "(@value 1:IsValid() and @value 1:GetSkin() or 0)" )
+Component:AddFunctionHelper( "getSkin", "e:", "Returns the skin index of the current skin of the entity.")
+
+Component:AddInlineFunction( "getGravity", "e:", "n", "(@value 1:IsValid() and @value 1:GetGravity() or 0)" )
+Component:AddFunctionHelper( "getGravity", "e:", "Gets the gravity multiplier of the entity.")
+
+Component:AddInlineFunction( "getFriction", "e:", "n", "(@value 1:IsValid() and @value 1:GetFriction() or 0)" )
+Component:AddFunctionHelper( "getFriction", "e:", "Returns how much friction an entity has. Entities default to 1 (100%) and can be higher or even negative.")
+
 /* --- --------------------------------------------------------------------------------
 	@: Accessors Set
    --- */
@@ -179,6 +211,21 @@ Component:AddFunctionHelper( "setColour", "e:c", "Sets the colour of the given e
 
 Component:AddPreparedFunction( "enableDrag", "e:b", "", "if(IsValid(@value 1) && IsValid(@value 1:GetPhysicsObject()) && EXPADV.PPCheck(Context, @value 1)) then @value 1:GetPhysicsObject():EnableDrag(@value 2) end") -- Because why not :) ?
 Component:AddFunctionHelper( "enableDrag", "e:b", "Enables/disables drag on an entity.")
+
+Component:AddPreparedFunction( "setBodygroup", "e:n,n", "", "if(IsValid(@value 1) && EXPADV.PPCheck(Context,@value 1)) then @value 1:SetBodygroup(@value 2, @value 3) end")
+Component:AddFunctionHelper( "setBodygroup", "e:n,n", "Sets an entities' bodygroup.")
+
+Component:AddPreparedFunction( "setBodyGroups", "e:s", "", "if(IsValid(@value 1) && EXPADV.PPCheck(Context,@value 1)) then @value 1:SetBodyGroups(@value 2) end")
+Component:AddFunctionHelper( "setBodyGroups", "e:s", "Sets the bodygroups from a string.")
+
+Component:AddPreparedFunction( "setSkin", "e:n", "", "if(IsValid(@value 1) && EXPADV.PPCheck(Context,@value 1)) then @value 1:SetSkin(@value 2) end")
+Component:AddFunctionHelper( "setSkin", "e:n", "Sets the skin of the entity.")
+
+Component:AddPreparedFunction( "setFriction", "e:n", "", "if(IsValid(@value 1) && EXPADV.PPCheck(Context, @value 1)) then @value 1:SetFriction(@value 2) end")
+Component:AddFunctionHelper( "setFriction", "e:n", "Sets how much friction an entity has when sliding against a surface. Entities default to 1 (100%) and can be higher or even negative.")
+
+Component:AddPreparedFunction( "setGravity", "e:n", "", "if(IsValid(@value 1) && EXPADV.PPCheck(Context, @value 1)) then @value 1:SetGravity(@value 2) end")
+Component:AddFunctionHelper( "setGravity", "e:n", "Sets the gravity multiplier of the entity.")
 
 /* --- --------------------------------------------------------------------------------
 	@: VEHICLES
@@ -343,7 +390,7 @@ Component:AddPreparedFunction( "angVel", "e:", "a",
 [[if(@value 1:IsValid() && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType( )== $MOVETYPE_VPHYSICS) then
 	@define vel = @value 1:GetPhysicsObject():GetAngleVelocity()
 	@define avel = Angle(@vel.y, @vel.z, @vel.x)
-end]], "@avel" )
+end]], "(@avel or Angle(0,0,0))" )
 
 Component:AddFunctionHelper( "angVel", "e:", "Returns the angular velocity of the given entity.")
 
@@ -354,18 +401,21 @@ Component:AddInlineFunction( "radius", "e:", "n","(@value 1:IsValid() and @value
 Component:AddFunctionHelper( "radius", "e:", "Returns the bounding radius of the given entity.")
 
 /* --- --------------------------------------------------------------------------------
-	@: Is Somthing
+	@: Is Something
    --- */
-EXPADV.ServerOperators()
+EXPADV.SharedOperators()
 
 Component:AddInlineFunction( "isNPC", "e:", "b", "(IsValid(@value 1) and @value 1:IsNPC())")
-Component:AddFunctionHelper( "isNPC", "e", "returns true is the entity is an npc.")
+Component:AddFunctionHelper( "isNPC", "e", "returns true if the entity is an NPC.")
 
 Component:AddInlineFunction( "isPlayer", "e:", "b", "(IsValid(@value 1) and @value 1:IsPlayer())")
-Component:AddFunctionHelper( "isPlayer", "e", "returns true is the entity is a player.")
+Component:AddFunctionHelper( "isPlayer", "e", "returns true if the entity is a player.")
 
 Component:AddInlineFunction( "isVehicle", "e:", "b", "(IsValid(@value 1) and @value 1:IsVehicle())")
-Component:AddFunctionHelper( "isVehicle", "e", "returns true is the entity is a Vehicle.")
+Component:AddFunctionHelper( "isVehicle", "e", "returns true if the entity is a vehicle.")
+
+Component:AddInlineFunction( "isRagdoll", "e:", "b", "(IsValid(@value 1) and @value 1:IsRagDoll())")
+Component:AddFunctionHelper( "isRagdoll", "e", "returns true if the entity is a ragdoll.")
 
 /* --- --------------------------------------------------------------------------------
 	@: Physics Setters
@@ -490,6 +540,9 @@ Component:AddFunctionHelper( "isWeapon", "e:", "Returns if the entity is a weapo
 Component:AddInlineFunction( "health", "e:", "n", "(@value 1:IsValid() and @value 1:Health() or 0)")
 Component:AddFunctionHelper( "health", "e:", "Returns the health of the entity.")
 
+Component:AddInlineFunction( "maxHealth", "e:", "n", "(@value 1:IsValid() and @value 1:GetMaxHealth() or 0)")
+Component:AddFunctionHelper( "maxHealth", "e:", "Returns the maximum health of the entity.")
+
 Component:AddPreparedFunction( "elevation", "e:v", "n", [[
 	if(IsValid(@value 1)) then
 		@define pos = @value 1:WorldToLocal(@value 2)
@@ -581,7 +634,7 @@ end]], "@Results" )
 
 Component:AddFunctionHelper( "findInBox", "v,v", "Returns an array with entities found in the given box (1st corner, 2nd corner)." )
 
-Component:AddPreparedFunction( "findInCone", "v,v,n,a", "ar", [[
+Component:AddPreparedFunction( "findInCone", "v,v,n,n", "ar", [[
 @define Results = { __type = "e" }
 for _, Ent in pairs( $ents.FindInCone( @value 1, @value 2, @value 3, @value 4)) do
 	if Ent:IsValid() and !EXPADV.EntitySearchFilter[Ent:GetClass( )] then
@@ -589,7 +642,7 @@ for _, Ent in pairs( $ents.FindInCone( @value 1, @value 2, @value 3, @value 4)) 
 	end
 end]], "@Results" )
 
-Component:AddFunctionHelper( "findInCone", "v,v,n,a", "Returns an array with entities found in the given cone (Position, Direction, Length, Angle)." )
+Component:AddFunctionHelper( "findInCone", "v,v,n,n", "Returns an array with entities found in the given cone (Position, Direction, Length, Angle)." )
 
 /***********************************************************************************************/
 
@@ -635,7 +688,7 @@ end]], "@Results" )
 
 Component:AddFunctionHelper( "findInBox", "s,v,v", "Returns an array with entities found in the given box by the given model (Model, 1st corner, 2nd corner)." )
 
-Component:AddPreparedFunction( "findInCone", "s,v,v,n,a", "ar", [[
+Component:AddPreparedFunction( "findInCone", "s,v,v,n,n", "ar", [[
 @define Results = { __type = "e" }
 for _, Ent in pairs( $ents.FindInCone( @value 2, @value 3, @value 4, @value 5)) do
 	local Class = Ent:GetClass( )
@@ -644,10 +697,10 @@ for _, Ent in pairs( $ents.FindInCone( @value 2, @value 3, @value 4, @value 5)) 
 	end
 end]], "@Results" )
 
-Component:AddFunctionHelper( "findInCone", "s,v,v,n,a", "Returns an array with entities found in the given cone by the given model (Model, Position, Direction, Length, Angle)." )
+Component:AddFunctionHelper( "findInCone", "s,v,v,n,n", "Returns an array with entities found in the given cone by the given model (Model, Position, Direction, Length, Angle)." )
 
 Component:AddPreparedFunction( "sortEntitiesByDistance", "ar,v", "", [[
-if @value 1.__type ~= "e" then self:Throw( @trace, "invoke", "sortEntitiesByDistance #1, entity array exspected." ) end
+if @value 1.__type ~= "e" then Context:Throw( @trace, "invoke", "sortEntitiesByDistance #1, entity array exspected." ) end
 $table.sort( @value 1,
 	function( A, B )
 		return A:GetPos():Distance( @value 2 ) < B:GetPos():Distance( @value 2 )
@@ -671,6 +724,8 @@ Component:AddFunctionHelper( "playerByName", "s,b", "Returns player found by the
 /* --- --------------------------------------------------------------------------------
 	@: Constraints
    --- */
+
+EXPADV.ServerOperators()
 
 Component:AddInlineFunction( "totalConstraints", "e:", "n", "(IsValid( @value 1) and #$constraint.GetTable( @value 1 ) or 0)" )
 
@@ -704,10 +759,67 @@ Component:AddVMFunction( "getConstraints", "e:", "ar",
 		return Array
 	end )
 
+
+
 Component:AddFunctionHelper( "totalConstraints", "e:", "Returns the total number of contrained entites." )
 Component:AddFunctionHelper( "isConstrained", "e:", "Returns true is the entity has a constraint." )
 Component:AddFunctionHelper( "isWeldedTo", "e:", "Returns the first entity welded to the object." )
 Component:AddFunctionHelper( "getConstraints", "e:", "Returns an array of contrained entities." )
+
+/* --- --------------------------------------------------------------------------------
+	@: attachments
+   --- */
+
+EXPADV.SharedOperators()
+
+Component:AddInlineFunction( "lookupAttachment", "e:s", "n", "(IsValid(@value 1) and @value 1:LookupAttachment(@value 2) or 0)")
+
+Component:AddPreparedFunction( "attachmentPos", "e:n", "v", [[
+	if IsValid(@value 1) then
+		local attachment = @value 1:GetAttachment(@value 2)
+		if attachment then
+			@define pos = attachment.Pos
+		end
+	end
+]], "(@pos or Vector(0,0,0))" )
+
+Component:AddPreparedFunction( "attachmentPos", "e:s", "v", [[
+	if IsValid(@value 1) then
+		local attachment = @value 1:GetAttachment(@value 1:LookupAttachment(@value 2))
+		if attachment then
+			@define pos = attachment.Pos
+		end
+	end
+]], "(@pos or Vector(0,0,0))" )
+
+Component:AddPreparedFunction( "attachmentAng", "e:n", "a", [[
+	if IsValid(@value 1) then
+		local attachment = @value 1:GetAttachment(@value 2)
+		if attachment then
+			@define ang = attachment.Ang
+		end
+	end
+]], "(@ang or Angle(0,0,0))" )
+
+Component:AddPreparedFunction( "attachmentAng", "e:s", "a", [[
+	if IsValid(@value 1) then
+		local attachment = @value 1:GetAttachment(@value 1:LookupAttachment(@value 2))
+		if attachment then
+			@define ang = attachment.Ang
+		end
+	end
+]], "(@ang or Angle(0,0,0))" )
+
+Component:AddPreparedFunction( "attachments", "e:", "ar", [[
+	@define array = {__type = "s"}
+
+	if IsValid(@value 1) then
+		local atc = @value 1:GetAttachments()
+		for i = 1, #atc do
+			@array[i] = atc[i].name
+		end
+	end
+]], "@array" )
 
 /* --- --------------------------------------------------------------------------------
 	@: Trails
@@ -741,6 +853,184 @@ EXPADV.AddFunctionAlias( "setTrails", "e:n,n,n,s,c,n" )
 EXPADV.AddFunctionAlias( "setTrails", "e:n,n,n,s,c" )
 
 Component:AddFunctionHelper( "setTrails", "e:n,n,n,s,c,n,b", "Adds a trail to an entity." )
+
+/* --- --------------------------------------------------------------------------------
+	@: NPC Control
+	@: Credits: Sparky
+   --- */
+   
+EXPADV.ServerOperators()
+
+Component:AddPreparedFunction( "npcGoWalk", "e:v", "", 
+[[if(@value 1:IsValid() && EXPADV.PPCheck(Context,@value 1) && @value 1:IsNPC()) then
+	@value 1:SetLastPosition( @value 2 )
+	@value 1:SetSchedule( $SCHED_FORCED_GO )
+end]])
+
+Component:AddFunctionHelper( "npcGoWalk", "e:v", "Tells an npc to walk to a position")
+
+Component:AddPreparedFunction( "npcGoRun", "e:v", "", 
+[[if(@value 1:IsValid() && EXPADV.PPCheck(Context,@value 1) && @value 1:IsNPC()) then
+	@value 1:SetLastPosition( @value 2 )
+	@value 1:SetSchedule( $SCHED_FORCED_GO_RUN )
+end]])
+
+Component:AddFunctionHelper( "npcGoRun", "e:v", "Tells an npc to run to a position")
+
+Component:AddPreparedFunction( "npcAttackMelee", "e:", "", 
+[[if(@value 1:IsValid() && EXPADV.PPCheck(Context,@value 1) && @value 1:IsNPC()) then
+	@value 1:SetSchedule( $SCHED_MELEE_ATTACK1 )
+end]])
+
+Component:AddFunctionHelper( "npcAttackMelee", "e:", "Tells an npc to run to start attacking with melee")
+
+Component:AddPreparedFunction( "npcAttackRange", "e:", "", 
+[[if(@value 1:IsValid() && EXPADV.PPCheck(Context,@value 1) && @value 1:IsNPC()) then
+	@value 1:SetSchedule( $SCHED_RANGE_ATTACK1 )
+end]])
+
+Component:AddFunctionHelper( "npcAttackRange", "e:", "Tells an npc to run to start attacking from a range")
+
+Component:AddPreparedFunction( "npcStop", "e:", "", 
+[[if(@value 1:IsValid() && EXPADV.PPCheck(Context,@value 1) && @value 1:IsNPC()) then
+	@value 1:SetSchedule( $SCHED_NONE )
+end]])
+
+Component:AddFunctionHelper( "npcStop", "e:", "Tells an npc to run to stop what it's doing")
+
+Component:AddPreparedFunction( "npcSetTarget", "e:e", "", 
+[[if(@value 1:IsValid() && @value 2:IsValid() && EXPADV.PPCheck(Context,@value 1) && @value 1:IsNPC()) then
+	@value 1:SetEnemy(@value 2)
+end]])
+
+Component:AddFunctionHelper( "npcSetTarget", "e:e", "Sets the npc's target")
+
+Component:AddPreparedFunction( "npcGetTarget", "e:", "e", 
+[[if(@value 1:IsValid() && EXPADV.PPCheck(Context,@value 1) && @value 1:IsNPC()) then
+		@define enemy = @value 1:GetEnemy() 
+end]], "(@enemy or Entity(0))")
+
+Component:AddFunctionHelper( "npcGetTarget", "e:", "Returns the npc's target")
+
+EXPADV.NpcRelationships = {hate = 1, fear = 2, like = 3, neutral = 4, [1] = "hate", [2] = "fear", [3] = "like", [4] = "neutral"}
+EXPADV.NpcRelationshipsStr = {hate = "D_HT", fear = "D_FR", like = "D_LI", neutral = "D_NU"}
+
+Component:AddPreparedFunction( "npcSetRelationship", "e:e,s,n", "", 
+[[if(@value 1:IsValid() && @value 2:IsValid() && EXPADV.PPCheck(Context,@value 1) && @value 1:IsNPC() && EXPADV.NpcRelationships[@value 3]) then
+	@value 1:AddEntityRelationship(@value 2, EXPADV.NpcRelationships[@value 3], @value 4)
+end]])
+
+Component:AddFunctionHelper( "npcSetRelationship", "e:e,s,n", "Sets the npc's relationship. hate, fear, like, or neutral, then the priority value.")
+
+Component:AddPreparedFunction( "npcSetRelationship", "e:s,s,n", "", 
+[[if(@value 1:IsValid() && EXPADV.PPCheck(Context,@value 1) && @value 1:IsNPC() && EXPADV.NpcRelationshipsStr[@value 3]) then
+	@value 1:AddRelationship(@value 2 .. " " .. EXPADV.NpcRelationshipsStr[@value 3] .. " " .. @value 4)
+end]])
+
+Component:AddFunctionHelper( "npcSetRelationship", "e:s,s,n", "Sets the npc's relationship to a general class group. hate, fear, like, or neutral, then the priority value.")
+
+Component:AddPreparedFunction( "npcGetRelationship", "e:e", "s", 
+[[if(@value 1:IsValid() && EXPADV.PPCheck(Context,@value 1) && @value 1:IsNPC() && @value 2:IsValid()) then
+	@define disp = EXPADV.NpcRelationships[@value 1:Disposition(@value 2)]
+end]], "(@disp or \"\")")
+
+Component:AddFunctionHelper( "npcGetRelationship", "e:e", "Gets the npc's relationship with another entity as a string.")
+   
+/* --- --------------------------------------------------------------------------------
+	@: Bones
+   --- */
+
+EXPADV.SharedOperators()
+
+Component:AddVMFunction( "setBoneJiggle", "e:n,b", "",
+	function(Context, Trace, Entity, Bone, Bool)
+		if IsValid(Entity) then
+			if Bone < 1 or Bone > Entity:GetBoneCount( ) then return end
+			if !EXPADV.PPCheck(Context, Entity) then return end
+			Entity:ManipulateBoneJiggle( Bone - 1, Bool and 1 or 0 )
+		end
+	end)
+
+Component:AddVMFunction( "getBoneJiggle", "e:n", "b",
+	function(Context, Trace, Entity, Bone)
+		if IsValid(Entity) then
+			if Bone < 1 or Bone > Entity:GetBoneCount( ) then return false end
+			if !EXPADV.PPCheck(Context, Entity) then return false end
+			return Entity:GetManipulateBoneJiggle( Bone - 1)
+		end
+
+		return false
+	end)
+
+Component:AddVMFunction( "setBonePos", "e:n,v", "",
+	function(Context, Trace, Entity, Bone, Vec)
+		if IsValid(Entity) then
+			if Bone < 1 or Bone > Entity:GetBoneCount( ) then return end
+			if !EXPADV.PPCheck(Context, Entity) then return end
+			Entity:ManipulateBonePosition( Bone - 1, Vec)
+		end
+	end)
+
+Component:AddVMFunction( "getBonePos", "e:n", "v",
+	function(Context, Trace, Entity, Bone)
+		if IsValid(Entity) then
+			if Bone < 1 or Bone > Entity:GetBoneCount( ) then return Vector(0,0,0) end
+			if !EXPADV.PPCheck(Context, Entity) then return Vector(0,0,0) end
+			return Entity:GetManipulateBonePosition( Bone - 1)
+		end
+
+		return Vector(0,0,0)
+	end)
+
+Component:AddVMFunction( "setBoneScale", "e:n,v", "",
+	function(Context, Trace, Entity, Bone, Vec)
+		if IsValid(Entity) then
+			if Bone < 1 or Bone > Entity:GetBoneCount( ) then return end
+			if !EXPADV.PPCheck(Context, Entity) then return end
+			Entity:ManipulateBoneScale( Bone - 1, Vec)
+		end
+	end)
+
+Component:AddVMFunction( "getBoneScale", "e:n", "v",
+	function(Context, Trace, Entity, Bone)
+		if IsValid(Entity) then
+			if Bone < 1 or Bone > Entity:GetBoneCount( ) then return Vector(0,0,0) end
+			if !EXPADV.PPCheck(Context, Entity) then return Vector(0,0,0) end
+			return Entity:GetManipulateBoneScale( Bone - 1)
+		end
+
+		return Vector(0,0,0)
+	end)
+
+Component:AddVMFunction( "setBoneAng", "e:n,a", "",
+	function(Context, Trace, Entity, Bone, Ang)
+		if IsValid(Entity) then
+			if Bone < 1 or Bone > Entity:GetBoneCount( ) then return end
+			if !EXPADV.PPCheck(Context, Entity) then return end
+			Entity:ManipulateBoneAngles( Bone - 1, Ang)
+		end
+	end)
+
+Component:AddVMFunction( "getBoneAng", "e:n", "a",
+	function(Context, Trace, Entity, Bone)
+		if IsValid(Entity) then
+			if Bone < 1 or Bone > Entity:GetBoneCount( ) then return Angle(0,0,0) end
+			if !EXPADV.PPCheck(Context, Entity) then return Angle(0,0,0) end
+			return Entity:GetManipulateBoneAngles( Bone - 1)
+		end
+
+		return Angle(0,0,0)
+	end)
+
+Component:AddFunctionHelper( "setBonePos", "e:n,v", "Sets the position of bone N on the entity." )
+Component:AddFunctionHelper( "setBoneAngle", "e:n,a", "Sets the angle of bone N on the entity." )
+Component:AddFunctionHelper( "setBoneScale", "e:n,v", "Sets the scale of bone N on the entity." )
+Component:AddFunctionHelper( "jiggleBone", "e:n,b", "Makes the bone N on the entity jiggle about when B is true." )
+Component:AddFunctionHelper( "getBonePos", "e:n", "Gets the position of bone N on entity." )
+Component:AddFunctionHelper( "getBoneAng", "e:n", "Gets the angle of bone N on entity." )
+Component:AddFunctionHelper( "getBoneScale", "e:n", "Gets the scale of bone N on entity." )
+Component:AddFunctionHelper( "boneCount", "e:", "Returns the ammount of bones of a entity." )
+Component:AddFunctionHelper( "boneParent", "e:n", "The bode ID of the bone to get parent of." )
 
 /* --- --------------------------------------------------------------------------------
 	@: Entity Events

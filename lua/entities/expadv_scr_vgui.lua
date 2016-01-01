@@ -84,6 +84,16 @@ function ENT:CreateDermaObject( Panel, Parent )
 		end
 	end
 
+	if Panel.MakePopup then
+		Panel._MakePopup = Panel.MakePopup
+
+		function Panel.MakePopup(Panel)
+			Panel:SetZPos(32767)
+			Panel:SetMouseInputEnabled(true)
+			Panel:SetKeyboardInputEnabled(true)
+		end
+	end
+
 	return Panel
 end
 
@@ -97,7 +107,6 @@ function ENT:Initialize()
 
 	self.Panel = self:CreateDermaObject( "DPanel" )
 	self.Panel:SetPos(0,0)
-	self.Panel:SetSize(512, 512)
 	self.Panel:SetDrawBackground(false)
 	self.Panel:SetPaintedManually( true )
 
@@ -119,18 +128,24 @@ end
 
 function ENT:OnRemove()
 	self:RestoreGuiMouse()
-	EXPADV.CacheRenderTarget( self.RenderTarget, self.RenderMat )
+	EXPADV.CacheRenderTarget(self.RT_Data)
 
 	if self.Panel and self.Panel:IsValid() then self.Panel:Remove() end
 
-	return self.BaseClass.BaseClass.OnRemove( self )
+	EXPADV.CacheRenderTarget(self.RT_Data)
+	
+	hook.Remove( "PlayerInitialSpawn", self )
+
+	if !self:IsRunning( ) then return end
+	
+	self.Context:ShutDown( )
 end
 
-function ENT:PostDrawScreen( Width, Height )
-	if !ValidPanel(self.Panel) then return end
+function ENT:PostDrawScreen(_, scrRes)
+	if !ValidPanel(self.Panel) or !self.GetResolution then return end
 
 	self:checkHover( self.Panel )
-
+	self.Panel:SetSize(self:GetResolution(512), self:GetResolution(512))
 	self.Panel:SetPaintedManually( false )
 	self.Panel:PaintManual()
 	self.Panel:SetPaintedManually( true )

@@ -182,13 +182,36 @@ Component:AddPreparedFunction( "setKeyboardSW", "", "", "Context.Data.KB_Layout 
 Component:AddPreparedFunction( "setKeyboardNW", "", "", "Context.Data.KB_Layout = \"nw\"" )
 Component:AddPreparedFunction( "setKeyboardGE", "", "", "Context.Data.KB_Layout = \"ge\"" )
 
+Component:AddFunctionHelper("setKeyboardUk", "", "Sets the default keyboard layout for keypress events.")
+Component:AddFunctionHelper("setKeyboardUS", "", "Sets the default keyboard layout for keypress events.")
+Component:AddFunctionHelper("setKeyboardSW", "", "Sets the default keyboard layout for keypress events.")
+Component:AddFunctionHelper("setKeyboardNW", "", "Sets the default keyboard layout for keypress events.")
+Component:AddFunctionHelper("setKeyboardGE", "", "Sets the default keyboard layout for keypress events.")
+
+function Component:OnRegisterContext(Context) Context.Data.KB_Users = {} end
+
+Component:AddPreparedFunction( "setKeyboardUk", "ply:", "", "Context.Data.KB_Users[@value 1] = \"en\"" )
+Component:AddPreparedFunction( "setKeyboardUS", "ply:", "", "Context.Data.KB_Users[@value 1] = \"us\"" )
+Component:AddPreparedFunction( "setKeyboardSW", "ply:", "", "Context.Data.KB_Users[@value 1] = \"sw\"" )
+Component:AddPreparedFunction( "setKeyboardNW", "ply:", "", "Context.Data.KB_Users[@value 1] = \"nw\"" )
+Component:AddPreparedFunction( "setKeyboardGE", "ply:", "", "Context.Data.KB_Users[@value 1] = \"ge\"" )
+
+Component:AddFunctionHelper("setKeyboardUk", "ply:", "Sets the keyboard layout for a players keypress events.")
+Component:AddFunctionHelper("setKeyboardUS", "ply:", "Sets the keyboard layout for a players keypress events.")
+Component:AddFunctionHelper("setKeyboardSW", "ply:", "Sets the keyboard layout for a players keypress events.")
+Component:AddFunctionHelper("setKeyboardNW", "ply:", "Sets the keyboard layout for a players keypress events.")
+Component:AddFunctionHelper("setKeyboardGE", "ply:", "Sets the keyboard layout for a players keypress events.")
+
 /* --- --------------------------------------------------------------------------------
 @: Events.
    --- */
 
 EXPADV.SharedEvents( )
 Component:AddEvent( "keypress", "ply,n", "" )
+EXPADV.AddEventHelper("keypress", "Called when a player presses a key, gives both the player and the ascii char pressed.")
+
 Component:AddEvent( "keyrelease", "ply,n", "" )
+EXPADV.AddEventHelper("keyrelease", "Called when a player releases a key, gives both the player and the ascii char released.")
 
 local LShift, RShift = { }, { }
 
@@ -213,7 +236,8 @@ hook.Add( "PlayerButtonDown", "expadv.keys", function( Ply, Key )
 		local Event = Context["event_keypress"]
 		
 		if Event then
-			local Ascii = GetKey(Context.Data.KB_Layout, Key, LShift[Ply], RShift[Ply])
+			local Layout = Context.Data.KB_Users[Ply] or Context.Data.KB_Layout
+			local Ascii = GetKey(Layout, Key, LShift[Ply], RShift[Ply])
 			Context:Execute( "Event keypress", Event, Ply, Ascii )
 		end
 	end
@@ -237,3 +261,54 @@ hook.Add( "PlayerButtonUp", "expadv.keys", function( Ply, Key )
 		end
 	end
 end )
+
+/* --- --------------------------------------------------------------------------------
+@: Keyboard Mode.
+   --- */
+
+EXPADV.ClientOperators()
+
+local PNL
+
+local func = function(ply, bind, pressed)
+	if bind == "+attack" or bind ==  "+attack2" then return nil end
+	return true
+end
+
+Component:AddFeature( "LockInput", "Blocks user input, Useful for virtual keyboards.", "tek/iconexclamation.png" )
+
+Component:AddVMFunction( "lockInput", "b", "", 
+	function( Context, Trace, bool )
+		if CLIENT and !IsValid(Context.entity) or !EXPADV.CanAccessFeature(Context.entity, "LockInput") then return end
+		
+		if bool and !IsValid(PNL) then
+			-- Just jacked this from the wire keyboard :D
+			PNL = vgui.Create("DShape")
+			PNL:SetColor(Color(0, 0, 0, 192))
+			PNL:SetType("Rect")
+
+			local label = vgui.Create("DLabel", PNL)
+			label:SetText("An EXPADV2 gate has locked your keyboard, press Left-Alt to exit.")
+			label:SizeToContents()
+			label:SetPos(6, 6)
+			PNL:SizeToChildren(true, true)
+			label:SetPos(2, 2)
+
+			PNL:CenterHorizontal()
+			PNL:CenterVertical(0.95)
+
+			hook.Add("PlayerBindPress", "expadv.keys", func)
+		elseif !bool and IsValid(PNL) then
+			hook.Remove("PlayerBindPress", "expadv.keys")
+			PNL:Remove()
+		end
+	end )
+
+if CLIENT then
+	hook.Add( "Think", "expadv.keys", function()
+		if IsValid(PNL) and input.IsKeyDown(KEY_LALT) then 
+			hook.Remove("PlayerBindPress", "expadv.keys")
+			PNL:Remove()
+		end
+	end)
+end

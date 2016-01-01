@@ -227,7 +227,7 @@ function Compiler:MakeVirtual( Instruction, Force )
 
 	local Native = table.concat( {
 		"return function( Context )",
-			"setfenv( 1, Context.Enviroment )",
+			"setfenv( 1, Context:SandBox() )",
 			Instruction.Prepare or "",
 			"return " .. (Instruction.Inline or ""),
 		"end"
@@ -240,7 +240,7 @@ function Compiler:MakeVirtual( Instruction, Force )
 	end
 
 	self.VMInstructions[ID] = Compiled( )
-	self.NativeLog[ "Instructions " .. ID ] = Natvie
+	self.NativeLog[ID] = Natvie
 
 	local Instr = self:NewLuaInstruction( Trace, Instruction, nil, string.format( "Context.Instructions[%i]( Context )", ID ) )
 
@@ -252,6 +252,17 @@ end
 /* --- --------------------------------------------------------------------------------
 	@: Classes.
    --- */
+function Compiler:GetUserClass(Name)
+	self.OOP = self.OOP or {}
+	if self.OOP[Name] then return self.OOP[Name] end
+
+	local Class = setmetatable( {Name = Name, Short = #self.OOP+1, DeriveFrom = "generic"}, EXPADV.BaseClassObj )
+	self.OOP[Name] = Class
+	self.OOP[Class.Short] = Class
+
+	return  Class
+end
+
 function Compiler:GetClass( Trace, ClassName, bNoError )
 	
 	local Class
@@ -262,7 +273,7 @@ function Compiler:GetClass( Trace, ClassName, bNoError )
 	
 	if !Class and bNoError then return end
 
-	if !Class then --or (Class.Name ~= ClassName and !EXPADV.ClassAliases[ ClassName ] ) then
+	if !Class then
 		if bNoError then return end
 		self:TraceError( Trace, "No such class %q", ClassName or "Error" )
 	end
@@ -329,17 +340,13 @@ end
 
    function Compiler:PushLambdaDeph( )
 		self:PushMemory( )
-   		self.LambdaDeph = self.LambdaDeph + 1
+		self.LambdaDeph = self.LambdaDeph + 1
    end
 
    function Compiler:PopLambdaDeph( )
    		local Memory = self:PopMemory( )
    		self.LambdaDeph = self.LambdaDeph - 1
    		return Memory
-   end
-
-   function Compiler:FlushMemory( Trace, Memory )
-		return string.format( "local Context = Context:Push( %s, %s )", EXPADV.ToLua( Trace ), EXPADV.ToLua( Memory or { } ) )
    end
 
    function Compiler:PushReturnDeph( ForceClass, Optional )
@@ -409,10 +416,6 @@ end
    --- */
 
 function Compiler:CreateVariable( Trace, Variable, Class, Modifier, Comparator )
-	--if Comparator then
-	--	Class, Modifier, Comparator = Comparator, Class, Modifier
-	--end -- ^ omg, I <3 that lua can do this :D
-
 	local ClassObj = istable( Class ) and Class or self:GetClass( Trace, Class, false )
 
 	if self.IsServerScript and self.IsClientScript then
@@ -484,17 +487,39 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier, Comparator )
 		return self.Global[ MemRef ]
 	end
 
+	/*if Modifier == "synced" then
+		if !ClassObj.WriteToNet or !ClassObj.ReadFromNet then
+			self:TraceError( Trace, "Synced variables of class %q are not supported.", Class )
+		end
+
+		local MemRef = self.Scope[ Variable ]
+
+		if MemRef and self:TestCell( Trace, MemRef, Class, Variable, Comparator ) then
+			return self.Cells[ MemRef ]
+		end
+
+		MemRef = self:NextMemoryRef( )
+
+		self.Scope[Variable] = MemRef
+
+		self.SyncVars[MemRef] = MemRef
+		
+		self.Cells[ MemRef ] = { Variable = Variable, Memory = MemRef, Scope = self.ScopeID, Return = ClassObj.Short, ClassObj = ClassObj, Modifier = "synced", Server = self.IsServerScript, Client = self.IsClientScript }
+
+		return self.Cells[ MemRef ]
+	end*/
+
 	if WireLib then
 		if Modifier == "input" or Modifier == "output" then
 			if Variable[1] ~= Variable[1]:upper( ) then
 				self:TraceError( Trace, "Wire %s's require captialization.", Modifier )
-			elseif self.IsClientScript then
-				self:TraceError( Trace, "Wire %s's can not be used clientside.", Modifier )
+			elseif self.IsClientScript then -- and (!ClassObj.WriteToNet or !ClassObj.ReadFromNet) then
+				self:TraceError( Trace, "Wire %s's of type %s can not appear clientside.", Modifier, Variable)
 			end
 		end
 
 		if Modifier == "input" then
-			if !ClassObj.Wire_In_Type then
+			if !ClassObj.Wire_in_type then
 				self:TraceError( Trace, "Wire inputs of class %q are not supported.", Class )
 			end
 
@@ -505,7 +530,7 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier, Comparator )
 			else
 				MemRef = self:NextMemoryRef( )
 
-				self.Cells[ MemRef ] = { Variable = Variable, Memory = MemRef, Scope = 0, Return = ClassObj.Short, ClassObj = ClassObj, Modifier = "input", Server = true, Client = false }
+				self.Cells[ MemRef ] = { Variable = Variable, Memory = MemRef, Scope = 0, Return = ClassObj.Short, ClassObj = ClassObj, Modifier = "input", Server = true, Client = self.IsClientScript }
 				self.InPorts[ Variable ] = MemRef
 			end
 
@@ -519,7 +544,7 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier, Comparator )
 		end
 
 		if Modifier == "output" then
-			if !ClassObj.Wire_In_Type then
+			if !ClassObj.Wire_out_type then
 				self:TraceError( "Wire outputs of class %q are not supported.", Class )
 			end
 
@@ -532,8 +557,6 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier, Comparator )
 
 				self.Cells[ MemRef ] = { Variable = Variable, Memory = MemRef, Scope = 0, Return = ClassObj.Short, ClassObj = ClassObj, Modifier = "output", Server = true, Client = false }
 				self.OutPorts[ Variable ] = MemRef
-
-				if ClassObj.HasUpdateCheck then self.OutClick[ MemRef ] = true end
 			end
 
 			if self.Scope[ Variable ] then
@@ -645,9 +668,9 @@ function Compiler:CheckStatus() end
 	@: Base Env
    --- */
 
+
 EXPADV.BaseEnv = {
 	__index = function( _, Value )
-			debug.Trace( )
 			error("Attempt to reach Lua environment " .. Value, 1 )
 	end, __newindex = function( _, Value )
 			error("Attempt to write to lua environment " .. Value, 1 )
@@ -662,13 +685,91 @@ local function CreateEnviroment( )
 		EXPADV = EXPADV, SERVER = SERVER, CLIENT = CLIENT,
 		Vector = Vector, Vector2 = Vector2, Angle = Angle, Color = Color, Quaternion = Quaternion,
 		pairs = pairs, ipairs = ipairs,
-		pcall = pcall, error = error, unpack = unpack,
+		pcall = pcall, error = error, unpack = unpack, setmetatable = setmetatable,
 		print = print, MsgN = MsgN, tostring = tostring, tonumber = tonumber,
 		IsValid = IsValid, Entity = Entity,
 		math = math, string = string, table = table,
 		setfenv = setfenv, type = type,
 	} 
 end
+
+/* --- --------------------------------------------------------------------------------
+	@: Debugging
+   --- */
+
+/*local time, stack, bench, calls
+
+function DebugStart(Name)
+	stack = {Name}
+	bench = {[Name] = 0}
+	calls = {[Name] = 1}
+	time = SysTime()
+end
+
+function DebugPush(Name)
+	local Time = SysTime()
+	local Pos = #stack
+	local Type = stack[Pos]
+
+	if Type then bench[Type] = (bench[Type] or 0) + ((Time - time) * 1000000) end
+
+	stack[Pos + 1] = Name
+	calls[Name] = (calls[Name] or 0) + 1
+	
+	time = SysTime()
+end
+
+function DebugPop()
+	local Time = SysTime()
+	local Pos = #stack
+	local Type = stack[Pos]
+	if Type then bench[Type] = (bench[Type] or 0) + ((Time - time) * 1000000) end
+	stack[Pos - 1] = nil
+	time = SysTime()
+end
+
+function DebugStop()
+	MsgN("Compiler Debug Results:")
+	
+	local TotalCalls, TotalTime = 0, 0
+
+	local Order = {}
+
+	for k,_ in pairs(bench) do Order[#Order + 1] = k end
+	table.sort(Order, function(a,b)
+		return (bench[a] or 0) > (bench[b] or 0)
+	end)
+
+	for _, Name in pairs(Order) do
+		local Time = bench[Name] or 0
+		local Count = calls[Name] or 0
+		MsgN(Name, ":")
+		MsgN("\tTimes Called: ", Count)
+		MsgN("\tOverall Time: ", Time, "us")
+		MsgN("\tAverage Time:  ", Time / Count, "us")
+
+		TotalCalls = TotalCalls + Count
+		TotalTime = TotalTime + Time
+	end
+
+	MsgN("Overall Results:")
+	MsgN("\tTimes Called: ", TotalCalls)
+	MsgN("\tOverall Time: ", TotalTime, "us")
+	MsgN("\tAverage Time:  ", TotalTime / TotalCalls, "us")
+end
+
+for name, func in pairs(Compiler) do
+	if isfunction(func) then
+
+		Compiler[name] = function(self, ...)
+			DebugPush(name)
+				local a, b, c, d, e = func(self, ...)
+			DebugPop()
+
+			return a, b, c, d, e
+		end
+	end
+end*/
 
 /* --- --------------------------------------------------------------------------------
 	@: Compile Code
@@ -687,14 +788,16 @@ function EXPADV.CreateCompiler(Script, Files)
 	
 	self:BuildScopes()
 	self.Delta, self.Memory = { }, { }
-	self.Cells, self.InPorts, self.OutPorts, self.OutClick = { }, { }, { }, { }
+	self.Cells, self.SyncVars, self.InPorts, self.OutPorts = { }, { }, { }, { }
 	self.FreshMemory, self.MemoryDeph, self.LambdaDeph, self.LoopDeph = { }, 0, 0, 0
 	self.ReturnOptional, self.ReturnTypes, self.ReturnDeph = { }, { }, 0
-
+	self.ClassDeph, self.ClassCells, self.ClassMemory, self.Classes  = 0, { }, { }, {}
 	return self
 end
 
 function EXPADV.SolidCompile(Script, Files)
+	//DebugStart("SolidCompile")
+
 	local self = EXPADV.CreateCompiler(Script, Files)
 	
 	self:StartTokenizer( )
@@ -703,11 +806,32 @@ function EXPADV.SolidCompile(Script, Files)
 		
 	local Status, Instruction = pcall(self.Sequence, self, {0, 0})
 	
+	//DebugStop()
+	
 	if !Status then return false, Instruction end
 
-	setmetatable(self.Enviroment, EXPADV.BaseEnv)
+	//setmetatable(self.Enviroment, EXPADV.BaseEnv)
 
 	return true, self, self:FixPlaceHolders(Instruction)
+end
+
+/* --- --------------------------------------------------------------------------------
+	@: Soft compiler setting.
+   --- */
+
+EXPADV.CreateSetting( "compile_threads", 10 )
+EXPADV.CreateSetting( "compile_rate", 60 )
+
+local function compileRate()
+	local rate = EXPADV.ReadSetting( "compile_rate", 60 )
+
+	if rate <= 0 then
+		return 0, false
+	elseif rate > 99 then
+		return 0.99, true
+	end
+	
+	return rate / 100, true
 end
 
 /* --- --------------------------------------------------------------------------------
@@ -727,7 +851,7 @@ function EXPADV.NewSoftCompiler(Script, Files)
 
 	self.Thread = coroutine.create(function()
 		self:StartTokenizer( )
-	
+		
 		EXPADV.CallHook("PreCompileScript", self, Script, Files)
 			
 		local Status, Instruction = pcall(self.Sequence, self, {0, 0})
@@ -735,8 +859,6 @@ function EXPADV.NewSoftCompiler(Script, Files)
 		self.IsDone = true -- What ever happens this coroutine is done!
 
 		if !Status then return self:OnFail(Instruction) end
-
-		setmetatable(self.Enviroment, EXPADV.BaseEnv)
 
 		Instruction = self:FixPlaceHolders(Instruction)
 
@@ -757,8 +879,6 @@ function SoftCompiler:Resume(Seconds)
 	function self:CheckStatus()
 		if Hault then coroutine.yield() end
 	end -- I wish I could do this from the above hook :(
-
-
 
 	Time = SysTime()
 	debug.sethook(hook, "", 500)
@@ -811,12 +931,15 @@ end
 
 
 function EXPADV.StepCompilerQueue()
+
 	local count = #Queue
 	if count == 0 then return end
-	if count > 10 then count = 10 end
+
+	local threads = EXPADV.ReadSetting( "compile_threads", 10 )
+	if count > threads then count = threads end
 
 	local finished = {}
-	local speed = ((engine.TickInterval() * 0.4) / count)
+	local speed = ((engine.TickInterval() * compileRate()) / count) -- was 0.4 now 0.8
 	local nextSpeed = speed -- Allows us to make the most of this :D
 
 	-- MsgN("processing ", count, " out of ", #Queue)
@@ -852,3 +975,5 @@ end)
    --- */
    
 EXPADV.CallHook( "PostLoadCompiler", Compiler.RawTokens )
+
+

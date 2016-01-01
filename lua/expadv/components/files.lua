@@ -150,7 +150,7 @@ Component:AddFunctionHelper( "canAccessFiles", "", "Returns true if this entity 
 	@: WIP Features.
    --- */
 
-Component:AddFeature( "File access", "Read and save files.", "fugue/blue-folder-horizontal-open.png" )
+Component:AddFeature( "Files", "Read and save files.", "tek/icons/iconfileaccess.png" )
 
 EXPADV.SharedEvents( )
 Component:AddEvent( "disableFileAccess", "", "" )

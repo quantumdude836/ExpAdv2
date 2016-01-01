@@ -13,7 +13,7 @@ AddCSLuaFile( "vars.lua" )
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Receive Code
    --- */
-   
+
 function ENT:ReceiveScript(script, name)
 	self.root = script
 	self.files = {}
@@ -21,12 +21,14 @@ function ENT:ReceiveScript(script, name)
 	if script ~= "" then
 		self:CompileScript( self.root, self.files )
 
-		EXPADV.SendToClient(nil, self, script, self.player)
+		timer.Simple(1, function()
+			EXPADV.SendToClient(nil, self, script, self.player)
+		end)
 
 		hook.Add( "PlayerInitialSpawn", self, function(self, player)
 			timer.Simple(5, function()
-				if IsValid(player) then
-					EXPADV.SendToClient(player, self, self.root, self.files) 
+				if IsValid(player) and !EXPADV.CallHook("SyncCodeToNewPlayer", self, player) then
+					EXPADV.SendToClient(player, self, self.root, self.files)
 				end
 			end)
 		end)
@@ -54,8 +56,6 @@ local function EntityLookup(CreatedEntities)
 	end
 end
 
-local __CONTEXT
-
 function ENT:PreEntityCopy( )
 	local DupeTable = WireLib and WireLib.BuildDupeInfo( self ) or { }
 	
@@ -66,14 +66,6 @@ function ENT:PreEntityCopy( )
 	EXPADV.CallHook( "BuildDupeInfo", self, DupeTable )
 	
 	duplicator.StoreEntityModifier(self, "ExpAdvDupeInfo", DupeTable)
-
-	__CONTEXT = self.Context
-	
-	self.Context = nil
-end
-
-function ENT:PostEntityCopy( )
-	self.Context = __CONTEXT
 end
 
 function ENT:PostEntityPaste( Player, Entity, CreatedEntities  )

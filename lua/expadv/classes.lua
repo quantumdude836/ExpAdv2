@@ -54,7 +54,7 @@ end
 
 -- Overrides the changed check to use 'Obj.HasChanged == true'
 function BaseClassObj:UsesHasChanged( )
-	self.HasUpdateCheck = true
+	print("Depricated use of Class:UsesHasChanged() for " .. self.Name)
 end
 
 /* --- --------------------------------------------------------------------------------
@@ -83,38 +83,45 @@ end
 
 if WireLib then
 
-	local function WireOut( Context, MemoryRef ) return Context.Memory[ MemoryRef ] end
-
-	-- Defines the wire outport type name of your class.
-	-- Optionally define a method to translate native type in memory to wire type.
-	function BaseClassObj:WireOutput( WireType, Function ) -- String, function( table Context, number MemoryRef )
-		self.Wire_Out_Type = string.upper( WireType )
-
-		self.Wire_Out_Util = Function or WireOut
-	end
-
-	local function WireIn( Context, MemoryRef, InValue ) Context.Memory[ MemoryRef ] = InValue end
-
-	-- Defines the wire inport type name of your class.
-	-- Optionally define a method to translate wire type to native type and store in memory.
-	function BaseClassObj:WireInput( WireType, Function ) -- function( table Context, number MemoryRef, obj Value )
-		self.Wire_In_Type = string.upper( WireType )
+	function EXPADV.ConvertFromWire(Type, Obj, Context)
+		local Class = EXPADV.GetClass(Type)
 		
-		self.Wire_In_Util = Function or WireIn
+		if !Class or !Class.Wire_in_type then
+			return nil, "void"
+		elseif !Class.Wire_in_func then
+			return Obj, Class.Wire_in_type
+		end
+
+		return Class.Wire_in_func(Obj, Context), Class.Wire_in_type
 	end
 
-	local DefaultWireLink = function( A ) return A end
-	
-	function BaseClassObj:WireLinkOutput( Function )
-		if !self.Wire_Out_Type then return ErrorNoHalt( string.format( "No wiretype defined for class %s.", self.Name ) ) end
+	function EXPADV.ConvertToWire(Type, Obj, Context)
+		local Class = EXPADV.GetClass(Type)
+		
+		if !Class or !Class.Wire_out_type then
+			return nil, "void"
+		elseif !Class.Wire_out_func then
+			return Obj, Class.Wire_out_type
+		end
 
-		self.Wire_Link_Out = Function or DefaultWireLink
+		return Class.Wire_out_func(Obj, Context), Class.Wire_out_type
 	end
 
-	function BaseClassObj:WireLinkInput( Function )
-		if !self.Wire_In_Type then return ErrorNoHalt( string.format(  "No wiretype defined for class %s.", self.Name ) ) end
+	function BaseClassObj:ToWire(WireType, Function)
+		self.Wire_in_type = WireType
+		self.Wire_in_func = Function
+	end
 
-		self.Wire_Link_In = Function or DefaultWireLink
+	function BaseClassObj:FromWire(WireType, Function)
+		self.Wire_out_type = WireType
+		self.Wire_out_func = Function
+	end
+
+	function BaseClassObj:WireIO(WireType, InFunc, OutFunc)
+		self.Wire_in_type = WireType
+		self.Wire_in_func = InFunc
+		self.Wire_out_type = WireType
+		self.Wire_out_func = OutFunc
 	end
 end
 
@@ -229,12 +236,22 @@ function EXPADV.ToString( Short, Obj ) -- String, Obj
 end
 
 /* --- --------------------------------------------------------------------------------
+	@: Net Functionality
+   --- */
+
+function BaseClassObj:NetWrite(func)
+	self.WriteToNet = func
+end
+
+function BaseClassObj:NetRead(func)
+	self.ReadFromNet = func
+end
+
+/* --- --------------------------------------------------------------------------------
 	@: Serialization Support
    --- */
 
-require( "von" )
-
-if von then
+if EXPADV.von then
 
 	function BaseClassObj:AddSerializer( Function )
 		self.VON_Can = true
@@ -382,29 +399,13 @@ function EXPADV.LoadClasses( )
 		Class.LoadOnClient = DeriveClass.LoadOnClient
 
  		if WireLib then
-
- 			if !Class.Wire_Out_Type then
- 				Class.Wire_Out_Type = DeriveClass.Wire_Out_Type
-
- 				Class.Wire_Out_Util = DeriveClass.Wire_Out_Util
- 			end
-
- 			if !Class.Wire_In_Type then
- 				Class.Wire_In_Type = DeriveClass.Wire_In_Type
-
- 				Class.Wire_In_Util = DeriveClass.Wire_In_Util
- 			end
-
- 			if Class.Wire_Out_Type and !Class.Wire_Link_Out then
- 				Class.Wire_Link_Out = DeriveClass.Wire_Link_Out
- 			end
-
- 			if Class.Wire_In_Type and !Class.Wire_Link_In then
- 				Class.Wire_Link_In = DeriveClass.Wire_Link_In
- 			end
+ 			if !Class.Wire_in_type then Class.Wire_in_type = DeriveClass.Wire_in_type end
+			if !Class.Wire_in_type and !Class.Wire_in_func then Class.Wire_in_func = DeriveClass.Wire_in_func end
+			if !Class.Wire_out_type then Class.Wire_out_type = DeriveClass.Wire_out_type end
+			if !Class.Wire_out_type and !Class.Wire_out_func then Class.Wire_out_func = DeriveClass.Wire_out_func end
  		end
 
-		if von then
+		if EXPADV.von then
 			if !Class.VON_Serialize then
 				Class.VON_Serialize = DeriveClass.VON_Serialize
 			end
@@ -421,6 +422,9 @@ function EXPADV.LoadClasses( )
 		if Class.MetaTable ~= DeriveClass.MetaTable then
 			Class.MetaTable = DeriveClass.MetaTable
 		end
+
+		if !Class.WriteToNet then Class.WriteToNet = DeriveClass.WriteToNet end
+		if !Class.ReadFromNet then Class.ReadFromNet = DeriveClass.ReadFromNet end
  	end
 
  	for Name, Class in pairs( EXPADV.Classes ) do

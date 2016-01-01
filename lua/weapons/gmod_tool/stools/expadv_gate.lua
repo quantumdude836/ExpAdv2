@@ -5,11 +5,10 @@ if !EXPADV then return ErrorNoHalt( "Expression Advanced 2, Failed to load tool.
    --- */
 
 if CLIENT then
-	language.Add( "Tool.expadv2.name", "Expression Advanced 2" )
-	language.Add( "Tool.expadv2.desc", "Creates an ingame scriptable entity." )
-	language.Add( "Tool.expadv2.help", "Place an Expression Advanced Gate or screen." )
-	language.Add( "Tool.expadv2.0", "Place an Expession Advanced Gate or screen." )
-	language.Add( "Tool.expadv2.1", "Pod selected. Right click an Expression advanced entity to link it." )
+	language.Add( "Tool.expadv_gate.name", "Expression Advanced 2 - Gate" )
+	language.Add( "Tool.expadv_gate.desc", "Creates an ingame scripted entity." )
+	language.Add( "Tool.expadv_gate.0", "LMB: Spawn Gate or upload to gate; RMB: Download from gate or select a pod to link." )
+	language.Add( "Tool.expadv_gate.1", "RMB: Now click the Gate you wish to link to this pod." )
 	
 	language.Add( "limit_expadv", "Expression Advanced Entity limit reached." )
 	language.Add( "Undone_expadv", "Expression Advanced - Removed." )
@@ -21,13 +20,12 @@ end
 	@: Tool Information
    --- */
 
+	TOOL.Name						= "ExpAdv2 Gate"
+	TOOL.Category					= "Expadv2"
+
 if WireLib then
-	TOOL.Name						= "Expression Advanced 2"
-	TOOL.Category					= "Chips, Gates"
 	TOOL.Tab						= "Wire"
-else
-	TOOL.Name						= "Expression Advanced 2"
-	TOOL.Category					= "Scriptable"
+	TOOL.Wire_MultiCategories		= { "Chips, Gates" }
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -35,8 +33,6 @@ end
    --- */
 
 TOOL.ClientConVar.model 		= "models/lemongate/lemongate.mdl"
-TOOL.ClientConVar.screen 		= 0
-TOOL.ClientConVar.derma			= 0
 TOOL.ClientConVar.weld		 	= 0
 TOOL.ClientConVar.weldworld 	= 0
 TOOL.ClientConVar.frozen		= 0
@@ -48,9 +44,12 @@ end )
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Model List
    --- */
+
 local GateModels = { }
 
 table.insert( GateModels, "models/lemongate/lemongate.mdl" )
+table.insert( GateModels, "models/shadowscion/lemongate/gate.mdl" )
+table.insert( GateModels, "models/mandrac/wire/e3.mdl" )
 
 if WireLib then
 	table.insert( GateModels, "models/bull/gates/processor.mdl" )
@@ -66,15 +65,6 @@ end
    --- */
 
 cleanup.Register( "expadv" )
-
-/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
-	@: Utility
-   --- */
-
-local function IsExpAdv( Entity )
-	if !IsValid( Entity ) then return false end
-	return Entity.Base == "expadv_base" or Entity.ExpAdv
-end -- TODO: Use somthing other then base class comparason.
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Make Gate Entity
@@ -107,62 +97,6 @@ end
 duplicator.RegisterEntityClass( "expadv_gate", MakeExpadv, "Pos", "Ang", "Model", "DupeInPorts", "DupeOutPorts" )
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
-	@: Make Screen Entity
-   --- */
-
-local function MakeExpadvScreen( Player, Position, Angle, Model, InPorts, OutPorts )
-	if Player:GetCount( "expadv" ) > EXPADV.ReadSetting( "limit", 20 ) then
-		Player:LimitHit( "Expression Advanced entity limit reached." )
-		return nil
-	end
-	
-	local ExpAdv = ents.Create( "expadv_screen" )
-	if !IsValid( ExpAdv ) then return end
-
-	ExpAdv:SetPos( Position )
-	ExpAdv:SetAngles( Angle )
-	ExpAdv:SetModel( Model )
-	ExpAdv:Activate( )
-	ExpAdv:Spawn( )
-
-	Player:AddCount( "expadv", ExpAdv )
-	ExpAdv:SetPlayer( Player )
-	ExpAdv.player = Player
-
-	ExpAdv:ApplyDupePorts( InPorts, OutPorts )
-
-	return ExpAdv
-end
-
-duplicator.RegisterEntityClass( "expadv_screen", MakeExpadvScreen, "Pos", "Ang", "Model", "DupeInPorts", "DupeOutPorts" )
-
-local function MakeExpadvScreenDerma( Player, Position, Angle, Model, InPorts, OutPorts )
-	if Player:GetCount( "expadv" ) > EXPADV.ReadSetting( "limit", 20 ) then
-		Player:LimitHit( "Expression Advanced entity limit reached." )
-		return nil
-	end
-	
-	local ExpAdv = ents.Create( "expadv_scr_vgui" )
-	if !IsValid( ExpAdv ) then return end
-
-	ExpAdv:SetPos( Position )
-	ExpAdv:SetAngles( Angle )
-	ExpAdv:SetModel( Model )
-	ExpAdv:Activate( )
-	ExpAdv:Spawn( )
-
-	Player:AddCount( "expadv", ExpAdv )
-	ExpAdv:SetPlayer( Player )
-	ExpAdv.player = Player
-
-	ExpAdv:ApplyDupePorts( InPorts, OutPorts )
-
-	return ExpAdv
-end
-
-duplicator.RegisterEntityClass( "expadv_scr_vgui", MakeExpadvScreenDerma, "Pos", "Ang", "Model", "DupeInPorts", "DupeOutPorts" )
-
-/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Left Click
    --- */
 
@@ -178,24 +112,19 @@ function TOOL:LeftClick( Trace )
 	if CLIENT then return true end
 
 	local Model, ExpAdv = self:GetClientInfo( "model" )
+
 	local Ang = Trace.HitNormal:Angle( ) + Angle( 90, 0, 0 )
 
-	if self:GetClientNumber( "screen" ) == 1 then
-		if self:GetClientNumber( "derma" ) == 1 then
-			ExpAdv = MakeExpadvScreenDerma( self:GetOwner( ), Trace.HitPos, Ang, Model )
-		else
-			ExpAdv = MakeExpadvScreen( self:GetOwner( ), Trace.HitPos, Ang, Model )
-		end
-	else
-		ExpAdv = MakeExpadv( self:GetOwner( ), Trace.HitPos, Ang, Model )
-	end
+	ExpAdv = MakeExpadv( self:GetOwner( ), Trace.HitPos, Ang, Model, nil, nil )
 
 	if !IsValid( ExpAdv ) then return false end
 
 	ExpAdv:SetPos( Trace.HitPos - Trace.HitNormal * ExpAdv:OBBMins().z )
 
 	undo.Create( "expadv" )
+
 	undo.AddEntity( ExpAdv )
+
 	undo.SetPlayer( self:GetOwner( ) ) 
 
 	if self:GetClientNumber( "weld" ) == 1 then
@@ -238,6 +167,7 @@ function TOOL:RightClick( Trace )
 	elseif self:GetStage() == 1 and Trace.Entity.ExpAdv then
 		EXPADV.Notifi(self:GetOwner(), "Pod has been linked to gate.", nil, 1 )
 		Trace.Entity:LinkPod(self.TargetPod)
+		self.TargetPod = nil
 		self:SetStage(0)
 		return true
 	end
@@ -256,41 +186,18 @@ if CLIENT then
 	function TOOL.BuildCPanel( CPanel )
 
 		local PropList = vgui.Create( "PropSelect" )
-		PropList:SetConVar( "expadv2_model" )
-		CPanel:AddItem( PropList )
-
-		local Screen = CPanel:CheckBox( "Create screen", "expadv2_screen" )
-		local Derma = CPanel:CheckBox( "Use VGUI for Screen", "expadv2_derma" )
-		local CheckWeld  = CPanel:CheckBox( "Create Welded", "expadv2_weld" )
-		local CheckFroze = CPanel:CheckBox( "Create Frozen", "expadv2_frozen" )
-		local CheckWorld = CPanel:CheckBox( "Create Welded to World", "expadv2_weldworld" )
-
-		local function AddModel( Mdl, IsScreen )
-			local Icon = vgui.Create( "SpawnIcon", PropList )
-			Icon:SetModel( Mdl )
-			Icon:SetToolTip( Mdl )
-			Icon.Model = Mdl
-
-			Icon.DoClick = function( ) 			
-				RunConsoleCommand( "expadv2_screen", IsScreen and 1 or 0 )
-				RunConsoleCommand( "expadv2_model", Mdl )
-				Screen:SetValue( IsScreen )
-			end
-
-			PropList.List:AddItem( Icon )
-			table.insert( PropList.Controls, Icon )
-		end
+		PropList:SetConVar( "expadv_gate_model" )
 
 		for _, Model in pairs( GateModels ) do
-			AddModel( Model, false )
+			PropList:AddModel( Model, false )
 		end
 
-		for Model, _ in pairs( EXPADV.GetMonitors( ) ) do
-			AddModel( Model, true )
-		end
+		CPanel:AddItem( PropList )
 
+		CPanel:CheckBox( "Create Welded", "expadv_gate_weld" )
+		CPanel:CheckBox( "Create Frozen", "expadv_gate_frozen" )
+		CPanel:CheckBox( "Create Welded to World", "expadv_gate_weldworld" )
 	end
-
 end
 
 

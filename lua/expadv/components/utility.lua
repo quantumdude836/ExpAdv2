@@ -8,6 +8,61 @@ Component.Author = "Rusketh"
 Component.Description = "Adds useful functions and objects that are not inportant enogh for there own component."
 
 /* --- --------------------------------------------------------------------------------
+	@: Server Information
+   --- */
+
+Component:AddInlineFunction( "map", "", "s", "$game.GetMap()")
+Component:AddFunctionHelper( "map", "", "Returns the current map." )
+
+Component:AddInlineFunction( "hostname", "", "s", "$GetConVar(\"hostname\"):GetString()")
+Component:AddFunctionHelper( "hostname", "", "Returns the current servers hostname." )
+
+Component:AddInlineFunction( "isLan", "", "b", "$GetConVar(\"sv_lan\"):GetBool()")
+Component:AddFunctionHelper( "isLan", "", "Returns the true is its a lan game." )
+
+Component:AddInlineFunction( "gamemode", "", "s", "$gmod.GetGamemode().Name")
+Component:AddFunctionHelper( "gamemode", "", "Returns the current gamemode." )
+
+Component:AddInlineFunction( "isSinglePlayer", "", "b", "$game.SinglePlayer()")
+Component:AddFunctionHelper( "isSinglePlayer", "", "Returns true if in a SinglePlayer game." )
+
+Component:AddInlineFunction( "isSinglePlayer", "", "b", "$game.IsDedicated()")
+Component:AddFunctionHelper( "isSinglePlayer", "", "Returns true if on a Dedicated server." )
+
+Component:AddInlineFunction( "numPlayers", "", "n", "#$player.GetAll()")
+Component:AddFunctionHelper( "numPlayers", "", "Returns the ammount of currently connected players." )
+
+Component:AddInlineFunction( "maxPlayers", "", "n", "$game.MaxPlayers()")
+Component:AddFunctionHelper( "maxPlayers", "", "Returns the ammount of max players." )
+
+Component:AddInlineFunction( "gravity", "", "n", "$GetConVar(\"sv_gravity\"):GetFloat()")
+Component:AddFunctionHelper( "gravity", "", "Returns the current servers gravity." )
+
+Component:AddInlineFunction( "propGravity", "", "n", "$physenv.GetGravity()")
+Component:AddFunctionHelper( "propGravity", "", "Returns the prop gravity." )
+
+Component:AddInlineFunction( "airDensity", "", "n", "$physenv.GetAirDensity()")
+Component:AddFunctionHelper( "airDensity", "", "Returns the air density." )
+
+Component:AddInlineFunction( "maxFrictionMass", "", "n", "$physenv.GetPerformanceSettings()[\"MaxFrictionMass\"]")
+Component:AddFunctionHelper( "maxFrictionMass", "", "Returns the max friction mass." )
+
+Component:AddInlineFunction( "minFrictionMass", "", "n", "$physenv.GetPerformanceSettings()[\"MinFrictionMass\"]")
+Component:AddFunctionHelper( "minFrictionMass", "", "Returns the min friction mass." )
+
+Component:AddInlineFunction( "speedLimit", "", "n", "$physenv.GetPerformanceSettings()[\"MaxVelocity\"]")
+Component:AddFunctionHelper( "speedLimit", "", "Returns the max velocity." )
+
+Component:AddInlineFunction( "angSpeedLimit", "", "n", "$physenv.GetPerformanceSettings()[\"MaxAngularVelocity\"]")
+Component:AddFunctionHelper( "angSpeedLimit", "", "Returns the max angular velocity." )
+
+Component:AddInlineFunction( "tickInterval", "", "n", "$engine.TickInterval()")
+Component:AddFunctionHelper( "tickInterval", "", "Returns the server tick interval." )
+
+Component:AddInlineFunction( "tickRate", "", "n", "(1/$engine.TickInterval())")
+Component:AddFunctionHelper( "tickRate", "", "Returns the server tick rate." )
+
+/* --- --------------------------------------------------------------------------------
 	@: Add A user hook system, They can add hooks to extend events, manualy.
 	@: This add no default hook, and shall encourage poeple to add there own.
    --- */
@@ -57,6 +112,24 @@ Component:AddFunctionHelper( "hookCall", "s,...", "Calls the named hook, passing
    --- */
 
 EXPADV.SharedOperators( )
+
+Component:AddVMFunction( "timerSimple", "n,d,...", "", function( Context, Trace, Delay, Delegate, ... )
+		local Data = Context.Data
+		Data.Timers = Data.Timers or { }
+
+		Data.Timers[#Data.Timers + 1] = {
+			Trace = Trace,
+			Delay = Delay,
+			Next = CurTime( ) + Delay,
+			Paused = false,
+			Reps = 1,
+			Count = 0,
+			Delegate = Delegate,
+			Inputs = { ... },
+		}
+	end )
+
+EXPADV.AddFunctionAlias( "timerSimple", "n,d" )
 
 Component:AddVMFunction( "timerCreate", "s,n,n,d,...", "", function( Context, Trace, Name, Delay, Reps, Delegate, ... )
 		local Data = Context.Data
@@ -132,8 +205,11 @@ hook.Add( "Think", "expadv.timers", function( )
 					end
 				end
 
-				Context:Execute( "Timer " .. Name, Timer.Delegate, Timer.Inputs and unpack( Timer.Inputs ) or nil )
-
+				if Timer.Inputs and #Timer.Inputs > 0 then
+					Context:Execute( "Timer " .. Name, Timer.Delegate, unpack(Timer.Inputs) )
+				else
+					Context:Execute( "Timer " .. Name, Timer.Delegate, unpack(Timer.Inputs) )
+				end
 			end
 
 			if Count > 100 then break end
@@ -285,7 +361,7 @@ Component:AddFunctionHelper( "convertUnit", "s,s,n", "Converts the number from u
 EXPADV.SharedOperators( )
 
 Component:AddPreparedFunction( "sortVectorsByDistance", "ar,v", "", [[
-	if @value 1.__type ~= "v" then self:Throw( @trace, "invoke", "sortVectorsByDistance #1, entity array exspected." ) end
+	if @value 1.__type ~= "v" then Context:Throw( @trace, "invoke", "sortVectorsByDistance #1, entity array exspected." ) end
 	$table.sort( @value 1,
 		function( A, B )
 			return A:Distance( @value 2 ) < B:Distance( @value 2 )
@@ -361,7 +437,7 @@ function Ranger:DoTrace( Context, Start, End, Distance )
 			Ignore_World = false
 			TraceData.mask = MASK_WATER
 		else
-			TraceData.mask = Bor( MASK_WATER, CONTENTS_SOLID )
+			TraceData.mask = bit.bor( MASK_WATER, CONTENTS_SOLID )
 		end
 	elseif self.Ignore_Entities then
 		if Ignore_World then
@@ -563,25 +639,92 @@ Component:AddFunctionHelper( "clearFilter", "rd:", "Clears the filter of the ran
 
 EXPADV.SharedOperators( )
 
-Component:AddPreparedFunction( "httpRequest", "s,d,d", "", [[$http.Fetch( @value 1,
-	function( Body )
-		Context:Execute( "http success callback", @value 2, { Body, "s" } )
-	end, function( )
-		Context:Execute( "http fail callback", @value 1 )
-	end
-)]] )
+local CheckURL
 
-Component:AddPreparedFunction( "httpPostRequest", "s,t,d,d", "", [[$http.Post( @value 1, @value 2.Data,
-	function( Body )
-		Context:Execute( "http success callback", @value 3, { Body, "s" } )
-	end, function( )
-		Context:Execute( "http fail callback", @value 4 )
-	end
-)]] )
+Component:AddVMFunction( "httpRequest", "s,d,d", "b", function(Context, Trace, URL, Sucess, Fail)
+	if !CheckURL(Context, URL) then return false end
+	
+	http.Fetch( URL,
+		function( Body )
+			Context:Execute( "http success callback", Sucess, { Body, "s" } )
+		end, function( )
+			Context:Execute( "http fail callback", Fail )
+		end)
+
+	return true
+end)
+
+Component:AddVMFunction( "httpRequest", "s,t,d,d", "b", function(Context, Trace, URL, Tbl, Sucess, Fail)
+	if !CheckURL(Context, URL) then return false end
+
+	http.Post( URL, Tbl.Data,
+		function( Body )
+			Context:Execute( "http success callback", Sucess, { Body, "s" } )
+		end, function( )
+			Context:Execute( "http fail callback", Fail )
+		end)
+
+	return true
+end)
 
 Component:AddFunctionHelper( "httpRequest", "s,d,d", "Sends HTTP Request, executing 1st delegate with string Body on success or 2nd delegate on failure." )
 Component:AddFunctionHelper( "httpPostRequest", "s,t,d,d", "Sends HTTP Request with data table, executing 1st delegate with string Body on success or 2nd delegate on failure." )
 
+/* --- --------------------------------------------------------------------------------
+	@: HTTP Security
+   --- */
+
+local DEFAULT_BLACKLIST = {} -- TODO: Populate this :D
+
+Component:CreateUserSetting( "http_blacklist", DEFAULT_BLACKLIST )
+Component:AddFeature( "HTTPRequests", "Requests from data from http, can be used maliciously.", "tek/iconexclamation.png" )
+
+function CheckURL(Context, URL)
+
+	--If its an ip, reject it.
+	if string.find(URL, "%d%d?%d?%.%d%d?%d?%.%d%d?%d?%.%d%d?%d?") then return false end
+
+	--If its serverside allow it, this may change in future.
+	if SERVER then return true end
+	
+	--Check feature access.
+	if !EXPADV.CanAccessFeature(Context.entity, "HTTPRequests") then return false end
+
+	--Check the black list with wild cards.
+	URL = string.lower(URL)
+
+	local BlackList = Component:ReadUserSetting( "http_blacklist", DEFAULT_BLACKLIST )
+
+	for _, listed in pairs(BlackList) do
+		if string.find(URL, string.lower(listed), 0, true) then return false end
+	end
+
+	/*if IsValid(Context.entity) then
+		local Log = Context.entity.URL_LOG
+
+		if !Log then Log = {}; Context.entity.URL_LOG = Log end
+
+		Log[URL] = (Log[URL] or 0) + 1
+	end*/ -- TODO: ^^
+
+	return true
+end
+
+if CLIENT then
+	concommand.Add("expadv_block_url", function(Player, _, Args)
+		local url = table.concat(Args, " ")
+
+		local BlackList = Component:ReadUserSetting( "http_blacklist", DEFAULT_BLACKLIST )
+
+		if table.HasValue(BlackList, url) then return MsgN(url, " is already blacklisted.") end
+
+		table.insert(BlackList, url)
+
+		EXPADV.SaveConfig()
+
+		MsgN(url, " has been blacklisted, you may undo this by editing 'data/cl_expadv.txt'.")
+	end)
+end
 
 /* --- --------------------------------------------------------------------------------
 	@: Physics Control Component
@@ -734,14 +877,14 @@ PropComponent:AddPreparedFunction( "remove", "e:", "", "if IsValid( @value 1 ) a
 
 PropComponent:AddPreparedFunction( "setPos", "e:v", "",[[
 if IsValid( @value 1 ) and EXPADV.PPCheck(Context, @value 1 ) then
-	if !( @value 2.x ~= @value 2.x and @value 2.y ~= @value 2.y and @value 2.z ~= @value 2.z ) then
+	if !( @value 2.x ~= @value 2.x or @value 2.y ~= @value 2.y or @value 2.z ~= @value 2.z ) then
 		@value 1:SetPos( @value 2 )
 	end
 end]] )
 
 PropComponent:AddPreparedFunction( "setAng", "e:a", "",[[
 if IsValid( @value 1 ) and EXPADV.PPCheck(Context, @value 1 ) then
-	if !( @value 2.p ~= @value 2.p and @value 2.y ~= @value 2.y and @value 2.r ~= @value 2.r ) then
+	if !( @value 2.p ~= @value 2.p or @value 2.y ~= @value 2.y or @value 2.r ~= @value 2.r ) then
 		@value 1:SetAngles( @value 2 )
 	end
 end]] )
@@ -865,13 +1008,13 @@ Component:AddVMFunction( "serialize", "vr", "s", function(Context, Trace, Varian
 
 	if !Serialized then return "" end
 
-	return von.serialize( Serialized ) 
+	return EXPADV.von.serialize( Serialized ) 
 end )
 
 Component:AddFunctionHelper( "serialize", "vr", "Serializes variant into string so it can be saved into file." )
 
 Component:AddVMFunction( "deserialize", "s", "vr", function(Context, Trace, VON)
-	local Ok, Obj = pcall(von.deserialize, VON)
+	local Ok, Obj = pcall(EXPADV.von.deserialize, VON)
 
 	if Ok then 
 		Obj = EXPADV.Deserialize( "vr", Obj )
@@ -896,7 +1039,7 @@ function Component:OnPostRegisterClass( Name, Class )
 			local Obj = EXPADV.Serialize( "vr", {Array, Class.Short} )
 
 			if Obj then
-				local Ok, Serialized = pcall( von.serialize, Obj )
+				local Ok, Serialized = pcall( EXPADV.von.serialize, Obj )
 				if Ok then return Serialized end
 			end
 			
@@ -907,3 +1050,174 @@ function Component:OnPostRegisterClass( Name, Class )
 
 	end
 end
+
+/* --- --------------------------------------------------------------------------------
+	@: JSON Support, requested by Jasongamer.
+	@: This should not be considered a replacement for von.
+   --- */
+
+local JSONCmp = EXPADV.AddComponent( "JSON", true )
+
+JSONCmp.Author = "Rusketh"
+JSONCmp.Description = "Adds JSON support."
+
+local arrayToJSON, tableToJSON
+
+local function objToJSON(type, value, ch)
+	local ch = ch or {}
+	if ch[getvalue] then return ch[getvalue] end
+	if type == "_vr" then return objToJSON(value[2], value[1])  end
+	if type == "b" || type == "n" || type == "s" || type == "v" || type == "a" || type == "c" || type == "e" || type == "_ply" then return value end
+	if type == "_ar" then return arrayToJSON(value, ch) end
+	if type == "t" then return tableToJSON(value, ch) end
+end
+
+local luaTypes = {
+	["number"] = "n",
+	["string"] = "s",
+	["Vector"] = "v",
+	["Angle" ] = "a",
+	["Color" ] = "c",
+	["Entity" ] = "e",
+	["Player" ] = "e",
+}
+
+local luaToTable
+
+local function luaToObject(object)
+	local type = type(object)
+	if luaTypes[type] then return object, luaTypes[type] end
+	if type == "table" then return luaToTable(object), "t" end
+end
+
+function arrayToJSON(value, ch)
+	local JSONtbl, ch = {}, ch or {}
+	local type = value.__type
+	ch[value] = JSONtbl
+
+	for i = 1, #value do
+		local object = objToJSON(type, value[i], ch)
+		if istable(object) then ch[value[i]] = object end
+		JSONtbl[i] = object
+	end
+
+	return JSONtbl
+end
+
+local indexTypes = {
+	["number"] = "n",
+	["string"] = "s",
+	["Entity" ] = "e",
+	["Player" ] = "e",
+}
+
+function tableToJSON(value, ch)
+	local JSONtbl, ch = {}, ch or {}
+	ch[value] = JSONtbl
+
+	for index, _ in pairs(value.Look) do
+		local getvalue = value.Data[index]
+		local object = objToJSON(value.Types[index], getvalue, ch)
+		if istable(object) then ch[getvalue] = object end
+		JSONtbl[index] = object
+	end
+
+	return JSONtbl
+end
+
+function luaToTable(table)
+	local TABLE = { Data = { }, Types = { }, Look = { }, Size = 0, Count = 0, HasChanged = false }
+
+	for index, value in pairs(table) do
+		local keyObj, keyType = luaToObject(index)
+		TABLE.Look[keyObj] = keyObj
+
+		local valueObj, valueType = luaToObject(value)
+		TABLE.Data[keyObj] = valueObj
+		TABLE.Types[keyObj] = valueType
+
+		TABLE.Size = TABLE.Size + 1
+	end
+
+	TABLE.Count = #TABLE.Data
+	return TABLE
+end
+
+EXPADV.SharedOperators( )
+
+Component:AddVMFunction( "ArrayToJSON", "ar", "s", function(Context, Trace, Array)
+	return util.TableToJSON(arrayToJSON(Array))
+end )
+
+Component:AddVMFunction( "tableToJSON", "t", "s", function(Context, Trace, Table)
+	return util.TableToJSON(tableToJSON(Table))
+end )
+
+Component:AddVMFunction( "jSONToTable", "s", "t", function(Context, Trace, JSON)
+	return luaToTable(util.JSONToTable(JSON))
+end )
+
+/* --- --------------------------------------------------------------------------------
+	@: Con Commands
+   --- */
+
+local Exec
+
+if SERVER then
+	util.AddNetworkString("expadv.cmd")
+elseif CLIENT then
+	local DEFAULT_WHITELIST = {}
+	local Banned = { quit = true, lua_run_cl = true, retry = true, rcon = true, connect = true, password = true }
+	
+	Component:CreateUserSetting( "concmd_whitelist", DEFAULT_WHITELIST )
+
+	function Exec(CommandLine)
+		local WhiteList = Component:ReadUserSetting( "concmd_whitelist", DEFAULT_WHITELIST )
+
+		for Line in CommandLine:gmatch( "[^;]+" ) do
+			local Concmd = Line:match( "[^%s]+" )
+
+			if Banned[Concmd] then return false end
+
+			if #WhiteList > 0 then
+				for _, listed in pairs(WhiteList) do
+					if !table.HasValue(WhiteList, Concmd) then return false end
+				end
+			end
+		end
+
+		LocalPlayer():ConCommand( CommandLine:gsub("%%", "%%%%"):gsub("[^ \t%w%p]", "") )
+
+		return true
+	end
+
+	net.Receive("expadv.cmd", function()
+		Exec(net.ReadString())
+	end)
+
+	concommand.Add("expadv_allow_cmd", function(Player, _, Args)
+		local cmd = table.concat(Args, " ")
+
+		local WhiteList = Component:ReadUserSetting( "concmd_whitelist", DEFAULT_BLACKLIST )
+
+		if table.HasValue(WhiteList, cmd) then return MsgN(cmd, " is already whitelisted.") end
+
+		table.insert(WhiteList, cmd)
+
+		EXPADV.SaveConfig()
+
+		MsgN(cmd, " has been whitelisted, you may undo this by editing 'data/cl_expadv.txt'.")
+	end)
+end
+
+Component:AddVMFunction( "conCommand", "s", "", function(Context, Trace, Command)
+	if SERVER then
+		net.Start("expadv.cmd")
+		net.WriteString(Command)
+		if !EXPADV.DoNetMessage(Context, net.Send, Context.player) then
+			Context:Throw( Trace, "net", "maxamum bytes reached, client did not receive concommand." )
+		end
+	elseif Context.player == LocalPlayer() then
+		Exec(Command)
+	end
+end )

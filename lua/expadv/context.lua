@@ -22,6 +22,7 @@ function EXPADV.BuildNewContext( Instance, Player, Entity ) -- Table, Player, En
 	local Context = setmetatable( { player = Player, entity = Entity, Online = false }, EXPADV.RootContext )
 
 	Context.Trigger = { }
+	Context.TrigMan = { }
 	Context.Changed = { }
 
 	Context.Memory = {  }
@@ -31,7 +32,6 @@ function EXPADV.BuildNewContext( Instance, Player, Entity ) -- Table, Player, En
 	Context.Definitions = { }
 	
 	Context.Cells = Instance.Cells or { }
-	Context.OutClick = Instance.OutClick or { }
 	Context.Strings = Instance.Strings or { }
 	Context.Traces = Instance.Traces or { }
 	Context.Instructions = Instance.VMInstructions or { }
@@ -48,6 +48,15 @@ function EXPADV.BuildNewContext( Instance, Player, Entity ) -- Table, Player, En
 end
 
 /* --- --------------------------------------------------------------------------------
+	@: SandBox
+   --- */
+function EXPADV.RootContext:SandBox()
+	local Env = {}
+	for k,v in pairs(self.Enviroment) do Env[k] = v end
+	return setmetatable(Env, EXPADV.BaseEnv)
+end
+
+/* --- --------------------------------------------------------------------------------
 	@: Executeion
    --- */
 
@@ -56,38 +65,66 @@ EXPADV.Updates = { }
 local SysTime = SysTime
 local debug_sethook = debug.sethook
 
--- Safely execute a function on this context.
-function EXPADV.RootContext:Execute( Location, Operation, ... ) -- String, Function, ...
-	
+-- Has to be called before an execution,
+-- All quota managment depends on this!
+function EXPADV.RootContext:PreExecute(op_counter)
 	local Status = self.Status
 
-	-- Ops monitoring:
-
-		local function op_counter( )
+	if !op_counter then
+		op_counter = function( )
 			Status.Perf = Status.Perf + expadv_luahook
+
 			if Status.Perf > expadv_tickquota then
 				debug.sethook( )
 				error( { Trace = {0,0}, Quota = true, Msg = Message, Context = Context }, 0 )
 			end
-
+			
 			Status.BenchMark = SysTime( )
 		end
+	end
 
-		Status.MemoryMark = collectgarbage("count")
-		Status.BenchMark = SysTime( )
+	Status.HookFunc = op_counter
+	Status.MemoryMark = collectgarbage("count")
+	Status.BenchMark = SysTime( )
 		
-		debug_sethook( op_counter, "", expadv_luahook )
+	debug_sethook( op_counter, "", expadv_luahook )
+end
 
-	-- Execuiton:
+-- Should always be called after an execution.
+-- Otherwise things will break.
+function EXPADV.RootContext:PostExecute()
+	debug_sethook( )
 
-		local Ok, Result, ResultType = pcall( Operation, Instance or self, ... )
+	local Status = self.Status
+	Status.StopWatch = Status.StopWatch + (SysTime( ) - Status.BenchMark)
+	Status.Memory = Status.Memory + (collectgarbage("count") - Status.MemoryMark)
+end
 
-	-- Reset Ops Monitor
-		debug.sethook( )
+function EXPADV.RootContext:CheckExecutionQuota()
+	local Status = self.Status
 
-		Status.StopWatch = Status.StopWatch + (SysTime( ) - Status.BenchMark)
-		Status.Memory = Status.Memory + (collectgarbage("count") - Status.MemoryMark)
+	if (Status.Counter + Status.Perf - expadv_softquota) > expadv_hardquota then
 
+		if IsValid( self.entity ) then self.entity:HitHardQuota( ) end
+		
+		self:ShutDown( true )
+
+		return false
+
+	elseif Status.Memory > expadv_memorylimit then
+		self.entity:ScriptError( "Memory limit exceeded" )
+
+		self:ShutDown( true )
+
+		return false
+	end
+
+	return true
+end
+
+-- Handels the results from an execution.
+-- PostExecute should always be called before this.
+function EXPADV.RootContext:HandelResult(Ok, Result, ResultType)
 	if !Ok and isstring( Result ) then
 		if IsValid( self.entity ) then -- This is the only way, :(
 			if Result:find("attempt to perform arithmetic on a nil value") then
@@ -106,28 +143,16 @@ function EXPADV.RootContext:Execute( Location, Operation, ... ) -- String, Funct
 		return false
 	end
 
+	if !Ok and Result.Terminate then
+		return false
+	end
+
 	if Ok or Result.Exit then
-
-		if (Status.Counter + Status.Perf - expadv_softquota) > expadv_hardquota then
-
-			if IsValid( self.entity ) then self.entity:HitHardQuota( ) end
-			
-			self:ShutDown( )
-
-			return false
-
-		elseif Status.Memory > expadv_memorylimit then
-			self.entity:ScriptError( "Memory limit exceeded" )
-
-			self:ShutDown( )
-
-			return false
-		end
-
+		if !self:CheckExecutionQuota() then return false end
+		
 		EXPADV.Updates[self] = true
 
 		return true, Result, ResultType
-
 	end
 
 	if !IsValid( self.entity ) then
@@ -145,6 +170,31 @@ function EXPADV.RootContext:Execute( Location, Operation, ... ) -- String, Funct
 	return false
 end
 
+-- Safely execute a function on this context.
+function EXPADV.RootContext:Execute( Location, Operation, ... ) -- String, Function, ...
+	self:PreExecute()
+
+	local Ok, Result, ResultType = pcall( Operation, self, ... )
+
+	self:PostExecute()
+
+	return self:HandelResult(Ok, Result, ResultType)
+end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Call Event
+   --- */
+
+function EXPADV.RootContext:CallEvent( Name, ... )	
+	if !self.Online then return false, nil end
+
+	local Event = self[ "event_" .. Name ]
+	
+	if !Event then return end
+
+	return self:Execute( "Event " .. Name, Event, ... )
+end
+
 /* --- --------------------------------------------------------------------------------
 	@: Breakouts
    --- */
@@ -152,6 +202,11 @@ end
 -- Exits the currently executing code.
 function EXPADV.RootContext:Exit( )
 	error( { Exit = true, Context = self }, 0 )
+end
+
+-- Used to shut down the gate internally.
+function EXPADV.RootContext:Terminate( )
+	error( { Terminate = true, Context = self }, 0 )
 end
 
 -- Throws an exception
@@ -178,12 +233,18 @@ function EXPADV.RootContext:StartUp( Execution ) -- Function
 
 	if IsValid( self.entity ) then self.entity:StartUp( ) end
 
-	return self:Execute( "Root", Execution, self )
+	local ok, a, b = self:Execute( "Root", Execution, self )
+	if !ok then return ok, a, b end
+
+	EXPADV.CallHook( "PostStartUp", self )
+	return ok, a, b
 end
 
 -- Shuts down the context and execution.
-function EXPADV.RootContext:ShutDown( )
+function EXPADV.RootContext:ShutDown( bNoLast )
 	if !self.Online then return end
+
+	if not bNoLast then self:CallEvent("last") end 
 
 	self.Online = false
 
@@ -227,8 +288,12 @@ hook.Add( "Tick", "ExpAdv2.Update", function( )
 		if !Ok then
 			Context.entity:LuaError( Msg )
 			Context:ShutDown( )
+		else
+			EXPADV.CallHook( "UpdateContext", Context )
 		end
 	end
+
+	EXPADV.CallHook( "PostUpdateAll", EXPADV.Updates )
 
 	EXPADV.Updates = { }
 end )
@@ -243,7 +308,6 @@ EXPADV_STATE_ONLINE = 1
 EXPADV_STATE_ALERT = 2
 EXPADV_STATE_CRASHED = 3
 EXPADV_STATE_BURNED = 4
-
 
 hook.Add( "Tick", "ExpAdv2.Performance", function( )
 	for Context, _ in pairs( EXPADV.CONTEXT_REGISTERY ) do

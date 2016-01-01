@@ -16,25 +16,16 @@ EXPADV.ClientOperators( )
    --- */
 
 Component.ValidFonts = {
-	["DebugFixed"] = true,
-	["DebugFixedSmall"] = true,
-	["Default"] = true,
-	["Marlett"] = true,
-	["Trebuchet18"] = true,
-	["Trebuchet24"] = true,
-	["HudHintTextLarge"] = true,
-	["HudHintTextSmall"] = true,
-	["CenterPrintText"] = true,
-	["HudSelectionText"] = true,
-	["CloseCaption_Normal"] = true,
-	["CloseCaption_Bold"] = true,
-	["CloseCaption_BoldItalic"] = true,
+	["Coolvetica"] = true,
+	["Arial"] = true,
+	["Lucida Console"] = true,
+	["Trebuchet"] = true,
+	["Courier New"] = true,
+	["Times New Roman"] = true,
 	["ChatFont"] = true,
-	["TargetID"] = true,
-	["TargetIDSmall"] = true,
-	["HL2MPTypeDeath"] = true,
-	["BudgetLabel"] = true,
-	["HL2MPTypeDeath"] = true,
+	["Marlett"] = true,
+	["Default"] = true,
+	["Roboto"] = true,
 	["DermaDefault"] = true,
 	["DermaDefaultBold"] = true,
 	["DermaLarge"] = true
@@ -47,15 +38,15 @@ function Component.CreateFont( Base, Size )
 	if Component.CreatedFonts[FontName] then return FontName end
 	
 	if !Component.ValidFonts[Base] then
-		Base = "default"
-		FontName = string.format( "expadv_default_%i", Size )
+		Base = "Default"
+		FontName = string.format( "expadv_Default_%i", Size )
 		if Component.CreatedFonts[FontName] then return FontName end
 	end
 
 	Component.CreatedFonts[FontName] = true
 
 	surface.CreateFont( FontName, {
-		font = BaseFont,
+		font = Base,
 		size = Size,
 		weight = 500,
 		antialias = true,
@@ -64,6 +55,13 @@ function Component.CreateFont( Base, Size )
 
 	return FontName
 end
+
+Component:AddVMFunction( "validFonts", "", "ar",
+	function( Context, Trace )
+		local ar = {__type = "s"}
+		for Font, _ in pairs(Component.ValidFonts) do ar[#ar + 1] = Font end
+		return ar
+	end )
 
 Component:AddVMFunction( "setFont", "s,n", "s",
 	function( Context, Trace, Base, Size )
@@ -77,6 +75,8 @@ Component:AddVMFunction( "setFont", "s,n,c", "s",
 	end )
 
 Component:AddPreparedFunction( "setFontColor", "c", "", "$surface.SetTextColor( @value 1 )" )
+Component:AddPreparedFunction( "setFontColor", "n,n,n,n", "", "$surface.SetTextColor($Color(@value 1, @value 2, @value 3, @value 4 or 255))" )
+Component:AddPreparedFunction( "setFontColor", "n,n,n", "", "$surface.SetTextColor($Color(@value 1, @value 2, @value 3, 255))" )
 
 Component:AddInlineFunction( "getTextWidth", "s", "n", "$surface.GetTextSize( @value 1 )" )
 
@@ -84,9 +84,11 @@ Component:AddPreparedFunction( "getTextHeight", "s", "n", "@define _, tall = $su
 
 Component:AddFunctionHelper( "setFont", "s,n", "Sets the current font and fontsize." )
 Component:AddFunctionHelper( "setFont", "s,n,c", "Sets the current font, fontsize and font color." )
-Component:AddFunctionHelper(  "setFontColor", "c", "Sets the current font color." )
-Component:AddFunctionHelper(  "getTextWidth", "s", "Returns the width of drawing string using the current font." )
-Component:AddFunctionHelper(  "getTextHeight", "s", "Returns the height of drawing string using the current font." )
+Component:AddFunctionHelper( "setFontColor", "c", "Sets the current font color." )
+Component:AddFunctionHelper( "setFontColor", "n,n,n,n", "Sets the current font color." )
+Component:AddFunctionHelper( "setFontColor", "n,n,n", "Sets the current font color." )
+Component:AddFunctionHelper( "getTextWidth", "s", "Returns the width of drawing string using the current font." )
+Component:AddFunctionHelper( "getTextHeight", "s", "Returns the height of drawing string using the current font." )
 
 /* -----------------------------------------------------------------------------------
 	@: Text
@@ -119,12 +121,14 @@ Component:AddFunctionHelper( "drawTextAlignedRight", "v2,s", "Draws a line of te
 
 Component:AddPreparedFunction( "getTextureSize", "s", "n", "$surface.GetTextureSize( $surface.GetTextureID( @value 1 ) )" )
 Component:AddPreparedFunction( "setDrawTexture", "s", "", "$surface.SetTexture( $surface.GetTextureID( @value 1 ) )" )
+Component:AddPreparedFunction( "noDrawTexture", "", "", "$draw.NoTexture()" )
 Component:AddPreparedFunction( "setDrawColor", "n,n,n,n", "", "$surface.SetDrawColor( @value 1, @value 2, @value 3, @value 4 )" )
 EXPADV.AddFunctionAlias( "setDrawColor", "n,n,n" )
 EXPADV.AddFunctionAlias( "setDrawColor", "c" )
 
 Component:AddFunctionHelper( "getTextureSize", "s", "Returns the size of a texture" )
 Component:AddFunctionHelper( "setDrawTexture", "s", "Sets the texture used for rendering polys and boxs" )
+Component:AddFunctionHelper( "noDrawTexture", "", "Removes the draw texture." )
 Component:AddFunctionHelper( "setDrawColor", "n,n,n,n", "Sets the color used for next draw operations" )
 
 /* -----------------------------------------------------------------------------------
@@ -143,16 +147,50 @@ Component:AddFunctionHelper( "drawLine", "v2,v2", "Draws a line between 2 points
 
 Component:AddPreparedFunction( "drawBox", "v2,v2", "", "$surface.DrawRect( @value 1.x, @value 1.y, @value 2.x, @value 2.y )" )
 
+Component:AddPreparedFunction( "drawBox", "v2,v2,n", "", [[
+	$draw.NoTexture()
+	$surface.DrawTexturedRectRotated( @value 1.x, @value 1.y, @value 2.x, @value 2.y, @value 3 )
+]])
+
+Component:AddPreparedFunction( "drawBox", "v2,v2,n", "", [[
+	$draw.NoTexture()
+	$surface.DrawTexturedRectRotated( @value 1.x, @value 1.y, @value 2.x, @value 2.y, @value 3 )
+]])
+
+Component:AddPreparedFunction( "drawBox", "v2,v2,n,v2", "", [[
+	$draw.NoTexture()
+
+	@define c = math.cos(math.rad(@value 3))
+	@define s = math.sin(math.rad(@value 3))
+
+	@define x = @value 4.y * @s - @value 4.x * @c
+	@define y = @value 4.y * @c + @value 4.x * @s
+
+	$surface.DrawTexturedRectRotated( @value 1.x + @x, @value 1.y + @y, @value 2.x, @value 2.y, @value 3 )
+]])
+
 Component:AddPreparedFunction( "drawTexturedBox", "v2,v2", "", "$surface.DrawTexturedRect( @value 1.x, @value 1.y, @value 2.x, @value 2.y )" )
 
 Component:AddPreparedFunction( "drawTexturedBox", "v2,v2,n", "", "$surface.DrawTexturedRectRotated( @value 1.x, @value 1.y, @value 2.x, @value 2.y, @value 3 )" )
 
 Component:AddPreparedFunction( "drawTexturedBox", "v2,v2,n,n,n,n", "", "$surface.DrawTexturedRectUV( @value 1.x, @value 1.y, @value 2.x, @value 2.y, @value 3, @value 4, @value 5, @value 6 )" )
 
+Component:AddPreparedFunction( "drawTexturedBox", "v2,v2,n,v2", "", [[
+	@define c = math.cos(math.rad(@value 3))
+	@define s = math.sin(math.rad(@value 3))
+
+	@define x = @value 4.y * @s - @value 4.x * @c
+	@define y = @value 4.y * @c + @value 4.x * @s
+
+	$surface.DrawTexturedRectRotated( @value 1.x + @x, @value 1.y + @y, @value 2.x, @value 2.y, @value 3 )
+]])
 
 Component:AddFunctionHelper( "drawBox", "v2,v2", "Draws a box ( Position, Size )." )
+Component:AddFunctionHelper( "drawBox", "v2,v2,n", "Draws a rotated box ( Position, Size, Angle )" )
+Component:AddFunctionHelper( "drawBox", "v2,v2,n,v2", "Draws a rotated box ( Position, Size, Angle, Origin of rotation )" )
 Component:AddFunctionHelper( "drawTexturedBox", "v2,v2", "Draws a textured box ( Position, Size )." )
 Component:AddFunctionHelper( "drawTexturedBox", "v2,v2,n", "Draws a rotated textured box ( Position, Size, Angle )." )
+Component:AddFunctionHelper( "drawTexturedBox", "v2,v2,n,v2", "Draws a rotated textured box ( Position, Size, Angle, Origin of rotation )" )
 Component:AddFunctionHelper( "drawTexturedBox", "v2,v2,n,n,n,n", "Draws a textured box with uv co-ordinates ( Position, Size, U1, V1, U2, V2 )." )
 
 /* -----------------------------------------------------------------------------------
@@ -198,7 +236,7 @@ local function Counterclockwise( a, b, c )
 end
  
 local function DrawPoly(Array)
-	render.CullMode(Counterclockwise(unpack(Array)) and MATERIAL_CULLMODE_CCW or MATERIAL_CULLMODE_CW )
+	render.CullMode(Counterclockwise(Array[1], Array[2], Array[3]) and MATERIAL_CULLMODE_CCW or MATERIAL_CULLMODE_CW )
 	surface.DrawPoly(Array)
 	render.CullMode(MATERIAL_CULLMODE_CCW)
 end
@@ -327,6 +365,21 @@ end]], "(@fps or 0)" )
 
 Component:AddFunctionHelper( "getFPS", "", "Returns the fps of the screen." )
 
+Component:AddPreparedFunction( "setBackgroundColor", "c", "", [[if IsValid( Context.entity ) and Context.entity.Screen then Context.entity:SetBackGround(@value 1) end]] )
+EXPADV.AddFunctionAlias("setBackGroundColor", "c")
+
+Component:AddFunctionHelper( "setBackGroundColor", "c", "Sets the background color of the screen, setting alpha to 0 makes it transparent." )
+
+Component:AddPreparedFunction( "getBackgroundColor", "", "c", [[if IsValid( Context.entity ) and Context.entity.Screen then 
+	@define col = Context.entity:GetBackGround() 
+end]], "(@col or Color(0,0,0,255)" )
+EXPADV.AddFunctionAlias("getBackGroundColor", "")
+
+Component:AddFunctionHelper( "getBackGroundColor", "", "Returns the background color of the screen." )
+
+Component:AddPreparedFunction( "clearScreen", "", "", [[if IsValid( Context.entity ) and Context.entity.Screen then Context.entity:ClearScreen() end]] )
+Component:AddFunctionHelper( "clearScreen", "", "Clears the contents of the screen and reverts back to the default frame." )
+
 /* -----------------------------------------------------------------------------------
 	@: Time functions
    --- */
@@ -349,7 +402,7 @@ Component:AddFunctionHelper( "toScreen", "v", "Translates the vectors position i
 Component:AddInlineFunction( "isVisible", "v", "b", "@value 1:ToScreen( ).visible" )
 Component:AddFunctionHelper( "isVisible", "v", "Returns true if the vectors position is in clients view." )
 
-Component:AddInlineFunction( "canRenderToHUD", "", "b", [[EXPADV.CanAccessFeature(Context.entity, "HUD rendering")]] )
+Component:AddInlineFunction( "canRenderToHUD", "", "b", [[EXPADV.CanAccessFeature(Context.entity, "HUD")]] )
 Component:AddFunctionHelper( "canRenderToHUD", "", "Returns true if this entity can render to clientside HUD." )
 
 /* -----------------------------------------------------------------------------------
@@ -447,7 +500,7 @@ Component:AddFunctionHelper( "popMatrix", "", "Stops rendering in current matrix
 	@: Author: Ripmax, Szymekk
    --- */
 
-Component:AddInlineFunction( "canRender3D", "", "b", [[EXPADV.CanAccessFeature(Context.entity, "3D rendering")]] )
+Component:AddInlineFunction( "canRender3D", "", "b", [[EXPADV.CanAccessFeature(Context.entity, "3DRendering")]] )
 Component:AddFunctionHelper( "canRender3D", "", "Returns true if this entity can render clientside 3D." )
 
 Component:AddInlineFunction("fov", "", "n", "$LocalPlayer():GetFOV()")
@@ -462,7 +515,7 @@ Component:AddFunctionHelper("draw3DLine", "v,v,c", "Draws 3D line (start, end, c
 Component:AddPreparedFunction("draw3DBox", "v,a,v,v,c", "", "$render.DrawBox(@value 1, @value 2, @value 3, @value 4, @value 5, true)")
 Component:AddFunctionHelper("draw3DBox", "v,a,v,v,c", "Draws 3D box (position, angle, mins, maxs, color).")
 
-Component:AddPreparedFunction("draw3DSphere", "v,n,n,n,c", "", "$render.DrawSphere(@value 1, @value 2, @value 3, @value 4, @value 5)")
+Component:AddPreparedFunction("draw3DSphere", "v,n,n,n,c", "", "$render.DrawSphere(@value 1, @value 2, $math.Clamp(@value 3,4,30), $math.Clamp(@value 4,4,30), @value 5)")
 Component:AddFunctionHelper("draw3DSphere", "v,n,n,n,c", "Draws 3D sphere.")
 
 Component:AddPreparedFunction("draw3DQuadEasy", "v,v,n,n,c,n", "", "$render.DrawQuadEasy(@value 1, @value 2, @value 3, @value 4, @value 5, @value 6)")
@@ -500,19 +553,143 @@ end
 
 Component:AddFunctionHelper( "end3D2D", "", "Stops current 3D2D rendering." )
 
+Component:AddPreparedFunction("renderEnableDepth", "b", "", [[
+if Context.In3DRender then
+	$render.OverrideDepthEnable(@value 1, true)
+end
+]])
+
+Component:AddFunctionHelper("renderEnableDepth", "b", "Overrides the write behaviour of all next rendering operations towards the depth buffer.")
+
+/* -----------------------------------------------------------------------------------
+	@: URL Materials
+	@: Author: Szymekk
+   --- */
+
+Component:CreateSetting("maxurlmaterials", 15)
+Component:CreateSetting("maxurlmatsize", 512)
+
+function Component:OnRegisterContext(Context)
+	Context.Data.Materials = { }
+end
+
+EXPADV.ClientOperators()
+
+local TextureSize = Component:ReadSetting("maxurlmatsize", 512)
+local HTML = HTML
+local URLQueue = { }
+local CanLoad = true
+
+local function Download(Context, Name, URL, Width, Height)
+	if string.find(URL, "%d%d?%d?%.%d%d?%d?%.%d%d?%d?%.%d%d?%d?") then return end
+
+	if IsValid(HTML) then
+		HTML:Remove()
+	end
+
+	local htmlpanel = vgui.Create("HTML")
+	htmlpanel:SetVisible(true)
+	htmlpanel:SetSize(Width, Height)
+	htmlpanel:SetPos(ScrW()-1, ScrH()-1)
+	htmlpanel:SetHTML(
+		[[		
+			<style type="text/css">
+				html 
+				{			
+					margin: 0px 0px;
+					overflow:hidden;
+				}
+			</style>
+
+			<body>
+				<img src="]] .. URL .. '"width="' .. Width .. '" height="' .. Height .. [[" />
+			</body>
+		]]
+	)
+	HTML = htmlpanel
+
+	local uid = "ea2urlmaterial_" .. Name .. Context.entity:EntIndex()
+
+	local spawn, nextUpdate = RealTime(), RealTime() + 0.5
+	hook.Add("Think", uid, function()
+		if !IsValid(Context.entity) || !IsValid(htmlpanel) || RealTime() - spawn > 5 then
+			htmlpanel:Remove()
+			CanLoad = true
+			hook.Remove("Think", uid)
+			return
+		end
+
+		if RealTime() < nextUpdate then return end
+
+		nextUpdate = RealTime() + 0.1
+
+		if htmlpanel:IsLoading() then
+			return
+		end
+
+		local mat = htmlpanel:GetHTMLMaterial()
+
+		if !mat then return end
+
+		local vertex_mat = CreateMaterial("ea2urlmat_" .. Name, "UnlitGeneric", { ["$vertexcolor"] = 1, ["$vertexalpha"] = 1, ["$ignorez"] = 1, ["$nolod"] = 1 } )	
+		local tex = mat:GetTexture("$basetexture")
+		tex:Download()
+		vertex_mat:SetTexture("$basetexture", tex)				
+		Context.Data.Materials[Name] = vertex_mat
+
+		htmlpanel:Remove()
+		CanLoad = true
+		hook.Remove("Think", uid)
+	end)
+end
+
+hook.Add("Think", "EA2_UrlTexture", function()
+	if #URLQueue > 1 && CanLoad then
+		CanLoad = false
+		Download(unpack(URLQueue[#URLQueue]))
+		table.remove(URLQueue, #URLQueue)
+	end
+	if #URLQueue == 0 then CanLoad = true end
+end)
+
+Component:AddVMFunction("downloadURLMaterial", "s,s,n,n", "", function(Context, Trace, Name, URL, Width, Height)
+	if (Context.Data.Materials[Name] || #Context.Data.Materials < Component:ReadSetting("maxurlmaterials", 15)) && #URLQueue < 10 then
+		Context.Data.Materials[Name] = Context.Data.Materials[Name] or Material("debug/debugempty")
+		table.insert(URLQueue, { Context, Name, URL, math.Clamp(Width or TextureSize, 1, TextureSize), math.Clamp(Height or TextureSize, 1, TextureSize) })
+	end
+end)
+EXPADV.AddFunctionAlias("downloadURLMaterial", "s,s")
+
+Component:AddFunctionHelper("downloadURLMaterial", "s,s,n,n", "Downloads a material from specified URL (name,url,width,height).")
+
+Component:AddPreparedFunction("setURLMaterial", "s", "", [[
+if Context.Data.Materials && Context.Data.Materials[@value 1] then
+	@define mat = Context.Data.Materials[@value 1]
+	$render.SetMaterial(@mat)
+	$surface.SetMaterial(@mat)
+end
+]])
+
 /* -----------------------------------------------------------------------------------
 	@: Hud Event
    --- */
 
 EXPADV.ClientEvents( )
 
-Component:AddEvent( "drawScreen", "n,n", "" )
+Component:AddEvent( "drawScreen", "n,n", "b" )
+EXPADV.AddEventHelper("drawScreen", "Use this event to draw to a screen, the width and height are provided.")
+
 Component:AddEvent( "drawHUD", "n,n", "" )
+EXPADV.AddEventHelper("drawHUD", "Use this event to draw to localplayers hud, the width and height of the game window are provided.")
+
 Component:AddEvent( "enableHUDRendering", "", "" )
 Component:AddEvent( "disableHUDRendering", "", "" )
 
 Component:AddEvent( "draw3DOverlay", "", "" )
+
 Component:AddEvent( "draw3D", "", "" )
+EXPADV.AddEventHelper("draw3D", "Use this event to render 3d objects in world.")
+
 Component:AddEvent( "enable3DRendering", "", "" )
 Component:AddEvent( "disable3DRendering", "", "" )
 
@@ -528,7 +705,7 @@ if CLIENT then
 			
 			if !IsValid(Context.entity) then continue end
 			
-			if(Context.event_drawHUD && EXPADV.CanAccessFeature(Context.entity, "HUD rendering")) then
+			if(Context.event_drawHUD && EXPADV.CanAccessFeature(Context.entity, "HUD")) then
 				Context.In2DRender = true
 				Context.Matrices = 0
 
@@ -544,18 +721,20 @@ if CLIENT then
 				Context.In2DRender = false
 			end
 			
-			if(Context.event_draw3DOverlay && EXPADV.CanAccessFeature(Context.entity, "3D rendering")) then
+			if(Context.event_draw3DOverlay && EXPADV.CanAccessFeature(Context.entity, "3DRendering")) then
 				cam.Start3D(EyePos(), EyeAngles())
-					Context.In2DRender = true
+					Context.In3DRender = true
 					Context.Matrices = 0
 
 					Context:Execute("Event draw3DOverlay", Context.event_draw3DOverlay)
-
+					
+					render.OverrideDepthEnable(false,false)
+					
 					for i=1, Context.Matrices do
 						cam.PopModelMatrix( )
 					end
 
-					Context.In2DRender = false
+					Context.In3DRender = false
 				cam.End3D()
 			end
 		end
@@ -585,13 +764,15 @@ if CLIENT then
 			
 			if !IsValid( Context.entity ) then continue end
 			
-			if(Context.event_draw3D && EXPADV.CanAccessFeature(Context.entity, "3D rendering")) then
+			if(Context.event_draw3D && EXPADV.CanAccessFeature(Context.entity, "3DRendering")) then
 				Context.In3DRender = true
 				Context.Matrices = 0
 				Context.Cams = 0
 
 				Context:Execute( "Event draw3D", Context.event_draw3D )
 
+				render.OverrideDepthEnable(false,false)
+				
 				for i=1, Context.Matrices do
 					cam.PopModelMatrix( )
 				end
@@ -610,21 +791,21 @@ if CLIENT then
 end
 
 /* -----------------------------------------------------------------------------------
-	@: WIP Features.
+	@: Features.
    --- */
 
-Component:AddFeature( "HUD rendering", "Drawing directly onto your heads up display.", "fugue/monitor-window-3d.png" )
-Component:AddFeature( "3D rendering", "Rendering 3D objects such as sprites in world.", "fugue/fire.png" )
+Component:AddFeature( "HUD", "Drawing directly onto your heads up display.", "fugue/monitor-window-3d.png" )
+Component:AddFeature( "3DRendering", "Rendering 3D objects such as sprites in world.", "tek/icons/icon3d.png" )
 
 if CLIENT then
 	function Component:OnChangeFeatureAccess(Entity, Feature, Value)
-		if Feature == "HUD rendering" then
+		if Feature == "HUD" then
 			if Value then
 				Entity:CallEvent( "enableHUDRendering" )
 			else
 				Entity:CallEvent( "disableHUDRendering" )
 			end
-		elseif Feature == "3D rendering" then
+		elseif Feature == "3DRendering" then
 			if Value then
 				Entity:CallEvent( "enable3DRendering" )
 			else

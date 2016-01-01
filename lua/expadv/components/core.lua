@@ -4,6 +4,7 @@
 
 EXPADV.AddException( nil, "invoke" )
 EXPADV.AddException( nil, "cast" )
+EXPADV.AddException( nil, "net" )
 
 /* --- --------------------------------------------------------------------------------
 	@: Default Classes
@@ -13,21 +14,22 @@ local Class_Boolean   = EXPADV.AddClass( nil, "boolean", "b" )
 local Class_Function  = EXPADV.AddClass( nil, "function", "f" )
 local Class_Delgate   = EXPADV.AddClass( nil, "delegate", "d" )
 local Class_Exception = EXPADV.AddClass( nil, "exception", "ex" )
-local Class_Class = EXPADV.AddClass( nil, "class", "cls" ) --Nope: Not what you think it is.
+local Class_Class 	  = EXPADV.AddClass( nil, "class", "cls" ) -- Nope: Not what you think it is.
 
 Class_Boolean:AddAlias( "bool" )
 Class_Boolean:CanSerialize( true )
 Class_Boolean:DefaultAsLua( false )
+Class_Boolean:NetWrite(net.WriteBool)
+Class_Boolean:NetRead(net.ReadBool)
 Class_Function:DefaultAsLua( "function( ) end" )
 
 if WireLib then
-	Class_Boolean:WireOutput( "NORMAL", function( Context, MemoryRef )
-		return Context.Memory[ MemoryRef ] and 1 or 0
-	end ) 
-
-	Class_Boolean:WireInput( "NORMAL", function( Context, MemoryRef, InValue )
-		Context.Memory[ MemoryRef ] = (InValue ~= 0)
-	end )
+	Class_Boolean:WireIO("NORMAL",
+        function(Value, Context) -- To Wire
+            return Value and 1 or 0
+        end, function(Value, context) -- From Wire
+            return !(Value == 0)
+        end)
 end
 
 /* --- --------------------------------------------------------------------------------
@@ -83,45 +85,90 @@ EXPADV.AddVMOperator( nil, "call", "f,s,...", "_vr",
 		return rValue
 	end)
 
-EXPADV.AddGeneratedFunction( nil, "invoke", "cls,d,...", "",
-	function( Operator, Compiler, Trace, ... )
-		
-		local Inputs = { ... }
-		local Preperation = { }
-		local Variants = { }
-		
-		for I = 1, #Inputs, 1 do
-			local Input = Inputs[I]
+/* --- -------------------------------------------------------------------------------
+	@: Invoke
+   --- */
 
-			if Input.FLAG == EXPADV_PREPARE or Input.FLAG == EXPADV_INLINEPREPARE then
-				Preperation[#Preperation + 1] = Input.Prepare
-			end
+local function buildLua(...)
+	local Inputs = { ... }
+	local Preperation = { }
+	local Outputs = { }
+	
+	for I = 1, #Inputs, 1 do
+		local Input = Inputs[I]
 
-			if I > 2 then
-				if Input.FLAG == EXPADV_INLINE or Input.FLAG == EXPADV_INLINEPREPARE then
-					if Input.Return == "_vr" then
-						Variants[#Variants + 1] = Input.Inline
-					else
-						Variants[#Variants + 1] = string.format("{%s,%q}", Input.Inline, Input.Return)
-					end
-				end
-			end
+		if Input.FLAG == EXPADV_PREPARE or Input.FLAG == EXPADV_INLINEPREPARE then
+			Preperation[#Preperation + 1] = Input.Prepare
 		end
 
-		local Function, Return, Type = Compiler:DefineVariable( ), Compiler:DefineVariable( ), Compiler:DefineVariable( )
-		local Arguments = table.concat(Variants, ",")
-		if #Variants > 0 then Arguments = "," .. Arguments end
-		
-		Preperation[#Preperation + 1] = string.format("%s = %s", Function, Inputs[2].Inline )
-		Preperation[#Preperation + 1] = string.format("%s, %s = %s( Context %s )", Return, Type, Function, Arguments )
-		Preperation[#Preperation + 1] = string.format("if %s ~= %s then Context:Throw(%s,%q,%q) end", Inputs[1].Inline, Type, Compiler:CompileTrace(Trace), "invoke", "This is not the exception, youre looking for." )
+		if Input.FLAG == EXPADV_INLINE or Input.FLAG == EXPADV_INLINEPREPARE then
+			if Input.Return == "_vr" then
+				Outputs[#Outputs + 1] = Input.Inline
+			else
+				Outputs[#Outputs + 1] = string.format("{%s,%q}", Input.Inline, Input.Return)
+			end
+		end
+	end
 
-		return { Trace = Trace, Inline = Return, Prepare = table.concat( Preperation, "\n" ), Return = Inputs[1].PointClass, FLAG = EXPADV_INLINEPREPARE }
-	end ); EXPADV.AddFunctionAlias("invoke", "cls,d")
+	return table.concat(Preperation, "\n"), Outputs
+end
+
+EXPADV.AddGeneratedFunction( nil, "invoke", "cls,d,...", "",
+	function(Operator, Compiler, Trace, Class, Delegate, ...)
+		local Prepare, Inputs = buildLua(Class, Delegate, ...)
+
+		local dVar = Compiler:DefineVariable( )
+		local Inline, tVar = Compiler:DefineVariable( ), Compiler:DefineVariable( )
+		
+		table.remove(Inputs, 1)
+		table.remove(Inputs, 1)
+
+		local Arguments = ""
+		if #Inputs > 0 then Arguments = "," .. table.concat(Inputs, ",") end
+
+		Prepare = Prepare .. "\n" .. string.format([[%s = %s]], dVar, Delegate.Inline)
+		Prepare = Prepare .. "\n" .. string.format([[%s, %s = %s(Context %s)]], Inline, tVar, dVar, Arguments)
+		Prepare = Prepare .. "\n" .. string.format([[if !%s then Context:Throw(%s, "invoke", "Delegate expected to return %s got void.") end]], Inline, Compiler:CompileTrace(Trace), Compiler:NiceClass(Class.PointClass))
+		Prepare = Prepare .. "\n" .. string.format([[if %s ~= %q then Context:Throw(%s, "invoke", "Delegate expected to return %s got " .. EXPADV.TypeName(%s) .. ".") end]], tVar, Class.PointClass, Compiler:CompileTrace(Trace), Compiler:NiceClass(Class.PointClass), tVar)
+
+		return {Trace = Trace, Inline = Inline, Prepare = Prepare, Return = Class.PointClass, FLAG = EXPADV_INLINEPREPARE}
+	end)
+EXPADV.AddFunctionAlias("invoke", "cls,d")
+
+EXPADV.AddGeneratedFunction( nil, "invoke", "d,...", "",
+	function(Operator, Compiler, Trace, Delegate, ...)
+		local Prepare, Inputs = buildLua(Delegate, ...)
+		
+		local dVar = Compiler:DefineVariable( )
+		local Inline, tVar = Compiler:DefineVariable( ), Compiler:DefineVariable( )
+		
+		table.remove(Inputs, 1)
+		
+		local Arguments = ""
+		if #Inputs > 0 then Arguments = "," .. table.concat(Inputs, ",") end
+		
+		Prepare = Prepare .. "\n" .. string.format([[%s = %s]], dVar, Delegate.Inline)
+		Prepare = Prepare .. "\n" .. string.format([[%s, %s = %s(Context %s)]], Inline, tVar, dVar, Arguments)
+		Prepare = Prepare .. "\n" .. string.format([[if %s then Context:Throw(%s, "invoke", "Delegate expected to return void got " .. EXPADV.TypeName(%s) .. ".") end]], Inline, Compiler:CompileTrace(Trace), tVar)
+		
+		return {Trace = Trace, Inline = Inline, Prepare = Prepare, Return = "", FLAG = EXPADV_INLINEPREPARE}
+	end)
+EXPADV.AddFunctionAlias("invoke", "d")
 
 /*EXPADV.AddFunctionHelper("invoke", "cls,d,...", "Executes the given delegate passing given params and returning the value (return type class, the function, params)." )
 	Not working :/
 */
+
+/* --- --------------------------------------------------------------------------------
+	@: Client and Server
+   --- */
+
+EXPADV.AddInlineFunction( nil,  "server", "", "b", "$SERVER" )
+EXPADV.AddFunctionHelper( nil, "server", "", "Returns true if running serverside." )
+
+EXPADV.AddInlineFunction( nil, "client", "", "b", "$CLIENT" )
+EXPADV.AddFunctionHelper( nil, "client", "", "Returns true if running clientside." )
+
 
 /* --- -------------------------------------------------------------------------------
 	@: Loops
@@ -241,7 +288,7 @@ local Component = EXPADV.AddComponent( "print" , true )
 
 Component.Author = "Rusketh"
 Component.Description = "Prints stuff to your chat."
-Component:AddFeature( "print", "Prints to you..", "fugue/printer-monochrome.png" )
+Component:AddFeature( "Print", "Prints to you..", "fugue/printer-monochrome.png" )
 
 EXPADV.SharedOperators( )
 
@@ -271,8 +318,52 @@ Component:AddVMFunction( "print", "...", "",
 
 		EXPADV.PrintColor( Context, Values )
 	end )
+	
+local function printTable(Context, t, indent, done )
+	done = done or {}
+	indent = indent or 0
+	local keys = table.GetKeys( t.Data )
+
+	table.sort( keys, function( a, b )
+		if ( isnumber( a ) && isnumber( b ) ) then return a < b end
+		return tostring( a ) < tostring( b )
+	end )
+
+	for i = 1, #keys do
+		local key = keys[ i ]
+		local obj_type = t.Types[ key ]
+		local value = t.Data[ key ]
+
+		if  ( istable( value ) && !done[ value ] ) then
+
+			done[ value ] = true
+			EXPADV.PrintColor( Context, string.rep( "\t", indent ) .. tostring( key ) .. ":" )
+			printTable ( Context, value, indent + 1, done )
+
+		else
+			EXPADV.PrintColor( Context, string.rep( "\t", indent ) .. tostring( key ) .. "\t=\t" .. EXPADV.ToString( obj_type, value ) )
+		end
+	end
+end
+	
+	
+Component:AddVMFunction( "printTable", "t", "",
+	function( Context, Trace, Table )
+		printTable(Context, Table)
+	end )
+	
+Component:AddVMFunction( "printArray", "ar", "",
+	function( Context, Trace, Array )
+
+		for I=1, #Array do
+			EXPADV.PrintColor( Context, "[ " .. I .. " ] = " .. EXPADV.ToString( Array.__type, Array[I] ) )
+		end
+
+	end )
 
 Component:AddFunctionHelper( "printColor", "...", "Prints the contents of ( ... ) to chat seperated with a space using colors." )
+Component:AddFunctionHelper( "printTable", "t", "Prints the contents of a table to chat" )
+Component:AddFunctionHelper( "printTable", "ar", "Prints the contents of an array to chat" )
 Component:AddFunctionHelper( "print", "...", "Prints the contents of ( ... ) to chat seperated with a space." )
 
 if SERVER then util.AddNetworkString( "expadv.printcolor" ) end
@@ -282,12 +373,12 @@ function EXPADV.PrintColor( Context, Tbl, ... )
 	if !istable(Tbl) then Tbl = {Tbl, ...} end
 
 	if CLIENT then
-		if !EXPADV.EntityCanAccessFeature(Context.entity, "print") then return end
+		if !EXPADV.EntityCanAccessFeature(Context.entity, "Print") then return end
 		chat.AddText( unpack(Tbl) )
 	elseif IsValid(Context.player) then
 		net.Start( "expadv.printcolor" )
 			net.WriteTable( Tbl )
-		net.Send( Player )
+		net.Send(Context.player)
 	elseif Context.entity and Context.entity.Scripted then
 		MsgC(unpack(Tbl))
 		net.Start( "expadv.printcolor" )
@@ -303,6 +394,16 @@ if CLIENT then
 end
 
 /* --- -------------------------------------------------------------------------------
+	@: Net
+   --- */
+
+EXPADV.AddInlineFunction( nil, "netUsage", "", "n", "(Context.Data.net_bytes or 0)" )
+EXPADV.AddFunctionHelper( nil, "netUsage", "", "Returns the current bytes used for client and server sync." )
+
+EXPADV.AddInlineFunction( nil, "netLimit", "", "n", "(expadv_netlimit or 0)" )
+EXPADV.AddFunctionHelper( nil, "netLimit", "", "Returns the max bytes that can used for client and server sync." )
+
+/* --- -------------------------------------------------------------------------------
 	@: Events
    --- */
 
@@ -310,9 +411,9 @@ EXPADV.SharedEvents( )
 	
 EXPADV.AddEvent( nil, "tick", "", "" )
 EXPADV.AddEvent( nil, "think", "", "" )
+EXPADV.AddEvent( nil, "last", "", "" )
 
 EXPADV.ServerEvents( )
-EXPADV.AddEvent( nil, "trigger", "s,s", "" )
 EXPADV.AddEvent( nil, "clientLoaded", "ply", "" )
 EXPADV.AddEvent( nil, "dupePasted" )
 

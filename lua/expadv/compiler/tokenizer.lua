@@ -343,12 +343,14 @@ function Compiler:BuildToken( )
 			return self:NewToken( "each", "foreach")
 		elseif RawData == "function" then
 			return self:NewToken( "func", "function")
-		elseif RawData == "method" then
-			return self:NewToken( "meth", "method")
-		elseif RawData == "switch" then
-			return self:NewToken( "swh", "switch")
-		elseif RawData == "case" then
-			return self:NewToken( "cse", "case")
+		//elseif RawData == "class" then
+		//	return self:NewToken( "cls", "class")
+		//elseif RawData == "method" then
+		//	return self:NewToken( "meth", "method")
+		//elseif RawData == "switch" then
+			//return self:NewToken( "swh", "switch")
+		//elseif RawData == "case" then
+			//return self:NewToken( "cse", "case")
 		elseif RawData == "default" then
 			return self:NewToken( "dft", "default")
 		elseif RawData == "event" then
@@ -389,6 +391,8 @@ function Compiler:BuildToken( )
 			return self:NewToken( "out", "output" )
 		elseif RawData == "static" then
 			return self:NewToken( "stc", "static" )
+		elseif RawData == "synced" then
+			return self:NewToken( "syn", "synced" )
 
 	-- SERVER && CLIENT:
 

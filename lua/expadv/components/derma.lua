@@ -63,8 +63,10 @@ end
 PanelClass:AddPreparedOperator( "=", "n,dp", "", "Context.Memory[@value 1] = @value 2" )
 
 Component:AddVMFunction( "dpanel", "", "dp", function(Context, Trace) return CreatePanel(Context, Trace, "DPanel") end )
+Component:AddVMFunction( "dpanel", "df", "dp", function( Context, Trace, Panel ) return CreatePanel( Context, Trace, "DPanel", Panel ) end )
 
 Component:AddFunctionHelper( "dpanel", "", "Returns new dpanel object." )
+Component:AddFunctionHelper( "dpanel", "df", "Returns new dpanel object with the given dframe as parent." )
 
 Component:AddPreparedFunction("setPos", "dp:v2", "", "@value 1:SetPos(@value 2.x, @value 2.y)")
 Component:AddFunctionHelper( "setPos", "dp:v2", "Sets the position of the dpanel." )
@@ -112,6 +114,22 @@ Component:AddFunctionHelper("onPaint", "dp:d", "Replaces the paint event of the 
 PanelClass:AddPreparedOperator( "=", "n,dp", "", "Context.Memory[@value 1] = @value 2" )
 
 /* -----------------------------------------------------------------------------------
+	@: Added functionality
+--- */
+
+Component:AddPreparedFunction("setVariant", "dp:vr", "", "@value 1.Variant = @value 2")
+Component:AddFunctionHelper( "setVariant", "dp:vr", "Attaches an object to this panel." )
+
+Component:AddInlineFunction("getVariant", "dp:", "vr", "@value 1.Variant or {0, 'n'}")
+Component:AddFunctionHelper( "getVariant", "dp:", "Returns the object attached to this panel." )
+
+Component:AddPreparedFunction("setPaintedManually", "dp:b", "vr", "@value 1:SetPaintedManually(@value 2)")
+Component:AddFunctionHelper( "setPaintedManually", "dp:b", "Sets this panel to paint outside of itself." )
+
+Component:AddPreparedFunction("paintManual", "dp:", "vr", "@value 1:PaintManual()")
+Component:AddFunctionHelper( "paintManual", "dp:", "Manually paints this panel." )
+
+/* -----------------------------------------------------------------------------------
 	@: Frame
 --- */
 
@@ -127,6 +145,8 @@ Component:AddVMFunction( "dframe", "", "df", function(Context, Trace) return Cre
 
 Component:AddFunctionHelper( "dframe", "", "Returns new dframe object." )
 
+Component:AddPreparedFunction("close", "df:", "", "@value 1:Close()")
+Component:AddFunctionHelper( "close", "df:", "Closes Derma frame." )
 Component:AddPreparedFunction("showCloseButton", "df:b", "", "@value 1:ShowCloseButton(@value 2)")
 Component:AddFunctionHelper( "showCloseButton", "df:b", "Shows/hides the close button." )
 Component:AddPreparedFunction("setDraggable", "df:b", "", "@value 1:SetDraggable(@value 2)")
@@ -138,7 +158,7 @@ Component:AddFunctionHelper("setBackgroundBlur", "df:b", "If set to true blurs b
 
 Component:AddPreparedFunction("setTitle", "df:s", "", "@value 1:SetTitle(@value 2)")
 Component:AddFunctionHelper( "setTitle", "df:s", "Sets the title of the dframe." )
-Component:AddPreparedFunction("makePopup", "df:", "", "@value 1:MakePopup()")
+Component:AddPreparedFunction("makePopup", "df:", "", "if !@value 1.ScreenDerma then @value 1:MakePopup() end")
 Component:AddFunctionHelper( "makePopup", "df:", "Makes the dframe popup on client's screen." )
 
 /* -----------------------------------------------------------------------------------
@@ -386,6 +406,57 @@ Component:AddFunctionHelper( "dpropertysheet", "dp", "Returns new dpropertysheet
 Component:AddFunctionHelper( "dpropertysheet", "df", "Returns new dpropertysheet object with the given dframe as parent." )
 
 /* -----------------------------------------------------------------------------------
+	@: DListView
+--- */
+
+local ListViewClass = Component:AddClass( "dlistview", "dlv" )
+ListViewClass:ExtendClass( "dp" )
+
+ListViewClass:AddPreparedOperator( "=", "n,dlv", "", "Context.Memory[@value 1] = @value 2" )
+
+Component:AddVMFunction( "dlistview", "dp", "dlv", function(Context, Trace, Panel) return CreatePanel(Context, Trace, "DListView", Panel) end )
+Component:AddVMFunction( "dlistview", "df", "dlv", function(Context, Trace, Panel) return CreatePanel(Context, Trace, "DListView", Panel) end )
+Component:AddVMFunction( "dlistview", "", "dlv", function(Context, Trace) return CreatePanel(Context, Trace, "DListView") end )
+
+Component:AddFunctionHelper( "dlistview", "", "Returns new dlistview object." )
+Component:AddFunctionHelper( "dlistview", "dp", "Returns new dlistview object with the given dpanel as parent." )
+Component:AddFunctionHelper( "dlistview", "df", "Returns new dlistview object with the given dframe as parent." )
+
+Component:AddPreparedFunction( "setMultiSelect", "dlv:b", "", "@value 1:SetMultiSelect(@value 2)" )
+Component:AddFunctionHelper( "setMultiSelect", "dlv:b", "Sets the multiselect mode of the dlistview." )
+
+Component:AddPreparedFunction( "clear", "dlv:", "", "@value 1:Clear()" )
+Component:AddFunctionHelper( "clear", "dlv:", "Clears the list." )
+
+Component:AddPreparedFunction( "addColumn", "dlv:s", "", "@value 1:AddColumn(@value 2)" )
+Component:AddFunctionHelper( "addColumn", "dlv:s", "Adds a column to the dlistview." )
+
+Component:AddVMFunction( "addLine", "dlv:...", "", function( Context, Trace, Panel, ... )
+	local Values = { ... }
+
+	for Key, Value in pairs( Values ) do
+		if Value[2] == "s" then
+			Values[Key] = Value[1]
+		else
+			Values[Key] = EXPADV.ToString( Value[2], Value[1] )
+		end
+	end
+
+	Panel:AddLine(unpack(Values))
+end )
+Component:AddFunctionHelper( "addLine", "dlv:...", "Adds a line to the list view." )
+
+Component:AddPreparedFunction( "onRowSelected", "dlv:d", "", [[
+@value 1.OnRowSelected = function(dunno, row)
+	Context:Execute( "dlistview", @value 2, { row, "n" } )
+end
+]] )
+Component:AddFunctionHelper( "onRowSelected", "dlv:d", "Executes when a row is selected." )
+
+Component:AddInlineFunction( "getSelectedLine", "dlv:", "n", "@value 1:GetSelectedLine() or 0" )
+Component:AddFunctionHelper( "getSelectedLine", "dlv:", "Gets the index of selected line." )
+
+/* -----------------------------------------------------------------------------------
 	@: DImage
 --- */
 
@@ -414,6 +485,54 @@ Component:AddVMFunction( "cursorImage", "", "dimg", function(Context, Trace)
 end )
 
 Component:AddFunctionHelper( "cursorImage", "", "Returns the cursor image. " )
+
+/* -----------------------------------------------------------------------------------
+	@: DModelPanel
+--- */
+
+local DModelClass = Component:AddClass( "dmodel", "dmdl" )
+
+DModelClass:ExtendClass( "dp" )
+
+DModelClass:AddPreparedOperator( "=", "n,dmdl", "", "Context.Memory[@value 1] = @value 2" )
+
+Component:AddVMFunction( "dmodel", "dp", "dmdl", function(Context, Trace, Panel) return CreatePanel(Context, Trace, "DModelPanel", Panel) end )
+Component:AddVMFunction( "dmodel", "df", "dmdl", function(Context, Trace, Panel) return CreatePanel(Context, Trace, "DModelPanel", Panel) end )
+Component:AddVMFunction( "dmodel", "", "dmdl", function(Context, Trace) return CreatePanel(Context, Trace, "DModelPanel") end )
+
+Component:AddPreparedFunction( "setModel", "dmdl:s", "", [[if IsValid(@value 1) then
+	@value 1:SetModel(@value 2)
+end]] )
+
+Component:AddInlineFunction( "getModel", "dmdl:", "s", [[(IsValid(@value 1) and (@value 1:GetModel() or "") or "")]] )
+
+Component:AddPreparedFunction( "startScene", "dmdl:s", "", [[if IsValid(@value 1) then
+	@value 1:StartScene(@value 2)
+end]] )
+
+Component:AddPreparedFunction( "setFOV", "dmdl:n", "", [[if IsValid(@value 1) then
+	@value 1:SetFOV(@value 2)
+end]] )
+
+Component:AddInlineFunction( "getFOV", "dmdl:", "n", [[(IsValid(@value 1) and (@value 1:GetFOV() or 0) or 0)]] )
+
+Component:AddPreparedFunction( "setCamPos", "dmdl:v", "", [[if IsValid(@value 1) then
+	@value 1:SetCamPos(@value 2)
+end]] )
+
+Component:AddInlineFunction( "getCamPos", "dmdl:", "v", [[(IsValid(@value 1) and (@value 1:GetCamPos() or Vector(0,0,0)) or Vector(0,0,0))]] )
+
+Component:AddPreparedFunction( "setLookAtPos", "dmdl:v", "", [[if IsValid(@value 1) then
+	@value 1:SetLookAt(@value 2)
+end]] )
+
+Component:AddInlineFunction( "getLookatPos", "dmdl:", "v", [[(IsValid(@value 1) and (@value 1:GetLookatPos() or Vector(0,0,0)) or Vector(0,0,0))]] )
+
+Component:AddPreparedFunction( "setLookAng", "dmdl:a", "", [[if IsValid(@value 1) then
+	@value 1:SetLookAng(@value 2)
+end]] )
+
+Component:AddInlineFunction( "getLookAngle", "dmdl:", "v", [[(IsValid(@value 1) and (@value 1:GetLookAngle() or Angle(0,0,0)) or Angle(0,0,0))]] )
 
 /* -----------------------------------------------------------------------------------
 	@: Functions for all classes
@@ -458,7 +577,7 @@ if CLIENT then
 	end )
 end
 
-Component:AddFeature( "Derma", "Using Derma GUI components.", "fugue/block.png" )
+Component:AddFeature( "Derma", "Using Derma GUI components.", "tek/icons/iconderma.png" )
 
 if CLIENT then
 	function Component:OnChangeFeatureAccess(Entity, Feature, Value)

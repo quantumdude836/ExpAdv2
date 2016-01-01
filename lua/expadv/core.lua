@@ -5,6 +5,7 @@
 EXPADV = { }
 MsgN( "Expression advanced Two - Installing..." )
 include( "net.lua" )
+include( "von.lua" )
 
 /* --- --------------------------------------------------------------------------------
 	@: Debugging Stuff
@@ -17,6 +18,28 @@ function EXPADV.Msg( ... )
 	MsgN( ... )
 end
 
+function describe(object, Message, first, ...)
+	if Message then
+		if first then Message = string.format(Message, first, ...) end
+		MsgN(Message)
+	end
+
+	local Type = string.lower(type(object))
+	MsgN("TYPE: ", Type)
+
+	if Type == "nil" then
+		return
+	elseif Type == "string" then
+		MsgN("LENGH: ", #object)
+		MsgN("VALUE: ", object)
+	elseif Type == "number" then
+		MsgN("VALUE: ", object)
+	elseif Type == "table" then
+		MsgN("Size: ", #object)
+		MsgN("Count: ", table.Count(object))
+		MsgN("POINTER: ", object)
+	end
+end
 /* --- --------------------------------------------------------------------------------
 	@: Sometimes We might need to convert objects into native.
    --- */
@@ -77,33 +100,48 @@ EXPADV.ToLuaTable = ToLuaTable
    --- */
 
 EXPADV.Config = { }
+EXPADV.CL_Settings = { }
 
 function EXPADV.LoadConfig( )
-	if CLIENT then return end
-
 	local Config = { }
 
-	if file.Exists( "expadv.txt", "DATA" ) then
-		Config = util.KeyValuesToTable( file.Read( "expadv.txt", "DATA" ) )
-	end
+	if SERVER then
+
+		if file.Exists( "expadv.txt", "DATA" ) then
+			Config = util.KeyValuesToTable( file.Read( "expadv.txt", "DATA" ) )
+		end
 	
-	Config.enabledcomponents = Config.enabledcomponents or { }
-	Config.components = Config.components or { }
-	Config.settings = Config.settings or { }
+		Config.enabledcomponents = Config.enabledcomponents or { }
+		Config.components = Config.components or { }
+		Config.settings = Config.settings or { }
+		EXPADV.Config = Config
 
-	EXPADV.Msg( "ExpAdv: Loaded config file, sucessfully." )
+		EXPADV.Msg( "ExpAdv: Loaded config file, sucessfully." )
+		EXPADV.CallHook( "PostLoadConfig", Config )
 
-	EXPADV.Config = Config
+	elseif CLIENT then
+		if file.Exists( "cl_expadv.txt", "DATA" ) then
+			Config = util.KeyValuesToTable( file.Read( "cl_expadv.txt", "DATA" ) )
+		end
+	
+		Config.components = Config.components or { }
+		Config.settings = Config.settings or { }
+		EXPADV.CL_Settings = Config
 
-	EXPADV.CallHook( "PostLoadConfig", Config )
+		EXPADV.Msg( "ExpAdv: Loaded config file, sucessfully." )
+		EXPADV.CallHook( "PostLoadUserSettings", Config )
+	end	
 end
 
 -- Saves the config file.
 function EXPADV.SaveConfig( )
-	if CLIENT then return end
-	EXPADV.CallHook( "PreSaveConfig", EXPADV.Config )
-
-	file.Write( "expadv.txt", util.TableToKeyValues( EXPADV.Config ) )
+	if SERVER then
+		EXPADV.CallHook( "PreSaveConfig", EXPADV.Config )
+		file.Write( "expadv.txt", util.TableToKeyValues( EXPADV.Config ) )
+	elseif CLIENT then
+		EXPADV.CallHook( "PreSaveUserSettings", EXPADV.CL_Settings )
+		file.Write( "cl_expadv.txt", util.TableToKeyValues( EXPADV.CL_Settings ) )
+	end
 end
 
 -- Creates a new setting on the config.
@@ -117,6 +155,20 @@ end
 function EXPADV.ReadSetting( Name, Default ) -- String, Obj
 	if !EXPADV.Config or !EXPADV.Config.settings then return Default end
 	return EXPADV.Config.settings[ string.lower( Name ) ] or Default
+end
+
+-- Creates a new user setting.
+function EXPADV.CreateUserSetting( Name, Default ) -- String, Obj
+	if SERVER then return end
+	Name = string.lower( Name )
+	EXPADV.CL_Settings.settings[ Name ] = EXPADV.CL_Settings.settings[ Name ] or Default
+end
+
+-- Reads a user setting.
+function EXPADV.ReadUserSetting( Name, Default ) -- String, Obj
+	if SERVER then return Default end
+	if !EXPADV.CL_Settings or !EXPADV.CL_Settings.settings then return Default end
+	return EXPADV.CL_Settings.settings[ string.lower( Name ) ] or Default
 end
 
 /* --- --------------------------------------------------------------------------------
@@ -289,6 +341,7 @@ function EXPADV.IncludeCore( )
 	include( "expadv/features.lua" )
 	include( "expadv/directives.lua" )
 	include( "expadv/context.lua" )
+	include( "expadv/monitors.lua" )
 	include( "expadv/cppi.lua" )
 end
 
@@ -347,6 +400,7 @@ function EXPADV.LoadCore( )
 	EXPADV.AddComponentFile( "entity" )
 	EXPADV.AddComponentFile( "physics" )
 	EXPADV.AddComponentFile( "player" )
+	EXPADV.AddComponentFile( "pod" )
 	EXPADV.AddComponentFile( "sound" )
 	EXPADV.AddComponentFile( "hologram" )
 	EXPADV.AddComponentFile( "motionsensor" )
@@ -354,14 +408,18 @@ function EXPADV.LoadCore( )
 	EXPADV.AddComponentFile( "render" )
 	EXPADV.AddComponentFile( "table" )
 	EXPADV.AddComponentFile( "array" )
-	EXPADV.AddComponentFile( "co-routine" )
+	EXPADV.AddComponentFile( "threads" )
 	EXPADV.AddComponentFile( "utility" )
 	EXPADV.AddComponentFile( "wire" )
+	EXPADV.AddComponentFile( "egp" )
 	EXPADV.AddComponentFile( "files" )
 	EXPADV.AddComponentFile( "navigation" )
 	EXPADV.AddComponentFile( "derma" )
 	EXPADV.AddComponentFile( "keyboard" )
 	EXPADV.AddComponentFile( "context" )
+	EXPADV.AddComponentFile( "android" )
+	EXPADV.AddComponentFile( "constraintcore" )
+	EXPADV.AddComponentFile( "bot" )
 
 	EXPADV.CallHook( "AddComponents" )
 
@@ -371,11 +429,11 @@ function EXPADV.LoadCore( )
 
 	EXPADV.LoadClasses( )
 
+	EXPADV.LoadFeatures( )
+
 	EXPADV.LoadOperators( )
 
 	EXPADV.LoadFunctions( )
-
-	EXPADV.LoadFeatures( )
 	
 	EXPADV.LoadEvents( )
 
@@ -476,7 +534,9 @@ end
    -- BuildHologramModels( Table )								| Void | Called when the hologram model look up is made.
    -- OpenContextMenu( Entity, ContextMenu, Trace, Option )		| Void | Called when an ExpAdv2 context menu is created.
    -- AddComponents( )											| Void | Called when its time to add custom components.
-
+   -- PostLoadFeatures											| Void | Called when its time to add features.
+   -- AddMonitors												| Void | Called when its time to add monitors.
+   
    --  function Component:OnPostLoadAliases( ) end
    --  hook.Add( "Expadv.PostLoadAliases", ... )
    -- @GitHub: Please request hooks, and return behavours via issue page.
@@ -520,6 +580,7 @@ hook.Add( "Expadv.PostLoadConfig", "expadv.quota", function( )
 	EXPADV.CreateSetting( "softquota", 100000 )
 	EXPADV.CreateSetting( "hardquota", 1000000 )
 	EXPADV.CreateSetting( "memorylimit", 5 )
+	EXPADV.CreateSetting( "net_max_bytes", 50000 )
 end )
 
 local function update( )
@@ -528,11 +589,32 @@ local function update( )
 	expadv_softquota = EXPADV.ReadSetting( "softquota", 100000 )
 	expadv_hardquota = EXPADV.ReadSetting( "hardquota", 1000000 )
 	expadv_memorylimit = EXPADV.ReadSetting( "memorylimit", 5 ) * 1024
+	expadv_netlimit = EXPADV.ReadSetting( "net_max_bytes", 50000 )
 end
 
 update()
 
 timer.Create( "expadv.quota", 1, 0, update )
+
+/* --- --------------------------------------------------------------------------------
+	@: Lets prevent net message spam :D
+   --- */
+
+function EXPADV.DoNetMessage(Context, func, ...)
+	local Bytes = (Context.Data.net_bytes or 0) + net.BytesWritten()
+	
+	if Bytes <= expadv_netlimit then
+		Context.Data.net_bytes = Bytes
+		return true, func(...)
+	end
+
+	return false
+end
+
+hook.Add("Expadv.UpdateContext", "expadv.netlimit",
+	function(Context)
+		Context.Data.net_bytes = nil
+	end)
 
 /* --- --------------------------------------------------------------------------------
 	@: Editor Animation.
@@ -617,6 +699,12 @@ end
 hook.Add( "Expadv.PostLoadCore", "expadv.updates", function( )
 	EXPADV.CheckForUpdates( true )
 end )
+
+if CLIENT then
+	concommand.Add( "expadv_ver", function( Player )
+		EXPADV.CheckForUpdates( true )
+	end )
+end
 
 /* --- --------------------------------------------------------------------------------
 	@: API.

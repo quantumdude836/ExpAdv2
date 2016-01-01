@@ -21,13 +21,14 @@ Number:AddAlias( "int" )
     @: Wire Support
    --- */
 
-if WireLib then
-  Number:WireInput( "NORMAL" )
-  Number:WireOutput( "NORMAL" )
+if WireLib then Number:WireIO( "NORMAL" ) end
 
-  Number:WireLinkOutput( )
-  Number:WireLinkInput( )
-end
+/* --- --------------------------------------------------------------------------------
+  @: Sync
+   --- */
+
+Number:NetWrite(net.WriteFloat)
+Number:NetRead(net.ReadFloat)
 
 /* --- --------------------------------------------------------------------------------
     @: Logical and Comparison
@@ -69,11 +70,11 @@ Component:AddInlineOperator( "-", "n", "n", "(-@value 1)" )
     @: Bitwise
    --- */
 
-Component:AddInlineOperator( "&", "n,n", "n", "bit.band(@value 1 , @value 2)" )
-Component:AddInlineOperator( "|", "n,n", "n", "bit.bor(@value 1 , @value 2)" )
-Component:AddInlineOperator( "^^", "n,n", "n", "bit.bxor(@value 1 , @value 2)" )
-Component:AddInlineOperator( ">>", "n,n", "n", "bit.rshift(@value 1 , @value 2)" )
-Component:AddInlineOperator( "<<", "n,n", "n", "bit.lshift(@value 1 , @value 2)" )
+Component:AddInlineOperator( "&", "n,n", "n", "$bit.band(@value 1 , @value 2)" )
+Component:AddInlineOperator( "|", "n,n", "n", "$bit.bor(@value 1 , @value 2)" )
+Component:AddInlineOperator( "^^", "n,n", "n", "$bit.bxor(@value 1 , @value 2)" )
+Component:AddInlineOperator( ">>", "n,n", "n", "$bit.rshift(@value 1 , @value 2)" )
+Component:AddInlineOperator( "<<", "n,n", "n", "$bit.lshift(@value 1 , @value 2)" )
 
 /* --- --------------------------------------------------------------------------------
     @: Assigment
@@ -83,7 +84,7 @@ Number:AddVMOperator( "=", "n,n", "", function( Context, Trace, MemRef, Value )
    local Prev = Context.Memory[MemRef] or 0
 
    Context.Memory[MemRef] = Value
-   Context.Delta[MemRef] = Prev - Value
+   Context.Delta[MemRef] = Prev - (Value or 0)
    Context.Trigger[MemRef] = Context.Trigger[MemRef] or ( Prev ~= Value )
 end )
 
@@ -342,7 +343,7 @@ Component:AddFunctionHelper( "asinr", "n", "Returns the inverse sin of (number).
 Component:AddInlineFunction( "atanr", "n", "n", "math.atan(@value 1)" )
 Component:AddFunctionHelper( "atanr", "n", "returns the inverse tangent of (number)." )
 
-Component:AddInlineFunction( "atanr", "n,n", "n", "math.atan(@value 1, @value 2)" )
+Component:AddInlineFunction( "atanr", "n,n", "n", "math.atan2(@value 1, @value 2)" )
 Component:AddFunctionHelper( "atanr", "n,n", "Returns the inverse tangent of (number) and (number)." )
 
 Component:AddInlineFunction( "cosr", "n", "n", "math.cos(@value 1)" )

@@ -13,7 +13,7 @@ Component.Description = "Adds a 3d and a 2d vector object."
 
 local VectorObj = Component:AddClass( "vector", "v" )
 
-VectorObj:StringBuilder( function( Vector ) return string.format( "Vec( %i, %i, %i )", Vector.x, Vector.y, Vector.z ) end )
+VectorObj:StringBuilder( function( Vector ) return string.format( "Vec( %.2f, %.2f, %.2f )", Vector.x, Vector.y, Vector.z ) end )
 VectorObj:CanSerialize( true )
 VectorObj:DefaultAsLua( Vector(0, 0, 0) )
 
@@ -22,23 +22,29 @@ VectorObj:DefaultAsLua( Vector(0, 0, 0) )
    --- */
 
 if WireLib then
-  VectorObj:WireInput( "VECTOR" )
-  VectorObj:WireOutput( "VECTOR" )
-
-  VectorObj:WireLinkOutput( )
-  VectorObj:WireLinkInput( )
+   VectorObj:WireIO( "VECTOR", nil,
+      function(Value, context)
+          return Vector( Value[1] or 0, Value[2] or 0, Value[3] or 0 )
+      end)
 end
+
+/* --- --------------------------------------------------------------------------------
+  @: Sync
+   --- */
+
+VectorObj:NetWrite(net.WriteVector)
+VectorObj:NetRead(net.ReadVector)
 
 /* --- --------------------------------------------------------------------------------
 	  @: Logical and Comparison
    --- */
 
-Component:AddInlineOperator( "==", "v,v", "b", "(@value 1 == @value 2)" )
-Component:AddInlineOperator( "!=", "v,v", "b", "(@value 1 ~= @value 2)" )
-Component:AddInlineOperator( ">", "v,v", "b", "(@value 1 > @value 2)" )
-Component:AddInlineOperator( "<", "v,v", "b", "(@value 1 < @value 2)" )
-Component:AddInlineOperator( ">=", "v,v", "b", "(@value 1 >= @value 2)" )
-Component:AddInlineOperator( "<=", "v,v", "b", "(@value 1 <= @value 2)" )
+Component:AddInlineOperator( "==", "v,v", "b",  "(@value 1.x == @value 2.x && @value 1.y == @value 2.y && @value 1.z == @value 2.z)")
+Component:AddInlineOperator( "!=", "v,v", "b",  "(@value 1.x ~= @value 2.x || @value 1.y ~= @value 2.y || @value 1.z ~= @value 2.z)")
+Component:AddInlineOperator( ">", "v,v", "b",   "(@value 1.x > @value 2.x && @value 1.y > @value 2.y && @value 1.z > @value 2.z)")
+Component:AddInlineOperator( "<", "v,v", "b",   "(@value 1.x < @value 2.x && @value 1.y < @value 2.y && @value 1.z < @value 2.z)")
+Component:AddInlineOperator( ">=", "v,v", "b",  "(@value 1.x >= @value 2.x && @value 1.y >= @value 2.y && @value 1.z >= @value 2.z)")
+Component:AddInlineOperator( "<=", "v,v", "b",  "(@value 1.x <= @value 2.x && @value 1.y <= @value 2.y && @value 1.z <= @value 2.z)")
 
 /* --- --------------------------------------------------------------------------------
 	  @: Arithmetic
@@ -86,7 +92,7 @@ VectorObj:AddVMOperator( "=", "n,v", "", function( Context, Trace, MemRef, Value
    local Prev = Context.Memory[MemRef] or Vector( 0, 0, 0 )
 
    Context.Memory[MemRef] = Value
-   Context.Delta[MemRef] = Prev - Value
+   Context.Delta[MemRef] = Prev - (Value or Vector(0, 0, 0))
    Context.Trigger[MemRef] = Context.Trigger[MemRef] or ( Prev ~= Value )
 end )
 
@@ -122,17 +128,30 @@ Component:AddInlineFunction( "getZ", "v:", "n", "@value 1.z" )
 Component:AddFunctionHelper( "getZ", "v:", "Gets the Z value of a vector" )
 
 --SETTERS
-Component:AddPreparedFunction( "setX", "v:n", "", "@value 1.x = @value 2" )
+Component:AddPreparedFunction( "setX", "v:n", "v", "@value 1.x = @value 2", "(@value 1)" )
 Component:AddFunctionHelper( "setX", "v:n", "Sets the X value of a vector" )
 
-Component:AddPreparedFunction( "setY", "v:n", "", "@value 1.y = @value 2" )
+Component:AddPreparedFunction( "setY", "v:n", "v", "@value 1.y = @value 2", "(@value 1)" )
 Component:AddFunctionHelper( "setY", "v:n", "Sets the Y value of a vector" )
 
-Component:AddPreparedFunction( "setZ", "v:n", "", "@value 1.z = @value 2" )
+Component:AddPreparedFunction( "setZ", "v:n", "v", "@value 1.z = @value 2", "(@value 1)" )
 Component:AddFunctionHelper( "setZ", "v:n", "Sets the Z value of a vector" )
 
-Component:AddPreparedFunction( "set", "v:v", "", "@value 1:Set( @value 2 )")
+Component:AddPreparedFunction( "set", "v:v", "v", "@value 1:Set( @value 2 )", "(@value 1)")
 Component:AddFunctionHelper( "set", "v:v", "Sets a vector to the value of another vector" )
+
+--Changers
+Component:AddPreparedFunction( "withX", "v:n", "v", "Vector(@value 2, @value 1.y, @value 1.z)" )
+Component:AddFunctionHelper( "withX", "v:n", "Returns the value of the vector with the value of x changed." )
+
+Component:AddPreparedFunction( "withY", "v:n", "v", "Vector(@value 1.x, @value 2, @value 1.z)" )
+Component:AddFunctionHelper( "withY", "v:n", "Returns the value of the vector with the value of y changed." )
+
+Component:AddPreparedFunction( "withZ", "v:n", "v", "Vector(@value 1.x, @value 1.y, @value 2)" )
+Component:AddFunctionHelper( "withZ", "v:n", "Returns the value of the vector with the value of z changed." )
+
+Component:AddPreparedFunction( "clone", "v:", "v", "Vector(@value 1.x, @value 1.y, @value 1.z)" )
+Component:AddFunctionHelper( "clone", "v:", "Returns a clone of the vector." )
 
 /* --- --------------------------------------------------------------------------------
     @: Rotate
@@ -154,7 +173,7 @@ Component:AddVMFunction( "rotateAroundAxis", "v:v,n", "v",
     return Vector(
       (Cos + (x ^ 2) * (1 - Cos)) * Pos.x + (x * y * (1 - Cos) - z * Sin) * Pos.y + (x * z * (1 - Cos) + y * Sin) * Pos.z,
       (y * x* (1-Cos) + z * Sin) * Pos.x + (Cos + (y ^ 2)*(1 - Cos)) * Pos.y + (y * z * (1 - Cos) - x * Sin) * Pos.z,
-      (z * x * (1-Cos) - y * Sin) * Pos.x + (z*y*(1 - ca) + x * Sin) * Pos.y + (Cos + (z ^ 2)*(1 - Cos)) * Pos.z
+      (z * x * (1-Cos) - y * Sin) * Pos.x + (z*y*(1 - Cos) + x * Sin) * Pos.y + (Cos + (z ^ 2)*(1 - Cos)) * Pos.z
     )
   end )
 
@@ -175,7 +194,7 @@ Component:AddFunctionHelper( "angleEx", "v:v", "Returns the angle between two ve
     @: Useful
    --- */
 
-Component:AddInlineFunction( "cross", "v:v", "n", "@value 1:Cross( @value 2 )" )
+Component:AddInlineFunction( "cross", "v:v", "v", "@value 1:Cross( @value 2 )" )
 Component:AddFunctionHelper( "cross", "v:v", "Calculates the cross product of the 2 vectors (The vectors that defined the normal created by the 2 vectors). " )
 
 Component:AddInlineFunction( "distance", "v:v", "n", "@value 1:Distance( @value 2 )" )
@@ -232,6 +251,11 @@ Component:AddFunctionHelper( "clamp", "v:n,n", "Clamps a vector." )
 Component:AddInlineFunction( "clamp", "v:v,v", "v", "Vector(math.Clamp(@value 1.x, @value 2.x, @value 3.x), math.Clamp(@value 1.y, @value 2.y, @value 3.y), math.Clamp(@value 1.z, @value 2.z, @value 3.z))" )
 Component:AddFunctionHelper( "clamp", "v:v,v", "Clamps a vector." )
 
+Component:AddInlineFunction( "mix", "v,v,n", "v", "Vector(@value 1.x * @value 3 + @value 2.x * (1-@value 3), @value 1.y * @value 3 + @value 2.y * (1-@value 3), @value 1.z * @value 3 + @value 2.z * (1-@value 3))" )
+Component:AddFunctionHelper( "mix", "v,v,n", "Returns the mix of 2 vectors." )
+
+Component:AddInlineFunction( "inrange", "v,v,v", "b", "((@value 1.x > @value 2.x and @value 1.x < @value 3.x) and (@value 1.y > @value 2.y and @value 1.y < @value 3.y) and (@value 1.z > @value 2.z and @value 1.z < @value 3.z))")
+Component:AddFunctionHelper( "inrange", "v,v,v", "Returns if the first vector is inrange of the other 2 vectors." )
 
 /* --- --------------------------------------------------------------------------------
     @: Headings
@@ -279,7 +303,7 @@ Component:AddFunctionHelper( "toLocalAxis", "e:v", "Converts a world axis to a l
    --- */
 
 Component:AddInlineFunction( "intersectRayWithOBB", "v,v,v,a,v,v", "v", "$util.IntersectRayWithOBB( @value 1, @value 2, @value 3, @value 4, @value 5, @value 6 )")
-Component:AddInlineFunction( "intersectRayWithPlane", "v,v,v,v", "n", "$util.IntersectRayWithPlane( @value 1, @value 2, @value 3, @value 4 )")
+Component:AddInlineFunction( "intersectRayWithPlane", "v,v,v,v", "v", "$util.IntersectRayWithPlane( @value 1, @value 2, @value 3, @value 4 )")
 
 Component:AddFunctionHelper( "intersectRayWithOBB", "v,v,v,a,v,v", "Performs a ray box intersection and returns position, (vector RayS tart, vector Ray Direction, vector Box Origin, angle BoxAngles, vector BoxMin, vector BoxMax)." )
 Component:AddFunctionHelper( "intersectRayWithPlane", "v,v,v,v", "Performs a ray plane intersection and returns the hit position, (vector Ray Origin, vector Ray Direction, vector Plane Position, vector Plane Normal)." )
@@ -301,18 +325,27 @@ Vector2Obj:CanSerialize( true )
    --- */
 
 if WireLib then
-	Vector2Obj:WireInput( "VECTOR2", function( Context, MemoryRef, InValue )
-		Context.Memory[ MemoryRef ] = Vector2(InValue[1], InValue[2])
-	end )
-
-	Vector2Obj:WireOutput( "VECTOR2", function( Context, MemoryRef )
-		local Val = Context.Memory[ MemoryRef ]
-		return {Val.x, Val.y}
-	end )
-
-  Vector2Obj:WireLinkOutput( function( Value ) return { Value.x, Value.y } end )
-  Vector2Obj:WireLinkInput( function( Value ) return Vector2( Value[1], Value[2] ) end )
+    Vector2Obj:WireIO("VECTOR2",
+        function(Value, Context) -- To Wire
+            return {Value.x, Value.y}
+        end, function(Value, context) -- From Wire
+            return Vector2(Value[1], Value[2])
+        end)
 end
+
+/* --- --------------------------------------------------------------------------------
+  @: Sync
+   --- */
+
+Vector2Obj:NetWrite(function(v2)
+  net.WriteFloat(v2.x)
+  net.WriteFloat(v2.y)
+end)
+
+Vector2Obj:NetRead(function()
+  return Vector2(net.ReadFloat(), net.ReadFloat())
+end)
+
 
 /* --- --------------------------------------------------------------------------------
 	  @: Logical and Comparison
@@ -381,7 +414,7 @@ Vector2Obj:AddVMOperator( "=", "n,v2", "", function( Context, Trace, MemRef, Val
    local Prev = Context.Memory[MemRef] or Vector2( 0, 0 )
    
    Context.Memory[MemRef] = Value
-   Context.Delta[MemRef] = Prev - Value
+   Context.Delta[MemRef] = Prev - (Value or Vector2(0, 0))
    Context.Trigger[MemRef] = Context.Trigger[MemRef] or ( Prev ~= Value )
 end )
 
@@ -420,16 +453,26 @@ Component:AddFunctionHelper( "setX", "v2:n", "Sets the X value of a vector2" )
 Component:AddPreparedFunction( "setY", "v2:n", "", "@value 1.y = @value 2" )
 Component:AddFunctionHelper( "setY", "v2:n", "Sets the Y value of a vector2" )
 
+--Changers
+Component:AddPreparedFunction( "withX", "v:n", "v", "Vector2(@value 2, @value 1.y)" )
+Component:AddFunctionHelper( "withX", "v:n", "Returns the value of the vector2 with the value of x changed." )
+
+Component:AddPreparedFunction( "withY", "v:n", "v", "Vector2(@value 1.x, @value 2)" )
+Component:AddFunctionHelper( "withY", "v:n", "Returns the value of the vector2 with the value of y changed." )
+
+Component:AddPreparedFunction( "clone", "v2:", "v2", "Vector2(@value 1.x, @value 1.y)" )
+Component:AddFunctionHelper( "clone", "v2:", "Returns a clone of the vector2." )
+
 /* --- --------------------------------------------------------------------------------
     @: Functions
    --- */
 
 Component:AddInlineFunction( "dot", "v2:v2", "n", "@value 1:Dot(@value 2)" )
 Component:AddFunctionHelper( "dot", "v2:v2", "Returns the dot (scalar) product of vector2s." )
-Component:AddInlineFunction( "normal", "v2:v2", "v2", "@value 1:Normalize(@value 2)" )
-Component:AddFunctionHelper( "normal", "v2:v2", "Returns the normalized product of vector2s." )
-Component:AddInlineFunction( "length", "v2:v2", "n", "@value 1:Length(@value 2)" )
-Component:AddFunctionHelper( "length", "v2:v2", "Returns the length product of vector2s." )
+Component:AddInlineFunction( "normal", "v2:", "v2", "@value 1:Normalize()" )
+Component:AddFunctionHelper( "normal", "v2:", "Returns the normalized product of vector2." )
+Component:AddInlineFunction( "length", "v2:", "n", "@value 1:Length()" )
+Component:AddFunctionHelper( "length", "v2:", "Returns the length product of vector2." )
 Component:AddInlineFunction( "cross", "v2:v2", "v2", "@value 1:Cross(@value 2)" )
 Component:AddFunctionHelper( "cross", "v2:v2", "Returns the cross/wedge product of vector2s." )
 Component:AddInlineFunction( "distance", "v2:v2", "n", "@value 1:Distance(@value 2)" )
@@ -455,6 +498,12 @@ Component:AddFunctionHelper( "abs", "v2:", "Returns vector with absolute values.
 
 Component:AddInlineFunction( "insideAABox", "v2:v2,v2", "b", "(!(@value 1.x < @value 2.x or @value 1.x > @value 3.x or @value 1.y < @value 2.y or @value 1.y > @value 3.y))" )
 Component:AddFunctionHelper( "insideAABox", "v2:v2,v2", "Returns whenever the given vector is in a box created by the 2 other vectors." )
+
+Component:AddInlineFunction( "rotate", "v2:n", "v2", "@value 1:Rotate( @value 2 )" )
+Component:AddFunctionHelper( "rotate", "v2:n", "Rotates the vector2 by the given degrees." )
+
+Component:AddInlineFunction( "inrange", "v2,v2,v2", "b", "((@value 1.x > @value 2.x and @value 1.x < @value 3.x) and (@value 1.y > @value 2.y and @value 1.y < @value 3.y))")
+Component:AddFunctionHelper( "inrange", "v2,v2,v2", "Returns if the first vector2 is inrange of the other 2 vector2s." )
 
 /* --- --------------------------------------------------------------------------------
     @: Loops

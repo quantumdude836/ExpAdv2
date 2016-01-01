@@ -546,7 +546,7 @@ local SpecialCase = {
 
 function PANEL:_OnKeyCodeTyped( code ) 
 	self.Blink = RealTime( )
-	
+
 	local alt = input_IsKeyDown( KEY_LALT ) or input_IsKeyDown( KEY_RALT )
 	if alt then return end
 	
@@ -972,7 +972,8 @@ function PANEL:_OnTextChanged( )
 	local text = self.TextEntry:GetValue( )
 	self.TextEntry:SetText( "" )
 
-	if input_IsKeyDown( KEY_BACKQUOTE ) and !input_IsKeyDown( KEY_LALT ) then return end
+	//Who ever added this linek BROKE @ and ' for BRITISH USERS!
+	//if input_IsKeyDown( KEY_BACKQUOTE ) and !input_IsKeyDown( KEY_LALT ) then return end
 	
 	if ( input_IsKeyDown( KEY_LCONTROL ) or input_IsKeyDown( KEY_RCONTROL ) ) and not ( input_IsKeyDown( KEY_LALT ) or input_IsKeyDown( KEY_RALT ) ) then
 		-- ctrl+[shift+]key
@@ -1171,63 +1172,118 @@ end
 /*---------------------------------------------------------------------------
 Paint stuff
 ---------------------------------------------------------------------------*/
-
-local function FindValidLines( Rows ) 
-	local Out = { } 
-	local MultilineComment = false 
+function PANEL:FindValidLines( ) 
+	local ValidLines = { } 
+	local bMultilineComment = false 
+	local bMultilineString = false 
 	local Row, Char = 1, 0 
 	
-	while Row < #Rows do 
-		local Line = Rows[Row]
+	while Row <= #self.Rows do 
+		local sStringType = false 
+		local Line = self.Rows[Row]
+		
 		while Char < #Line do 
 			Char = Char + 1
 			local Text = Line[Char]
 			
-			if MultilineComment then 
+			if bMultilineComment then 
 				if Text == "/" and Line[Char-1] == "*" then 
-					if Out[Row] then 
-						Out[Row] = Out[Row] or { 0, 0 } 
-						Out[Row][2] = Char 
-					else 
-						Out[Row] = { 1, Char }
-					end 
-					MultilineComment = false 
-					continue
-				else 
-					Out[Row] = Out[Row] or false
-					continue 
+					ValidLines[#ValidLines][2] = { Row, Char }
+					bMultilineComment = false 
 				end 
+				continue 
+			end 
+			
+			if bMultilineString then 
+				if Text == "'" and Line[Char-1] ~= "\\" then 
+					ValidLines[#ValidLines][2] = { Row, Char }
+					bMultilineString = nil 
+				end 
+				continue 
+			end 
+			
+			if sStringType then 
+				if Text == sStringType and Line[Char-1] ~= "\\" then 
+					ValidLines[#ValidLines][2] = { Row, Char }
+					sStringType = nil 
+				end 
+				continue 
 			end 
 			
 			if Text == "/" then 
 				if Line[Char+1] == "/" then // SingleLine comment
-					Out[Row] = { Char, #Line + 1 }
+					ValidLines[#ValidLines+1] = { { Row, Char }, { Row, #Line + 1 } }
 					break 
 				elseif Line[Char+1] == "*" then // MultiLine Comment
-					MultilineComment = true 
-					Out[Row] = { Char, #Line + 1 }
+					bMultilineComment = true 
+					ValidLines[#ValidLines+1] = { { Row, Char }, { Row, #Line + 1 } }
 					continue 
 				end 
 			end 
-		end 
-		if not Out[Row] and Out[Row] ~= false then 
-			Out[Row] = true 
-		end 
 			
+			if Text == "'" then 
+				if Line[Char-1] ~= "\\" then 
+					bMultilineString = true 
+					ValidLines[#ValidLines+1] = { { Row, Char }, { Row, #Line + 1 } }
+				end 
+				continue 
+			end 
+			
+			if Text == '"' then 
+				if Line[Char-1] ~= "\\" then 
+					sStringType = Text 
+					ValidLines[#ValidLines+1] = { { Row, Char }, { Row, #Line + 1 } }
+				end 
+			end 
+		end 
+		
 		Char = 0 
 		Row = Row + 1 
-	end  
+	end 
 	
-	return Out 
+	return function( nLine, nStart ) 
+		for i = 1, #ValidLines do
+			local tStart, tEnd = ValidLines[i][1], ValidLines[i][2]
+			
+			if tStart[1] < nLine and tEnd[1] > nLine then 
+				return false 
+			end 
+			
+			if tStart[1] == tEnd[1] then
+				if tStart[1] == nLine then 
+			 		if tStart[2] <= nStart and tEnd[2] >= nStart then 
+			 			return false 
+			 		end 
+			 	end 
+			else 
+			 	if tStart[1] == nLine then 
+			 		if tStart[2] <= nStart then 
+			 			return false 
+			 		end 
+			 	elseif tEnd[1] == nLine then 
+			 		if tEnd[2] >= nStart then 
+			 			return false 
+			 		end 
+			 	end 
+			end 
+		end
+		
+		return true 
+	end 
 end 
 
-local function FindMatchingParam( Rows, Row, Char ) 
-	if !Rows[Row] then return false end 
-	local Param, EnterParam, ExitParam = ParamPairs[Rows[Row][Char]] 
+function PANEL:FindMatchingParam( Row, Char ) 
+	if !self.Rows[Row] then return false end 
+	local Param, EnterParam, ExitParam = ParamPairs[self.Rows[Row][Char]] 
+	
+	if ParamPairs[self.Rows[Row][Char-1]] and not ParamPairs[self.Rows[Row][Char-1]][3] then 
+		Char = Char - 1
+		Param = ParamPairs[self.Rows[Row][Char]] 
+	end 
 	
 	if not Param then 
 		Char = Char - 1
-		Param = ParamPairs[Rows[Row][Char]] 
+		Param = ParamPairs[self.Rows[Row][Char]] 
 	end 
 	
 	if not Param then return false end 
@@ -1236,18 +1292,17 @@ local function FindMatchingParam( Rows, Row, Char )
 	ExitParam = Param[2]
 	
 	local line, pos, level = Row, Char, 0 
-	local ValidLines = FindValidLines( Rows ) 
+	local ValidLines = self:FindValidLines( ) 
 	
-	if type( ValidLines[line] ) == "table" and ValidLines[line][1] <= pos and ValidLines[line][2] >= pos then return false end 
+	if not ValidLines( line, pos ) then return false end 
 	
 	if Param[3] then -- Look forward 
-		while line < #Rows do 
-			while pos < #Rows[line] do 
+		while line <= #self.Rows do 
+			while pos <= #self.Rows[line] do 
 				pos = pos + 1 
-				local Text = Rows[line][pos] 
+				local Text = self.Rows[line][pos] 
 				
-				if not ValidLines[line] then break end 
-				if type( ValidLines[line] ) == "table" and ValidLines[line][1] <= pos and ValidLines[line][2] >= pos then continue end 
+				if not ValidLines( line, pos ) then continue end 
 				
 				if Text == EnterParam then 
 					level = level + 1 
@@ -1266,10 +1321,9 @@ local function FindMatchingParam( Rows, Row, Char )
 		while line > 0 do 
 			while pos > 0 do 
 				pos = pos - 1 
-				local Text = Rows[line][pos] 
+				local Text = self.Rows[line][pos] 
 				
-				if not ValidLines[line] then break end 
-				if type( ValidLines[line] ) == "table" and ValidLines[line][1] <= pos and ValidLines[line][2] >= pos then continue end 
+				if not ValidLines( line, pos ) then continue end 
 				
 				if Text == EnterParam then 
 					level = level + 1 
@@ -1282,7 +1336,7 @@ local function FindMatchingParam( Rows, Row, Char )
 				end 
 			end 
 			line = line - 1 
-			pos = #(Rows[line] or "") + 1
+			pos = #(self.Rows[line] or "") + 1
 		end 
 	end 
 	
@@ -1354,7 +1408,7 @@ function PANEL:DrawText( w, h )
 	surface_SetDrawColor( 0, 0, 0, 255 )
 	surface_DrawRect( self.BookmarkWidth + self.LineNumberWidth + self.FoldingWidth, 0, self:GetWide( ) - ( self.BookmarkWidth + self.LineNumberWidth + self.FoldingWidth ), self:GetTall( ) )
 	
-	self.Params = FindMatchingParam( self.Rows, self.Caret.x, self.Caret.y ) 
+	self.Params = self:FindMatchingParam( self.Caret.x, self.Caret.y ) 
 	
 	for i = 1, #self.Rows do
 		if self.Bookmarks[i] and ValidPanel( self.Bookmarks[i] ) then 
@@ -1432,11 +1486,9 @@ function PANEL:PaintCursor( Caret )
 	end
 end 
 
-function PANEL:PaintSelection( selection )
+function PANEL:PaintSelection( selection, color )
 	local start, stop = self:MakeSelection( selection )
-
 	if ! self:PositionExists( start ) or ! self:PositionExists( stop ) then return end
-
 	local line, char = start.x, start.y 
 	local endline, endchar = stop.x, stop.y 
 	
@@ -1446,13 +1498,17 @@ function PANEL:PaintSelection( selection )
 	if char < 0 then char = 0 end
 	if endchar < 0 then endchar = 0 end
 	
-
 	for Row = line, endline do 
 		if Row > #self.Rows then break end
 		local length = #self.Rows[Row] - self.Scroll.y + 1
 		local LinePos = Row - self.Scroll.x
 		
-		surface_SetDrawColor( 0, 0, 160, 255 )
+		if color then 
+			surface_SetDrawColor( color )
+		else 
+			surface_SetDrawColor( 0, 0, 160, 255 )
+		end 
+		
 		if Row == line and line == endline then 
 			surface_DrawRect( 
 				char * self.FontWidth + self.BookmarkWidth + self.LineNumberWidth + self.FoldingWidth, 
@@ -1499,16 +1555,9 @@ function PANEL:PaintRowUnderlay( Row, LinePos )
 			Row = Row:lower( )
 		end
 		
-		surface_SetDrawColor( 128, 255, 0, 50 )
-		
 		pcall( function( ) -- For now untill we fix the invalid pattern bug.
 			for overS, overE in string_gmatch( Row, "()" .. FindQuery .. "()" ) do
-				surface_DrawRect( 
-					( overS - 1 ) * self.FontWidth + self.BookmarkWidth + self.LineNumberWidth + self.FoldingWidth, 
-					( LinePos ) * self.FontHeight, 
-					self.FontWidth * ( overE - overS ), 
-					self.FontHeight 
-				)
+				self:PaintSelection( { Vector2(Row, overS), Vector2(Row, overE) }, Color( 128, 255, 0, 50 ))
 			end
 		end )
 	end
@@ -1523,80 +1572,21 @@ function PANEL:PaintRowUnderlay( Row, LinePos )
 			Row = Row:lower( )
 		end
 		
-		surface_SetDrawColor( 255, 128, 0, 50 )
-		
 		pcall( function( ) -- For now untill we fix the invalid pattern bug.
 			for overS, overE in string_gmatch( Row, "()" .. ReplaceWith .. "()" ) do
-				surface_DrawRect( 
-					( overS - 1 ) * self.FontWidth + self.BookmarkWidth + self.LineNumberWidth + self.FoldingWidth, 
-					( LinePos ) * self.FontHeight, 
-					self.FontWidth * ( overE - overS ), 
-					self.FontHeight 
-				)
+				self:PaintSelection( { Vector2(Row, overS), Vector2(Row, overE) }, Color( 255, 128, 0, 50 ))
 			end
 		end )
 	end
 
 	if self:HasSelection( ) then 
-		-- Section Reference Highlighting
 		local overHighlight = self:HiglightedWord( )
 		
 		if overHighlight then
-			surface_SetDrawColor( 0, 255, 128, 50 )
-			
 			for overS, overE in string_gmatch( self.Rows[ Row ], "()" .. overHighlight .. "()" ) do
-				surface_DrawRect( 
-					( overS - 1 ) * self.FontWidth + self.BookmarkWidth + self.LineNumberWidth + self.FoldingWidth, 
-					( LinePos ) * self.FontHeight, 
-					self.FontWidth * ( overE - overS ), 
-					self.FontHeight 
-				)
+				self:PaintSelection( { Vector2(Row, overS), Vector2(Row, overE) }, Color( 0, 255, 128, 50 ))
 			end
 		end
-		--[[
-		local start, stop = self:MakeSelection( self:Selection( ) )
-		local line, char = start.x, start.y 
-		local endline, endchar = stop.x, stop.y 
-		
-		char = char - self.Scroll.y
-		endchar = endchar - self.Scroll.y
-
-		if char < 0 then char = 0 end
-		if endchar < 0 then endchar = 0 end
-		
-		local length = self.Rows[Row]:len( ) - self.Scroll.y + 1
-		
-		surface_SetDrawColor( 0, 0, 160, 255 )
-		if Row == line and line == endline then 
-			surface_DrawRect( 
-				char * self.FontWidth + self.BookmarkWidth + self.LineNumberWidth + self.FoldingWidth, 
-				( LinePos ) * self.FontHeight, 
-				self.FontWidth * ( endchar - char ), 
-				self.FontHeight 
-			 )
-		elseif Row == line then 
-			surface_DrawRect( 
-				char * self.FontWidth + self.BookmarkWidth + self.LineNumberWidth + self.FoldingWidth, 
-				( LinePos ) * self.FontHeight, 
-				self.FontWidth * math_min( self.Size.y - char + 2, length - char + 1 ), 
-				self.FontHeight 
-			 )
-		elseif Row == endline then 
-			surface_DrawRect( 
-				self.BookmarkWidth + self.LineNumberWidth + self.FoldingWidth, 
-				( LinePos ) * self.FontHeight, 
-				self.FontWidth * endchar,  
-				self.FontHeight 
-			 ) 
-		elseif Row > line and Row < endline then 
-			surface_DrawRect( 
-				self.BookmarkWidth + self.LineNumberWidth + self.FoldingWidth, 
-				( LinePos ) * self.FontHeight, 
-				self.FontWidth * math_min( self.Size.y + 2, length + 1 ),  
-				self.FontHeight 
-			 )
-		end
-		]]
 	elseif self.Params then 
 		if self.Params[1].x == Row then 
 			surface_SetDrawColor( 160, 160, 160, 255 )

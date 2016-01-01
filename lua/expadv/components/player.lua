@@ -155,17 +155,94 @@ Component:AddFunctionHelper("voiceVolume", "ply:", "Returns the volume of the pl
 	@: Player Events
    --- */
 
+EXPADV.SharedOperators( )
+
+Component:AddPreparedFunction( "playerByName", "s,b", "ply",
+[[for _, Ply in pairs($player.GetAll( )) do
+	if Ply:Name( ) == @value 1 or ( !@value 2 and Ply:Name( ):lower( ):find( @value 1:lower( ) ) ) then
+		@define result = Ply
+		break
+	end
+end
+]], "(@result or Entity(0))" )
+
+Component:AddFunctionHelper("playerByName", "s,b", "Returns the player with the given name, boolean is exact match.")
+
+/* --- --------------------------------------------------------------------------------
+	@: Weapon functions
+   --- */
+
+EXPADV.SharedOperators( )
+
+Component:AddPreparedFunction("weapon", "e:", "e", [[
+if IsValid(@value 1) and (@value 1:IsPlayer() or @value 1:IsNPC()) then
+	@define wep = @value 1:GetActiveWeapon()
+end
+]], "(@wep or Entity(0))")
+
+Component:AddPreparedFunction("weapon", "e:s", "e", [[
+if IsValid(@value 1) and (@value 1:IsPlayer() or @value 1:IsNPC()) then
+	@define wep = @value 1:GetActiveWeapon(@value 2)
+end
+]], "(@wep or Entity(0))")
+
+Component:AddInlineFunction( "primaryAmmoType", "e:", "s", "((@value 1:IsValid() and @value 1:IsWeapon()) and @value 1:GetPrimaryAmmoType() or \"\")" )
+
+Component:AddInlineFunction( "secondaryAmmoType", "e:", "s", "((@value 1:IsValid() and @value 1:IsWeapon()) and @value 1:GetSecondaryAmmoType() or \"\")" )
+
+Component:AddPreparedFunction("ammoCount", "e:s", "n", [[
+if IsValid(@value 1) and @value 1:IsPlayer() then
+	@define count = @value 1:GetAmmoCount(@value 2)
+end
+]], "(@count or 0)")
+
+Component:AddInlineFunction( "clip1", "e:", "n", "((@value 1:IsValid() and @value 1:IsWeapon()) and @value 1:Clip1() or 0)" )
+Component:AddInlineFunction( "clip2", "e:", "n", "((@value 1:IsValid() and @value 1:IsWeapon()) and @value 1:Clip2() or 0)" )
+
+Component:AddVMFunction( "tool", "ply:", "s", function(Context, Trace, Ply)
+	if !IsValid(Ply) or !Ply:IsPlayer() then
+		return ""
+	end
+
+	local Wep = Ply:GetActiveWeapon()
+	
+	if !IsValid(Wep) or Wep:GetClass() ~= "gmod_tool" then
+		return ""
+	end
+
+	return Wep.Mode
+end)
+
+
+/* --- --------------------------------------------------------------------------------
+	@: Player Events
+   --- */
+
 EXPADV.SharedEvents( )
 Component:AddEvent( "playerNoClip", "ply,b", "" )
+EXPADV.AddEventHelper("playerNoClip", "Called when a player starts or stops noclipping.")
+
 Component:AddEvent( "playerEnterVehicle", "ply,e,n", "" )
+EXPADV.AddEventHelper("playerEnterVehicle", "Called when a player enters a vehicle the 3rd argument is the players role.")
+
+Component:AddEvent( "playerChat", "ply,s,b", "s" )
+EXPADV.AddEventHelper("playerChat", "Called when a player talks in chat the 3rd arument is teamchat and your can return a string to change the message.")
 
 EXPADV.ServerEvents( )
 Component:AddEvent( "playerSpawn", "ply", "" )
+EXPADV.AddEventHelper("playerSpawn", "Called when a player respawns.")
+
 Component:AddEvent( "playerJoin", "ply", "" )
+EXPADV.AddEventHelper("playerJoin", "Called when a player joins the server.")
+
 Component:AddEvent( "playerQuit", "ply", "" )
-Component:AddEvent( "playerChat", "ply,s,b", "s" )
+EXPADV.AddEventHelper("playerQuit", "Called when a player leaves the server.")
+
 Component:AddEvent( "playerSpray", "ply", "" )
+EXPADV.AddEventHelper("playerSpray", "Called when a player sprays.")
+
 Component:AddEvent( "playerExitVehicle", "ply,e", "" )
+EXPADV.AddEventHelper("playerExitVehicle", "Called when a player exits a vehicle.")
 
 /* --- --------------------------------------------------------------------------------
 	@: Server Hooks
@@ -207,7 +284,9 @@ end
    --- */
 
 if CLIENT then
-
+	hook.Add( "OnPlayerChat", "Expav.Event", function( Player, Text, Team )
+		EXPADV.CallEvent( "playerChat", Player, Text, Team )
+	end )
 end
 
 /* --- --------------------------------------------------------------------------------

@@ -26,7 +26,7 @@ function ENT:BuildInputs( Cells, Ports )
 
 	for Variable, Reference in pairs( Ports ) do
 		local Cell = Cells[ Reference ]
-		Unsorted[ #Unsorted + 1 ] = { Variable, Cell.ClassObj.Wire_In_Type }
+		Unsorted[ #Unsorted + 1 ] = { Variable, Cell.ClassObj.Wire_in_type }
 	end
 
 	table.sort( Unsorted, SortPorts )
@@ -49,16 +49,11 @@ end
 
 
 function ENT:BuildOutputs( Cells, Ports )
-	local OutClick = { }
 	local Unsorted = { }
 
 	for Variable, Reference in pairs( Ports ) do
 		local Cell = Cells[ Reference ]
-		Unsorted[ #Unsorted + 1 ] = { Variable, Cell.ClassObj.Wire_Out_Type }
-
-		if Cell.ClassObj.HasUpdateCheck then
-			OutClick[ Reference ] = Variable
-		end
+		Unsorted[ #Unsorted + 1 ] = { Variable, Cell.ClassObj.Wire_out_type }
 	end
 
 	table.sort( Unsorted, SortPorts )
@@ -75,7 +70,6 @@ function ENT:BuildOutputs( Cells, Ports )
 	local OldPorts = self.Outputs
 
 	self.OutPorts = Ports
-	self.OutClick = OutClickt
 	self.DupeOutPorts = { Names, Types }
 
 	self.Outputs = WireLib.AdjustSpecialOutputs( self, Names, Types )
@@ -95,51 +89,53 @@ function ENT:LoadFromInputs( Cells )
 		if !MemRef then continue end
 
 		local Class = Cells[MemRef].ClassObj
-		if Port.Type ~= Class.Wire_In_Type then continue end
+		if Port.Type ~= Class.Wire_in_type then continue end
 
-		Class.Wire_In_Util( Context, MemRef, Port.Value )
+		Context.Memory[MemRef] = EXPADV.ConvertFromWire(Class.Short, Port.Value, Context)
 	end
 end
 
 function ENT:TriggerInput( Key, Value )
 	local Context = self.Context
-	if !self.Context then return end
+	if !Context then return end
 
 	local Reference = self.InPorts[ Key ]
 	local Cell = self.Cells[ Reference ]
-
 	if !Cell then return end
 
-	Cell.ClassObj.Wire_In_Util( self.Context, Reference, Value )
+	Context.Memory[Reference] = EXPADV.ConvertFromWire(Cell.ClassObj.Short, Value, Context)
+	
 	Context.Trigger[ Reference ] = true
 
 	self:CallEvent( "trigger", Key, Cell.ClassObj.Name )
 
-	Context.Trigger[ Reference ] = false
+	Context.Trigger[Reference] = false
+
+	if Cell.Client and Cell.ClassObj.ReadFromNet then
+		self.SyncQueue[Reference] = true
+		self.SyncQueued = true
+	end
 end
 
 function ENT:TriggerOutputs( )
-		local Context = self.Context
-		if !self.Context then return end
+	local Context = self.Context
+	if !Context then return end
 
-		local Cells = self.Cells
+	local Cells = self.Cells
 
-		for Name, Reference in pairs( self.OutPorts ) do
-			local Class = Cells[ Reference ].ClassObj
+	for Name, MemRef in pairs( self.OutPorts ) do
+		local Class = Cells[MemRef].ClassObj
+		local Value = Context.Memory[MemRef]
 
-			if Context.Memory[ Reference ] == nil then
-				continue
-			elseif Context.Trigger[ Reference ] then
-				local Value = Class.Wire_Out_Util( Context, Reference )
-				WireLib.TriggerOutput( self, Name, Value )
-			elseif Context.OutClick[ Reference ] then
-				local Val = Context.Memory[ Reference ]
-
-				if Val and Val.HasChanged then
-					Val.HasChanged = nil
-					local Value = Class.Wire_Out_Util( Context, Reference )
-					WireLib.TriggerOutput( self, Name, Value )
-				end
-			end
+		if Value == nil then continue end
+		//TODO: Possibly output default Value here :D
+			
+		if Context.Trigger[MemRef] or Context.TrigMan[Value] then
+			local WireVal = EXPADV.ConvertToWire(Class.Short, Value, Context)
+			
+			WireLib.TriggerOutput( self, Name, WireVal )
 		end
+	end
+
+	Context.TrigMan = {}
 end

@@ -9,82 +9,95 @@ local Component = EXPADV.AddComponent( "hologram" , true )
 Component.Author = "Rusketh"
 Component.Description = "Adds a holographic object, that is visible in world and can be manipulated to suit any purpose."
 
+
 /* --- --------------------------------------------------------------------------------
-	@: Settings
+	@: Holo Manager
    --- */
 
-Component:CreateSetting( "max", 250 )
-Component:CreateSetting( "rate", 50 )
-Component:CreateSetting( "clips", 5 )
-Component:CreateSetting( "size", 50 )
-Component:CreateSetting( "model_any", 1 )
+	-- Counters
+	local RateCounter = {}
+	local PlayerCounter = {}
+
+   -- Settings
+	expadv_hologram_max = Component:CreateSetting("max", 250)
+	expadv_hologram_rate = Component:CreateSetting("rate", 50)
+	expadv_hologram_clips = Component:CreateSetting("clips", 5)
+	expadv_hologram_size = Component:CreateSetting("size", 50)
+	expadv_hologram_any = Component:CreateSetting("model_any", 1)
+
+	timer.Create("expadv.hologram", 1, 0, function()
+		expadv_hologram_max = Component:ReadSetting("max", 250)
+		expadv_hologram_rate = Component:ReadSetting("rate", 50)
+		expadv_hologram_clips = Component:ReadSetting("clips", 5)
+		expadv_hologram_size = Component:ReadSetting("size", 50)
+		expadv_hologram_any = Component:ReadSetting("model_any", 1)
+		RateCounter = {}
+	end)
+
+	-- Balancing
+	function Component:OnRegisterContext(ctx)
+		ctx.Data.Holos = {}
+		ctx.Data.Holograms = {}
+
+		if IsValid(ctx.player) then
+			RateCounter[ctx.player] = RateCounter[ctx.player] or 0
+			PlayerCounter[ctx.player] = PlayerCounter[ctx.player] or 0
+		end
+	end
+
+	function Component:OnShutDown(ctx)
+		if ctx.Data.Holos then
+			for _, holo in pairs(ctx.Data.Holos) do
+				if IsValid(holo) then holo:Remove() end
+			end
+
+			ctx.Data.Holos = nil
+		end
+	end
+
+	function Component:OnCoreReload()
+		for _, ctx in pairs(EXPADV.CONTEXT_REGISTERY) do
+			self:OnShutDown(ctx)
+		end
+	end
+
+	hook.Add( "PlayerInitialSpawn", "expadv.holograms", function(ply)
+		local uid, count = ply:UniqueID(), 0
+
+		for _, ctx in pairs(EXPADV.CONTEXT_REGISTERY) do
+			if ctx.plyid == uid then
+				if ctx.Data.Holos then
+					for _, holo in pairs(ctx.Data.Holos) do
+						count = count + 1
+					end
+				end
+			end
+		end
+
+		PlayerCounter[ply] = count
+	end)
+
+	local function LowerCount(self)
+		if IsValid(self.player) then
+			PlayerCounter[self.player] = PlayerCounter[self.player] - 1
+		end
+	end
 
 /* --- --------------------------------------------------------------------------------
 	@: Settings as inlined functions
    --- */
 
-Component:AddInlineFunction( "hologramLimit", "", "n", "@setting max" )
+Component:AddInlineFunction( "hologramLimit", 		"", "n", "$expadv_hologram_max" )
+Component:AddInlineFunction( "hologramSpawnRate", 	"", "n", "$expadv_hologram_rate" )
+Component:AddInlineFunction( "hologramClipLimit", 	"", "n", "$expadv_hologram_clips" )
+Component:AddInlineFunction( "hologramMaxScale", 	"", "n", "$expadv_hologram_size" )
+Component:AddInlineFunction( "hologramAnyModel", 	"", "b", "$expadv_hologram_any" )
+
 Component:AddFunctionHelper( "hologramLimit", "", "Returns how many holograms can be spawned per player." )
-Component:AddInlineFunction( "hologramSpawnRate", "", "n", "@setting rate" )
 Component:AddFunctionHelper( "hologramSpawnRate", "", "Returns how many holograms can be spawned per second." )
-Component:AddInlineFunction( "hologramClipLimit", "", "n", "@setting clips" )
 Component:AddFunctionHelper( "hologramClipLimit", "", "Returns how many clips can a hologram have." )
-Component:AddInlineFunction( "hologramMaxScale", "", "n", "@setting Size" )
 Component:AddFunctionHelper( "hologramMaxScale", "", "Returns the maximum scale of homogram." )
-Component:AddInlineFunction( "hologramAnyModel", "", "b", "@setting model_any" )
 Component:AddFunctionHelper( "hologramAnyModel", "", "Returns true if model_any is enabled." )
-
-/* --- --------------------------------------------------------------------------------
-	@: Hologram Handeling
-   --- */
-
-local HolosByEntity = { }
-
-local HolosByPlayer = { }
-
-local DeltaPerPlayer = { }
-
-function Component:OnShutDown( Context )
-	
-	if IsValid( Context.player ) then
-		local PlyTbl = HolosByPlayer[ Context.player:UniqueID( ) ]
-
-		for _, Holo in pairs( HolosByEntity[ Context.entity ] or { } ) do
-			PlyTbl[ Holo ] = nil
-			if IsValid( Holo ) then Holo:Remove( ) end
-		end
-	else
-		for _, Holo in pairs( HolosByEntity[ Context.entity ] or { } ) do
-			if IsValid( Holo ) then Holo:Remove( ) end
-		end
-	end
-end
-
-function Component:OnCoreReload( )
-	HolosByPlayer = { }
-
-	for Ent, Holos in pairs( HolosByEntity ) do
-		for _, Holo in pairs( Holos ) do
-			if IsValid( Holo ) then Holo:Remove( ) end
-		end
-	end
-end
-
-timer.Create( "lemon.holograms", 1, 0, function( )
-	DeltaPerPlayer = { }
-end )
-
-hook.Add( "PlayerInitialSpawn", "lemon.hologram.owners", function( Ply )
-	local Holos = HolosByPlayer[ Ply:UniqueID( ) ]
-	
-	if !Holos then return end
-
-	local Total = 0
-
-	for _, Holo in pairs( Holos ) do Total = Total + 1 end
-
-	Ply:SetNWInt( "lemon.holograms", Total )
-end )
 
 /* --- --------------------------------------------------------------------------------
 	@: Build Model List
@@ -222,7 +235,7 @@ local function SetModel( Context, Trace, Entity, Model )
 			Entity:SetModel( "models/holograms/" .. ValidModel .. ".mdl" )
 		end
 
-	elseif !Component:ReadSetting( "model_any", true ) or !util.IsValidModel( Model ) then
+	elseif !Component:ReadSetting( "model_any", true ) then //or !util.IsValidModel( Model ) then
 		Context:Throw( Trace, "hologram", "Invalid model set " .. Model )
 	elseif Entity.IsHologram and Entity.player == Context.player then
 		Entity:SetModel( ValidModel or Model )
@@ -271,61 +284,51 @@ Component:AddFunctionHelper( "hologram", "n", "Returns the hologram with the id 
 ==============================================================================================*/
 
 local function NewHolo( Context, Trace, Model, Position, Angle )
-	local UID = Context.player:UniqueID( )
-
-	if Context.player:GetNWInt( "lemon.holograms", 0 ) >= Component:ReadSetting( "max", 0 ) then
-		Context:Throw( Trace, "hologram", "Hologram limit reached." )
-	elseif ( DeltaPerPlayer[ UID ] or 0 ) >= Component:ReadSetting( "rate", 0 ) then
-		Context:Throw( Trace, "hologram", "Hologram cooldown reached." )
-	end
-
-	local Entity = ents.Create( "lemon_holo" )
-
-	if !IsValid( Entity ) then
-		Context:Throw( Trace, "hologram", "Failed to create hologram." )
-	end
-
-	Context.player:SetNWInt( "lemon.holograms", Context.player:GetNWInt( "lemon.holograms", 0 ) + 1 )
-
-	Entity.player = Context.player
-
-	Entity:Spawn( )
-
-	Entity:Activate( )
+	local ent, ply = Context.entity, Context.player
+	local rate, count = RateCounter[ply] or 0, PlayerCounter[ply] or 0
 	
-	if CPPI then Entity:CPPISetOwner( Context.player ) end
+	MsgN(">>", rate, " / ", count)
 
-	HolosByEntity[ Context.entity ] = HolosByEntity[ Context.entity ] or { }
+	if rate >= expadv_hologram_rate then
+		Context:Throw(Trace, "hologram", "Hologram cooldown reached.")
+	elseif count >= expadv_hologram_max then
+		Context:Throw(Trace, "hologram", "Hologram max reached.")
+	end
 
-	HolosByEntity[ Context.entity ][ Entity ] = Entity
+	local holo = ents.Create( "lemon_holo" )
 
-	HolosByPlayer[ UID ] = HolosByPlayer[ UID ] or { }
+	if !IsValid(holo) then 
+		Context:Throw(Trace, "hologram", "Failed to create hologram." )
+	end
 
-	HolosByPlayer[ UID ][ Entity ] = Entity
+	RateCounter[ply] = rate + 1
+	PlayerCounter[ply] = count + 1
 
-	DeltaPerPlayer[ UID ] = ( DeltaPerPlayer[ UID ] or 0 ) + 1
+	holo.player = ply
+	holo:Spawn( )
+	holo:Activate( )
+	holo.LowerCount = LowerCount
 
-	Context.Data.Holograms = Context.Data.Holograms or { }
+	Context.Data.Holos[#Context.Data.Holos + 1] = holo
+	Context.Data.Holograms[#Context.Data.Holograms + 1] = holo
 
-	local ID = #Context.Data.Holograms + 1
-	Context.Data.Holograms[ ID ] = Entity
+	if CPPI then holo:CPPISetOwner(ply) end
 
-	--if !Model then return Entity end
-	SetModel( Context, Trace, Entity, Model or "sphere" )
+	SetModel( Context, Trace, holo, Model or "sphere" )
 
 	if !Position then
-		Entity:SetPos( Context.entity:GetPos( ) )
+		holo:SetPos( ent:GetPos( ) )
 	else
-		Entity:SetPos( Position )
+		holo:SetPos( Position )
 	end
 
 	if !Angle then
-		Entity:SetAngles( Context.entity:GetAngles( ) )
+		holo:SetAngles( ent:GetAngles( ) )
 	else
-		Entity:SetAngles( Angle )
+		holo:SetAngles( Angle )
 	end
 
-	return Entity
+	return holo
 end
 
 Component:AddVMFunction( "hologram", "", "h", NewHolo )
@@ -343,12 +346,12 @@ Component:AddFunctionHelper( "hologram", "s,v,a", "Creates a hologram with (stri
 /*==============================================================================================
     Section: Can Hologram
 ==============================================================================================*/
-local function CanHolo( Context )
-	local UID = Context.player:UniqueID( )
-	
-	if Context.player:GetNWInt( "lemon.holograms", 0 ) >= Component:ReadSetting( "max", 0 )  then
+local function CanHolo( ctx )
+	local ply = ctx.player
+
+	if (RateCounter[ply] or 0) >= expadv_hologram_rate then
 		return false
-	elseif ( DeltaPerPlayer[ UID ] or 0 ) >= Component:ReadSetting( "rate", 0 )  then
+	elseif (PlayerCounter[ply] or 0) >= expadv_hologram_max then
 		return false
 	end
 
@@ -363,12 +366,23 @@ Component:AddFunctionHelper( "canMakeHologram", "", "Returns true if a hologram 
 ==============================================================================================*/
 Component:AddPreparedFunction("setPos", "h:v", "",[[
 if IsValid( @value 1 ) and @value 1.player == Context.player then
-	@value 1:SetPos( @value 2 )
+	if !( @value 2.x ~= @value 2.x or @value 2.y ~= @value 2.y or @value 2.z ~= @value 2.z ) then
+		@value 1:SetPos( @value 2 )
+	end
 end]] )
 
 Component:AddPreparedFunction("moveTo", "h:v,n", "",[[
 if IsValid( @value 1 ) and @value 1.player == Context.player then
-	@value 1:MoveTo( @value 2, @value 3 )
+	if !( @value 2.x ~= @value 2.x or @value 2.y ~= @value 2.y or @value 2.z ~= @value 2.z ) then
+		@value 1:MoveTo( @value 2, @value 3 )
+	end
+end]] )
+
+Component:AddPreparedFunction("startMove", "h:v", "",[[
+if IsValid( @value 1 ) and @value 1.player == Context.player then
+	if !( @value 2.x ~= @value 2.x or @value 2.y ~= @value 2.y or @value 2.z ~= @value 2.z ) then
+		@value 1:StartMove( @value 2)
+	end
 end]] )
 
 Component:AddPreparedFunction("stopMove", "h:", "",[[
@@ -376,22 +390,47 @@ if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:StopMove( )
 end]] )
 
+Component:AddPreparedFunction("onFinishMoveTo", "h:d", "", [[
+if IsValid( @value 1 ) and @value 1.player == Context.player then
+	@value 1.PostFinishMove = function()
+		Context:Execute( "hologram.onMoved", @value 2, {@value 1, "h"} )
+	end
+end]])
+
+Component:AddPreparedFunction("onFinishMoveTo", "h:", "", [[
+if IsValid( @value 1 ) and @value 1.player == Context.player then
+	@value 1.PostFinishMove = nil
+end]])
 
 Component:AddFunctionHelper( "setPos", "h:v", "Sets the postion of the hologram." )
-Component:AddFunctionHelper( "moveTo", "h:v,n", "Moves the hologram to position V at speed N" )
-Component:AddFunctionHelper( "stopMove", "h:", "If a hologram is being moved, by a call to h:moveTo(v,) this stops it." )
+Component:AddFunctionHelper( "moveTo", "h:v,n", "Moves the hologram to position V at speed (units per second)." )
+Component:AddFunctionHelper( "startMove", "h:v", "Moves the hologram in direction V." )
+Component:AddFunctionHelper( "stopMove", "h:", "If a hologram is being moved, by a call to h:moveTo(v,n) this stops it." )
+Component:AddFunctionHelper( "stopMove", "h:", "If a hologram is being moved, by a call to h:moveTo(v,n) this stops it." )
+Component:AddFunctionHelper( "onFinishMoveTo", "h:d", "Calls the delegate once the hologram has reached it desired position set by h:moveTo(v,n).")
 
 /*==============================================================================================
     Angles
 ==============================================================================================*/
 Component:AddPreparedFunction("setAng", "h:a", "",[[
 if IsValid( @value 1 ) and @value 1.player == Context.player then
-	@value 1:SetAngles( @value 2 )
+	if !( @value 2.p ~= @value 2.p or @value 2.y ~= @value 2.y or @value 2.r ~= @value 2.r ) then
+		@value 1:SetAngles( @value 2 )
+	end
 end]] )
 
 Component:AddPreparedFunction("rotateTo", "h:a,n", "",[[
 if IsValid( @value 1 ) and @value 1.player == Context.player then
-	@value 1:RotateTo( @value 2, @value 3 )
+	if !( @value 2.p ~= @value 2.p or @value 2.y ~= @value 2.y or @value 2.r ~= @value 2.r ) then
+		@value 1:RotateTo( @value 2, @value 3 )
+	end
+end]] )
+
+Component:AddPreparedFunction("startRotate", "h:a", "",[[
+if IsValid( @value 1 ) and @value 1.player == Context.player then
+	if !( @value 2.p ~= @value 2.p or @value 2.y ~= @value 2.y or @value 2.r ~= @value 2.r ) then
+		@value 1:StartRotate( @value 2 )
+	end
 end]] )
 
 Component:AddPreparedFunction("stopRotate", "h:", "",[[
@@ -399,9 +438,23 @@ if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:StopRotate( )
 end]] )
 
+Component:AddPreparedFunction("onFinishRotateTo", "h:d", "", [[
+if IsValid( @value 1 ) and @value 1.player == Context.player then
+	@value 1.PostFinishRotate = function()
+		Context:Execute( "hologram.onMoved", @value 2, {@value 1, "h"} )
+	end
+end]])
+
+Component:AddPreparedFunction("onFinishRotateTo", "h:", "", [[
+if IsValid( @value 1 ) and @value 1.player == Context.player then
+	@value 1.PostFinishRotate = nil
+end]])
+
 Component:AddFunctionHelper( "setAng", "h:a", "Sets the angle of a hologram." )
-Component:AddFunctionHelper( "rotateTo", "h:a,n", "Animates a hologram to move to rotation A, N is speed." )
+Component:AddFunctionHelper( "rotateTo", "h:a,n", "Animates a hologram to move to rotation A, N is speed (units per second)." )
+Component:AddFunctionHelper( "startRotate", "h:a", "Animates a hologram to start rotating." )
 Component:AddFunctionHelper( "stopRotate", "h:", "Stops the rotation animation of a hologram." )
+Component:AddFunctionHelper( "onFinishRotateTo", "h:d", "Calls the delegate once the hologram has reached its desired angles set by h:rotateTo(a,n).")
 
 /*==============================================================================================
     Scale
@@ -441,14 +494,27 @@ if IsValid( @value 1 ) and @value 1.GetScale then
 	@define pos = @value 1:GetScaleUnits( )
 end]], "(@pos or Vector( 0, 0, 0 ))" )
 
-Component:AddFunctionHelper( "stopRotate", "h:", "Stops the rotation animation of a hologram." )
+Component:AddPreparedFunction("onFinishScaleTo", "h:d", "", [[
+if IsValid( @value 1 ) and @value 1.player == Context.player then
+	@value 1.PostFinishScale = function()
+		Context:Execute( "hologram.onMoved", @value 2, {@value 1, "h"} )
+	end
+end]])
+
+Component:AddPreparedFunction("onFinishScaleTo", "h:", "", [[
+if IsValid( @value 1 ) and @value 1.player == Context.player then
+	@value 1.PostFinishScale = nil
+end]])
+
+Component:AddFunctionHelper("stopRotate", "h:", "Stops the rotation animation of a hologram." )
 Component:AddFunctionHelper("setScale", "h:v", "Sets the scale of a hologram." )
 Component:AddFunctionHelper("setScaleUnits", "h:v", "Sets the scale of a hologram in units." )
-Component:AddFunctionHelper("scaleTo", "h:v,n", "Animates a hologram to rescale to size V, N is speed." )
-Component:AddFunctionHelper("scaleToUnits", "h:v,n", "Animates a hologram to rescale to size V in units, N is speed." )
+Component:AddFunctionHelper("scaleTo", "h:v,n", "Animates a hologram to rescale to size V, N is speed (units per second)." )
+Component:AddFunctionHelper("scaleToUnits", "h:v,n", "Animates a hologram to rescale to size V in units, N is speed (units per second)." )
 Component:AddFunctionHelper("stopScale", "h:", "Stops the rescale animation of a hologram." )
 Component:AddFunctionHelper("getScale", "h:", "Returns the scale of a hologram." )
 Component:AddFunctionHelper("getScaleUnits", "h:", "Returns the scale of a hologram in units." )
+Component:AddFunctionHelper( "onFinishScaleTo", "h:d", "Calls the delegate once the hologram has reached it desired size set by h:scaleTo(v,n).")
 
 /*==============================================================================================
     Visible and Shading
@@ -594,6 +660,44 @@ if IsValid( @value 1 ) and @value 1.player == Context.player and IsValid( @value
 	@value 1:SetParent(@value 2)
 end]] )
 
+Component:AddPreparedFunction( "parentAttachment", "h:e,s", "", [[
+if IsValid( @value 1 ) and @value 1.player == Context.player and IsValid( @value 2 )then
+	@value 1:SetParent(@value 2)
+	@value 1:Fire("SetParentAttachmentMaintainOffset", @value 3, 0)
+end]] )
+
+Component:AddPreparedFunction( "parentAttachment", "h:h,s", "", [[
+if IsValid( @value 1 ) and @value 1.player == Context.player and IsValid( @value 2 )then
+	@value 1:SetParent(@value 2)
+	@value 1:Fire("SetParentAttachmentMaintainOffset", @value 3, 0)
+end]] )
+
+Component:AddPreparedFunction( "parentAttachment", "h:p,s", "", [[
+if IsValid( @value 1 ) and @value 1.player == Context.player and IsValid( @value 2 )then
+	@value 1:SetParent(@value 2)
+	@value 1:Fire("SetParentAttachmentMaintainOffset", @value 3, 0)
+end]] )
+
+/*
+Component:AddPreparedFunction( "parentBone", "h:e,n", "", [[
+if IsValid( @value 1 ) and @value 1.player == Context.player and IsValid( @value 2 )then
+	@value 1:SetParent(@value 2)
+	$timer.Simple(0.1, function() @value 1:SetParentPhysNum(@value 3) end)
+end]] )
+
+Component:AddPreparedFunction( "parentBone", "h:h,n", "", [[
+if IsValid( @value 1 ) and @value 1.player == Context.player and IsValid( @value 2 )then
+	@value 1:SetParent(@value 2)
+	@value 1:SetParentPhysNum(@value 3)
+end]] )
+
+Component:AddPreparedFunction( "parentBone", "h:p,n", "", [[
+if IsValid( @value 1 ) and @value 1.player == Context.player and IsValid( @value 2 )then
+	@value 1:SetParent(@value 2)
+	@value 1:SetParentPhysNum(@value 3)
+end]] )
+*/
+
 Component:AddPreparedFunction( "unparent", "h:", "", [[
 if IsValid( @value 1 ) and @value 1.player == Context.player then
 	@value 1:SetParent( nil )
@@ -622,6 +726,14 @@ end]], "(@val or $Entity(0))" )
 Component:AddFunctionHelper( "parent", "h:e", "Sets the parent entity of a hologram." )
 Component:AddFunctionHelper( "parent", "h:h", "Sets the parent hologram of a hologram." )
 Component:AddFunctionHelper( "parent", "h:p", "Sets the parent physics object of a hologram." )
+Component:AddFunctionHelper( "parentAttachment", "h:e,s", "Sets the parent entity of a hologram with an attachment name." )
+Component:AddFunctionHelper( "parentAttachment", "h:h,s", "Sets the parent hologram of a hologram with an attachment name." )
+Component:AddFunctionHelper( "parentAttachment", "h:p,s", "Sets the parent physics object of a hologram with an attachment name." )
+--[[
+Component:AddFunctionHelper( "parentBone", "h:e,n", "Sets the parent entity of a hologram with an bone index." )
+Component:AddFunctionHelper( "parentBone", "h:h,n", "Sets the parent hologram of a hologram with an bone index." )
+Component:AddFunctionHelper( "parentBone", "h:p,n", "Sets the parent physics object of a hologram with an bone index." )
+]]
 Component:AddFunctionHelper( "unparent", "h:", "Unparents H from its parent." )
 Component:AddFunctionHelper( "getParentHolo", "h:", "Returns the parent hologram of a hologram." )
 Component:AddFunctionHelper( "getParent", "h:", "Returns the parent entity of a hologram." )
@@ -636,7 +748,7 @@ end]] )
 
 Component:AddPreparedFunction( "setBoneAngle", "h:n,a", "", [[
 if IsValid( @value 1 ) and @value 1.player == Context.player then
-	@value 1:SetBoneAng( @value 2, @value 3 )
+	@value 1:SetBoneAngle( @value 2, @value 3 )
 end]] )
 
 Component:AddPreparedFunction( "setBoneScale", "h:n,v", "", [[
@@ -669,6 +781,11 @@ if IsValid( @value 1 ) then
 	@define val = @value 1:GetBoneCount( )
 end]], "( @val or 0 )" )
 
+Component:AddPreparedFunction( "boneParent", "h:n", "n", [[
+if IsValid( @value 1 ) then
+	@define val = @value 1:GetBoneParent(@value 2 - 1) + 1
+end]], "( @val or 0 )" )
+
 Component:AddFunctionHelper( "setBonePos", "h:n,v", "Sets the position of bone N on the hologram." )
 Component:AddFunctionHelper( "setBoneAngle", "h:n,a", "Sets the angle of bone N on the hologram." )
 Component:AddFunctionHelper( "setBoneScale", "h:n,v", "Sets the scale of bone N on the hologram." )
@@ -677,6 +794,7 @@ Component:AddFunctionHelper( "getBonePos", "h:n", "Gets the position of bone N o
 Component:AddFunctionHelper( "getBoneAng", "h:n", "Gets the angle of bone N on hologram." )
 Component:AddFunctionHelper( "getBoneScale", "h:n", "Gets the scale of bone N on hologram." )
 Component:AddFunctionHelper( "boneCount", "h:", "Returns the ammount of bones of a hologram." )
+Component:AddFunctionHelper( "boneParent", "h:n", "The bode ID of the bone to get parent of." )
 
 /*==============================================================================================
     Section: Animation

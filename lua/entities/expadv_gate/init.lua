@@ -53,37 +53,12 @@ end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Pod Connectivity
+	@: TODO: This should now be a component
    --- */
 
 function ENT:LinkPod(Pod)
-	if !IsValid(Pos) or !Pod:IsVehicle() then return end
+	if !IsValid(Pod) or !Pod:IsVehicle() then return end
 
 	self:SetLinkedPod(Pod)
 end
 
-hook.Add( "Expadv.BuildDupeInfo", "expadv.pod", function( Ent, DupeTable )
-	if !Ent.GetLinkedPod then return end
-	DupeTable.Pod = Ent:GetLinkedPod()
-end )
-
-hook.Add( "Expadv.PasteDupeInfo", "expadv.pod", function( Ent, DupeTable, FromID )
-	if !Ent.SetLinkedPod then return end
-	if !DupeTable.Pod then return end
-	Ent:LinkPod(FromID(DupeTable.Pod))
-end )
-
-hook.Add( "PlayerEnteredVehicle", "expadv.pod", function( Ply, Ent )
-	for _, Context in pairs( EXPADV.CONTEXT_REGISTERY ) do
-		if !Context.Online or !IsValid(Context.entity) then continue end
-		if !Context.entity.GetLinkedPod or Context.entity:GetLinkedPod() ~= Ent then continue end
-		Context.entity:CallEvent( "playerEnteredVehicle", Ply )	
-	end
-end)
-
-hook.Add( "PlayerLeaveVehicle", "expadv.pod", function( Ply, Ent )
-	for _, Context in pairs( EXPADV.CONTEXT_REGISTERY ) do
-		if !Context.Online or !IsValid(Context.entity) then continue end
-		if !Context.entity.GetLinkedPod or Context.entity:GetLinkedPod() ~= Ent then continue end
-		Context.entity:CallEvent( "playerExitedVehicle", Ply )	
-	end
-end)

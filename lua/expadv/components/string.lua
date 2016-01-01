@@ -22,13 +22,23 @@ String:AddAlias( "str" )
 	@: Wire Support
    --- */
 
-if WireLib then
-	String:WireInput( "STRING" ) 
-	String:WireOutput( "STRING" )
+if WireLib then String:WireIO( "STRING" ) end
 
-	String:WireLinkOutput( )
-	String:WireLinkInput( )
-end
+/* --- --------------------------------------------------------------------------------
+	@: Sync
+   --- */
+
+String:NetWrite(function(Str)
+	local len = #Str
+	if len > 32767 then Str = Str.sub(1, 32767) end
+
+	net.WriteUInt(len, 15)
+	net.WriteData(Str, len)
+end)
+
+String:NetRead(function()
+	return net.ReadData(net.ReadUInt(15))
+end)
 
 /* --- --------------------------------------------------------------------------------
 	@: Logical and Comparison
@@ -87,7 +97,7 @@ Component:AddInlineOperator( "not", "s", "b", "(@value 1 == \"\")" )
 	@: Indexing
    --- */
 
-String:AddInlineOperator( "get", "s,n", "s", "string.sub(@value 1, @value 2, @value 2)" )
+String:AddInlineOperator( "get", "s,n", "s", "@value 1[@value 2]" )
 
 /* --- --------------------------------------------------------------------------------
 	@: Casting
@@ -246,5 +256,5 @@ Component:AddFunctionHelper( "toChar", "n:", "Returns the character for a given 
 	@: Index
    --- */
 
-String:AddVMOperator( "get", "t,n,vr", "s", "@value 1[@value 2]" )
-String:AddVMOperator( "get", "t,n,s", "s", "@value 1[@value 2]" )
+String:AddInlineOperator( "get", "t,n,vr", "s", "@value 1[@value 2]" )
+String:AddInlineOperator( "get", "t,n,s", "s", "@value 1[@value 2]" )

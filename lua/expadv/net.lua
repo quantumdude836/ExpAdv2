@@ -138,7 +138,7 @@ elseif CLIENT then
 
 				if !tab then
 					editor:NewTab(script, nil, name)
-					tab = Editor.TabHolder:GetActiveTab()
+					tab = editor.TabHolder:GetActiveTab()
 					tab.Entity = entity
 					editor.GateTabs[entity] = tab
 				else
@@ -181,14 +181,12 @@ end
 	@: Sending Config
    --- */
 
-require("von")
-
 if SERVER then
 	function EXPADV.SendConfig(target, init)
 		net.Start("expadv.config")
 			net.WriteBit(init)
 			
-			local seralized = von.serialize(EXPADV.Config)
+			local seralized = EXPADV.von.serialize(EXPADV.Config)
 			writeCompressedString(seralized)
 
 			--net.WriteTable(EXPADV.Config)
@@ -206,7 +204,7 @@ elseif CLIENT then
 
 		local seralized = readCompressedString()
 		if !seralized then print("SERALIZING NIL?") end
-		EXPADV.Config = von.deserialize(seralized)
+		EXPADV.Config = EXPADV.von.deserialize(seralized)
 
 		--EXPADV.Config = net.ReadTable()
 
@@ -220,6 +218,8 @@ end
 
 if SERVER then
 	function EXPADV.Notifi( target, message, type, duration )
+		if !message or message == "" then return end
+
 		net.Start("expadv.notify")
 			net.WriteString( message )
 			net.WriteUInt( type or 0, 8 )
@@ -238,6 +238,8 @@ if SERVER then
 		local type = net.ReadUInt(8)
 		local duration = net.ReadFloat()
 
+		if !message or message == "" then return end
+		
 		if IsValid(player) then
 			EXPADV.Notifi( player ,message, type, duration )
 		end
@@ -265,6 +267,8 @@ elseif CLIENT then
 		local message = net.ReadString()
 		local type = net.ReadUInt(8)
 		local duration = net.ReadFloat()
+
+		if !message or message == "" then return end
 
 		GAMEMODE:AddNotify(message, type, duration)
 		MsgN(message)

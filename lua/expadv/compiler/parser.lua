@@ -348,7 +348,13 @@ function Compiler:Expression_8( Trace )
 
 	while self:CheckToken( "lth", "leq", "gth", "geq" ) do
 		if self:AcceptToken( "lth" ) then
-			Expression = self:Compile_LTH( self:GetTokenTrace( Trace ), Expression, self:Expression_9( Trace ) )
+			local Exp2 = self:Expression_9( Trace )
+
+			if !self:AcceptToken( "gth" ) then
+				Expression = self:Compile_LTH( self:GetTokenTrace( Trace ), Expression, Exp2 )
+			else
+				Expression = self:Compile_INRANGE( self:GetTokenTrace( Trace ), Expression, Exp2, self:Expression_9( Trace ) )
+			end
 		elseif self:AcceptToken( "leq" ) then
 			Expression = self:Compile_LEQ( self:GetTokenTrace( Trace ), Expression, self:Expression_9( Trace ) )
 		elseif self:AcceptToken( "gth" ) then
@@ -652,6 +658,15 @@ function Compiler:Expression_Variable( Trace )
 		
 		return self:Compile_DELTA( Trace, self.TokenData )
 	
+	elseif WireLib and self:AcceptToken( "wc" ) then -- Wiremod IO connection.
+		local Trace = self:GetTokenTrace( Trace )
+
+		self:ExcludeWhiteSpace( "Connect operator (->) must not be succeeded by white space" )
+		
+		self:RequireToken( "var", "variable expected, after Connect operator (->)" )
+		
+		return self:Compile_CONNECT( Trace, self.TokenData )
+
 	elseif self:AcceptToken( "var" ) then
 		local Trace = self:GetTokenTrace( Trace )
 
@@ -727,13 +742,11 @@ function Compiler:Expression_17( Trace, Expression, Statment )
 				if !self:AcceptToken( "com" ) then
 					self:RequireToken( "rsb", "Right square bracket (]) missing, to close indexing operator [Index]" )
 
-					if !self:AcceptToken( "ass" ) then
-						Expression = self:Compile_GET( Trace, Expression, Index )
-					elseif Statment then
-						return self:Compile_SET( Trace, Expression, Index, self:Expression( Trace ) )
-					else
-						self:TraceError( Trace, "Set operator (%s[%s]=) must not appear inside an equation", self:NiceClass( Expression, Index ) )
+					if self:CheckToken("ass", "aadd", "asub", "adiv", "amul") then
+						return self:Expression_Set( Trace, Statment, Expression, Index )
 					end
+					
+					Expression = self:Compile_GET( Trace, Expression, Index )
 
 				elseif !self:AcceptToken( "var", "func" ) then
 					self:TraceError( Trace, "Right square bracket (]) expected, to close indexing operator [Index]" )
@@ -742,14 +755,13 @@ function Compiler:Expression_17( Trace, Expression, Statment )
 
 					self:RequireToken( "rsb", "Right square bracket (]) missing, to close indexing operator [Index]" )
 
-					if !self:AcceptToken( "ass" ) then
-						Expression = self:Compile_GET( Trace, Expression, Index, Class.Short )
-					elseif Statment then
-						return self:Compile_SET( Trace, Expression, Index, self:Expression( Trace ), Class.Short )
-					else
-						self:TraceError( Trace, "Set operator (%s[%s,%s]=) must not appear inside an equation", self:NiceClass( Expression, Index, Class.Short ) )
+					if self:CheckToken("ass", "aadd", "asub", "adiv", "amul") then
+						return self:Expression_Set( Trace, Statment, Expression, Index, Class.Short )
 					end
+					
+					Expression = self:Compile_GET( Trace, Expression, Index, Class.Short )
 				end
+
 
 			end
 
@@ -778,6 +790,31 @@ function Compiler:Expression_17( Trace, Expression, Statment )
 		end
 
 	return Expression
+end
+
+/* --- --------------------------------------------------------------------------------
+	@: Statments
+   --- */
+
+function Compiler:Expression_Set( Trace, Statment, Expression, Index, Class )
+	if !Statment then
+		self:ExcludeToken("ass", "Set operator (%s[%s]=) must not appear inside an equation", self:NiceClass( Expression, Index ) )
+		self:ExcludeToken("aadd", "Arithmatic set operator (%s[%s]+=) must not appear inside an equation", self:NiceClass( Expression, Index ) )
+		self:ExcludeToken("asub", "Arithmatic set operator (%s[%s]-=) must not appear inside an equation", self:NiceClass( Expression, Index ) )
+		self:ExcludeToken("adiv", "Arithmatic set operator (%s[%s]/=) must not appear inside an equation", self:NiceClass( Expression, Index ) )
+		self:ExcludeToken("amul", "Arithmatic set operator (%s[%s]+=) must not appear inside an equation", self:NiceClass( Expression, Index ) )
+		self:TraceError(Trace, "You are not looking for this compiler error!")
+	elseif self:AcceptToken("ass") then
+		return self:Compile_SET( Trace, Expression, Index, self:Expression( Trace ), Class )
+	elseif self:AcceptToken("aadd") then
+		return self:Compile_SET(Trace, Expression, Index, self:Compile_ADD(Trace, self:Compile_GET(Trace, Expression, Index, Class), self:Expression(Trace)), Class)
+	elseif self:AcceptToken("asub") then
+		return self:Compile_SET(Trace, Expression, Index, self:Compile_SUB(Trace, self:Compile_GET(Trace, Expression, Index, Class), self:Expression(Trace)), Class)
+	elseif self:AcceptToken("amul") then
+		return self:Compile_SET(Trace, Expression, Index, self:Compile_MUL(Trace, self:Compile_GET(Trace, Expression, Index, Class), self:Expression(Trace)), Class)
+	elseif self:AcceptToken("adiv") then
+		return self:Compile_SET(Trace, Expression, Index, self:Compile_DIV(Trace, self:Compile_GET(Trace, Expression, Index, Class), self:Expression(Trace)), Class)
+	end
 end
 
 /* --- --------------------------------------------------------------------------------
@@ -836,9 +873,11 @@ function Compiler:Sequence( Trace, ExitToken )
 		end
 	end
 
+	local BreakOut = self.BreakOut
+	
 	self.BreakOut = nil
 
-	return self:Compile_SEQ( Trace, Sequence )
+	return self:Compile_SEQ( Trace, Sequence, BreakOut )
 end
 
 
@@ -1141,6 +1180,8 @@ function Compiler:Statement_6( Trace )
 	elseif self:AcceptToken( "glo" ) then Modifier = "global"
 	elseif self:AcceptToken( "in" ) then Modifier = "input"
 	elseif self:AcceptToken( "out" ) then Modifier = "output"
+	//elseif self:AcceptToken( "syn" ) then Modifier = "synced"
+	elseif self.InClass then Modifier = "class"
 	end
 
 	if Modifier and !self:CheckToken( "var", "func" ) then
@@ -1154,7 +1195,7 @@ function Compiler:Statement_6( Trace )
 	if self:AcceptToken( "var" ) then
 		local Trace = self:GetTokenTrace( Trace )
 
-		if !self:CheckToken( "var", "ass", "aadd", "asub", "advi", "amul", "com" ) then
+		if !self:CheckToken( "var", "ass", "aadd", "asub", "adiv", "amul", "com" ) then
 			self:PrevToken( )
 			return self:Statement_7( Trace )
 		end
@@ -1178,7 +1219,7 @@ function Compiler:Statement_6( Trace )
 			Variables[#Variables + 1] = self.TokenData
 		end
 
-		if !Defined and !self:CheckToken( "ass", "aadd", "asub", "advi", "amul" ) then
+		if !Defined and !self:CheckToken( "ass", "aadd", "asub", "adiv", "amul" ) then
 			self:TraceError( Trace, "Incomplete assigment statment")
 		end
 
@@ -1467,10 +1508,68 @@ function Compiler:Statement_8( Trace )
 	return self:Statement_9( Trace )
 end
 
+/* --- --------------------------------------------------------------------------------
+	@: lemon
+   --- */
 
 -- Stage 9: Statment Expressions
 function Compiler:Statement_9( Trace )
 	-- MsgN( "Compiler -> Statement 9" )
+
+	/*if self:AcceptToken("cls") then
+		local Trace = self:GetTokenTrace( Trace )
+
+		self:RequireToken("var", "Class name expected, after class.")
+		local className = self.TokenData
+		self.curClass = {name = className, Cells = {}}
+		self.Classes[className] = self.curClass
+		
+		self:PushClassDeph(true)
+			self:RequireToken( "lcb", "Left curly bracket ({) missing, to open class" )
+				self:PushScope( )
+					local Sequence = self:Sequence( Trace, "rcb" )
+				self:PopScope( )
+			self:RequireToken( "rcb", "Right curly bracket (}) missing, to close class" )
+		self:PopClassDeph( )
+
+		if !self.curClass.hasConstructor then
+			self:TraceError(Trace, "Class %s requires at least 1 constructor.", className)
+		end
+		
+		local Instr = self:Compile_CLASS(Trace, className, Sequence, self.curClass.Cells)
+		
+		self.curClass = nil
+
+		return Instr
+	elseif self.InClass then
+		if self.PrepTokenData == self.curClass.name and self:AcceptToken("var") then 
+			local Trace = self:GetTokenTrace( Trace )
+
+			self:RequireToken( "lpa", "Left parenthesis ( () missing, to open constructor arguments" )
+		
+			self:PushScope( )
+			self:PushReturnDeph()
+
+			local Perams, UseVarg = self:Util_Perams( Trace )
+			
+			local Cell = self:CreateVariable( Trace, "this", self.curClass.name )
+			self:RequireToken( "rpa", "Right parenthesis () ) missing, to close constructor arguments" )
+			
+			local Sequence = self:GetBlock( Trace, "to close constructor" ) //self:Sequence( Trace, "rcb" )
+	
+			self:PopReturnDeph( )
+			self:PopScope( )
+	
+			return self:Compile_CONSTR( Trace, Cell, Perams, UseVarg, Sequence )
+		end
+	end*/
+
+	return self:Statement_10( Trace )
+end
+
+-- Stage 10: Statment Expressions
+function Compiler:Statement_10( Trace )
+	-- MsgN( "Compiler -> Statement 10" )
 	self:CheckStatus( )
 
 	if !self:HasTokens( ) then

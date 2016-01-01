@@ -65,10 +65,14 @@ local PANEL = { }
 			local AddLine = false
 			local Line = self.Lines[I]
 
-			for J = 1, #Line do
-				if Query ~= "" and !string.find( string.lower(Line[J]), Query, 1, true ) then continue end
+			if !Query or Query == "" then
 				AddLine = true
-				break
+			else
+				for J = 1, #Line do
+					if !string.find( string.lower(Line[J]), Query, 1, true ) then continue end
+					AddLine = true
+					break
+				end
 			end
 
 			if !AddLine then continue end
@@ -259,7 +263,8 @@ function PANEL:PerformLayout( )
 		Y = Y + self.Sheet_Event:GetTall( ) + 5
 	end
 
-	self:SetTall( Y + 5 )
+	self:SetSize( self:GetParent():GetWide(), Y + 5 )
+
 end
 
 vgui.Register( "EA_HelpPage", PANEL, "DPanel" )
@@ -322,19 +327,20 @@ function EXPADV.Editor.OpenHelper( )
 		local TabSheet = Frame:Add( "DPropertySheet" )
 		TabSheet:Dock( FILL )
 
+		local GuideTabSheet = vgui.Create( "DHTML" )
+		GuideTabSheet:OpenURL( "http://goo.gl/g6WEfs" )
+		GuideTabSheet:DockMargin( 5, 5, 5 ,5 )
+		GuideTabSheet:Dock( FILL )
+
 		local WikiTabSheet = vgui.Create( "DHTML" )
 		WikiTabSheet:OpenURL( "https://github.com/Rusketh/ExpAdv2/wiki/Syntax" )
 		WikiTabSheet:DockMargin( 5, 5, 5 ,5 )
 		WikiTabSheet:Dock( FILL )
 
-		TabSheet:AddSheet( "Syntax", WikiTabSheet, nil, true, true, "Syntax documentation." )
-
 		local ExamplesTabSheet = vgui.Create( "DHTML" )
 		ExamplesTabSheet:OpenURL( "https://github.com/Rusketh/ExpAdv2/wiki/Examples" )
 		ExamplesTabSheet:DockMargin( 5, 5, 5 ,5 )
 		ExamplesTabSheet:Dock( FILL )
-
-		TabSheet:AddSheet( "Examples", ExamplesTabSheet, nil, true, true, "Example Codes." )
 
 		local ComponentTabSheet = vgui.Create( "DPanel" )
 		ComponentTabSheet:DockMargin( 5, 5, 5 ,5 )
@@ -349,20 +355,27 @@ function EXPADV.Editor.OpenHelper( )
 		ComponentCanvas:DockMargin( 5, 5, 5 ,5 )
 		ComponentCanvas:Dock( FILL )
 
-		TabSheet:AddSheet( "Components", ComponentTabSheet, nil, true, true, "Components & Classes" )
-
-		local BrowserTabSheet = vgui.Create( "DPanel" )
-		BrowserTabSheet:DockMargin( 5, 5, 5 ,5 )
-		BrowserTabSheet:Dock( FILL )
-
-		local BrowserCanvas = BrowserTabSheet:Add( "DScrollPanel" )
+		local BrowserCanvas = vgui.Create( "DScrollPanel" )
 		BrowserCanvas:DockMargin( 5, 5, 5 ,5 )
 		BrowserCanvas:Dock( FILL )
 
-		local BrowserSheet = BrowserCanvas:Add( "EA_HelpPage" )
-		BrowserSheet:Dock( FILL )
 
-		TabSheet:AddSheet( "Browser", BrowserTabSheet, nil, true, true, "Browse" )
+		local BrowserSheet = BrowserCanvas:Add( "EA_HelpPage" )
+		BrowserSheet:SetParent(BrowserCanvas)
+		BrowserSheet:Dock(FILL)
+		
+		timer.Simple(1,function()
+			BrowserCanvas:PerformLayout()
+
+			BrowserSheet:PerformLayout()
+		end)
+
+
+		TabSheet:AddSheet( "Components", ComponentTabSheet, nil, true, true, "Components & Classes" )
+		TabSheet:AddSheet( "Browser", BrowserCanvas, nil, true, true, "Browse" )
+		TabSheet:AddSheet( "Wiki and Syntax", WikiTabSheet, nil, true, true, "Syntax documentation." )
+		TabSheet:AddSheet( "Examples", ExamplesTabSheet, nil, true, true, "Example Codes." )
+		TabSheet:AddSheet( "Tutorial", GuideTabSheet, nil, true, true, "EXPADV2 For Dummies." )
 
 	-- COMPONENTS & CLASSES:
 
@@ -670,11 +683,13 @@ function EXPADV.Editor.OpenHelper( )
 
 			ClearSearch:SetVisible( SearchQuery ~= "" )
 
-			BrowserSheet:Search( SearchQuery )
+			timer.Create("EASearch", 1, 1, function()
+				BrowserSheet:Search( SearchQuery )
 
-			if IsValid( Frame.ActivePage ) then
-				Frame.ActivePage:Search( SearchQuery )
-			end
+				if IsValid( Frame.ActivePage ) then
+					Frame.ActivePage:Search( SearchQuery )
+				end
+			end)
 		end
 
 	-- LAYOUT:

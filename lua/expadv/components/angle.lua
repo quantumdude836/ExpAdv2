@@ -20,13 +20,20 @@ AngObject:DefaultAsLua( Angle(0,0,0) )
 	@: Wire Support
    --- */
 
-if WireLib then
-	AngObject:WireInput( "ANGLE" )
-	AngObject:WireOutput( "ANGLE" )
-
-	AngObject:WireLinkOutput( )
-	AngObject:WireLinkInput( )
+if WireLib then AngObject:WireIO( "ANGLE",
+	function(Value, Context) -- To Wire
+        return {Value.p, Value.y, Value.r}
+    end, function(Value, context) -- From Wire
+        return Angle(Value[1], Value[2], Value[3])
+    end)
 end
+
+/* --- --------------------------------------------------------------------------------
+  @: Sync
+   --- */
+
+AngObject:NetWrite(net.WriteAngle)
+AngObject:NetRead(net.ReadAngle)
 
 /* --- --------------------------------------------------------------------------------
 	@: Assignment
@@ -38,7 +45,7 @@ AngObject:AddVMOperator( "=", "n,a", "", function( Context, Trace, MemRef, Value
 	local Prev = Context.Memory[MemRef] or Angle( 0, 0, 0 )
 	
 	Context.Memory[MemRef] = Value
-	Context.Delta[MemRef] = Prev - Value
+	Context.Delta[MemRef] = Prev - (Value or Angle(0, 0, 0))
 	Context.Trigger[MemRef] = Context.Trigger[MemRef] or ( Prev ~= Value )
 end )
 
@@ -104,6 +111,9 @@ Component:AddFunctionHelper( "ang", "", "Creates an angle object" )
 Component:AddInlineFunction( "randAng", "n,n", "a", "Angle( $math.random(@value 1, @value 2), $math.random(@value 1, @value 2), $math.random(@value 1, @value 2) )" )
 Component:AddFunctionHelper( "randAng", "n,n", "Creates a random angle constrained to the given values" )
 
+Component:AddPreparedFunction( "clone", "a:", "a", "Angle(@value 1.p, @value 1.y, @value 1.r)" )
+Component:AddFunctionHelper( "clone", "a:", "Returns a clone of the angle." )
+
 /* --- --------------------------------------------------------------------------------
 	@: Accessors
    --- */
@@ -119,14 +129,27 @@ Component:AddInlineFunction( "getRoll", "a:", "n", "@value 1.r" )
 Component:AddFunctionHelper( "getRoll", "a:", "Gets the roll value of an angle" )
 
 --SETTERS
-Component:AddPreparedFunction( "setPitch", "a:n", "", "@value 1.p = @value 2" )
+Component:AddPreparedFunction( "setPitch", "a:n", "a", "@value 1.p = @value 2", "(@value 1)" )
 Component:AddFunctionHelper( "setPitch", "a:n", "Sets the pitch value of an angle" )
 
-Component:AddPreparedFunction( "setYaw", "a:n", "", "@value 1.y = @value 2" )
+Component:AddPreparedFunction( "setYaw", "a:n", "a", "@value 1.y = @value 2", "(@value 1)"  )
 Component:AddFunctionHelper( "setYaw", "a:n", "Sets the yaw value of an angle" )
 
-Component:AddPreparedFunction( "setRoll", "a:n", "", "@value 1.r = @value 2" )
+Component:AddPreparedFunction( "setRoll", "a:n", "a", "@value 1.r = @value 2", "(@value 1)"  )
 Component:AddFunctionHelper( "setRoll", "a:n", "Sets the roll value of an angle" )
+
+--Changers
+Component:AddPreparedFunction( "withX", "a:n", "a", "Angle(@value 2, @value 1.y, @value 1.r)" )
+Component:AddFunctionHelper( "withX", "a:n", "Returns the value of the angle with the value of pitch changed." )
+
+Component:AddPreparedFunction( "withY", "a:n", "a", "Angle(@value 1.p, @value 2, @value 1.r)" )
+Component:AddFunctionHelper( "withY", "a:n", "Returns the value of the angle with the value of yaw changed." )
+
+Component:AddPreparedFunction( "withZ", "a:n", "a", "Angle(@value 1.p, @value 1.y, @value 2)" )
+Component:AddFunctionHelper( "withZ", "a:n", "Returns the value of the angle with the value of roll changed." )
+
+Component:AddPreparedFunction( "clone", "a:", "a", "Angle(@value 1.p, @value 1.y, @value 1.r)" )
+Component:AddFunctionHelper( "clone", "a:", "Returns a clone of the vector." )
 
 /* --- --------------------------------------------------------------------------------
 	@: Directions
@@ -178,7 +201,7 @@ Component:AddFunctionHelper( "snapToRoll", "a:n", "Snaps the angle's roll to nea
 	@: Casting
    --- */
 
-Component:AddInlineOperator( "string", "a", "s", [[string.format("Ang<%i,%i,%i>",@value 1.p, @value 1.y, @value 1.r)]] )
+Component:AddInlineOperator( "string", "a", "s", [[string.format("Ang<%i, %i, %i>",@value 1.p, @value 1.y, @value 1.r)]] )
 
 /* --- --------------------------------------------------------------------------------
     @: World and Axis
@@ -190,9 +213,9 @@ Component:AddInlineFunction( "toLocal", "e:a", "a", "(IsValid( @value 1 ) and @v
 Component:AddFunctionHelper( "toWorld", "e:a", "Converts an angle to a world angle." )
 Component:AddFunctionHelper( "toLocal", "e:a", "Converts a world angle to a local angle." )
 
-Component:AddVMFunction("toWorldAng", "v,a,v,a", "a", "@define Pos, Ang = LocalToWorld(@value 1, @value 2, @value 3, @value 4)", "@Ang" )
+Component:AddPreparedFunction("toWorldAng", "v,a,v,a", "a", "@define Pos, Ang = $LocalToWorld(@value 1, @value 2, @value 3, @value 4)", "@Ang" )
 Component:AddFunctionHelper("toWorldAng", "v,a,v,a", "Translates the specified position and angle from the specified coordinate system into worldspace coordinates.")
 
-Component:AddVMFunction("toLocalAng", "v,a,v,a", "a", "@define Pos, Ang = WorldToLocal(@value 1, @value 2, @value 3, @value 4)", "@Ang" )
+Component:AddPreparedFunction("toLocalAng", "v,a,v,a", "a", "@define Pos, Ang = $WorldToLocal(@value 1, @value 2, @value 3, @value 4)", "@Ang" )
 Component:AddFunctionHelper("toLocalAng", "v,a,v,a", "Translates the specified position and angle into the specified coordinate system.")
 

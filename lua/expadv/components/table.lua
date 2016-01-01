@@ -14,7 +14,19 @@ Component:AddException( "table" )
 	@: Default Table Obj
    --- */
 
-local DEFAULT_TABLE = { Data = { }, Types = { }, Look = { }, Size = 0, Count = 0, HasChanged = false }
+local DEFAULT_TABLE = { Data = { }, Types = { }, Look = { }, Size = 0, Count = 0 }
+
+local function Clone(Table)
+	local New = { Data = { }, Types = { }, Look = { }, Size = Table.Size, Count = Table.Count, HasChanged = false }
+
+	for Key, _ in pairs( Table.Look ) do
+		New.Look[ Key ] = Table.Look[ Key ]
+		New.Data[ Key ] = Table.Data[ Key ]
+		New.Types[ Key ] = Table.Types[ Key ]
+	end
+
+	return New
+end
 
 /* --- --------------------------------------------------------------------------------
 	@: Result Tables
@@ -36,7 +48,23 @@ Table:DefaultAsLua( DEFAULT_TABLE )
 
 Table:StringBuilder( function( Table ) return string.format( "table[%s/%s]", Table.Count, Table.Size ) end )
 
-Table:UsesHasChanged( )
+/* ---	--------------------------------------------------------------------------------
+	@: Wire Support
+   ---	*/
+
+if WireLib then Table:WireIO( "ADVANCEDTABLE",
+	function(Value, Context) -- To Wire
+        return Clone(Value)
+    end, function(Value, context) -- From Wire
+        return Clone(Value)
+    end)
+
+	if SERVER then
+		WireLib.DT.ADVANCEDTABLE = {
+			Zero = { Data = { }, Types = { }, Look = { }, Size = 0, Count = 0 }
+		}
+	end
+end
 
 /* --- --------------------------------------------------------------------------------
 	@: Basic Operators
@@ -45,8 +73,10 @@ Table:UsesHasChanged( )
 EXPADV.SharedOperators( )
 
 Table:AddVMOperator( "=", "n,t", "", function( Context, Trace, MemRef, Value )
-	Context.Memory[MemRef] = Value
-end ) -- Keeping this virtual, becuase i might need to add to it later :D
+   local Prev = Context.Memory[MemRef]
+   Context.Memory[MemRef] = Value
+   Context.Trigger[MemRef] = Context.Trigger[MemRef] or ( Prev ~= Value )
+end )
 
 Component:AddInlineOperator( "#","t","n", "@value 1.Count" )
 
@@ -166,7 +196,7 @@ Component:AddVMFunction( "stringKeys", "t:", "ar",
 
 Component:AddVMFunction( "entityKeys", "t:", "ar",
 	function(Context, Trace, Table)
-		local Array = {__type = "s"}
+		local Array = {__type = "e"}
 
 		for K, V in pairs(Table.Look) do
 			local T = type(K)
@@ -216,6 +246,10 @@ Component:AddFunctionHelper( "keys", "t:", "Returns an array of indexs on the ta
 			end
 	end
 	
+	Table:AddVMOperator( "get", "t,n", "vr", Get )
+	Table:AddVMOperator( "get", "t,s", "vr", Get )
+	Table:AddVMOperator( "get", "t,e", "vr", Get )
+
 	Table:AddVMOperator( "get", "t,n,vr", "vr", Get )
 	Table:AddVMOperator( "get", "t,s,vr", "vr", Get )
 	Table:AddVMOperator( "get", "t,e,vr", "vr", Get )
@@ -230,7 +264,7 @@ Component:AddFunctionHelper( "keys", "t:", "Returns an array of indexs on the ta
 
 		if Old == nil then Table.Size = Table.Size + 1 end
 
-		if Old ~= Value then Table.HasChanged = true end
+		if Old ~= Value then Context.TrigMan[Table] = true end
 
 		Data[Index] = Value[1]
 
@@ -264,7 +298,7 @@ Component:AddFunctionHelper( "keys", "t:", "Returns an array of indexs on the ta
 
 			Table.Look[Table.Count] = Table.Count
 			
-			Table.HasChanged = true
+			Context.TrigMan[Table] = true
 		end )
 
 	Component:AddVMFunction( "insert", "t:n,vr", "",
@@ -276,7 +310,7 @@ Component:AddFunctionHelper( "keys", "t:", "Returns an array of indexs on the ta
 
 			Table.Look[Index] = Index
 			
-			Table.HasChanged = true
+			Context.TrigMan[Table] = true
 			
 			Table.Count = #Data
 			
@@ -299,7 +333,7 @@ Component:AddFunctionHelper( "keys", "t:", "Returns an array of indexs on the ta
 		
 		if Old ~= nil then
 			Table.Size = Table.Size - 1
-			Table.HasChanged = true
+			Context.TrigMan[Table] = true
 		end
 		
 		local Value = Data[Index] or 0
@@ -338,7 +372,7 @@ Component:AddFunctionHelper( "keys", "t:", "Returns an array of indexs on the ta
 			
 			if Old ~= nil then
 				Table.Size = Table.Size - 1
-				Table.HasChanged = true
+				Context.TrigMan[Table] = true
 			end
 			
 			local Value = table.remove( Data, Index ) or 0
@@ -422,7 +456,7 @@ function Component:OnPostRegisterClass( Name, Class )
 
 			if Old == nil then Table.Size = Table.Size + 1 end
 
-			if Old ~= Value then Table.HasChanged = true end
+			if Old ~= Value then Context.TrigMan[Table] = true end
 
 			Data[Index] = Value
 
@@ -457,7 +491,7 @@ function Component:OnPostRegisterClass( Name, Class )
 
 				Table.Look[Table.Count] = Table.Count
 				
-				Table.HasChanged = true
+				Context.TrigMan[Table] = true
 			end )
 
    		Component:AddVMFunction( "insert", "t:n," .. Class.Short, "",
@@ -469,7 +503,7 @@ function Component:OnPostRegisterClass( Name, Class )
 
 				Table.Look[Index] = Index
 				
-				Table.HasChanged = true
+				Context.TrigMan[Table] = true
 				
 				Table.Count = #Data
 				
@@ -588,3 +622,68 @@ Table:AddDeserializer( function( Table )
 
 	return Clone
 end )
+
+/* ---	--------------------------------------------------------------------------------
+	@: Net Support
+   ---	*/
+
+Table:NetWrite(function(Table)
+	for key, type in pairs(Table.Types) do
+		local Class = EXPADV.ClassShorts[type]
+		if !Class or !Class.WriteToNet then continue end
+
+		local val = Table.Data[key]
+		if val == nil then continue end
+
+		net.WriteBool(true)
+		net.WriteType(key)
+		net.WriteString(type)
+		Class.WriteToNet(val)
+	end
+
+	net.WriteBool(false)
+end)
+
+Table:NetRead(function()
+	local Size, Types, Data, Look = 0, {}, {}, {}
+
+	while net.ReadBool() do
+		local key = net.ReadType(net.ReadUInt(8))
+		local type = net.ReadString()
+
+		local Class = EXPADV.ClassShorts[type]
+
+		Look[key] = key
+		Types[key] = type
+		Data[key] = Class.ReadFromNet()
+	end
+	
+	return { Data = Data, Types = Types, Look = Look, Size = Size, Count = #Data, HasChanged = true }
+end)
+
+/* ---	--------------------------------------------------------------------------------
+	@: Stream methods
+   ---	*/
+
+Component:AddVMFunction( "writeTable", "st:t", "", function( Context, Trace, Stream, Obj )
+	Stream.W = Stream.W + 1
+	if Stream.W >= 128 then Context:Throw( Trace, "stream", "Failed to write table to stream, maxamum stream size achived (128)" ) end
+	Stream.V[Stream.W] = table.Copy(Obj)
+	Stream.T[Stream.W] = "t"
+end )
+
+Component:AddFunctionHelper( "writeTable", "st:t", "Appends a table to the stream object." )
+
+Component:AddVMFunction( "readTable", "st:", "t", function( Context, Trace, Stream )
+	Stream.R = Stream.R + 1
+	
+	if !Stream.T[Stream.R] then
+		Context:Throw( Trace, "stream", "Failed to read table from stream, stream returned void." )
+	elseif Stream.T[Stream.R] ~= "t" then
+		Context:Throw( Trace, "stream", "Failed to read table from stream, stream returned " .. EXPADV.TypeName( Stream.T[Stream.R] )  .. "." )
+	end
+
+	return Stream.V[Stream.R]
+end )
+
+Component:AddFunctionHelper( "readTable", "st:", "Reads a table from the stream object." )

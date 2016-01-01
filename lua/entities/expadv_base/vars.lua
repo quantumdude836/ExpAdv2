@@ -62,8 +62,9 @@ end
    --- */
 
 local Updated = false
-local SyncVars = { }
-local ExpVars = { }
+local SaveVars = {}
+local SyncVars = {}
+local ExpVars = {}
 
 local function default() return {BOOLEAN = {}, FLOAT = {}, INT = {}, STRING = {}, ENTITY = {}, VECTOR = {}, VECTOR2 = {}, ANGLE = {}, TABLE = {}} end
 
@@ -84,14 +85,16 @@ function ENT:SetupExpVars()
 	return self.__ExpVars
 end
 
-function ENT:AddExpVar(Type, ID, Name, Def)
+function ENT:AddExpVar(Type, ID, Name, Def, Save)
 	local ExpVars = self:SetupExpVars()
 
 	local Values = ExpVars[Type]
 	if !Values then error("Invalid Network Type " .. Type) end
 
-	if Def ~= nil then self:SetExpVar(Type, ID, Def) end
-
+	if Def ~= nil then
+		self:SetExpVar(Type, ID, Def)
+	end
+	
 	self["Set" .. Name] = function(self, Value) self:SetExpVar(Type, ID, Value) end
 	self["Get" .. Name] = function(self, Value)  return Values[ID] or Value end
 end
@@ -463,3 +466,42 @@ if CLIENT then
 		end
 	end)
 end
+
+/* --- ----------------------------------------------------------------------------------------------------------------------------------------------
+	@: Duplicator 
+   --- */
+
+ if SERVER then
+
+	hook.Add( "Expadv.BuildDupeInfo", "expadv.screen", function( Ent, DupeTable )
+		if ExpVars[Ent:EntIndex()] then
+			local DupeVars = {}
+			DupeTable.ExpVars = DupeVars
+
+			for Type, Vars in pairs(ExpVars[Ent:EntIndex()]) do
+				local VarTable = {}
+				DupeVars[Type] = VarTable
+
+				for ID, Value in pairs(Vars) do
+					if Type == "ENTITY" then
+						if !IsValid(Value) then continue end
+						Value = Value:EntIndex()
+					end
+
+					VarTable[ID] = Value
+				end
+			end
+		end
+	end )
+
+	hook.Add( "Expadv.PasteDupeInfo", "expadv.screen", function( Ent, DupeTable, FromID )
+		if DupeTable.ExpVars then
+			for Type, Vars in pairs(DupeTable.ExpVars) do
+				for ID, Value in pairs(Vars) do
+					if Type == "ENTITY" then Value = FromID(Value) end
+					Ent:SetExpVar(Type, ID, Value, true)
+				end
+			end
+		end
+	end )
+ end

@@ -7,12 +7,18 @@ ENT.Base 					= "expadv_base"
 ENT.ExpAdv 					= true
 ENT.AutomaticFrameAdvance  	= true
 
+ENT.EXPADV_GATE				= ENT
+
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Queded Compiler
    --- */
 
 function ENT:CompileScript(Root, Files)
 
+	if EXPADV.ReadSetting( "compile_rate", 60 ) <= 0 then
+		return self.EXPADV_BASE.CompileScript(self, Root, Files)
+	end
+	
 	if self:IsRunning( ) then
 		self.Context:ShutDown( )
 		EXPADV.UnregisterContext( self.Context )
@@ -89,7 +95,7 @@ function ENT:SetupDataTables( )
 	self:AddExpVar( "FLOAT", 3, "Average" )
 	self:AddExpVar( "FLOAT", 4, "ServerState" )
 	self:AddExpVar( "FLOAT", 5, "ServerLoaded" )
-
+	
 	self:AddExpVar( "STRING", 1, "GateName" )
 	self:AddExpVar( "ENTITY", 1, "LinkedPod" )
 
@@ -153,10 +159,6 @@ function ENT:SetState( State )
 	end
 end
 
-function ENT:PostStartUp( )
-	self:SetState( EXPADV_STATE_ONLINE )
-end
-
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: Think
    --- */
@@ -174,23 +176,15 @@ function ENT:Think( )
 
 	    if self:GetServerState(EXPADV_STATE_OFFLINE) >= EXPADV_STATE_CRASHED then SpinSpeed = 0 end
 	    
-	    self.SpinSpeed = SpinSpeed + math.Clamp( Percent - SpinSpeed, -0.1, 0.1 )
+	    self.SpinSpeed = SpinSpeed + math.Clamp( Percent - SpinSpeed, -0.33, 0.33 )
 
 	    self:SetPlaybackRate( self.SpinSpeed )
 
-	    self:ResetSequence( self:LookupSequence( self.SpinSpeed <= 0 and "idle" or "spin" ) )
+	    local Sequence = self:LookupSequence(self.SpinSpeed <= 0 and "idle" or "spin")
+	    -- if Sequence ~= self:GetSequence() then
+	    	self:ResetSequence(Sequence)
+	    -- end
 	end
-
-	if self.Compiler_Instance then
-		if self.Compiler_Instance.Running then
-			self.Compiler_Instance:Resume( )
-		else
-			self.Compiler_Instance = nil
-		end
-	end
-
-	self:NextThink(CurTime() + 1)
-	return true
 end
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -273,7 +267,6 @@ end
 
 function ENT:NotifiOwner( Message, Type, Duration )
 	if !IsValid( self.player ) then return end
-	
 	EXPADV.Notifi( self.player, Message, Type, Duration )
 end
 

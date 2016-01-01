@@ -24,6 +24,8 @@ function EXPADV.LoadFeatures( )
 
 		EXPADV.Features[Feature.Name] = Feature
 	end
+
+	EXPADV.CallHook( "PostLoadFeatures" )
 end
 
 /* --- --------------------------------------------------------------------------------
@@ -41,9 +43,7 @@ hook.Add( "Expadv.PreLoadFunctions", "expadv.features",
 	function( )
 		EXPADV.ClientOperators( )
 		EXPADV.AddInlineFunction( nil, "canAccessFeature", "s", "b", "EXPADV.EntityCanAccessFeature(Context.entity, @value 1)")
-		/*EXPADV.AddFunctionHelper( "canAccessFeature", "s", "Returns true if the entity can access the given feature." )
-			Need to know how to do this.
-		*/
+		EXPADV.AddFunctionHelper( nil, "canAccessFeature", "s", "Returns true if the entity can access the given feature." )	
 	end )
 
 if SERVER then return end
@@ -63,13 +63,11 @@ if SERVER then return end
 	@: Features
    --- */
 
-require("von")
-
 local DB = { }
 
 hook.Add( "Expadv.PostLoadCore", "expadv.features", function( )
 	if file.Exists("expadv/features.txt", "DATA") then
-		DB = von.deserialize(file.Read("expadv/features.txt", "DATA") or "")
+		DB = EXPADV.von.deserialize(file.Read("expadv/features.txt", "DATA") or "")
 	end
 end )
 
@@ -80,7 +78,7 @@ function EXPADV.SetAccessToFeature( Player, Feature, bBool )
 		local Steam = Player:SteamID()
 		DB[Steam] = DB[Steam] or { }
 		DB[Steam][Feature] = bBool and 1 or 0
-		file.Write("expadv/features.txt", von.serialize( DB ) )
+		file.Write("expadv/features.txt", EXPADV.von.serialize( DB ) )
 	end
 end
 
@@ -102,7 +100,7 @@ function EXPADV.SetGlobalAccessToFeature( Feature, bBool )
 	
 	DB["GLOBAL"] = DB["GLOBAL"] or { }
 	DB["GLOBAL"][Feature] = bBool and 1 or 0
-	file.Write("expadv/features.txt", von.serialize( DB ) )
+	file.Write("expadv/features.txt", EXPADV.von.serialize( DB ) )
 end
 
 function EXPADV.GetGlobalAccessToFeature( Feature )
@@ -149,14 +147,6 @@ function EXPADV.CanAccessFeature( Entity, Feature )
 
 	if Entity.player == LocalPlayer() then return true end
 
-	if Entity.GetLinkedPod then
-		local Pod = Entity:GetLinkedPod()
-
-		if IsValid(Pod) and !(Pod:GetDriver() ~= LocalPlayer()) then
-			return true
-		end
-	end
-
 	if EXPADV.GetGlobalAccessToFeature( Feature ) then return true end
 
 	if EXPADV.GetAccessToFeature( Entity.player, Feature ) then return true end
@@ -194,8 +184,19 @@ hook.Add( "Expadv.RegisterContext", "expadv.context", function( Context )
 end )
 
 function EXPADV.EntityCanAccessFeature(Entity, Feature)
-	if !Memory[Entity] then return false end
-	return Memory[Entity][Feature] or false
+	local Access = (Memory[Entity] and Memory[Entity][Feature]) or false
+
+	if Access then
+		return true
+	/*elseif Entity.GetLinkedPod then
+		local Pod = Entity:GetLinkedPod()
+
+		if IsValid(Pod) and !(Pod:GetDriver() ~= LocalPlayer()) then
+			return !EXPADV.IsFeatureBlockedForEntity(Entity, Feature)
+		end -- Lets make it show the menu when they enter instead :D*/
+	end
+
+	return false
 end
 
 /* --- --------------------------------------------------------------------------------
@@ -364,6 +365,6 @@ end
 
 hook.Add( "Expadv.OpenContextMenu", "expadv.features",
 	function( Entity, Menu, Trace, Option )
-		Menu:AddOption("Show Features", function() EXPADV.ShowFeatures(Entity) end)
+		Menu:AddOption("Edit Features", function() EXPADV.ShowFeatures(Entity) end)
 	end )
 
