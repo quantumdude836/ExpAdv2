@@ -84,7 +84,7 @@ Component:AddPreparedFunction("hasValue", "ar:vr", "b", [[
 			Context:Throw(@trace, "array", "variant not of array type, " .. @value 1.__type .. " expected got " .. EXPADV.TypeName(@value 2[2]))
 		end
 		
-		@value 2 = @value 2[1]
+		@value 2 = @value 2[2]
 	end
 
 	@define found = false
@@ -94,7 +94,7 @@ Component:AddPreparedFunction("hasValue", "ar:vr", "b", [[
 		if @value 1.__type == "_vr" then v = v[1] end
 		if v == @value 2 then @found = true; break end
 	end
-]], "@found")
+end]], "@found")
 
 Component:AddFunctionHelper("hasValue", "ar:vr", "Checks if the given value is in the given array.")
 
