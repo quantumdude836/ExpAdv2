@@ -106,6 +106,12 @@ end]], "@Ret" )
 
 Component:AddInlineFunction( "inertia", "p:", "v", "(IsValid(@value 1) and (@value 1:GetInertia( )) or Vector(0, 0, 0) )" )
 
+Component:AddPreparedFunction( "setInertia", "p:v", "", [[
+	if @value 1:IsValid() then
+		if @value 2 == Vector(0, 0, 0) then Context:Throw(@trace, "physics", "inertia cannot be set to Vector(0,0,0)" ) end
+		@value 1:SetInertia(@value 2)
+	end
+	]] )
 /* --- --------------------------------------------------------------------------------
 	@: Bearing and Elevation
    --- */
@@ -289,6 +295,7 @@ Component:AddFunctionHelper( "bearing", "p:v", "Returns the bearing between a ph
 Component:AddFunctionHelper( "applyOffsetForce", "e:v,v", "Applies an offset vector force to an entity." )
 Component:AddFunctionHelper( "right", "p:", "Returns the right vector of a physics object." )
 Component:AddFunctionHelper( "inertia", "p:", "Returns the inertia of a physics object as a vector" )
+Component:AddFunctionHelper( "setInertia", "p:v", "Sets the inertia of a physics object to a specified vector" )
 Component:AddFunctionHelper( "ang", "p:", "Returns the angles PYR of a physics object." )
 Component:AddFunctionHelper( "forward", "p:", "Returns the forward vector of a physics object." )
 Component:AddFunctionHelper( "mass", "p:", "Returns the mass of a physics object." )
