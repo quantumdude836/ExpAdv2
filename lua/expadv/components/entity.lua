@@ -380,6 +380,17 @@ Component:AddFunctionHelper( "isfrozen", "e:", "Returns if the given entity is f
 Component:AddInlineFunction( "inertia", "e:", "v", "((@value 1:IsValid() && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType( )== $MOVETYPE_VPHYSICS) and @value 1:GetPhysicsObject():GetInertia() or Vector(0,0,0))")
 Component:AddFunctionHelper( "inertia", "e:", "Returns the inertia of the given entity.")
 
+Component:AddPreparedFunction( "setInertia", "e:v", "", [[
+	if @value 1:IsValid() && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType( )== $MOVETYPE_VPHYSICS then
+		if @value 2 == Vector(0, 0, 0) then Context:Throw(@trace, "entity", "inertia cannot be set to Vector(0,0,0)" ) end
+		@value 1:GetPhysicsObject():SetInertia(@value 2)
+	end
+	]] )
+Component:AddFunctionHelper( "setInertia", "e:v", "Sets the inertia of the given entity to the specified vector" )
+
+Component:AddInlineFunction( "stress", "e:", "n", "((@value 1:IsValid() && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType( )== $MOVETYPE_VPHYSICS) and @value 1:GetPhysicsObject():GetStress() or 0)")
+Component:AddFunctionHelper( "stress", "e:", "Returns the stress of the given entity.")
+
 Component:AddInlineFunction( "vel", "e:", "v", "(@value 1:IsValid() and @value 1:GetVelocity() or Vector(0,0,0))")
 Component:AddFunctionHelper( "vel", "e:", "Returns the velocity of the given entity.")
 

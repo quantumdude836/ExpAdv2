@@ -109,13 +109,14 @@ end
 
 Component:AddPreparedFunction("hasValue", "t:vr", "b", [[
 	@define found = false
-	for k, v in pairs(@value 1) do
-		if(v == @value 2) then
+	@value 2 = @value 2[1]
+	for k, v in pairs(@value 1.Data) do
+		if (v == @value 2) then
 			@found = true
 			break
 		end
 	end
-end]], "@found")
+]], "@found")
 
 Component:AddFunctionHelper( "type", "t:n", "Returns the type of obect stored in table at index." )
 Component:AddFunctionHelper( "type", "t:s", "Returns the type of obect stored in table at index." )
