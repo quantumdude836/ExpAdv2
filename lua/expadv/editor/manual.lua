@@ -88,6 +88,8 @@ local PANEL = { }
 		else
 			self.Label:SetText( self.LabelText )
 		end
+
+		self.Contents:SortByColumn( 3 ) -- Universal almost for all EA_HelpList blocks
 	end
 
 vgui.Register( "EA_HelpList", PANEL, "DPanel" )
