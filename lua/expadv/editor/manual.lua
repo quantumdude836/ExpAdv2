@@ -101,7 +101,7 @@ function PANEL:MakeInfoSheet( )
 	self.Sheet_Info = self:Add( "EA_HelpList" )
 	self.Sheet_Info:SetLabel( "Information" )
 
-	self.Sheet_Info:AddColumn( "", 60 )
+	self.Sheet_Info:AddColumn( "", 100 )
 	self.Sheet_Info:AddColumn( "" )
 end
 
@@ -132,7 +132,7 @@ function PANEL:MakeOperatorSheet( )
 	self.Sheet_Operator:AddColumn( "Avalibility", 60 )
 	self.Sheet_Operator:AddColumn( "Operator",  70 )
 	self.Sheet_Operator:AddColumn( "Return",  60 )
-	self.Sheet_Operator:AddColumn( "Example" )
+	self.Sheet_Operator:AddColumn( "Example", 300 )
 	self.Sheet_Operator:AddColumn( "Description" )
 end
 
@@ -148,7 +148,7 @@ function PANEL:MakeFunctionSheet( )
 
 	self.Sheet_Function:AddColumn( "Avalibility", 60 )
 	self.Sheet_Function:AddColumn( "Return", 60 )
-	self.Sheet_Function:AddColumn( "Function" )
+	self.Sheet_Function:AddColumn( "Function", 300 )
 	self.Sheet_Function:AddColumn( "Description" )
 end
 
@@ -164,7 +164,7 @@ function PANEL:MakeMethodSheet( )
 
 	self.Sheet_Method:AddColumn( "Avalibility", 60 )
 	self.Sheet_Method:AddColumn( "Return", 60 )
-	self.Sheet_Method:AddColumn( "Method" )
+	self.Sheet_Method:AddColumn( "Method", 300 )
 	self.Sheet_Method:AddColumn( "Description" )
 end
 
@@ -180,7 +180,7 @@ function PANEL:MakeEventSheet( )
 
 	self.Sheet_Event:AddColumn( "Avalibility", 60 )
 	self.Sheet_Event:AddColumn( "Return", 60 )
-	self.Sheet_Event:AddColumn( "Event" )
+	self.Sheet_Event:AddColumn( "Event", 300 )
 	self.Sheet_Event:AddColumn( "Description" )
 end
 
