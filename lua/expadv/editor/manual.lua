@@ -373,9 +373,9 @@ function EXPADV.Editor.OpenHelper( )
 
 		TabSheet:AddSheet( "Components", ComponentTabSheet, nil, true, true, "Components & Classes" )
 		TabSheet:AddSheet( "Browser", BrowserCanvas, nil, true, true, "Browse" )
-		TabSheet:AddSheet( "Wiki and Syntax", WikiTabSheet, nil, true, true, "Syntax documentation." )
-		TabSheet:AddSheet( "Examples", ExamplesTabSheet, nil, true, true, "Example Codes." )
-		TabSheet:AddSheet( "Tutorial", GuideTabSheet, nil, true, true, "EXPADV2 For Dummies." )
+		TabSheet:AddSheet( "Wiki and Syntax", WikiTabSheet, nil, true, true, "Syntax documentation" )
+		TabSheet:AddSheet( "Examples", ExamplesTabSheet, nil, true, true, "Example Codes" )
+		TabSheet:AddSheet( "Tutorial", GuideTabSheet, nil, true, true, "EXPADV2 For Dummies" )
 
 	-- COMPONENTS & CLASSES:
 
@@ -504,7 +504,7 @@ function EXPADV.Editor.OpenHelper( )
 			local Page = Frame:GetComponentPanel( Component.Name )
 
 			Page:GetInfoSheet( ):AddLine( "Component", Component.Name )
-			Page:GetInfoSheet( ):AddLine( "Author", Component.Author or "Unkown" ) 
+			Page:GetInfoSheet( ):AddLine( "Author", Component.Author or "Unknown" ) 
 			Page:GetInfoSheet( ):AddLine( "Status", Component.Enabled and "Enabled" or "Disabled" )
 			Page:GetInfoSheet( ):AddLine( "Description", Component.Description or "N/A" )
 
