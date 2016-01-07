@@ -502,7 +502,13 @@ function EXPADV.Editor.OpenHelper( )
 			Frame:SetActiveComponentPage( "core" )
 		end
 
-		for _, Component in pairs( EXPADV.Components ) do
+		local SortedComp = {}
+		for _, Comp in pairs( EXPADV.Components ) do
+			table.insert( SortedComp, Comp )
+		end
+		table.SortByMember( SortedComp, "Name", true )
+
+		for _, Component in ipairs( SortedComp ) do
 			local Page = Frame:GetComponentPanel( Component.Name )
 
 			Page:GetInfoSheet( ):AddLine( "Component", Component.Name )
