@@ -59,6 +59,17 @@ local PANEL = { }
 	function PANEL:Search( Query )
 		self.Contents:Clear( )
 
+		local Desc_Col = 0
+		for i = 6, 1, -1 do
+			local Column = self.Contents.Columns[i]
+			if IsValid( Column ) then
+				if Column.Header:GetText() == "Description" then
+					Desc_Col = i
+					break
+				end
+			end
+		end
+
 		local TotalResults = 0
 
 		for I = 1, #self.Lines do
@@ -78,7 +89,11 @@ local PANEL = { }
 			if !AddLine then continue end
 
 			TotalResults = TotalResults + 1
-			self.Contents:AddLine( Line[1], Line[2], Line[3], Line[4], Line[5], Line[6] )
+			local Row = self.Contents:AddLine( Line[1], Line[2], Line[3], Line[4], Line[5], Line[6] )
+			
+			if Desc_Col > 1 then
+				Row:SetTooltip( ( Line[Desc_Col - 1] or "" ) .."\n\n".. ( Line[Desc_Col] or "No description" ) )
+			end
 		end
 
 		if TotalResults == 0 then
