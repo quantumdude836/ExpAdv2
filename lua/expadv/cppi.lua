@@ -60,11 +60,12 @@ local UIDCach = { } -- Because UniqueID is slow and isn't cached, Fix it *KILLBU
 local ObjectOwners, Friends = { }, { }
 
 function EXPADV.GetOwner( Entity )
-	if !IsValid( Entity ) or !ObjectOwners[Entity] then return end
-
-	local Owner = player.GetByUniqueID( ObjectOwners[Entity] )
-	if !IsValid( Owner ) then return end
-
+	if !IsValid( Entity ) then return end
+	
+	local Owner -- For some reason ObjectOwners is not filling with Wire entities, ...
+	if Entity.IsWire then Owner = WireLib.GetOwner( Entity ) -- so we use WireLib function
+	elseif ObjectOwners[Entity] then Owner = player.GetByUniqueID( ObjectOwners[Entity] ) end
+	
 	return Owner
 end
 
