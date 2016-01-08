@@ -611,16 +611,28 @@ function EXPADV.Editor.OpenHelper( )
 		local RootClassNode = NodeList:AddNode( "Classes" )
 		RootClassNode:SetIcon( "fugue/rocket-fly.png" )
 
+		-- Preparation hack for SortedPairs
+		local LongToShort = {}
+		local ClNew = {}
 		for Short, Panel in pairs( ClassPanels ) do
+			local Unit = EXPADV.GetClass( Short )
+			local Long
+			if Unit ~= nil then Long = Unit.Name
+			else Long = "unknown:".. Short end
+			LongToShort[Long] = Short
+			ClNew[Long] = Panel
+		end
 
-			local Class = EXPADV.GetClass(Short)
+		for Long, Panel in SortedPairs( ClNew ) do
+			local Short = LongToShort[Long]
+			local Class = EXPADV.GetClass( Short )
 			local Page = Frame:GetClassPanel( Short )
 
 			if !Class or !Page then
 				continue
 			end
 
-			Page:GetInfoSheet( ):AddLine( "Class", Class.Name )
+			Page:GetInfoSheet( ):AddLine( "Class", Long )
 			Page:GetInfoSheet( ):AddLine( "Extends", Class.DerivedClass and Class.DerivedClass.Name or "generic" ) 
 			Page:GetInfoSheet( ):AddLine( "Component", Class.Component and Class.Component.Name or "Core" )
 			Page:GetInfoSheet( ):AddLine( "Avalibility", GetAvalibility( Class ) )
@@ -632,14 +644,14 @@ function EXPADV.Editor.OpenHelper( )
 				ComponentNode.ClassNode:SetIcon( "fugue/rocket-fly.png" )
 			end
 
-			local Node = ComponentNode.ClassNode:AddNode( Class.Name )
+			local Node = ComponentNode.ClassNode:AddNode( Long )
 			Node:SetIcon( "fugue/block.png" )
 
 			function Node:DoClick( )
 				Frame:SetActiveClassPage( Short )
 			end
 
-			local Node = RootClassNode:AddNode( Class.Name )
+			local Node = RootClassNode:AddNode( Long )
 			Node:SetIcon( "fugue/block.png" )
 
 			function Node:DoClick( )
