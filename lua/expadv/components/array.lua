@@ -2,7 +2,7 @@
 	@: Array Component
    ---	*/
 
-local Component = EXPADV.AddComponent( "arrays" , true )
+local Component = EXPADV.AddComponent( "arays" , true )
 
 Component.Author = "Rusketh"
 Component.Description = "Adds array objects."
