@@ -205,12 +205,12 @@ end
 function PANEL:Think( )
 	local Tall = self.Expanded and 75 or 50
 
-	self.T = self.T + math.Clamp( Tall - self.T, -2, 2 )
+	self.T = self.T + math.Clamp( Tall - self.T, -10, 10 )
 	self:SetTall( self.T )
 
 	local Dest = self.Extended and 5 or -(self:GetTall() + 5)
 	
-	self.Y = self.Y + math.Clamp( Dest - self.Y, -2, 2 )
+	self.Y = self.Y + math.Clamp( Dest - self.Y, -10, 10 )
 	self:SetPos( self:GetPos( ), self.Y )
 end
 
