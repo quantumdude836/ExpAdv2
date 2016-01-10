@@ -381,7 +381,7 @@ Component:AddInlineFunction( "inertia", "e:", "v", "((@value 1:IsValid() && @val
 Component:AddFunctionHelper( "inertia", "e:", "Returns the inertia of the given entity.")
 
 Component:AddPreparedFunction( "setInertia", "e:v", "", [[
-	if @value 1:IsValid() && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType( )== $MOVETYPE_VPHYSICS then
+	if @value 1:IsValid() && @value 1:GetPhysicsObject():IsValid() && @value 1:GetMoveType( )== $MOVETYPE_VPHYSICS && EXPADV.PPCheck(Context,@value 1) then
 		if @value 2 == Vector(0, 0, 0) then Context:Throw(@trace, "entity", "inertia cannot be set to Vector(0,0,0)" ) end
 		@value 1:GetPhysicsObject():SetInertia(@value 2)
 	end
