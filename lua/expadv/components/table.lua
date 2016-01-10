@@ -140,11 +140,12 @@ Component:AddFunctionHelper("hasValue", "t:vr", "Checks if the given value is in
 local Unpack
 
 function Unpack( Context, Trace, Table, Index )
-	local Object = Table.Data[Index or 1]
+	Index = Index or 1
+	local Object = Table.Data[Index]
 
-	if Object ~= nil then return end
+	if Object == nil then return end
 	
-	return { Object, Table.Types[Index] }, Unpack( Context, Trace, Table, (Index or 1) + 1 )
+	return { Object, Table.Types[Index] }, Unpack( Context, Trace, Table, Index + 1 )
 end
 
 
