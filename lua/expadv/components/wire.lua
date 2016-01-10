@@ -255,6 +255,7 @@ Component:AddFunctionHelper( "outputType", "wl:s", "Returns the wiretype of an o
 Component:AddFunctionHelper( "hasInput", "wl:s", "Returns true if the linked component has an input of the specified name." )
 Component:AddFunctionHelper( "isHiSpeed", "wl:", "Returns true if the wirelinked object supports the HiSpeed interface. See wiremod wiki for more information." )
 Component:AddFunctionHelper( "inputType", "wl:s", "Returns the wiretype of an input on the linked component." )
+Component:AddFunctionHelper( "linkWireIO", "e,s,e,s", "Wires input of first `entity` to output of second. 1st `string` - input, 2nd - output name. Returns true on success." )
 
 /* --- --------------------------------------------------------------------------------
 	@: Events
