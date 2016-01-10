@@ -240,7 +240,7 @@ Component:AddInlineFunction( "time", "s", "n", "$tonumber( $os.date(\"!*t\")[ @v
 Component:AddFunctionHelper( "time", "s", "Returns the current time is unit S." )
 
 /* --- --------------------------------------------------------------------------------
-	@: Apparently we need unit convershion
+	@: Apparently we need unti convershion
    --- */
 local UnitSpeed = {
 	["u/s"] = 1 / 0.75,
