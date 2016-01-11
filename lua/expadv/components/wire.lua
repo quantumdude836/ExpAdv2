@@ -6,7 +6,7 @@ if !WireLib then return end
 
 local Component = EXPADV.AddComponent( "wire" , true )
 
-Component.Author = "Rusketh"
+Component.Author = "Rusketh, VINTproYKT"
 Component.Description = "Adds basic wiremod and wirelink support."
 
 EXPADV.ServerOperators( )
@@ -88,6 +88,22 @@ end
 /* --- --------------------------------------------------------------------------------
 	@: Functions
    --- */
+
+local function GetOwner( Entity )
+	if !IsValid( Entity ) return nil end
+	local Owner
+	if Entity.IsWire then Owner = WireLib.GetOwner( Entity )
+	else Owner = EXPADV.GetOwner( Entity ) end
+	return Owner
+end
+local function PPCheck( Context, Entity )
+	if !IsValid( Entity ) return false end
+	if IsValid( Context.entity ) and Context.entity.Scripted then return true end
+	if !IsValid( Context.player ) then return false end
+
+	local Owner = GetOwner( Entity )
+	return Owner == Context.player or EXPADV.IsFriend( Context.player, Owner )
+end
 
 Component:AddVMFunction( "hasInput", "wl:s", "b", function( Context, Trace, WireLink, Index )
 		return IsValid( WireLink ) and WireLink.Inputs and WireLink.Inputs[Index]
@@ -198,7 +214,7 @@ end
 Component:AddVMFunction( "writeStringZero", "wl:n,s", "n", WriteStringZero )
 Component:AddVMFunction( "readStringZero", "wl:n", "s", ReadStringZero )
 
-function linkWireIO( Dst, DstId, Src, SrcId ) -- Baked: unified global function that can be then used in the whole code
+function linkWireIO( Dst, DstId, Src, SrcId )
 	/* Modified version:
 		local function Wire_Link - as spotted in lua/wire/server/wirelib.lua */
 
@@ -237,7 +253,7 @@ function EXPADV.linkWireIO( Context, Trace, Dst, DstId, Src, SrcId )
 	if !IsValid(Src) or !WireLib.HasPorts(Src) or !Src.Outputs then Context.Throw( Trace, "linkWireIO", tostring( Src ) .." has no wire outputs" ) end
 	if !Dst.Inputs[DstId] then Context.Throw( Trace, "linkWireIO", tostring( Dst ) .." has no `".. DstId .."` input" ) end
 	if !Src.Outputs[SrcId] then Context.Throw( Trace, "linkWireIO", tostring( Src ) .." has no `".. SrcId .."` output" ) end
-	if !EXPADV.PPCheck( Context, Dst ) || !EXPADV.PPCheck( Context, Src ) then return end
+	if !PPCheck( Context, Dst ) || !PPCheck( Context, Src ) then return end
 	linkWireIO( Dst, DstId, Src, SrcId )
 	return true
 end

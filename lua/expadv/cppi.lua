@@ -62,9 +62,8 @@ local ObjectOwners, Friends = { }, { }
 function EXPADV.GetOwner( Entity )
 	if !IsValid( Entity ) then return end
 	
-	local Owner -- For some reason ObjectOwners is not filling with Wire entities, ...
-	if Entity.IsWire then Owner = WireLib.GetOwner( Entity ) -- so we use WireLib function
-	elseif Entity.ExpAdv then Owner = Entity.player
+	local Owner
+	if Entity.ExpAdv then Owner = Entity.player
 	elseif ObjectOwners[Entity] then Owner = player.GetByUniqueID( ObjectOwners[Entity] ) end
 	
 	return Owner
