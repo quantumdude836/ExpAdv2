@@ -90,14 +90,13 @@ end
    --- */
 
 local function GetOwner( Entity )
-	if !IsValid( Entity ) return nil end
+	if !IsValid( Entity ) then return nil end
 	local Owner
 	if Entity.IsWire then Owner = WireLib.GetOwner( Entity )
 	else Owner = EXPADV.GetOwner( Entity ) end
 	return Owner
 end
 local function PPCheck( Context, Entity )
-	if !IsValid( Entity ) return false end
 	if IsValid( Context.entity ) and Context.entity.Scripted then return true end
 	if !IsValid( Context.player ) then return false end
 
