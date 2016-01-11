@@ -99,12 +99,13 @@ Component:AddInlineFunction( "type", "t:s", "s", "EXPADV.TypeName(@value 1.Types
 Component:AddInlineFunction( "type", "t:e", "s", "EXPADV.TypeName(@value 1.Types[@value 2])" )
 
 Component:AddPreparedFunction("connect", "t:t", "t", [[
-@value 1.Size = @value 1.Size + @value 2.Size
-@value 1.Count = @value 1.Count + @value 2.Count
-for I=1,#@value 1.Data,1 do
-	@value 1.Data[#@value 1.Data+1] = @value 2.Data[I]
-	@value 1.Types[#@value 1.Types+1] = @value 2.Types[I]
-end
+	for K, V in pairs( @value 2.Look ) do
+		if @value 1.Data[K] == nil then @value 1.Size = @value 1.Size + 1 end
+		@value 1.Data[K] = @value 2.Data[K]
+		@value 1.Types[K] = @value 2.Types[K]
+		@value 1.Look[K] = K
+		if type( K ) == "number" then @value 1.Count = math.max( K, @value 1.Count ) end
+	end
 ]],"@value 1")
 
 Component:AddPreparedFunction("hasValue", "t:vr", "b", [[
