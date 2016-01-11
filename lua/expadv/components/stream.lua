@@ -236,7 +236,7 @@ Component:AddVMFunction( "readColor", "st:", "c", function( Context, Trace, Stre
 
 	local Value = Stream.V[Stream.R]
 
-	return { Value.r, Value.g, Value.b, Value.a }
+	return { r = Value.r, g = Value.g, b = Value.b, a = Value.a }
 end )
 
 Component:AddVMFunction( "readStream", "st:", "st", function( Context, Trace, Stream )

@@ -87,7 +87,7 @@ Component:AddInlineOperator( "string", "c", "s", "string.format( \"Color(%i, %i,
    --- */
 
 ColorObj:AddVMOperator( "=", "n,c", "", function( Context, Trace, MemRef, Value )
-	local Prev = Context.Memory[MemRef] or Color( 0, 0 , 0, 0 )
+	local Prev = Context.Memory[MemRef] or Color( 0, 0, 0, 0 )
 
 	Context.Memory[MemRef] = Value
 	Context.Delta[MemRef] = Color( Prev.r - Value.r, Prev.g - Value.g, Prev.b - Value.b, Prev.a - Value.a )
