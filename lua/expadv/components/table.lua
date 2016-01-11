@@ -100,10 +100,7 @@ Component:AddInlineFunction( "type", "t:e", "s", "EXPADV.TypeName(@value 1.Types
 
 Component:AddPreparedFunction("connect", "t:t", "t", [[
 	for K, V in pairs( @value 2.Look ) do
-		if @value 1.Data[K] == nil then
-			MsgN( K )
-			@value 1.Size = @value 1.Size + 1
-		end
+		if @value 1.Data[K] == nil then @value 1.Size = @value 1.Size + 1 end
 		@value 1.Data[K] = @value 2.Data[K]
 		@value 1.Types[K] = @value 2.Types[K]
 		@value 1.Look[K] = K
