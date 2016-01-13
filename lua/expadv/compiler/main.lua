@@ -391,6 +391,7 @@ end
 
 function Compiler:FindCell( Trace, Variable, bError )
 	for Scope = self.ScopeID, 0, -1 do
+		if Scope == 0 then PrintTable(self.Scopes[ Scope ]) end
 		local MemRef = self.Scopes[ Scope ][ Variable ]
 		
 		if MemRef then
@@ -474,8 +475,8 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier, Comparator )
 		else
 			MemRef = self:NextMemoryRef( )
 
-			self.Global[ MemRef ] = { Variable = Variable, Memory = MemRef, Scope = 0, Return = ClassObj.Short, ClassObj = ClassObj, Modifier = "global", Server = self.IsServerScript, Client = self.IsClientScript }
-			self.Cells[ MemRef ] = self.Global[ MemRef ]
+			self.Global[ Variable ] = MemRef
+			self.Cells[ MemRef ] = { Variable = Variable, Memory = MemRef, Scope = 0, Return = ClassObj.Short, ClassObj = ClassObj, Modifier = "global", Server = self.IsServerScript, Client = self.IsClientScript }
 		end
 
 		if self.Scope[ Variable ] then
@@ -484,7 +485,7 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier, Comparator )
 
 		self.Scope[ Variable ] = MemRef
 
-		return self.Global[ MemRef ]
+		return self.Cells[ MemRef ]
 	end
 
 	/*if Modifier == "synced" then
