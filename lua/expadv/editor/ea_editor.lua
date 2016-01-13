@@ -251,11 +251,14 @@ function PANEL:MovePosition( caret, offset )
 			end
 		end
 	end
-
 	return caret
 end
 
 function PANEL:ScrollCaret( )
+	if !self.Rows[self.Caret.x] then
+		self.Caret.x = self.Caret.x - 1
+		self.Caret.y = #self.Rows[self.Caret.x] + 1
+	end
 	if self.Caret.x - self.Scroll.x < 1 then
 		self.Scroll.x = self.Caret.x - 1
 		if self.Scroll.x < 1 then self.Scroll.x = 1 end
@@ -327,8 +330,11 @@ function PANEL:GetArea( selection )
 		for i = start.x + 1, stop.x - 1 do
 			text = text .. "\n" .. self.Rows[i]
 		end
-
-		return text .. "\n" .. string_sub( self.Rows[stop.x], 1, stop.y - 1 )
+		if self.Rows[stop.x] then
+			return text .. "\n" .. string_sub( self.Rows[stop.x], 1, stop.y - 1 )
+		else
+			return text
+		end
 	end
 end
 
