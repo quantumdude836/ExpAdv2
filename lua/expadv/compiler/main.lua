@@ -490,7 +490,7 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier, Comparator )
 
 	/*if Modifier == "synced" then
 		if !ClassObj.WriteToNet or !ClassObj.ReadFromNet then
-			self:TraceError( Trace, "Synced variables of class %q are not supported.", Class )
+			self:TraceError( Trace, "Synced variables of class %q are not supported.", ClassObj.Name )
 		end
 
 		local MemRef = self.Scope[ Variable ]
@@ -521,7 +521,7 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier, Comparator )
 
 		if Modifier == "input" then
 			if !ClassObj.Wire_in_type then
-				self:TraceError( Trace, "Wire inputs of class %q are not supported.", Class )
+				self:TraceError( Trace, "Wire inputs of class %q are not supported.", ClassObj.Name )
 			end
 
 			local MemRef = self.InPorts[ Variable ]
@@ -546,7 +546,7 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier, Comparator )
 
 		if Modifier == "output" then
 			if !ClassObj.Wire_out_type then
-				self:TraceError( "Wire outputs of class %q are not supported.", Class )
+				self:TraceError( Trace, "Wire outputs of class %q are not supported.", ClassObj.Name )
 			end
 
 			local MemRef = self.OutPorts[ Variable ]
