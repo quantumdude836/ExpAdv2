@@ -693,6 +693,62 @@ function PANEL:ToggleVoice( )
 end
 
 ------------------------------------------------------------------------------------------------------
+--		Auto Refresh
+------------------------------------------------------------------------------------------------------
+function PANEL:DoAutoRefresh()
+	for File, Tab in pairs(self.FileTabs) do
+		File = "expadv2/" .. File
+
+		if file.Exists(File, "DATA") then
+			local Panel = Tab.Editor
+
+			local RawFile = file.Read(File, "DATA")
+
+			if RawFile then
+				 local Title, NewCode = string.match( RawFile, "(.+)(.+)" )
+
+				 if !NewCode then NewCode = RawFile end
+
+				 local Hash = util.CRC(NewCode)
+
+				 if Tab.RefreshHash and Hash == Tab.RefreshHash then continue end
+				 
+				 Tab.RefreshHash = Hash
+
+				 if NewCode and NewCode != Panel:GetCode() then
+					//Tab has been updated.
+					local Message = string.format("File %q has been changed outside of the editor, would you like to refresh?", File)
+
+					local YesFunc = function()
+						if !IsValid(Panel) then return end
+
+						--Panel:SelectAll() 
+						--Panel:SetSelection(NewCode) -- this is an impossible error :D
+						--Panel:SetCaret(Vector2(0, 0))
+
+						Panel:SetCode(NewCode)
+					end
+
+					local Window = Derma_Query( Message, "Update tab?", "Refresh", YesFunc, "Ignore", function() end)
+					
+					timer.Simple(30, function()
+						if IsValid(Window) then Window:Close() end
+					end)
+				end
+			end
+		end
+	end
+end
+
+timer.Create("ExpAdv2.Editor.Refresh", 3, 0, function()
+	local Editor = EXPADV.Editor
+	
+	if !Editor or !Editor.Instance then return end
+
+	Editor.Instance:DoAutoRefresh()
+end)
+
+------------------------------------------------------------------------------------------------------
 --		NEW VALIDATOR
 ------------------------------------------------------------------------------------------------------
 
@@ -747,3 +803,5 @@ function PANEL:ResumeValidator( )
 end
 
 vgui.Register( "EA_EditorPanel", PANEL, "EA_Frame" )
+
+
