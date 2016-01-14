@@ -327,6 +327,20 @@ end
    		return Memory
    end
 
+   function Compiler:PushVarg(State)
+   		self.VargDeph = self.VargDeph + 1
+   		self.VargMemory[ self.VargDeph ] = State or false
+   		self.VarArgsAvalible = State or false
+   end
+
+   function Compiler:PopVarg( )
+   		local Memory = self.FreshMemory[ self.VargDeph ]
+   		self.VargMemory[ self.VargDeph ] = nil
+   		self.VargDeph = self.VargDeph - 1
+   		self.VarArgsAvalible = Memory
+   		return Memory
+   end
+
    function Compiler:PushLoopDeph( )
    		self:PushMemory( )
    		self.LoopDeph = self.LoopDeph + 1
@@ -790,8 +804,8 @@ function EXPADV.CreateCompiler(Script, Files)
 	self:BuildScopes()
 	self.Delta, self.Memory = { }, { }
 	self.Cells, self.SyncVars, self.InPorts, self.OutPorts = { }, { }, { }, { }
-	self.FreshMemory, self.MemoryDeph, self.LambdaDeph, self.LoopDeph = { }, 0, 0, 0
-	self.ReturnOptional, self.ReturnTypes, self.ReturnDeph = { }, { }, 0
+	self.FreshMemory, self.MemoryDeph, self.LambdaDeph, self.LoopDeph, self.VargDeph = { }, 0, 0, 0, 0
+	self.ReturnOptional, self.ReturnTypes, self.VargMemory, self.ReturnDeph = { }, { }, { }, 0
 	self.ClassDeph, self.ClassCells, self.ClassMemory, self.Classes  = 0, { }, { }, {}
 	return self
 end

@@ -14,6 +14,8 @@ ENT.EXPADV_SCREEN	= ENT
 	@: Resolution
    --- */
 
+local Resolutions = {}
+
 if SERVER then
 	util.AddNetworkString("expadv.resolution")
 	
@@ -60,9 +62,10 @@ if SERVER then
 elseif CLIENT then
 	net.Receive("expadv.resolution", function()
 		local scr = net.ReadEntity()
-
+		local res = net.ReadUInt(32)
 		if IsValid(scr) and scr.ExpAdv and scr.Screen then
-			scr.RT_Data = EXPADV.GetRenderTarget(net.ReadUInt(32))
+			Resolutions[scr:EntIndex()] = res
+			scr.RT_Data = EXPADV.GetRenderTarget(res)
 		end
 	end)
 end
@@ -159,6 +162,7 @@ end
    --- */
 
 EXPADV.RenderTargets = EXPADV.RenderTargets or {[256] = {}, [512] = {}, [1024] = {}}
+
 local MaterialInfo = { ["$vertexcolor"] = 1, ["$vertexalpha"] = 1, ["$ignorez"] = 1, ["$nolod"] = 1, }
 
 function EXPADV.GetRenderTarget(Res)
@@ -211,6 +215,18 @@ function EXPADV.CacheRenderTarget(RT)
 		end
 	end
 end
+
+hook.Add( "NetworkEntityCreated", "Expadv.Screen", function()
+	EXPADV.RenderTargets = nil
+
+	EXPADV.RenderTargets = {[256] = {}, [512] = {}, [1024] = {}}
+
+	for k,scr in pairs( ents.FindByClass("expadv_*") ) do
+		if !scr.Screen then continue end
+		local res = Resolutions[scr:EntIndex()]
+		if res then scr.RT_Data = EXPADV.GetRenderTarget(res) end
+	end
+end )
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
 	@: ClearRT
@@ -397,7 +413,6 @@ function ENT:OnRemove()
 	EXPADV.CacheRenderTarget(self.RT_Data)
 	
 	hook.Remove( "PlayerInitialSpawn", self )
-
 	if !self:IsRunning( ) then return end
 	
 	self.Context:ShutDown( )
