@@ -37,19 +37,19 @@ function PANEL:Init( )
 	self:SetText( "Expression Advanced Editor" )
 	self:SetSize( EXPADV.ReadUserSetting( "editor_w", math.min( 1000, ScrW( ) * 0.8 ) ), EXPADV.ReadUserSetting( "editor_h", math.min( 800, ScrH( ) * 0.8 ) ) )
 	self:SetPos( math.Clamp( EXPADV.ReadUserSetting( "editor_x", ScrW( ) / 2 - self:GetWide( ) / 2 ), 0, ScrW( ) - 20 ), EXPADV.ReadUserSetting( "editor_y", ScrH( ) / 2 - self:GetTall( ) / 2 ) )
-
+	
 	self.ExitSave = self:Add( "EA_ImageButton" )
 	self.ExitSave:SetMaterial(Material("fugue/disk.png"))
 	self.ExitSave:SetTooltip("Save and close.")
 	self.ExitSave.Think = function()
 		self.ExitSave:SetPos(self:GetWide( ) - (self.ExitSave:GetWide( ) * 2) - 5, 5)
 	end
-
+	
 	self.ExitSave.DoClick = function()
 		self:SaveFile(true) 
 		self:Close( )
 	end
-
+	
 	self.TabHolder = self:Add( "DPropertySheet" )
 	self.TabHolder:Dock( FILL )
 	self.TabHolder:DockMargin( 5, 5, 5, 5 )
@@ -103,7 +103,7 @@ function PANEL:Init( )
 	
 	function self:ChangeTab( Previous, Current )
 		self.ToolBar.pnlName.txt:SetText( Current:GetText( ) )
-
+		
 		local Session = Current:GetPanel( ).SharedSession 
 		RunConsoleCommand( "expadv_open_session", Session and Session.ID or 0 )
 	end
@@ -178,10 +178,10 @@ function PANEL:GetName( Tab )
 	return Tab:GetText( )
 end
 
-function PANEL:GetFileCode( Path )
+function PANEL:GetFileCode( Path, bForce )
 	if not string.EndsWith( Path, ".txt" ) then Path = Path .. ".txt" end 
 	if not string.StartWith( Path, "expadv2/" ) then Path = "expadv2/" .. Path end
-	if self.FileTabs[Path] then 
+	if self.FileTabs[Path] and not bForce then 
 		return self:GetCode( self.FileTabs[Path] )
 	elseif not Path or file.IsDir( Path, "DATA" ) then
 		return
@@ -242,6 +242,7 @@ function PANEL:SaveFile( Path, SaveAs, Tab, bNoSound )
 	MakeFolders( Path )
 	
 	file.Write( Path, "" .. Tab:GetText( ) .. "" .. self:GetCode( Tab ) .. "" )
+	Tab.LastEdit = nil
 	
 	if not bNoSound then
 		surface.PlaySound( "ambient/water/drip3.wav" )
@@ -280,7 +281,7 @@ function PANEL:LoadFile( Path )
 	if not Data then return end
 	
 	self:AutoSave( )
-	local Title, Code = string.match( Data, "(.+)(.+)" )
+	local Title, Code = string.match( Data, "(.+)(.*)" )
 	self:NewTab( Code or Data, string.sub( Path, 9 ), Title )
 end
 
@@ -388,6 +389,8 @@ function PANEL:CloseTab( bSave, Tab )
 		self.GateTabs[Tab.Entity] = nil 
 	end 
 	
+	if Tab.TempFile then file.Delete( Tab.TempFile ) end 
+	
 	local idx
 	for k, v in pairs( self.TabHolder.Items ) do
 		if v.Tab ~= Tab then continue end
@@ -434,13 +437,29 @@ function PANEL:CloseAllBut( pTab )
 	end
 end
 
+function PANEL:AutoSave( Tab )
+	local code, filePath = self:GetCode( Tab )
+	if self.autoBuffer == code or code == "" then return end
+	self.autoBuffer = code
+	file.Write( "expadv2/_autosave_.txt", code )
+end
+
 function PANEL:SaveTempFile( Tab )
 	if not ValidPanel( Tab ) then return end
 	local Code = Tab:GetPanel( ):GetCode( )
-	local Path = "expadv2_temp/" .. util.CRC( Code ) .. ".txt"
+	local Path = Tab.TempFile or "expadv2_temp/" .. math.random( 100000000, 1000000000 ) + math.random( 100000000, 1000000000 ) .. ".txt"
 	MakeFolders( Path )
 	file.Write( Path, "" .. Tab:GetText( ) .. "" .. Code .. "" )
-	return util.CRC( Code ) .. ".txt"
+	return Path
+end
+
+function PANEL:LoadTempFile( sPath )
+	if not file.Exists( sPath, "DATA" ) then return false end 
+	local Data = file.Read( sPath ) 
+	local Name, Code = string.match( Data, "(.+)(.*)" )
+	self:NewTab( Code or Data, nil, Name ) 
+	file.Delete( sPath ) 
+	return true 
 end
 
 function PANEL:SaveTabs( )
@@ -451,39 +470,14 @@ function PANEL:SaveTabs( )
 		if not FilePath or FilePath == "" then
 			// TODO: Complete this
 			FilePath = self:SaveTempFile( self.TabHolder.Items[i].Tab )
+			self.TabHolder.Items[i].Tab.TempFile = FilePath 
+		else 
+			if not string.StartWith( FilePath, "expadv2/" ) then FilePath = "expadv2/" .. FilePath end
 		end
 		strtabs[#strtabs+1] = FilePath 
 	end
 	
 	file.Write( "expadv2/_tabs_.txt", table.concat( strtabs, ";" ) ) 
-end
-
-function PANEL:AutoSave( Tab )
-	local code, filePath = self:GetCode( Tab )
-	if self.autoBuffer == code or code == "" then return end
-	self.autoBuffer = code
-	file.Write( "expadv2/_autosave_.txt", code )
-end
-
--- function PANEL:OpenTempTabs( )
--- 	if not file.Exists( "expadv2_temp", "DATA" ) then return end 
--- 	local List = file.Find( "expadv2_temp/*.txt", "DATA", "dateasc" )
--- 	if #List <= 0 then return end 
-	
--- 	for i = 1, #List do
--- 		local Data = file.Read( "expadv2_temp/" .. List[i] )
--- 		local Title, Code = string.match( Data, "(.+)(.+)" )
--- 		self:NewTab( Code or Data, nil, Title ) 
--- 		file.Delete( "expadv2_temp/" .. List[i] )
--- 	end
--- end
-
-function PANEL:LoadTempFile( sPath )
-	if not file.Exists( sPath, "DATA" ) then return false end 
-	local Data = file.Read( sPath ) 
-	local Name, Code = string.match( Data, "(.+)(.+)" )
-	self:NewTab( Code or Data, nil, Name ) 
-	return true 
 end
 
 function PANEL:OpenOldTabs( )
@@ -498,12 +492,14 @@ function PANEL:OpenOldTabs( )
 	local opentabs = false
 	for k, v in pairs( tabs ) do
 		if v and v != "" then
-			if file.Exists( "expadv2/" .. v, "DATA" ) then
-				self:LoadFile( v, true )
-				opentabs = true
-			elseif string.StartWith( v, "expadv2_temp" ) then
-				if self:LoadTempFile( v ) then opentabs = true end 
-			end
+			if file.Exists( v, "DATA" ) then
+				if string.StartWith( v, "expadv2_temp" ) then
+					if self:LoadTempFile( v ) then opentabs = true end 
+				else 
+					self:LoadFile( v, true )
+					opentabs = true
+				end
+			end 
 		end
 	end
 	
@@ -636,7 +632,7 @@ function PANEL:ChangeFont( sFont, nSize )
 	if not sFont or sFont == "" then return end 
 	nSize = nSize or GetConVarNumber( "lemon_editor_font_size" )
 	self.CurrentFont = "EA_" .. sFont .. "_" .. nSize
-
+	
 	self:CreateFont( self.CurrentFont, sFont, nSize )
 	
 	RunConsoleCommand( "lemon_editor_font", sFont ) 
@@ -695,74 +691,56 @@ end
 ------------------------------------------------------------------------------------------------------
 --		Auto Refresh
 ------------------------------------------------------------------------------------------------------
-function PANEL:DoAutoRefresh()
+function PANEL:DoAutoRefresh( )
 	for File, Tab in pairs(self.FileTabs) do
 		File = "expadv2/" .. File
-
-		if file.Exists(File, "DATA") then
-			local Panel = Tab.Editor
-
-			local RawFile = file.Read(File, "DATA")
-
-			if RawFile then
-				 local Title, NewCode = string.match( RawFile, "(.+)(.+)" )
-
-				 if !NewCode then NewCode = RawFile end
-
-				 local Hash = util.CRC(NewCode)
-
-				 if Tab.RefreshHash and Hash == Tab.RefreshHash then continue end
-				 
-				 Tab.RefreshHash = Hash
-
-				 if NewCode and NewCode != Panel:GetCode() then
-					//Tab has been updated.
-					local Message = string.format("File %q has been changed outside of the editor, would you like to refresh?", File)
-
-					local YesFunc = function()
-						if !IsValid(Panel) then return end
-
-						--Panel:SelectAll() 
-						--Panel:SetSelection(NewCode) -- this is an impossible error :D
-						--Panel:SetCaret(Vector2(0, 0))
-
-						Panel:SetCode(NewCode)
-					end
-
-					local Window = Derma_Query( Message, "Update tab?", "Refresh", YesFunc, "Ignore", function() end)
+		
+		if file.Exists( File, "DATA" ) then
+			local Panel = Tab:GetPanel( )
+			
+			if not Tab.LastEdit then 
+				Tab.LastEdit = file.Time( File, "DATA" ) 
+				continue 
+			end 
+			
+			if file.Time( File, "DATA" ) ~= Tab.LastEdit then 
+				Tab.LastEdit = file.Time( File, "DATA" )
+				local Message = string.format( "File %q has been changed outside of the editor, would you like to refresh?", File )
+				
+				local function YesFunc( ) 
+					if not IsValid( Panel ) then return end 
+					Panel:SetCode( self:GetFileCode( File ) ) 
+				end 
+				
+				local Window = Derma_Query( Message, "Update tab?", "Refresh", YesFunc, "Ignore", function( ) end )
 					
-					timer.Simple(30, function()
-						if IsValid(Window) then Window:Close() end
-					end)
-				end
-			end
+				timer.Simple( 30, function( ) if IsValid( Window ) then Window:Close( ) end end )
+			end 
 		end
 	end
 end
 
-timer.Create("ExpAdv2.Editor.Refresh", 3, 0, function()
-	local Editor = EXPADV.Editor
+hook.Add( "Think", "CodeAutoRefresh", function( ) 
+	if not EXPADV or not EXPADV.Editor or not EXPADV.Editor.Instance then return end 
 	
-	if !Editor or !Editor.Instance then return end
-
-	Editor.Instance:DoAutoRefresh()
-end)
+	EXPADV.Editor.Instance:DoAutoRefresh( ) 
+end )
 
 ------------------------------------------------------------------------------------------------------
 --		NEW VALIDATOR
 ------------------------------------------------------------------------------------------------------
 
 function PANEL:DoValidate( Goto, Code )
-
+	
 	Code = Code or self:GetCode( )
-
+	
 	if !Code or Code == "" then
 		self:OnValidateError( false,"No code submited, compiler exited.")
 		return false
 	end
-
+	
 	local Status, Instance, Instruction = EXPADV.SolidCompile(Code, Files or {})
-
+	
 	if !Status then
 		self:OnValidateError(Goto, Instance)
 		return false
@@ -778,7 +756,7 @@ function PANEL:OnValidateError( Goto, Error )
 	if Goto then
 		local Row, Col = Error:match( "at line ([0-9]+), char ([0-9]+)$" )
 		if not Row then Row, Col = Error:match( "at line ([0-9]+)$" ), 1 end
-
+		
 		if Row then
 			Row, Col = tonumber( Row ), tonumber( Col )
 			if Row < 1 or Col < 1 then 
@@ -788,7 +766,7 @@ function PANEL:OnValidateError( Goto, Error )
 			end 
 		end
 	end
-
+	
 	self.ValidateButton:SetText( Error )
 	self.ValidateButton:SetColor( Color( 255, 0, 0 ) )
 end
@@ -798,10 +776,8 @@ function PANEL:ResumeValidator( )
 		self.Validator_Instance = nil
 		return
 	end
-
+	
 	self.Validator_Instance:Resume( )
 end
 
 vgui.Register( "EA_EditorPanel", PANEL, "EA_Frame" )
-
-
