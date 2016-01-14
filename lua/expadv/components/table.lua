@@ -323,6 +323,29 @@ Component:AddFunctionHelper( "keys", "t:", "Returns an array of indexs on the ta
 	Component:AddFunctionHelper( "insert", "t:vr", "Inserts variants object to the top of the tables array element." ) 
 	Component:AddFunctionHelper( "insert", "t:n,vr", "Inserts %variants object tables array element at index, pushing all higher index up." )
 
+
+/* --- --------------------------------------------------------------------------------
+	@: Vararg insert functions
+   --- */
+
+   Component:AddVMOperator( "{...}", "t", "",
+		function( Context, Trace, Table )
+			for _, Value in pairs(Context._VARARGS_) do
+				local Data = Table.Data
+
+				table.insert( Data, Value[1] )
+				table.insert( Table.Types, Value[2] )
+
+				Table.Count = #Data
+
+				Table.Size = Table.Size + 1
+
+				Table.Look[Table.Count] = Table.Count
+			end
+
+			Context.TrigMan[Table] = true
+		end )
+
 /* --- --------------------------------------------------------------------------------
 	@: The remove function, shall return a variant
    --- */
