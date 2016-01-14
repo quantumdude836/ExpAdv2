@@ -271,7 +271,7 @@ function PANEL:LoadFile( Path )
 	if not Data then return end
 	
 	self:AutoSave( )
-	local Title, Code = string.match( Data, "(.+)(.+)" )
+	local Title, Code = string.match( Data, "(.+)(.*)" )
 	self:NewTab( Code or Data, string.sub( Path, 9 ), Title )
 end
 
@@ -379,6 +379,8 @@ function PANEL:CloseTab( bSave, Tab )
 		self.GateTabs[Tab.Entity] = nil 
 	end 
 	
+	if Tab.TempFile then file.Delete( Tab.TempFile ) end 
+	
 	local idx
 	for k, v in pairs( self.TabHolder.Items ) do
 		if v.Tab ~= Tab then continue end
@@ -425,30 +427,6 @@ function PANEL:CloseAllBut( pTab )
 	end
 end
 
-function PANEL:SaveTempFile( Tab )
-	if not ValidPanel( Tab ) then return end
-	local Code = Tab:GetPanel( ):GetCode( )
-	local Path = "expadv2_temp/" .. util.CRC( Code ) .. ".txt"
-	MakeFolders( Path )
-	file.Write( Path, "" .. Tab:GetText( ) .. "" .. Code .. "" )
-	return util.CRC( Code ) .. ".txt"
-end
-
-function PANEL:SaveTabs( )
-	local strtabs = { }
-	for i = 1, #self.TabHolder.Items do 
-		if self.TabHolder.Items[i].Tab.Panel.Global then continue end 
-		local FilePath = self.TabHolder.Items[i].Tab.FilePath
-		if not FilePath or FilePath == "" then
-			// TODO: Complete this
-			FilePath = self:SaveTempFile( self.TabHolder.Items[i].Tab )
-		end
-		strtabs[#strtabs+1] = FilePath 
-	end
-	
-	file.Write( "expadv2/_tabs_.txt", table.concat( strtabs, ";" ) ) 
-end
-
 function PANEL:AutoSave( Tab )
 	local code, filePath = self:GetCode( Tab )
 	if self.autoBuffer == code or code == "" then return end
@@ -469,12 +447,40 @@ end
 -- 	end
 -- end
 
+function PANEL:SaveTempFile( Tab )
+	if not ValidPanel( Tab ) then return end
+	local Code = Tab:GetPanel( ):GetCode( )
+	local Path = Tab.TempFile or "expadv2_temp/" .. math.random( 100000000, 1000000000 ) + math.random( 100000000, 1000000000 ) .. ".txt"
+	MakeFolders( Path )
+	file.Write( Path, "" .. Tab:GetText( ) .. "" .. Code .. "" )
+	return Path
+end
+
 function PANEL:LoadTempFile( sPath )
 	if not file.Exists( sPath, "DATA" ) then return false end 
 	local Data = file.Read( sPath ) 
-	local Name, Code = string.match( Data, "(.+)(.+)" )
+	local Name, Code = string.match( Data, "(.+)(.*)" )
 	self:NewTab( Code or Data, nil, Name ) 
+	file.Delete( sPath ) 
 	return true 
+end
+
+function PANEL:SaveTabs( )
+	local strtabs = { }
+	for i = 1, #self.TabHolder.Items do 
+		if self.TabHolder.Items[i].Tab.Panel.Global then continue end 
+		local FilePath = self.TabHolder.Items[i].Tab.FilePath
+		if not FilePath or FilePath == "" then
+			// TODO: Complete this
+			FilePath = self:SaveTempFile( self.TabHolder.Items[i].Tab )
+			self.TabHolder.Items[i].Tab.TempFile = FilePath 
+		else 
+			if not string.StartWith( FilePath, "expadv2/" ) then FilePath = "expadv2/" .. FilePath end
+		end
+		strtabs[#strtabs+1] = FilePath 
+	end
+	
+	file.Write( "expadv2/_tabs_.txt", table.concat( strtabs, ";" ) ) 
 end
 
 function PANEL:OpenOldTabs( )
@@ -489,12 +495,14 @@ function PANEL:OpenOldTabs( )
 	local opentabs = false
 	for k, v in pairs( tabs ) do
 		if v and v != "" then
-			if file.Exists( "expadv2/" .. v, "DATA" ) then
-				self:LoadFile( v, true )
-				opentabs = true
-			elseif string.StartWith( v, "expadv2_temp" ) then
-				if self:LoadTempFile( v ) then opentabs = true end 
-			end
+			if file.Exists( v, "DATA" ) then
+				if string.StartWith( v, "expadv2_temp" ) then
+					if self:LoadTempFile( v ) then opentabs = true end 
+				else 
+					self:LoadFile( v, true )
+					opentabs = true
+				end
+			end 
 		end
 	end
 	
