@@ -63,7 +63,7 @@ end
 
 EXPADV.Updates = { }
 
-local SysTime = SysTime
+local SysTime = os.clock()
 local debug_sethook = debug.sethook
 
 -- Has to be called before an execution,
