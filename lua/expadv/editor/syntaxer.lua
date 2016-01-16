@@ -470,20 +470,14 @@ function Syntaxer:Parse( Row )
 				addToken( "operator", self.tokendata ) 
 				self.tokendata = "" 
 				
-				if self:NextPattern( "([a-zA-Z][a-zA-Z0-9_]*)" ) then 
+				while self:NextPattern( "([a-zA-Z][a-zA-Z0-9_]*)" ) do 
 					self.Variables[self.tokendata] = Row 
 					addToken( "variable", self.tokendata ) 
 					self.tokendata = "" 
 					
-					self:NextPattern( " *, *" ) 
+					if not self:NextPattern( " *, *" ) then break end 
 					addToken( "operator", self.tokendata ) 
 					self.tokendata = "" 
-					
-					while self:NextPattern( "([a-zA-Z][a-zA-Z0-9_]*)" ) do 
-						self.Variables[self.tokendata] = Row 
-						addToken( "variable", self.tokendata ) 
-						self.tokendata = "" 
-					end 
 				end 
 				continue 
 			end 
