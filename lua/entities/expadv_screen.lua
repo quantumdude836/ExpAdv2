@@ -190,7 +190,7 @@ function EXPADV.GetRenderTarget(Res)
 			CLEAR = true,
 			BLANK = true,
 			CACHED = false,
-			RT = GetRenderTarget( "expadv_rt_" .. Res .. "_" .. ID, Res, Res ),
+			RT = GetRenderTarget( "expadv_rt_" .. Res .. "_" .. ID, Res + 16, Res + 16 ),
 			MAT = CreateMaterial( "expadv_rt_" .. Res .. "_" .. ID, "UnlitGeneric", MaterialInfo ),
 		}
 
@@ -372,6 +372,7 @@ function ENT:DoScreenUpdate(context)
 	if event and rtData then
 		render.PushRenderTarget(rtData.RT)
 		render.OverrideAlphaWriteEnable(true, true)
+		render.SetViewPort(8, 8, scrSize, scrSize)
 
 		if rtData.CLEAR or !self:GetNoClearFrame() then
 			render.ClearDepth()
