@@ -308,6 +308,10 @@ Component:AddFunctionHelper( "toLocalAxis", "e:v", "Converts a world axis to a l
 local function intersectRayWithOBB(Context, Trace, rStart, rDir, bOrigin, bAngles, bMins, bMaxs)
 	local hPos, nDir, frac = util.IntersectRayWithOBB(rStart, rDir, bOrigin, bAngles, bMins, bMaxs)
 	
+	hPos = hPos or Vector(0, 0, 0)
+	nDir = nDir or Vector(0, 0, 0)
+	frac = frac or 0
+	
 	return {
 		Look = {RayStart = "RayStart", RayDir = "RayDir", BoxOrigin = "BoxOrigin", BoxAngles = "BoxAngles", BoxMins = "BoxMins", BoxMaxs = "BoxMaxs", HitPos = "HitPos", Direction = "Direction", Fraction = "Fraction"},
 		Data = {RayStart = rStart, RayDir = rDir, BoxOrigin = bOrigin, BoxAngles = bAngles, BoxMins = bMins, BoxMaxs = bMaxs, HitPos = hPos, Direction = nDir, Fraction = frac},
