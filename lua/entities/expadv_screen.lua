@@ -216,16 +216,10 @@ function EXPADV.CacheRenderTarget(RT)
 	end
 end
 
-hook.Add( "NetworkEntityCreated", "Expadv.Screen", function()
-	EXPADV.RenderTargets = nil
-
-	EXPADV.RenderTargets = {[256] = {}, [512] = {}, [1024] = {}}
-
-	for k,scr in pairs( ents.FindByClass("expadv_*") ) do
-		if !scr.Screen then continue end
-		local res = Resolutions[scr:EntIndex()]
-		if res then scr.RT_Data = EXPADV.GetRenderTarget(res) end
-	end
+hook.Add( "NetworkEntityCreated", "Expadv.Screen", function(ent)
+	if !ent.ExpAdv or !ent.Screen then continue end
+	local res = Resolutions[ent:EntIndex()]
+	if res then ent.RT_Data = EXPADV.GetRenderTarget(res) end
 end )
 
 /* --- ----------------------------------------------------------------------------------------------------------------------------------------------
