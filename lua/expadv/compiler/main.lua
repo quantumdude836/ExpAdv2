@@ -245,7 +245,8 @@ function Compiler:MakeVirtual( Instruction, Force )
 	local Instr = self:NewLuaInstruction( Trace, Instruction, nil, string.format( "Context.Instructions[%i]( Context )", ID ) )
 
 	Instr.IsRaw = true
-
+	Instr.IsVirtual = true
+	
 	return Instr, ID
 end
 
