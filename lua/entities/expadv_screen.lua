@@ -217,7 +217,7 @@ function EXPADV.CacheRenderTarget(RT)
 end
 
 hook.Add( "NetworkEntityCreated", "Expadv.Screen", function(ent)
-	if !ent.ExpAdv or !ent.Screen then continue end
+	if !ent.ExpAdv or !ent.Screen then return end
 	local res = Resolutions[ent:EntIndex()]
 	if res then ent.RT_Data = EXPADV.GetRenderTarget(res) end
 end )
