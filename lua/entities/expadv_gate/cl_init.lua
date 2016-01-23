@@ -157,10 +157,12 @@ end
 
 local function drawTile(ent, sv)
     local tick          = (sv and ent:GetTickQuota() or ent.ClientTickQuota) or 0
-    local soft          = (sv and ((ent:GetTickQuota( ) / expadv_hardquota) * 100) or ((ent.ClientTickQuota / expadv_hardquota) * 100) or 0)
+    local soft          = (sv and ent:GetTickQuota( ) or ent.ClientTickQuota) or 0
     local average       = (sv and ent:GetAverage( ) or ent.ClientAverage) or 0
     local state         = (sv and ent:GetServerState() or ent:GetClientState()) or 0
     local loaded        = (sv and ent:GetServerLoaded( ) or ent:GetClientLoaded( )) or 0
+    
+    if soft > 0 then soft = (soft / expadv_hardquota) * 100 else soft = 0 end
 
     local w = 100*Mult
     local x = sv and xPos + w or xPos
