@@ -97,11 +97,15 @@ function PANEL:Init( )
 	end 
 	
 	function self.btnUploadPaste:DoClick( ) 
-		local Code, Path = self:GetParent( ):GetParent( ):GetCode( )
-		local res = Pastebin.CreatePaste( Code, "ExpAdv2 Script", nil, CreatePasteSuccess )
-		if(res == false) then
-			CreatePasteEmpty()
-		end
+		Derma_Query("Process upload to Pastebin?", "Pastebin upload",
+		"Yes", function()
+			local Code, Path = self:GetParent( ):GetParent( ):GetCode( )
+			local res = Pastebin.CreatePaste( Code, "ExpAdv2 Script", nil, CreatePasteSuccess )
+			if(res == false) then
+				CreatePasteEmpty()
+			end
+		end,
+		"No", function() return end)
 	end
 	
 	function self.btnOptions:DoClick( ) 
