@@ -265,7 +265,7 @@ function PANEL:FindKey( )
 		self.txtFind:RequestFocus( )
 	elseif self:GetParent( ):HasSelection( ) then
 		local Selected = self:GetParent( ):GetSelection( )
-		self.txtFind:SetText( Selected:split( "\n" )[1] or "" )
+		self.txtFind:SetText( Selected:Split( "\n" )[1] or "" )
 		self:Toggle( true )
 	else
 		self:Toggle( true )
@@ -302,7 +302,7 @@ function PANEL:ReplaceKey( )
 	if !self.Extended then
 		if self:GetParent( ):HasSelection( ) then
 			local Selected = self:GetParent( ):GetSelection( )
-			self.txtFind:SetText( Selected:split( "\n" )[1] or "" )
+			self.txtFind:SetText( Selected:Split( "\n" )[1] or "" )
 			self:Toggle( true )
 		end
 
