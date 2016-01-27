@@ -189,7 +189,6 @@ if SERVER then
 		if Forced then return self:SyncClipsForced( ) end
 
 		for ID, _ in pairs( self.SYNC_CLIPS ) do
-
 			net.WriteUInt( ID, 16 )
 
 			local Info = self.CLIPS[ID]
@@ -740,7 +739,7 @@ if SERVER then
 
 	function ENT:SetClipEnabled( ID, bEnable )
 		if ID < 1 or ID > Component:ReadSetting( "clips", 5 ) then return end
-		
+
 		self.CLIPS[ ID ] = self.CLIPS[ ID ] or NewClippingTable( )
 
 		self.CLIPS[ ID ].ENABLED = bEnable
@@ -1119,7 +1118,6 @@ function ENT:Draw( )
 	local Pushed, State
 
 	if Info.CLIPS then
-		
 		Pushed = 0
 		State = render.EnableClipping( true )
 
@@ -1132,7 +1130,7 @@ function ENT:Draw( )
 			local Origin = Vector( Clip.ORIGINX, Clip.ORIGINY, Clip.ORIGINZ )
 
 			if !Clip.Global then
-				Normal = self:LocalToWorld( Normal ) - self:GetPos( ) 
+				Normal = self:LocalToWorld( Normal ) //- self:GetPos( ) 
 						
 				Origin = self:LocalToWorld( Origin )
 			end
