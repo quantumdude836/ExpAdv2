@@ -525,7 +525,7 @@ Component:AddPreparedFunction("draw3DQuad", "v,v,v,v,c", "", "$render.DrawQuad(@
 Component:AddFunctionHelper("draw3DQuad", "v,v,v,v,c", "Draws 3D quad.")
 
 Component:AddPreparedFunction("draw3DBeam", "v,v,n,n,n,c", "", "$render.DrawBeam(@value 1, @value 2, @value 3, @value 4, @value 5, @value 6)")
-Component:AddFunctionHelper("draw3DBeam", "v,v,n,n,n,c", "Draws 3D beam (startPos, endPos, width, height, texStart, texEnd, color).")
+Component:AddFunctionHelper("draw3DBeam", "v,v,n,n,n,c", "Draws 3D beam (startPos, endPos, width, texStart, texEnd, color).")
 
 Component:AddPreparedFunction("draw3DModel", "s,v,a", "", [[
 if $string.sub(@value 1, 0, 1) != "*" then
