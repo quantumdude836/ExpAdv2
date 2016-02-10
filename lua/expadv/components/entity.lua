@@ -241,9 +241,9 @@ Component:AddFunctionHelper( "passenger", "e:", "Gets the passenger of the given
 
 EXPADV.ServerOperators()
 
-Component:AddPreparedFunction( "lockPod", "e:b", "", 
+Component:AddPreparedFunction( "lockPod", "e:b", "",
 [[if(@value 1:IsValid() && EXPADV.PPCheck(Context,@value 1) && @value 1:IsVehicle()) then
-	if(@value 2) then 
+	if(@value 2) then
 		this:Fire("Lock","",0)
 	else
 		this:Fire("Unlock","",0)
@@ -252,14 +252,14 @@ end]])
 
 Component:AddFunctionHelper( "lockPod", "e:b", "Locks/Unlocks the given pod.")
 
-Component:AddPreparedFunction( "ejectPod", "e:", "", 
+Component:AddPreparedFunction( "ejectPod", "e:", "",
 [[if(@value 1:IsValid() && EXPADV.PPCheck(Context,@value 1) && @value 1:IsVehicle() && @value 1:GetDriver():IsValid()) then
 	@value 1:GetDriver():ExitVehicle()
 end]])
 
 Component:AddFunctionHelper( "ejectPod", "e:", "Ejects the driver from the given vehicle.")
 
-Component:AddPreparedFunction( "killPod", "e:", "", 
+Component:AddPreparedFunction( "killPod", "e:", "",
 [[if(@value 1:IsValid() && EXPADV.PPCheck(Context,@value 1) && @value 1:IsVehicle() && @value 1:GetDriver():IsValid()) then
 	@value 1:GetDriver():Kill()
 end]])
@@ -346,8 +346,8 @@ Component:AddVMFunction( "allowCrosshair", "b", "",
 
 		local Driver = Pod:GetDriver()
 		if !IsValid(Driver) then return end
-		
-		if Allow then 
+
+		if Allow then
 			Driver:CrosshairEnable()
 		else
 			Driver:CrosshairDisable()
@@ -463,14 +463,14 @@ Component:AddVMFunction( "applyAngForce", "e:a", "",
 		if Target:IsValid() and AngleNotHuge(Angle )and EXPADV.PPCheck(Context,Target) then
 			local Phys = Target:GetPhysicsObject()
 			if !Phys or !Phys:IsValid( ) then return end
-			
+
 			if Target:GetMoveType() == MOVETYPE_VPHYSICS then
 				if Angle.p != 0 or Angle.y != 0 or Angle.r != 0 then
-					
+
 					local up = Target:GetUp()
 					local left = Target:GetRight() * -1
 					local forward = Target:GetForward()
-					
+
 					if Angle.p ~= 0 then
 						local pitch = up * (Angle.p * 0.5)
 						Phys:ApplyForceOffset( forward, pitch )
@@ -573,10 +573,10 @@ Component:AddFunctionHelper( "bearing", "e:v", "Returns the bearing between the 
 Component:AddPreparedFunction( "heading", "e:v", "a", [[
 	if(IsValid(@value 1)) then
 		@define pos = @value 1:WorldToLocal(@value 2)
-	
+
 		@define bearing = (180 / math.pi) * -math.atan2(@pos.y, @pos.x)
 		@define elevation = (180 / math.pi) * math.asin(@pos.z / @pos:Length())
-	
+
 		@define ang = Angle(@elevation, @bearing, 0)
 	end
 ]], "(@ang or Angle(0,0,0))" )
@@ -586,7 +586,7 @@ Component:AddFunctionHelper( "heading", "e:v", "Returns the heading angle betwee
 	@: Entity Discovery
    --- */
 
-EXPADV.EntitySearchFilter = { 
+EXPADV.EntitySearchFilter = {
 		["prop_dynamic"] = "prop_dynamic",
 		["physgun_beam"] = "physgun_beam",
 		["player_manager"] = "player_manager",
@@ -720,18 +720,6 @@ $table.sort( @value 1,
 
 Component:AddFunctionHelper( "sortEntitiesByDistance", "ar,v", "Sorts the given array of entities by distance to the given position." )
 
-Component:AddPreparedFunction( "playerByName", "s,b", "ply", [[
-for _, Ply in pairs( $player.GetAll( ) ) do
-	@define Name, Query = Ply:Name( ):lower( ), @value 1:lower( )
-	if @Name == @Query or ( !@value 2 and @Name:find( @value 1 ) ) then
-		@define Player = Ply
-		break
-	end
-end
-]], "(@Player or $Entity(0))" )
-
-Component:AddFunctionHelper( "playerByName", "s,b", "Returns player found by the given name (Name, Fullname only)." )
-
 /* --- --------------------------------------------------------------------------------
 	@: Constraints
    --- */
@@ -745,13 +733,13 @@ Component:AddInlineFunction( "isConstrained", "e:", "b", "$constraint.HasConstra
 Component:AddVMFunction( "isWeldedTo", "e:", "e",
 	function( Context, Trace, Ent )
 		if !IsValid(Ent) or !constraint.HasConstraints( Ent ) then return Entity(0) end
-		
+
 		local Constraint = constraint.FindConstraint( Ent, "Weld" )
 		if Constraint and Constraint.Ent1 == Ent then
 			return Constraint.Ent2
 		elseif Constraint then
 			return Constraint.Ent1
-		end	
+		end
 
 		return Entity(0)
 	end )
@@ -760,7 +748,7 @@ Component:AddVMFunction( "getConstraints", "e:", "ar",
 	function( Context, Trace, Ent )
 		local Array = {__type = "e"}
 		if !IsValid(Ent) or !constraint.HasConstraints( Ent ) then return Array end
-		
+
 		for _, Constraint in pairs( constraint.GetAllConstrainedEntities( Ent ) ) do
 			if IsValid( Constraint ) and Constraint ~= Ent then
 				Array[#Array + 1] = Constraint
@@ -869,10 +857,10 @@ Component:AddFunctionHelper( "setTrails", "e:n,n,n,s,c,n,b", "Adds a trail to an
 	@: NPC Control
 	@: Credits: Sparky
    --- */
-   
+
 EXPADV.ServerOperators()
 
-Component:AddPreparedFunction( "npcGoWalk", "e:v", "", 
+Component:AddPreparedFunction( "npcGoWalk", "e:v", "",
 [[if(@value 1:IsValid() && EXPADV.PPCheck(Context,@value 1) && @value 1:IsNPC()) then
 	@value 1:SetLastPosition( @value 2 )
 	@value 1:SetSchedule( $SCHED_FORCED_GO )
@@ -880,7 +868,7 @@ end]])
 
 Component:AddFunctionHelper( "npcGoWalk", "e:v", "Tells an npc to walk to a position")
 
-Component:AddPreparedFunction( "npcGoRun", "e:v", "", 
+Component:AddPreparedFunction( "npcGoRun", "e:v", "",
 [[if(@value 1:IsValid() && EXPADV.PPCheck(Context,@value 1) && @value 1:IsNPC()) then
 	@value 1:SetLastPosition( @value 2 )
 	@value 1:SetSchedule( $SCHED_FORCED_GO_RUN )
@@ -888,37 +876,37 @@ end]])
 
 Component:AddFunctionHelper( "npcGoRun", "e:v", "Tells an npc to run to a position")
 
-Component:AddPreparedFunction( "npcAttackMelee", "e:", "", 
+Component:AddPreparedFunction( "npcAttackMelee", "e:", "",
 [[if(@value 1:IsValid() && EXPADV.PPCheck(Context,@value 1) && @value 1:IsNPC()) then
 	@value 1:SetSchedule( $SCHED_MELEE_ATTACK1 )
 end]])
 
 Component:AddFunctionHelper( "npcAttackMelee", "e:", "Tells an npc to run to start attacking with melee")
 
-Component:AddPreparedFunction( "npcAttackRange", "e:", "", 
+Component:AddPreparedFunction( "npcAttackRange", "e:", "",
 [[if(@value 1:IsValid() && EXPADV.PPCheck(Context,@value 1) && @value 1:IsNPC()) then
 	@value 1:SetSchedule( $SCHED_RANGE_ATTACK1 )
 end]])
 
 Component:AddFunctionHelper( "npcAttackRange", "e:", "Tells an npc to run to start attacking from a range")
 
-Component:AddPreparedFunction( "npcStop", "e:", "", 
+Component:AddPreparedFunction( "npcStop", "e:", "",
 [[if(@value 1:IsValid() && EXPADV.PPCheck(Context,@value 1) && @value 1:IsNPC()) then
 	@value 1:SetSchedule( $SCHED_NONE )
 end]])
 
 Component:AddFunctionHelper( "npcStop", "e:", "Tells an npc to run to stop what it's doing")
 
-Component:AddPreparedFunction( "npcSetTarget", "e:e", "", 
+Component:AddPreparedFunction( "npcSetTarget", "e:e", "",
 [[if(@value 1:IsValid() && @value 2:IsValid() && EXPADV.PPCheck(Context,@value 1) && @value 1:IsNPC()) then
 	@value 1:SetEnemy(@value 2)
 end]])
 
 Component:AddFunctionHelper( "npcSetTarget", "e:e", "Sets the npc's target")
 
-Component:AddPreparedFunction( "npcGetTarget", "e:", "e", 
+Component:AddPreparedFunction( "npcGetTarget", "e:", "e",
 [[if(@value 1:IsValid() && EXPADV.PPCheck(Context,@value 1) && @value 1:IsNPC()) then
-		@define enemy = @value 1:GetEnemy() 
+		@define enemy = @value 1:GetEnemy()
 end]], "(@enemy or Entity(0))")
 
 Component:AddFunctionHelper( "npcGetTarget", "e:", "Returns the npc's target")
@@ -926,27 +914,27 @@ Component:AddFunctionHelper( "npcGetTarget", "e:", "Returns the npc's target")
 EXPADV.NpcRelationships = {hate = 1, fear = 2, like = 3, neutral = 4, [1] = "hate", [2] = "fear", [3] = "like", [4] = "neutral"}
 EXPADV.NpcRelationshipsStr = {hate = "D_HT", fear = "D_FR", like = "D_LI", neutral = "D_NU"}
 
-Component:AddPreparedFunction( "npcSetRelationship", "e:e,s,n", "", 
+Component:AddPreparedFunction( "npcSetRelationship", "e:e,s,n", "",
 [[if(@value 1:IsValid() && @value 2:IsValid() && EXPADV.PPCheck(Context,@value 1) && @value 1:IsNPC() && EXPADV.NpcRelationships[@value 3]) then
 	@value 1:AddEntityRelationship(@value 2, EXPADV.NpcRelationships[@value 3], @value 4)
 end]])
 
 Component:AddFunctionHelper( "npcSetRelationship", "e:e,s,n", "Sets the npc's relationship. hate, fear, like, or neutral, then the priority value.")
 
-Component:AddPreparedFunction( "npcSetRelationship", "e:s,s,n", "", 
+Component:AddPreparedFunction( "npcSetRelationship", "e:s,s,n", "",
 [[if(@value 1:IsValid() && EXPADV.PPCheck(Context,@value 1) && @value 1:IsNPC() && EXPADV.NpcRelationshipsStr[@value 3]) then
 	@value 1:AddRelationship(@value 2 .. " " .. EXPADV.NpcRelationshipsStr[@value 3] .. " " .. @value 4)
 end]])
 
 Component:AddFunctionHelper( "npcSetRelationship", "e:s,s,n", "Sets the npc's relationship to a general class group. hate, fear, like, or neutral, then the priority value.")
 
-Component:AddPreparedFunction( "npcGetRelationship", "e:e", "s", 
+Component:AddPreparedFunction( "npcGetRelationship", "e:e", "s",
 [[if(@value 1:IsValid() && EXPADV.PPCheck(Context,@value 1) && @value 1:IsNPC() && @value 2:IsValid()) then
 	@define disp = EXPADV.NpcRelationships[@value 1:Disposition(@value 2)]
 end]], "(@disp or \"\")")
 
 Component:AddFunctionHelper( "npcGetRelationship", "e:e", "Gets the npc's relationship with another entity as a string.")
-   
+
 /* --- --------------------------------------------------------------------------------
 	@: Bones
    --- */
@@ -1108,5 +1096,5 @@ if SERVER then
 	hook.Add("PlayerSpawnedVehicle", "Expav.Event", function( Player, Entity )
 		EXPADV.CallEvent( "onEntityCreated", Entity, Player, "vehicle" )
 	end)
-	
+
 end
