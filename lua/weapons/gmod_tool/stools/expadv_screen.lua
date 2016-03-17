@@ -79,7 +79,7 @@ local function MakeExpadvScreenDerma( Player, Position, Angle, Model, InPorts, O
 	ExpAdv:Activate( )
 	ExpAdv:Spawn( )
 
-	Player:AddCount( "expadv", ExpAdv )
+	Player:AddCount( "expadv_screens", ExpAdv )
 	ExpAdv:SetPlayer( Player )
 	ExpAdv.player = Player
 
