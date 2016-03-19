@@ -238,6 +238,12 @@ end]])
 
 Component:AddFunctionHelper( "onTextChanged", "dte:d", "The given delegate will be executed when the text inside the dtextentry changes." )
 
+Component:AddPreparedFunction("setMultiline", "dte:b", "", [[
+	@value 1:SetMultiline(@value 2)
+]])
+
+Component:AddFunctionHelper("setMultiline", "dte:b", "Sets the dtextentry to be multiline.")
+
 /* -----------------------------------------------------------------------------------
 	@: Check Box
 --- */
