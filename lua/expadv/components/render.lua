@@ -36,7 +36,7 @@ Component.CreatedFonts = { }
 function Component.CreateFont( Base, Size )
 	local FontName = string.format( "expadv_%s_%i", Base, Size )
 	if Component.CreatedFonts[FontName] then return FontName end
-	
+
 	if !Component.ValidFonts[Base] then
 		Base = "Default"
 		FontName = string.format( "expadv_Default_%i", Size )
@@ -196,7 +196,7 @@ Component:AddFunctionHelper( "drawTexturedBox", "v2,v2,n,n,n,n", "Draws a textur
 /* -----------------------------------------------------------------------------------
 	@: Sprites
    --- */
-  
+
 Component:AddPreparedFunction("drawSprite", "v,n,n,c", "", "$render.DrawSprite(@value 1, @value 2, @value 3, @value 4)")
 Component:AddFunctionHelper("drawSprite", "v,n,n,c", "Creates a sprite at the given position.")
 
@@ -229,22 +229,22 @@ Component:AddFunctionHelper( "vert", "n,n,n,n", "Creates a vertex object." )
 /* --- -------------------------------------------------------------------------------
 	@: Polys
    --- */
-   
+
 local function Counterclockwise( a, b, c )
 	local area = (a.x - c.x) * (b.y - c.y) - (b.x - c.x) * (a.y - c.y)
 	return area > 0
 end
- 
+
 local function DrawPoly(Array)
 	render.CullMode(Counterclockwise(Array[1], Array[2], Array[3]) and MATERIAL_CULLMODE_CCW or MATERIAL_CULLMODE_CW )
 	surface.DrawPoly(Array)
 	render.CullMode(MATERIAL_CULLMODE_CCW)
 end
 
-local function DrawPolyOutline(Array) 
+local function DrawPolyOutline(Array)
 	for i=1, #Array do
 		if i==#Array then
-			surface.DrawLine( Array[i].x, Array[i].y, Array[1].x, Array[1].y ) 
+			surface.DrawLine( Array[i].x, Array[i].y, Array[1].x, Array[1].y )
 		else
 			surface.DrawLine( Array[i].x, Array[i].y, Array[i+1].x, Array[i+1].y )
 		end
@@ -256,10 +256,10 @@ Component:AddVMFunction( "drawTexturedTriangle", "vt,vt,vt", "", function(Contex
 Component:AddVMFunction( "drawTexturedTriangle", "v2,v2,v2", "", function(Context, Trace, V1, V2, V3) DrawPoly({V1, V2, V3}) end)
 
 Component:AddVMFunction( "drawTriangle", "v2,v2,v2", "", function(Context, Trace, V1, V2, V3) draw.NoTexture(); DrawPoly({V1, V2, V3}) end)
- 
+
 Component:AddVMFunction( "drawPoly", "ar", "", function(Context, Trace, Array)
 	if Array.__type ~= "_vt" and Array.__type ~= "_v2" then Context.Throw(Trace, "array", "array type missmatch, vertex expected got " .. EXPADV.TypeName(Array.__type)) end
-	draw.NoTexture() 
+	draw.NoTexture()
 	DrawPoly(Array)
 end)
 
@@ -283,7 +283,7 @@ Component:AddFunctionHelper( "drawTexturedPoly", "ar", "Draws a textured polygon
 /* --- -------------------------------------------------------------------------------
 	@: Circles
    --- */
-  
+
 Component:AddVMFunction( "drawCircle", "v2,n", "", function(Context, Trace, Position, Radius)
 	local vertices = { }
 	for i=1, 30 do
@@ -301,7 +301,7 @@ Component:AddVMFunction( "drawCircleOutline", "v2,n", "", function(Context, Trac
 	draw.NoTexture()
 	DrawPolyOutline(vertices)
 end)
-  
+
 Component:AddFunctionHelper( "drawCircle", "v2,n", "Draws a circle." )
 Component:AddFunctionHelper( "drawCircleOutline", "v2,n", "Draws an outlined circle." )
 
@@ -359,8 +359,8 @@ Component:AddPreparedFunction( "setFPS", "n", "", [[if IsValid( Context.entity )
 
 Component:AddFunctionHelper( "setFPS", "n", "Sets the fps of the screen, between 1 - 60 frames per second." )
 
-Component:AddPreparedFunction( "getFPS", "", "n", [[if IsValid( Context.entity ) and Context.entity.Screen then 
-	@define fps = Context.entity:GetFPS() 
+Component:AddPreparedFunction( "getFPS", "", "n", [[if IsValid( Context.entity ) and Context.entity.Screen then
+	@define fps = Context.entity:GetFPS()
 end]], "(@fps or 0)" )
 
 Component:AddFunctionHelper( "getFPS", "", "Returns the fps of the screen." )
@@ -370,8 +370,8 @@ EXPADV.AddFunctionAlias("setBackGroundColor", "c")
 
 Component:AddFunctionHelper( "setBackGroundColor", "c", "Sets the background color of the screen, setting alpha to 0 makes it transparent." )
 
-Component:AddPreparedFunction( "getBackgroundColor", "", "c", [[if IsValid( Context.entity ) and Context.entity.Screen then 
-	@define col = Context.entity:GetBackGround() 
+Component:AddPreparedFunction( "getBackgroundColor", "", "c", [[if IsValid( Context.entity ) and Context.entity.Screen then
+	@define col = Context.entity:GetBackGround()
 end]], "(@col or Color(0,0,0,255))" )
 EXPADV.AddFunctionAlias("getBackGroundColor", "")
 
@@ -398,6 +398,15 @@ Component:AddFunctionHelper( "realFrameTime", "", "Returns the real frame-time w
 
 Component:AddPreparedFunction( "toScreen", "v", "v2", "@define T = @value 1:ToScreen( )", "Vector2( @T.x, @T.y )" )
 Component:AddFunctionHelper( "toScreen", "v", "Translates the vectors position into 2D client screen coordinates." )
+
+Component:AddInlineFunction( "scrH", "", "n", "$ScrH( )" )
+Component:AddFunctionHelper( "scrH", "", "Returns the clients screen height." )
+
+Component:AddInlineFunction( "scrW", "", "n", "$ScrW( )" )
+Component:AddFunctionHelper( "scrW", "", "Returns the clients screen width." )
+
+Component:AddInlineFunction( "scrSize", "", "v2", "$Vector2( $ScrW( ), $ScrH( ) )")
+Component:AddFunctionHelper( "scrSize", "", "Returns a vec 2 with the clients screen width and height." )
 
 Component:AddInlineFunction( "isVisible", "v", "b", "@value 1:ToScreen( ).visible" )
 Component:AddFunctionHelper( "isVisible", "v", "Returns true if the vectors position is in clients view." )
@@ -433,12 +442,12 @@ Component:AddFunctionHelper("matrix", "v,a,v", "Returns new matrix object (trans
 
 Component:AddPreparedFunction("matrix", "v2,n,v2", "mx", [[
 @define Matrix = $Matrix()
-@Matrix:SetTranslation($Vector(@value 1.x,@value 1.y,0))	
+@Matrix:SetTranslation($Vector(@value 1.x,@value 1.y,0))
 @Matrix:SetAngles($Angle(0,@value 2 or 0,0))
 @define Vec = @value 3 or $Vector2(1,1)
 @Matrix:Scale($Vector(@Vec.x,@Vec.y,1))
 ]], "@Matrix")
-EXPADV.AddFunctionAlias("matrix", "v2") 	
+EXPADV.AddFunctionAlias("matrix", "v2")
 EXPADV.AddFunctionAlias("matrix", "v2,n")
 Component:AddFunctionHelper("matrix", "v2,n,v2", "Returns new matrix object (translation, angle, scale).")
 
@@ -592,10 +601,10 @@ local function Download(Context, Name, URL, Width, Height)
 	htmlpanel:SetSize(Width, Height)
 	htmlpanel:SetPos(ScrW()-1, ScrH()-1)
 	htmlpanel:SetHTML(
-		[[		
+		[[
 			<style type="text/css">
-				html 
-				{			
+				html
+				{
 					margin: 0px 0px;
 					overflow:hidden;
 				}
@@ -631,10 +640,10 @@ local function Download(Context, Name, URL, Width, Height)
 
 		if !mat then return end
 
-		local vertex_mat = CreateMaterial("ea2urlmat_" .. Name, "UnlitGeneric", { ["$vertexcolor"] = 1, ["$vertexalpha"] = 1, ["$ignorez"] = 1, ["$nolod"] = 1 } )	
+		local vertex_mat = CreateMaterial("ea2urlmat_" .. Name, "UnlitGeneric", { ["$vertexcolor"] = 1, ["$vertexalpha"] = 1, ["$ignorez"] = 1, ["$nolod"] = 1 } )
 		local tex = mat:GetTexture("$basetexture")
 		tex:Download()
-		vertex_mat:SetTexture("$basetexture", tex)				
+		vertex_mat:SetTexture("$basetexture", tex)
 		Context.Data.Materials[Name] = vertex_mat
 
 		htmlpanel:Remove()
@@ -702,16 +711,16 @@ if CLIENT then
 
 		for _, Context in pairs( EXPADV.CONTEXT_REGISTERY ) do
 			if !Context.Online then continue end
-			
+
 			if !IsValid(Context.entity) then continue end
-			
+
 			if(Context.event_drawHUD && EXPADV.CanAccessFeature(Context.entity, "HUD")) then
 				Context.In2DRender = true
 				Context.Matrices = 0
 
 				surface.SetDrawColor( 255, 255, 255, 255 )
 				surface.SetTextColor( 0, 0, 0, 255 )
-				
+
 				Context:Execute( "Event drawHUD", Context.event_drawHUD, W, H )
 
 				for i=1, Context.Matrices do
@@ -720,16 +729,16 @@ if CLIENT then
 
 				Context.In2DRender = false
 			end
-			
+
 			if(Context.event_draw3DOverlay && EXPADV.CanAccessFeature(Context.entity, "3DRendering")) then
 				cam.Start3D(EyePos(), EyeAngles())
 					Context.In3DRender = true
 					Context.Matrices = 0
 
 					Context:Execute("Event draw3DOverlay", Context.event_draw3DOverlay)
-					
+
 					render.OverrideDepthEnable(false,false)
-					
+
 					for i=1, Context.Matrices do
 						cam.PopModelMatrix( )
 					end
@@ -739,11 +748,11 @@ if CLIENT then
 			end
 		end
 	end )
-	
+
 
 	Component.InRender = false
 	Component.DrawingSkybox = false
-	
+
 	hook.Add( "PreDrawSkyBox", "expadv.skyboxfix", function( )
 		Component.DrawingSkybox = true
 	end )
@@ -761,9 +770,9 @@ if CLIENT then
 
 		for _, Context in pairs( EXPADV.CONTEXT_REGISTERY ) do
 			if !Context.Online then continue end
-			
+
 			if !IsValid( Context.entity ) then continue end
-			
+
 			if(Context.event_draw3D && EXPADV.CanAccessFeature(Context.entity, "3DRendering")) then
 				Context.In3DRender = true
 				Context.Matrices = 0
@@ -772,7 +781,7 @@ if CLIENT then
 				Context:Execute( "Event draw3D", Context.event_draw3D )
 
 				render.OverrideDepthEnable(false,false)
-				
+
 				for i=1, Context.Matrices do
 					cam.PopModelMatrix( )
 				end
@@ -787,7 +796,7 @@ if CLIENT then
 
 		Component.InRender = false
 	end)
-	
+
 end
 
 /* -----------------------------------------------------------------------------------
