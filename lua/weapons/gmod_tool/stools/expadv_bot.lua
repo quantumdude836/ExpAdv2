@@ -85,7 +85,7 @@ local function MakeExpadvbot( Player, Position, Angle, Model, InPorts, OutPorts 
 	ExpAdv:Activate( )
 	ExpAdv:Spawn( )
 
-	Player:AddCount( "expadv", ExpAdv )
+	Player:AddCount( "expadv_bots", ExpAdv )
 	ExpAdv:SetPlayer( Player )
 	ExpAdv.player = Player
 
