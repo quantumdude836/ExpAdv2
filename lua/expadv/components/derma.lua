@@ -235,8 +235,12 @@ Component:AddFunctionHelper( "dtextentry", "df", "Returns new dtextentry object 
 Component:AddPreparedFunction("onTextChanged", "dte:d", "", [[@value 1.OnTextChanged = function()
 	Context:Execute( "textentry", @value 2 )
 end]])
+Component:AddPreparedFunction("onEnter", "dte:d", "", [[@value 1.OnEnter = function()
+	Context:Execute( "textentry", @value 2 )
+end]])
 
 Component:AddFunctionHelper( "onTextChanged", "dte:d", "The given delegate will be executed when the text inside the dtextentry changes." )
+Component:AddFunctionHelper( "onEnter", "dte:d", "The given delegate will be executed when the client presses enter inside the dtextentry." )
 
 Component:AddPreparedFunction("setMultiline", "dte:b", "", [[
 	@value 1:SetMultiline(@value 2)
