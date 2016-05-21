@@ -109,11 +109,11 @@ Component:AddFunctionHelper( "makePopup", "dp:", "Makes the dframe popup on clie
 Component:AddPreparedFunction("center", "dp:", "", "@value 1:Center()")
 Component:AddFunctionHelper("center", "dp:", "Sets the dpanel's position to center of its parent." )
 
-Component:AddPreparedFunction("onPaint", "dp:d", "", [[@value 1.Paint = function()
-	Context:Execute( "paint", @value 2 )
+Component:AddPreparedFunction("onPaint", "dp:d", "", [[@value 1.Paint = function(_, w, h)
+	Context:Execute( "paint", @value 2, {w, "n"}, {h, "n"})
 end]])
 
-Component:AddFunctionHelper("onPaint", "dp:d", "Replaces the paint event of the dpanel.")
+Component:AddFunctionHelper("onPaint", "dp:d", "Replaces the paint event of the dpanel. Delegate is called with width and height.")
 
 PanelClass:AddPreparedOperator( "=", "n,dp", "", "Context.Memory[@value 1] = @value 2" )
 
