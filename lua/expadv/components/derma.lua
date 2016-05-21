@@ -89,6 +89,8 @@ Component:AddInlineFunction("getText", "dp:", "s", "@value 1:GetText()")
 Component:AddFunctionHelper( "getText", "dp:", "Returns the text of the dpanel." )
 Component:AddInlineFunction("isVisible", "dp:", "b", "@value 1:IsVisible()")
 Component:AddFunctionHelper( "isVisible", "dp:", "Returns whether or not the panel is visible." )
+Component:AddInlineFunction("cursorPos", "dp:", "v2", "Vector2(@value 1:CursorPos())")
+Component:AddFunctionHelper( "cursorPos", "dp:", "Returns a vec 2 with clients cursor position." )
 
 Component:AddPreparedFunction("noDock", "dp:", "", "@value 1:Dock($NODOCK)")
 Component:AddFunctionHelper( "noDock", "dp:", "Removes dock from the panel." )
