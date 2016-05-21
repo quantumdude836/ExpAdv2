@@ -102,6 +102,10 @@ Component:AddFunctionHelper( "dockMargin", "dp:n,n,n,n", "Sets the dock margin o
 Component:AddPreparedFunction("dockPadding", "dp:n,n,n,n", "", "@value 1:DockPadding(@value 2, @value 3, @value 4, @value 5)")
 Component:AddFunctionHelper( "dockPadding", "dp:n,n,n,n", "Sets the dock padding of the dpanel." )
 
+Component:AddPreparedFunction("remove", "dp:", "", "@value 1:Remove()")
+Component:AddFunctionHelper( "remove", "dp:", "Removes the derma panel")
+Component:AddPreparedFunction("makePopup", "dp:", "", "if !@value 1.ScreenDerma then @value 1:MakePopup() end")
+Component:AddFunctionHelper( "makePopup", "dp:", "Makes the dframe popup on client's screen." )
 Component:AddPreparedFunction("center", "dp:", "", "@value 1:Center()")
 Component:AddFunctionHelper("center", "dp:", "Sets the dpanel's position to center of its parent." )
 
@@ -158,8 +162,6 @@ Component:AddFunctionHelper("setBackgroundBlur", "df:b", "If set to true blurs b
 
 Component:AddPreparedFunction("setTitle", "df:s", "", "@value 1:SetTitle(@value 2)")
 Component:AddFunctionHelper( "setTitle", "df:s", "Sets the title of the dframe." )
-Component:AddPreparedFunction("makePopup", "df:", "", "if !@value 1.ScreenDerma then @value 1:MakePopup() end")
-Component:AddFunctionHelper( "makePopup", "df:", "Makes the dframe popup on client's screen." )
 
 /* -----------------------------------------------------------------------------------
 	@: Label
