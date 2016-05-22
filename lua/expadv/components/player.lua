@@ -46,6 +46,13 @@ Component:AddInlineOperator( "entity", "ply", "e", "@value 1" )
 	@: Functions
    --- */
 
+EXPADV.ServerOperators()
+
+Component:AddInlineFunction("timeConnected", "ply:", "n", "( IsValid(@value 1) and @value 1:TimeConnected() or 0 )" )
+Component:AddFunctionHelper("timeConnected", "ply:", "Returns the player's current session time.")
+
+EXPADV.SharedOperators()
+
 Component:AddInlineFunction( "isPlayer", "e:", "b", "(IsValid(@value 1) and @value 1:IsPlayer( ))")
 Component:AddFunctionHelper( "isPlayer", "e:", "Returns true if the entity is a player.")
 
@@ -95,8 +102,6 @@ Component:AddInlineFunction("frags", "ply:", "n", "( IsValid(@value 1) and @valu
 Component:AddFunctionHelper("frags", "ply:", "Returns the player's frags.")
 Component:AddInlineFunction("deaths", "ply:", "n", "( IsValid(@value 1) and @value 1:Deaths() or 0 )" )
 Component:AddFunctionHelper("deaths", "ply:", "Returns the player's deaths.")
-Component:AddInlineFunction("timeConnected", "ply:", "n", "( IsValid(@value 1) and @value 1:TimeConnected() or 0 )" )
-Component:AddFunctionHelper("timeConnected", "ply:", "Returns the player's current session time.")
 Component:AddInlineFunction("vehicle", "ply:", "e", "( IsValid(@value 1) and @value 1:GetVehicle() or Entity(0))" )
 Component:AddFunctionHelper("vehicle", "ply:", "Returns the player's vehicle or null entity.")
 Component:AddInlineFunction("inNoclip", "ply:", "b", "( IsValid(@value 1) and (@value 1:GetMoveType() == $MOVETYPE_NOCLIP) )" )
