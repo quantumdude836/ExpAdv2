@@ -62,14 +62,14 @@ Component:AddFunctionHelper( "contains", "cna:v", "Returns whether this Navigati
 Component:AddInlineFunction( "closestPointOnArea", "cna:v", "v", "(@value 1 and @value 1:GetClosestPointOnArea(@value 2) or Vector(0,0,0))" )
 Component:AddFunctionHelper( "closestPointOnArea", "cna:v", "Returns whether this Navigation Area contains the given vector." )
 
-Component:AddInlineFunction( "getCorner", "cna:n", "v", "(@value 1 and @value 1:GetCorner(math.Clamp(@value 2 + 1, 1, 4)) or Vector(0,0,0))" )
+Component:AddInlineFunction( "getCorner", "cna:n", "v", "(@value 1 and @value 1:GetCorner(math.Clamp(math.floor(@value 2), 1, 4) - 1) or Vector(0, 0, 0))" )
 Component:AddFunctionHelper( "getCorner", "cna:n", "Returns the position for the corner of a navigation area (1 - 4)." )
 
 Component:AddPreparedFunction( "exposedSpots", "cna:", "ar", [[
 	@define Array = {}
 
 	if @value 1 then @Array = @value 1:GetExposedSpots( ) end
-	
+
 	@Array.__type = "v"
 ]], "@Array" )
 Component:AddFunctionHelper( "exposedSpots", "cna:", "Returns an array of very bad hiding spots in this area." )
@@ -78,7 +78,7 @@ Component:AddPreparedFunction( "hidingSpots", "cna:", "ar", [[
 	@define Array = {}
 
 	if @value 1 then @Array = @value 1:GetHidingSpots( ) end
-	
+
 	@Array.__type = "v"
 ]], "@Array" )
 Component:AddFunctionHelper( "hidingSpots", "cna:", "Returns an array of good hiding spots in this area." )
