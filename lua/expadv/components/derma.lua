@@ -40,7 +40,7 @@ local PanelClass = Component:AddClass( "dpanel", "dp" )
 
 PanelClass:MakeClientOnly( ) //Szymekk - REMBER TO DO THIS NEXT TIME!
 
-local function CreatePanel( Context, Trace, Name, Object ) 
+local function CreatePanel( Context, Trace, Name, Object )
 	local CreatedPanel
 
 	if IsValid(Context.entity) and Context.entity.ScreenDerma then
@@ -56,7 +56,7 @@ local function CreatePanel( Context, Trace, Name, Object )
 
 	Panels[Context] = Panels[Context] or { }
 	Panels[Context][#Panels[Context]+1] = CreatedPanel
-	
+
 	return CreatedPanel
 end
 
@@ -76,6 +76,10 @@ Component:AddPreparedFunction("setText", "dp:s", "", "@value 1:SetText(@value 2)
 Component:AddFunctionHelper( "setText", "dp:s", "Sets the text of the dpanel." )
 Component:AddPreparedFunction("setVisible", "dp:b", "", "@value 1:SetVisible(@value 2)")
 Component:AddFunctionHelper( "setVisible", "dp:b", "Enables/disables visibility of the dpanel." )
+Component:AddPreparedFunction("setMouseInput", "dp:b", "", "@value 1:SetMouseInputEnabled(@value 2)")
+Component:AddFunctionHelper( "setMouseInput", "dp:b", "Enables/disables mouse input for the panel." )
+Component:AddPreparedFunction("setKeyboardInput", "dp:b", "", "@value 1:SetKeyboardInputEnabled(@value 2)")
+Component:AddFunctionHelper( "setKeyboardInput", "dp:b", "Enables/disables keyboard input for the panel." )
 
 Component:AddInlineFunction("getPos", "dp:", "v2", "Vector2(@value 1:GetPos())")
 Component:AddFunctionHelper( "getPos", "dp:", "Returns the position of the dpanel." )
@@ -83,6 +87,10 @@ Component:AddInlineFunction("getSize", "dp:", "v2", "Vector2(@value 1:GetSize())
 Component:AddFunctionHelper( "getSize", "dp:", "Returns the size of the dpanel." )
 Component:AddInlineFunction("getText", "dp:", "s", "@value 1:GetText()")
 Component:AddFunctionHelper( "getText", "dp:", "Returns the text of the dpanel." )
+Component:AddInlineFunction("isVisible", "dp:", "b", "@value 1:IsVisible()")
+Component:AddFunctionHelper( "isVisible", "dp:", "Returns whether or not the panel is visible." )
+Component:AddInlineFunction("cursorPos", "dp:", "v2", "Vector2(@value 1:CursorPos())")
+Component:AddFunctionHelper( "cursorPos", "dp:", "Returns a vec 2 with clients cursor position." )
 
 Component:AddPreparedFunction("noDock", "dp:", "", "@value 1:Dock($NODOCK)")
 Component:AddFunctionHelper( "noDock", "dp:", "Removes dock from the panel." )
@@ -492,7 +500,7 @@ end]] )
 Component:AddFunctionHelper( "setImage", "dimg:s", "Sets the dimage." )
 
 Component:AddVMFunction( "cursorImage", "", "dimg", function(Context, Trace)
-	if !Context.entity.ScreenDerma then return nil end 
+	if !Context.entity.ScreenDerma then return nil end
 	return Context.entity.Cursor_Image
 end )
 
@@ -554,12 +562,12 @@ function Component:OnPostRegisterClass( Name, Class )
 	if Class.Component != self && Name != "dframe" then return end
 
 	EXPADV.ClientOperators() //Szymekk - REMBER TO DO THIS NEXT TIME!
-	
+
 	Component:AddPreparedFunction("addSheet", "dps:s," .. Class.Short .. ",s", "", [[@value 1:AddSheet(@value 2, @value 3, @value 4)]])
 	EXPADV.AddFunctionAlias("addSheet", "dps:s," .. Class.Short)
-	
+
 	Component:AddFunctionHelper( "addSheet", "dps:s," .. Class.Short .. ",s", "Adds " .. Class.Name .. " into the dpropertysheet." )
-	
+
 	Component:AddPreparedFunction("addItem", "dpl:" .. Class.Short .. "", "", [[@value 1:AddItem(@value 2)]])
 
 	Component:AddFunctionHelper( "addItem", "dpl:" .. Class.Short .. "", "Adds " .. Class.Name .. " into the dpanel." )
@@ -607,5 +615,3 @@ if CLIENT then
 		end
 	end
 end
-
-
