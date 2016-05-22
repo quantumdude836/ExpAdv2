@@ -76,7 +76,7 @@ Component:AddInlineFunction("shootPos", "ply:", "v", "( IsValid(@value 1) and @v
 Component:AddFunctionHelper("shootPos", "ply:", "Returns the player's head position.")
 Component:AddInlineFunction("eye", "ply:", "v", "( IsValid(@value 1) and @value 1:GetAimVector() or @value 1:GetForward() or Vector(0,0,0)  )" )
 Component:AddFunctionHelper("eye", "ply:", "Returns the player's view direction or forward direction.")
-Component:AddInlineFunction("eyeAngles", "ply:", "a", "(IsValid(@value 1) and @value 1:EyeAngles() or Angle(0, 0, 0))" ) 
+Component:AddInlineFunction("eyeAngles", "ply:", "a", "(IsValid(@value 1) and @value 1:EyeAngles() or Angle(0, 0, 0))" )
 Component:AddFunctionHelper("eyeAngles", "ply:", "Returns the player's eye's angle.")
 Component:AddInlineFunction("aimEntity", "ply:", "e", "( IsValid(@value 1) and @value 1:GetEyeTraceNoCursor().Entity or Entity(0))" )
 Component:AddFunctionHelper("aimEntity", "ply:", "Returns the player's aim entity.")
@@ -130,7 +130,7 @@ for Name, Enum in pairs( FuncKeys ) do
 	Component:AddFunctionHelper( Name, "ply:", "Returns true if the player's " .. Enum[2] .. " is pressed." )
 end
 
-Component:AddVMFunction( "players", "", "ar", 
+Component:AddVMFunction( "players", "", "ar",
 	function( Context, Trace )
 		local Array = { __type = "_ply" }
 
@@ -150,6 +150,9 @@ Component:AddFunctionHelper( "localPlayer", "", "Returns the clientside player."
 
 Component:AddInlineFunction("voiceVolume", "ply:", "n", "@value 1:VoiceVolume()")
 Component:AddFunctionHelper("voiceVolume", "ply:", "Returns the volume of the player's voice")
+
+Component:AddInlineFunction("cursorPos", "", "v2", "Vector2($input.GetCursorPos())")
+Component:AddFunctionHelper("cursorPos", "", "Returns a vec 2 with clients cursor position.")
 
 /* --- --------------------------------------------------------------------------------
 	@: Player Events
@@ -206,7 +209,7 @@ Component:AddVMFunction( "tool", "ply:", "s", function(Context, Trace, Ply)
 	end
 
 	local Wep = Ply:GetActiveWeapon()
-	
+
 	if !IsValid(Wep) or Wep:GetClass() ~= "gmod_tool" then
 		return ""
 	end
@@ -301,4 +304,3 @@ end
 	hook.Add( "PlayerEnteredVehicle", "Expav.Event", function( Player, Car, Role )
 		EXPADV.CallEvent( "playerEnterVehicle", Player, Car or Entity(0), Role or 0 )
 	end )
-
