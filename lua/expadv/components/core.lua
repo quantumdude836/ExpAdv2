@@ -334,7 +334,7 @@ local function printTable(Context, t, indent, done )
 		local obj_type = t.Types[ key ]
 		local value = t.Data[ key ]
 
-		if  ( istable( value ) && !done[ value ] ) then
+		if  ( obj_type == "t" && !done[ value ] ) then
 
 			done[ value ] = true
 			EXPADV.PrintColor( Context, string.rep( "\t", indent ) .. tostring( key ) .. ":" )
