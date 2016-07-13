@@ -69,9 +69,9 @@ EXPADV.AddInlineOperator( nil, "function", "d", "f", "@value 1" )
 EXPADV.AddVMOperator( nil, "call", "f,s,...", "_vr",
 	function(Context, Trace, Function, rExpect, ...)
 		if !Function then Context:Throw( Trace, "invoke", "Attempt to call void" ) end
-		
+
 		local rValue, rType = Function(Context, ...)
-		
+
 		if (!rExpect or rExpect == "void") and (!rType or rType == "void") then
 			return -- VOID!
 		elseif rExpect == "void" then
@@ -93,7 +93,7 @@ local function buildLua(...)
 	local Inputs = { ... }
 	local Preperation = { }
 	local Outputs = { }
-	
+
 	for I = 1, #Inputs, 1 do
 		local Input = Inputs[I]
 
@@ -119,7 +119,7 @@ EXPADV.AddGeneratedFunction( nil, "invoke", "cls,d,...", "",
 
 		local dVar = Compiler:DefineVariable( )
 		local Inline, tVar = Compiler:DefineVariable( ), Compiler:DefineVariable( )
-		
+
 		table.remove(Inputs, 1)
 		table.remove(Inputs, 1)
 
@@ -138,19 +138,19 @@ EXPADV.AddFunctionAlias("invoke", "cls,d")
 EXPADV.AddGeneratedFunction( nil, "invoke", "d,...", "",
 	function(Operator, Compiler, Trace, Delegate, ...)
 		local Prepare, Inputs = buildLua(Delegate, ...)
-		
+
 		local dVar = Compiler:DefineVariable( )
 		local Inline, tVar = Compiler:DefineVariable( ), Compiler:DefineVariable( )
-		
+
 		table.remove(Inputs, 1)
-		
+
 		local Arguments = ""
 		if #Inputs > 0 then Arguments = "," .. table.concat(Inputs, ",") end
-		
+
 		Prepare = Prepare .. "\n" .. string.format([[%s = %s]], dVar, Delegate.Inline)
 		Prepare = Prepare .. "\n" .. string.format([[%s, %s = %s(Context %s)]], Inline, tVar, dVar, Arguments)
 		Prepare = Prepare .. "\n" .. string.format([[if %s then Context:Throw(%s, "invoke", "Delegate expected to return void got " .. EXPADV.TypeName(%s) .. ".") end]], Inline, Compiler:CompileTrace(Trace), tVar)
-		
+
 		return {Trace = Trace, Inline = Inline, Prepare = Prepare, Return = "", FLAG = EXPADV_INLINEPREPARE}
 	end)
 EXPADV.AddFunctionAlias("invoke", "d")
@@ -218,7 +218,7 @@ Component:AddVMFunction( "perf", "", "b",
 	end )
 
 Component:AddFunctionHelper( "perf", "", "Returns true if the current qouta is below limit." )
-	
+
 Component:AddVMFunction( "perf", "n", "b",
 	function( Context, Trace, Value )
 		Value = math.Clamp( Value, 0, 100 )
@@ -249,7 +249,7 @@ Component:AddVMFunction( "minquota", "", "n",
 	end )
 
 Component:AddFunctionHelper( "minquota", "", "Returns the minQuota." )
-	
+
 Component:AddVMFunction( "maxquota", "", "n",
 	function( Context, Trace )
 		local Perf = Context.Status.Perf
@@ -258,26 +258,26 @@ Component:AddVMFunction( "maxquota", "", "n",
 
 		local tickquota = expadv_tickquota - Perf
 		local hardquota = expadv_hardquota - Context.Status.Counter - Perf + expadv_softquota
-			
+
 		if hardquota < tickquota then return math.floor(hardquota) end
-		
+
 		return math.floor(tickquota)
 	end )
 
 Component:AddFunctionHelper( "maxquota", "", "Returns the maxQuota." )
-	
+
 Component:AddVMFunction( "softQuota", "", "n",
 	function( Context, Trace )
 		return expadv_softquota
 	end )
 
 Component:AddFunctionHelper( "softQuota", "", "Returns the softQuota." )
-	
+
 Component:AddVMFunction( "hardQuota", "", "n",
 	function( Context, Trace )
 		return expadv_hardquota
 	end )
-	
+
 Component:AddFunctionHelper( "hardQuota", "", "Returns the hardQouta." )
 
 /* --- --------------------------------------------------------------------------------
@@ -294,7 +294,7 @@ EXPADV.SharedOperators( )
 
 Component:AddVMFunction( "printColor", "...", "",
 	function( Context, Trace, ... )
-		
+
 		local Values = { ... }
 
 		for Key, Value in pairs( Values ) do
@@ -318,7 +318,7 @@ Component:AddVMFunction( "print", "...", "",
 
 		EXPADV.PrintColor( Context, Values )
 	end )
-	
+
 local function printTable(Context, t, indent, done )
 	done = done or {}
 	indent = indent or 0
@@ -345,13 +345,13 @@ local function printTable(Context, t, indent, done )
 		end
 	end
 end
-	
-	
+
+
 Component:AddVMFunction( "printTable", "t", "",
 	function( Context, Trace, Table )
 		printTable(Context, Table)
 	end )
-	
+
 Component:AddVMFunction( "printArray", "ar", "",
 	function( Context, Trace, Array )
 
@@ -408,7 +408,7 @@ EXPADV.AddFunctionHelper( nil, "netLimit", "", "Returns the max bytes that can u
    --- */
 
 EXPADV.SharedEvents( )
-	
+
 EXPADV.AddEvent( nil, "tick", "", "" )
 EXPADV.AddEvent( nil, "think", "", "" )
 EXPADV.AddEvent( nil, "last", "", "" )
