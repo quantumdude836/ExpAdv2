@@ -38,7 +38,7 @@ Component:AddFunctionHelper( "maxPlayers", "", "Returns the ammount of max playe
 Component:AddInlineFunction( "gravity", "", "n", "$GetConVar(\"sv_gravity\"):GetFloat()")
 Component:AddFunctionHelper( "gravity", "", "Returns the current servers gravity." )
 
-Component:AddInlineFunction( "propGravity", "", "n", "$physenv.GetGravity()")
+Component:AddInlineFunction( "propGravity", "", "v", "$physenv.GetGravity()")
 Component:AddFunctionHelper( "propGravity", "", "Returns the prop gravity." )
 
 Component:AddInlineFunction( "airDensity", "", "n", "$physenv.GetAirDensity()")
