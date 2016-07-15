@@ -38,7 +38,7 @@ Component:AddFunctionHelper( "maxPlayers", "", "Returns the ammount of max playe
 Component:AddInlineFunction( "gravity", "", "n", "$GetConVar(\"sv_gravity\"):GetFloat()")
 Component:AddFunctionHelper( "gravity", "", "Returns the current servers gravity." )
 
-Component:AddInlineFunction( "propGravity", "", "n", "$physenv.GetGravity()")
+Component:AddInlineFunction( "propGravity", "", "v", "$physenv.GetGravity()")
 Component:AddFunctionHelper( "propGravity", "", "Returns the prop gravity." )
 
 Component:AddInlineFunction( "airDensity", "", "n", "$physenv.GetAirDensity()")
@@ -151,7 +151,7 @@ EXPADV.AddFunctionAlias( "timerCreate", "s,n,n,d" )
 
 Component:AddVMFunction( "timerStop", "s", "", function( Context, Trace, Name )
 		local Data = Context.Data
-		
+
 		if !Data.Timers then return end
 
 		Data.Timers[Name] = nil
@@ -159,7 +159,7 @@ Component:AddVMFunction( "timerStop", "s", "", function( Context, Trace, Name )
 
 Component:AddVMFunction( "timerPause", "s", "", function( Context, Trace, Name )
 		local Data = Context.Data
-		
+
 		if !Data.Timers or !Data.Timers[Name] then return end
 
 		Data.Timers[Name].Paused = true
@@ -167,7 +167,7 @@ Component:AddVMFunction( "timerPause", "s", "", function( Context, Trace, Name )
 
 Component:AddVMFunction( "timerResume", "s", "", function( Context, Trace, Name )
 		local Data = Context.Data
-		
+
 		if !Data.Timers or !Data.Timers[Name] then return end
 
 		Data.Timers[Name].Paused = false
@@ -179,7 +179,7 @@ Component:AddFunctionHelper( "timerPause", "s", "Pauses the timer with then give
 Component:AddFunctionHelper( "timerResume", "s", "Resumed the timer with then given name." )
 
 hook.Add( "Think", "expadv.timers", function( )
-	
+
 	for _, Context in pairs( EXPADV.CONTEXT_REGISTERY ) do
 		if !Context.Online then continue end
 
@@ -215,7 +215,7 @@ hook.Add( "Think", "expadv.timers", function( )
 			if Count > 100 then break end
 		end
 
-		if Count > 100 then 
+		if Count > 100 then
 			-- Todo: Error this entity!
 		end
 	end
@@ -408,13 +408,13 @@ function Ranger:DoTrace( Context, Start, End, Distance )
 	if Distance then
 		End = Start + ( End:GetNormalized( ) * Distance )
 	end
-	
+
 	self.Start = Start
 	self.End = End
-	
+
 	local Ignore_World = self.Ignore_World
 	local TraceData = { start = Start, endpos = End, filter = Filter }
-	
+
 	if !self.FilterFunc then
 		local Filter = { }
 
@@ -429,7 +429,7 @@ function Ranger:DoTrace( Context, Start, End, Distance )
 			if Type == "b" and Value then return true end
 		end
 	end
-	
+
 	if self.Hit_Water then
 		if !self.Ignore_Entities then
 			TraceData.mask = -1
@@ -447,18 +447,18 @@ function Ranger:DoTrace( Context, Start, End, Distance )
 			TraceData.mask = MASK_NPCWORLDSTATIC
 		end
 	end
-	
+
 	local Trace
-	
+
 	if self.Mins and self.Maxs then
 		TraceData.mins = self.Mins
 		TraceData.maxs = self.Maxs
-		
+
 		Trace = util.TraceHull( TraceData )
 	else
 		Trace = util.TraceLine( TraceData )
 	end
-	
+
 	if Ignore_World and Trace.HitWorld then
 		Trace.HitPos = self.Default_Zero and Start or End
 		Trace.HitWorld = false
@@ -466,7 +466,7 @@ function Ranger:DoTrace( Context, Start, End, Distance )
 	elseif self.Default_Zero and !Trace.Hit then
 		Trace.HitPos = Start
 	end
-	
+
 	self.Result = Trace
 
 end
@@ -547,13 +547,13 @@ Component:AddInlineFunction( "entity", "rd:", "e", "( @value 1.Result.Entity or 
 	Component:AddInlineFunction( "hit", "rd:", "b", "( @value 1.Result.Hit or false )" )
 
 	Component:AddInlineFunction( "hitSky", "rd:", "b", "( @value 1.Result.HitSky or false )" )
-	
+
 	Component:AddInlineFunction( "hitNoDraw", "rd:", "b", "( @value 1.Result.HitNoDraw or false )" )
 
 	Component:AddInlineFunction( "hitWorld", "rd:", "b", "( @value 1.Result.HitWorld or false )" )
 
 	Component:AddInlineFunction( "hitNoneWorld", "rd:", "b", "( @value 1.Result.HitNonWorld or false )" )
-	
+
 	Component:AddInlineFunction( "startSolid", "rd:", "b", "( @value 1.Result.StartSolid or false )" )
 
 -- Vector
@@ -564,25 +564,25 @@ Component:AddInlineFunction( "entity", "rd:", "e", "( @value 1.Result.Entity or 
 	Component:AddInlineFunction( "normal", "rd:", "v", "( @value 1.Result.Normal or Vector( 0, 0, 0 ) )" )
 
 -- Number
-	
+
 	Component:AddInlineFunction( "fraction", "rd:", "n", "( @value 1.Result.Fraction or 0 )" )
-	
+
 	Component:AddInlineFunction( "fractionLeftSolid", "rd:", "n", "( @value 1.Result.FractionLeftSolid or 0 )" )
-	
+
 	Component:AddInlineFunction( "hitGroup", "rd:", "n", "( @value 1.Result.HitGroup or 0 )" )
-	
+
 	Component:AddInlineFunction( "hitBox", "rd:", "n", "( @value 1.Result.HitBox or 0 )" )
-	
+
 	Component:AddInlineFunction( "hitPhysics", "rd:", "n", "( @value 1.Result.PhysicsBone or 0 )" )
-	
+
 	Component:AddInlineFunction( "hitBoxbone", "rd:", "n", "( @value 1.Result.HitBoxBone or 0 )" )
-	
+
 	Component:AddInlineFunction( "materialType", "rd:", "n", "( @value 1.Result.MatType or 0 )" )
-	
+
 	Component:AddInlineFunction( "distance", "rd:", "n", "@value 1.Start:Distance( @value 1.Result.HitPos or @value 1.Start )" )
-	
+
 -- String
-	
+
 	Component:AddInlineFunction( "hitTexture", "rd:", "s", "( @value 1.Result.HitTexture or \"\" )" )
 
 -- Clear
@@ -643,7 +643,7 @@ local CheckURL
 
 Component:AddVMFunction( "httpRequest", "s,d,d", "b", function(Context, Trace, URL, Sucess, Fail)
 	if !CheckURL(Context, URL) then return false end
-	
+
 	http.Fetch( URL,
 		function( Body )
 			Context:Execute( "http success callback", Sucess, { Body, "s" } )
@@ -686,7 +686,7 @@ function CheckURL(Context, URL)
 
 	--If its serverside allow it, this may change in future.
 	if SERVER then return true end
-	
+
 	--Check feature access.
 	if !EXPADV.CanAccessFeature(Context.entity, "HTTPRequests") then return false end
 
@@ -772,7 +772,7 @@ end
 local function AddProp( Prop, Context )
 	Prop.player = Context.player
 	Context.player:AddCleanup( "props", Prop )
-	
+
 	undo.Create("lemon_spawned_prop")
 		undo.AddEntity( Prop )
 		undo.SetPlayer( Context.player )
@@ -802,7 +802,7 @@ local _DoPropSpawnedEffect = DoPropSpawnedEffect
 local function PropCoreSpawn ( Context, Trace,  Model, Freeze )
 	local G, P = Context.entity, Context.player
 	local PRate, PCount = PlayerRate[P] or 0, PlayerCount[P] or 0
-	
+
 	local Max = PropComponent:ReadSetting( "maxprops", 50 )
 	local Rate = PropComponent:ReadSetting( "cooldown", 10 )
 
@@ -815,19 +815,19 @@ local function PropCoreSpawn ( Context, Trace,  Model, Freeze )
 	elseif Context.Data.PC_NoEffect then
 		DoPropSpawnedEffect = NIL_FUNC
 	end
-	
+
 	local Prop = MakeProp( P, G:GetPos(), G:GetAngles(), Model, {}, {} )
-	
+
 	if Context.Data.PC_NoEffect then
 		DoPropSpawnedEffect = _DoPropSpawnedEffect
 	end
-	
+
 	if !Prop or !Prop:IsValid( ) then
 		Context:Throw("propcore", "Unable to spawn prop." )
 	end
 
 	AddProp( Prop, Context )
-	
+
 	Prop:Activate()
 
 	local Phys = Prop:GetPhysicsObject()
@@ -849,13 +849,13 @@ PropComponent:AddVMFunction("spawn", "s,b", "e", PropCoreSpawn )
 
 PropComponent:AddVMFunction( "canSpawn", "", "b", function( Context )
 	local Max = PropComponent:ReadSetting( "maxprops", 50 )
-	
+
 	if Max ~= -1 and (PlayerCount[Context.player] or 0) >= Max then
 		return false
 	elseif (PlayerRate[Context.player] or 0) >= PropComponent:ReadSetting( "cooldown", 10 ) then
 		return false
 	end
-	
+
 	return true
 end )
 
@@ -1008,7 +1008,7 @@ Component:AddVMFunction( "serialize", "vr", "s", function(Context, Trace, Varian
 
 	if !Serialized then return "" end
 
-	return EXPADV.von.serialize( Serialized ) 
+	return EXPADV.von.serialize( Serialized )
 end )
 
 Component:AddFunctionHelper( "serialize", "vr", "Serializes variant into string so it can be saved into file." )
@@ -1016,7 +1016,7 @@ Component:AddFunctionHelper( "serialize", "vr", "Serializes variant into string 
 Component:AddVMFunction( "deserialize", "s", "vr", function(Context, Trace, VON)
 	local Ok, Obj = pcall(EXPADV.von.deserialize, VON)
 
-	if Ok then 
+	if Ok then
 		Obj = EXPADV.Deserialize( "vr", Obj )
 
 		if Obj then return Obj end
@@ -1042,10 +1042,10 @@ function Component:OnPostRegisterClass( Name, Class )
 				local Ok, Serialized = pcall( EXPADV.von.serialize, Obj )
 				if Ok then return Serialized end
 			end
-			
+
 			Context:Throw( Trace, "von", "failed to serialize object." )
 		end )
-		
+
 		Component:AddFunctionHelper( "serialize", Class.Short, "Serializes " .. Class.Name .. " into string so it can be saved into file." )
 
 	end
@@ -1168,7 +1168,7 @@ if SERVER then
 elseif CLIENT then
 	local DEFAULT_WHITELIST = {}
 	local Banned = { quit = true, lua_run_cl = true, retry = true, rcon = true, connect = true, password = true }
-	
+
 	Component:CreateUserSetting( "concmd_whitelist", DEFAULT_WHITELIST )
 
 	function Exec(CommandLine)
