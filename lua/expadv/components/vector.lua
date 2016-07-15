@@ -36,8 +36,13 @@ end
   @: Sync
    --- */
 
-VectorObj:NetWrite(net.WriteVector)
-VectorObj:NetRead(net.ReadVector)
+VectorObj:NetWrite( function( send ) 
+  net.WriteFloat( send.x )
+  net.WriteFloat( send.y )
+  net.WriteFloat( send.z )
+end )
+
+VectorObj:NetRead( function( ) return Vector( net.ReadFloat( ), net.ReadFloat( ), net.ReadFloat( ) ) end )
 
 /* --- --------------------------------------------------------------------------------
 	  @: Logical and Comparison
