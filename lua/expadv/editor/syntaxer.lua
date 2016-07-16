@@ -449,7 +449,7 @@ function Syntaxer:Parse( Row )
 				addToken( "keyword", self.tokendata  ) 
 				self.tokendata = ""
 				
-				if self:NextPattern( "^[a-zA-Z][a-zA-Z0-9_]* " ) then 
+				if self:NextPattern( "^[a-zA-Z][a-zA-Z0-9_]* *" ) then 
 					addToken( "typename", self.tokendata ) 
 					self.tokendata = ""
 				end 
@@ -457,10 +457,38 @@ function Syntaxer:Parse( Row )
 				if self:NextPattern( "^[a-zA-Z][a-zA-Z0-9_]*" ) then 
 					self:AddUserFunction( Row, self.tokendata )
 					addToken( "userfunction", self.tokendata ) 
+					self.tokendata = ""
+				end 
+				
+				self:NextPattern( " *%( *" ) 
+				addToken( "operator", self.tokendata ) 
+				self.tokendata = "" 
+				
+				while self:NextPattern( "[a-zA-Z][a-zA-Z0-9_]*" ) do 
+					if istype( self.tokendata ) then 
+						addToken( "typename", self.tokendata ) 
+					else 
+						addToken( "notfound", self.tokendata ) 
+					end 
+					self.tokendata = ""
+					
+					self:NextPattern( " *" )
+					addToken( "operator", self.tokendata ) 
+					self.tokendata = "" 
+					
+					self:NextPattern( "[a-zA-Z][a-zA-Z0-9_]*" )
+					self.Variables[self.tokendata] = Row 
+					addToken( "variable", self.tokendata ) 
+					self.tokendata = "" 
+					
+					if not self:NextPattern( " *, *" ) then break end 
+					addToken( "operator", self.tokendata ) 
+					self.tokendata = "" 
 				end 
 				
 				continue 
 			end 
+			
 			
 			if istype( word ) and keyword then 
 				addToken( "typename", self.tokendata ) 
