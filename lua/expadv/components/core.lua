@@ -221,18 +221,18 @@ Component:AddFunctionHelper( "perf", "", "Returns true if the current qouta is b
 
 Component:AddVMFunction( "perf", "n", "b",
 	function( Context, Trace, Value )
-		Value = math.Clamp( Value, 0, 100 )
+		Value = (Value < 100 and Value or 100) * 0.01
 
-		if Context.Status.Perf + Context.Status.Counter >= (expadv_hardquota - expadv_tickquota) * Value * 0.01 then
+		if Context.Status.Perf + Context.Status.Counter >= (expadv_hardquota - expadv_tickquota) * Value then
 			return false
 		elseif Value == 100 then
 			if Context.Status.Perf >= expadv_softquota * 2 then
 				return false
 			end
-		elseif Context.Status.Perf >= expadv_softquota * Value * 0.01 then
+		elseif Context.Status.Perf >= expadv_softquota * Value then
 			return false
 		end
-
+		
 		return true
 	end )
 
