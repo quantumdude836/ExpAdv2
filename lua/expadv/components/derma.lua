@@ -170,6 +170,10 @@ Component:AddFunctionHelper("setBackgroundBlur", "df:b", "If set to true blurs b
 
 Component:AddPreparedFunction("setTitle", "df:s", "", "@value 1:SetTitle(@value 2)")
 Component:AddFunctionHelper( "setTitle", "df:s", "Sets the title of the dframe." )
+Component:AddPreparedFunction("onClose", "df:d", "", [[@value 1.OnClose = function()
+	Context:Execute( "frame", @value 2 )
+end]])
+Component:AddFunctionHelper( "onClose", "df:d", "The given delegate will be executed when player closes the dframe." )
 
 /* -----------------------------------------------------------------------------------
 	@: Label
@@ -330,7 +334,7 @@ Component:AddPreparedFunction("setValue", "dns:n", "", "@value 1:SetValue(@value
 Component:AddFunctionHelper( "setValue", "dns:n", "Sets the current value of the dnumslider." )
 Component:AddInlineFunction("getValue", "dns:", "n", "@value 1:GetValue()")
 Component:AddFunctionHelper( "getValue", "dns:", "Returns the current value of the dnumslider." )
-Component:AddPreparedFunction("onChange", "dns:d", "", [[@value 1.ValueChanged = function()
+Component:AddPreparedFunction("onChange", "dns:d", "", [[@value 1.OnValueChanged = function()
 	Context:Execute( "numslider", @value 2 )
 end]])
 
