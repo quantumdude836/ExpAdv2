@@ -557,7 +557,7 @@ function Component:OnPostRegisterClass( Name, Class )
 
 			for _, Index in pairs( Table.Look ) do
 				if Table.Types[Index] == Class.Short then
-					Array[Array + 1] = Table.Data[Index]
+					Array[#Array + 1] = Table.Data[Index]
 				end
 			end
 
