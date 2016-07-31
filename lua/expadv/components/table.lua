@@ -202,8 +202,7 @@ Component:AddVMFunction( "entityKeys", "t:", "ar",
 		local Array = {__type = "e"}
 
 		for K, V in pairs(Table.Look) do
-			local T = type(K)
-			if T == "Entity" or T == "Player" then Array[#Array + 1] = K end
+			if isentity(K) then Array[#Array + 1] = K end
 		end
 
 		return Array
