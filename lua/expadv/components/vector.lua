@@ -150,16 +150,16 @@ Component:AddPreparedFunction( "set", "v:v", "v", "@value 1:Set( @value 2 )", "(
 Component:AddFunctionHelper( "set", "v:v", "Sets a vector to the value of another vector" )
 
 --Changers
-Component:AddPreparedFunction( "withX", "v:n", "v", "Vector(@value 2, @value 1.y, @value 1.z)" )
+Component:AddInlineFunction( "withX", "v:n", "v", "Vector(@value 2, @value 1.y, @value 1.z)" )
 Component:AddFunctionHelper( "withX", "v:n", "Returns the value of the vector with the value of x changed." )
 
-Component:AddPreparedFunction( "withY", "v:n", "v", "Vector(@value 1.x, @value 2, @value 1.z)" )
+Component:AddInlineFunction( "withY", "v:n", "v", "Vector(@value 1.x, @value 2, @value 1.z)" )
 Component:AddFunctionHelper( "withY", "v:n", "Returns the value of the vector with the value of y changed." )
 
-Component:AddPreparedFunction( "withZ", "v:n", "v", "Vector(@value 1.x, @value 1.y, @value 2)" )
+Component:AddInlineFunction( "withZ", "v:n", "v", "Vector(@value 1.x, @value 1.y, @value 2)" )
 Component:AddFunctionHelper( "withZ", "v:n", "Returns the value of the vector with the value of z changed." )
 
-Component:AddPreparedFunction( "clone", "v:", "v", "Vector(@value 1.x, @value 1.y, @value 1.z)" )
+Component:AddInlineFunction( "clone", "v:", "v", "Vector(@value 1)" )
 Component:AddFunctionHelper( "clone", "v:", "Returns a clone of the vector." )
 
 /* --- --------------------------------------------------------------------------------
@@ -478,13 +478,13 @@ Component:AddPreparedFunction( "setY", "v2:n", "", "@value 1.y = @value 2" )
 Component:AddFunctionHelper( "setY", "v2:n", "Sets the Y value of a vector2" )
 
 --Changers
-Component:AddPreparedFunction( "withX", "v:n", "v", "Vector2(@value 2, @value 1.y)" )
-Component:AddFunctionHelper( "withX", "v:n", "Returns the value of the vector2 with the value of x changed." )
+Component:AddInlineFunction( "withX", "v2:n", "v2", "Vector2(@value 2, @value 1.y)" )
+Component:AddFunctionHelper( "withX", "v2:n", "Returns the value of the vector2 with the value of x changed." )
 
-Component:AddPreparedFunction( "withY", "v:n", "v", "Vector2(@value 1.x, @value 2)" )
-Component:AddFunctionHelper( "withY", "v:n", "Returns the value of the vector2 with the value of y changed." )
+Component:AddInlineFunction( "withY", "v2:n", "v2", "Vector2(@value 1.x, @value 2)" )
+Component:AddFunctionHelper( "withY", "v2:n", "Returns the value of the vector2 with the value of y changed." )
 
-Component:AddPreparedFunction( "clone", "v2:", "v2", "Vector2(@value 1.x, @value 1.y)" )
+Component:AddInlineFunction( "clone", "v2:", "v2", "@value 1:Clone()" )
 Component:AddFunctionHelper( "clone", "v2:", "Returns a clone of the vector2." )
 
 /* --- --------------------------------------------------------------------------------
