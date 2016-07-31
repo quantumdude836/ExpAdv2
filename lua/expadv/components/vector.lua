@@ -36,7 +36,7 @@ end
   @: Sync
    --- */
 
-VectorObj:NetWrite( function( send ) 
+VectorObj:NetWrite( function( send )
   net.WriteFloat( send.x )
   net.WriteFloat( send.y )
   net.WriteFloat( send.z )
@@ -150,16 +150,16 @@ Component:AddPreparedFunction( "set", "v:v", "v", "@value 1:Set( @value 2 )", "(
 Component:AddFunctionHelper( "set", "v:v", "Sets a vector to the value of another vector" )
 
 --Changers
-Component:AddPreparedFunction( "withX", "v:n", "v", "Vector(@value 2, @value 1.y, @value 1.z)" )
+Component:AddInlineFunction( "withX", "v:n", "v", "Vector(@value 2, @value 1.y, @value 1.z)" )
 Component:AddFunctionHelper( "withX", "v:n", "Returns the value of the vector with the value of x changed." )
 
-Component:AddPreparedFunction( "withY", "v:n", "v", "Vector(@value 1.x, @value 2, @value 1.z)" )
+Component:AddInlineFunction( "withY", "v:n", "v", "Vector(@value 1.x, @value 2, @value 1.z)" )
 Component:AddFunctionHelper( "withY", "v:n", "Returns the value of the vector with the value of y changed." )
 
-Component:AddPreparedFunction( "withZ", "v:n", "v", "Vector(@value 1.x, @value 1.y, @value 2)" )
+Component:AddInlineFunction( "withZ", "v:n", "v", "Vector(@value 1.x, @value 1.y, @value 2)" )
 Component:AddFunctionHelper( "withZ", "v:n", "Returns the value of the vector with the value of z changed." )
 
-Component:AddPreparedFunction( "clone", "v:", "v", "Vector(@value 1.x, @value 1.y, @value 1.z)" )
+Component:AddInlineFunction( "clone", "v:", "v", "Vector(@value 1)" )
 Component:AddFunctionHelper( "clone", "v:", "Returns a clone of the vector." )
 
 /* --- --------------------------------------------------------------------------------
@@ -312,11 +312,11 @@ Component:AddFunctionHelper( "toLocalAxis", "e:v", "Converts a world axis to a l
    --- */
 local function intersectRayWithOBB(Context, Trace, rStart, rDir, bOrigin, bAngles, bMins, bMaxs)
 	local hPos, nDir, frac = util.IntersectRayWithOBB(rStart, rDir, bOrigin, bAngles, bMins, bMaxs)
-	
+
 	hPos = hPos or Vector(0, 0, 0)
 	nDir = nDir or Vector(0, 0, 0)
 	frac = frac or 0
-	
+
 	return {
 		Look = {RayStart = "RayStart", RayDir = "RayDir", BoxOrigin = "BoxOrigin", BoxAngles = "BoxAngles", BoxMins = "BoxMins", BoxMaxs = "BoxMaxs", HitPos = "HitPos", Direction = "Direction", Fraction = "Fraction"},
 		Data = {RayStart = rStart, RayDir = rDir, BoxOrigin = bOrigin, BoxAngles = bAngles, BoxMins = bMins, BoxMaxs = bMaxs, HitPos = hPos, Direction = nDir, Fraction = frac},
@@ -436,7 +436,7 @@ Component:AddInlineOperator( "vector", "v2", "v", "Vector(@value 1.x, @value 1.y
 
 Vector2Obj:AddVMOperator( "=", "n,v2", "", function( Context, Trace, MemRef, Value )
    local Prev = Context.Memory[MemRef] or Vector2( 0, 0 )
-   
+
    Context.Memory[MemRef] = Value
    Context.Delta[MemRef] = Prev - (Value or Vector2(0, 0))
    Context.Trigger[MemRef] = Context.Trigger[MemRef] or ( Prev ~= Value )
@@ -478,13 +478,13 @@ Component:AddPreparedFunction( "setY", "v2:n", "", "@value 1.y = @value 2" )
 Component:AddFunctionHelper( "setY", "v2:n", "Sets the Y value of a vector2" )
 
 --Changers
-Component:AddPreparedFunction( "withX", "v:n", "v", "Vector2(@value 2, @value 1.y)" )
-Component:AddFunctionHelper( "withX", "v:n", "Returns the value of the vector2 with the value of x changed." )
+Component:AddInlineFunction( "withX", "v2:n", "v2", "Vector2(@value 2, @value 1.y)" )
+Component:AddFunctionHelper( "withX", "v2:n", "Returns the value of the vector2 with the value of x changed." )
 
-Component:AddPreparedFunction( "withY", "v:n", "v", "Vector2(@value 1.x, @value 2)" )
-Component:AddFunctionHelper( "withY", "v:n", "Returns the value of the vector2 with the value of y changed." )
+Component:AddInlineFunction( "withY", "v2:n", "v2", "Vector2(@value 1.x, @value 2)" )
+Component:AddFunctionHelper( "withY", "v2:n", "Returns the value of the vector2 with the value of y changed." )
 
-Component:AddPreparedFunction( "clone", "v2:", "v2", "Vector2(@value 1.x, @value 1.y)" )
+Component:AddInlineFunction( "clone", "v2:", "v2", "@value 1:Clone()" )
 Component:AddFunctionHelper( "clone", "v2:", "Returns a clone of the vector2." )
 
 /* --- --------------------------------------------------------------------------------
@@ -537,18 +537,18 @@ VectorObj:AddPreparedOperator( "for", "v,v,v,?", "", [[
    for z = @value 1.z, @value 2.z, @value 3.z do
       for y = @value 1.y, @value 2.y, @value 3.y do
          for x = @value 1.x, @value 2.x, @value 3.x do
-            local i = Vector(x,y,z) 
+            local i = Vector(x,y,z)
             @prepare 4
          end
       end
    end
-]] ) 
+]] )
 
 Vector2Obj:AddPreparedOperator( "for", "v2,v2,v2,?", "", [[
     for y = @value 1.y, @value 2.y, @value 3.y do
       for x = @value 1.x, @value 2.x, @value 3.x do
-         local i = Vector2(x,y) 
-         @prepare 4        
+         local i = Vector2(x,y)
+         @prepare 4
       end
    end
 ]] )
