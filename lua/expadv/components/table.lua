@@ -145,7 +145,7 @@ function Unpack( Context, Trace, Table, Index )
 	local Object = Table.Data[Index]
 
 	if Object == nil then return end
-	
+
 	return { Object, Table.Types[Index] }, Unpack( Context, Trace, Table, Index + 1 )
 end
 
@@ -241,14 +241,14 @@ Component:AddFunctionHelper( "keys", "t:", "Returns an array of indexs on the ta
 
 	local Get = function( Context, Trace, Table, Index, _ )
 			local Object = Table.Data[Index]
-			
+
 			if Object == nil then
 				Context:Throw( Trace, "table", string.format( "Attempt reach %s at index %s of table, result reached void.", Name, Index ) )
 			else
 				return { Object, Table.Types[Index] }
 			end
 	end
-	
+
 	Table:AddVMOperator( "get", "t,n", "vr", Get )
 	Table:AddVMOperator( "get", "t,s", "vr", Get )
 	Table:AddVMOperator( "get", "t,e", "vr", Get )
@@ -300,7 +300,7 @@ Component:AddFunctionHelper( "keys", "t:", "Returns an array of indexs on the ta
 			Table.Size = Table.Size + 1
 
 			Table.Look[Table.Count] = Table.Count
-			
+
 			Context.TrigMan[Table] = true
 		end )
 
@@ -312,15 +312,15 @@ Component:AddFunctionHelper( "keys", "t:", "Returns an array of indexs on the ta
 			table.insert( Table.Types, Index, Value[2] )
 
 			Table.Look[Index] = Index
-			
+
 			Context.TrigMan[Table] = true
-			
+
 			Table.Count = #Data
-			
+
 			Table.Size = Table.Size + 1
 		end )
 
-	Component:AddFunctionHelper( "insert", "t:vr", "Inserts variants object to the top of the tables array element." ) 
+	Component:AddFunctionHelper( "insert", "t:vr", "Inserts variants object to the top of the tables array element." )
 	Component:AddFunctionHelper( "insert", "t:n,vr", "Inserts %variants object tables array element at index, pushing all higher index up." )
 
 
@@ -356,23 +356,23 @@ Component:AddFunctionHelper( "keys", "t:", "Returns an array of indexs on the ta
 		local Types = Table.Types
 
 		local Old = Data[Index]
-		
+
 		if Old ~= nil then
 			Table.Size = Table.Size - 1
 			Context.TrigMan[Table] = true
 		end
-		
+
 		local Value = Data[Index] or 0
 		local Type = Types[Index] or "n"
-		
+
 		Data[Index] = nil
 
 		Types[Index] = nil
 
 		Table.Look[Index] = nil
-		
+
 		Table.Count = #Data
-		
+
 		return { Value, Type }
 	end
 
@@ -380,9 +380,9 @@ Component:AddFunctionHelper( "keys", "t:", "Returns an array of indexs on the ta
 	Component:AddVMFunction( "remove", "t:s", "vr", Remove )
 	Component:AddVMFunction( "remove", "t:e", "vr", Remove )
 
-	Component:AddFunctionHelper( "remove", "t:n", "Removes value at index of table, the removed object is returned as variant." ) 
-	Component:AddFunctionHelper( "remove", "t:s", "Removes value at index of table, the removed object is returned as variant." ) 
-	Component:AddFunctionHelper( "remove", "t:e", "Removes value at index of table, the removed object is returned as variant." ) 
+	Component:AddFunctionHelper( "remove", "t:n", "Removes value at index of table, the removed object is returned as variant." )
+	Component:AddFunctionHelper( "remove", "t:s", "Removes value at index of table, the removed object is returned as variant." )
+	Component:AddFunctionHelper( "remove", "t:e", "Removes value at index of table, the removed object is returned as variant." )
 
 /* --- --------------------------------------------------------------------------------
 	@: Shift is basicaly the same, but it pops
@@ -395,17 +395,17 @@ Component:AddFunctionHelper( "keys", "t:", "Returns an array of indexs on the ta
 			local Types = Table.Types
 
 			local Old = Data[Index]
-			
+
 			if Old ~= nil then
 				Table.Size = Table.Size - 1
 				Context.TrigMan[Table] = true
 			end
-			
+
 			local Value = table.remove( Data, Index ) or 0
 			local Type = table.remove( Types, Index ) or "n"
-			
+
 			table.remove( Table.Look, Index )
-			
+
 			Table.Count = #Data
 
 			return { Value, Type }
@@ -447,18 +447,18 @@ function Component:OnPostRegisterClass( Name, Class )
 	else
 		return
 	end
-	
+
 	/* --- --------------------------------------------------------------------------------
 		@: Get Operators
    	   --- */
 
 		local Get = function( Context, Trace, Table, Index, _ )
 				local Object = Table.Data[Index]
-				
+
 				if Object == nil then
 					if Class.CreateNew then return Class.CreateNew( ) end
 					Context:Throw( Trace, "table", string.format( "Attempt reach %s at index %s of table, result reached void.", Name, Index ) )
-				
+
 				elseif Table.Types[Index] == Class.Short then
 					return Object
 
@@ -466,7 +466,7 @@ function Component:OnPostRegisterClass( Name, Class )
 					Context:Throw( Trace, "table", string.format( "Attempt reach %s at index %s of table, result reached %s.", Name, Index, EXPADV.TypeName( Table.Types[Index] ) ) )
 				end
 		end
-		
+
 		Table:AddVMOperator( "get", "t,n," .. Class.Short, Class.Short, Get )
 		Table:AddVMOperator( "get", "t,s," .. Class.Short, Class.Short, Get )
 		Table:AddVMOperator( "get", "t,e," .. Class.Short, Class.Short, Get )
@@ -516,7 +516,7 @@ function Component:OnPostRegisterClass( Name, Class )
 				Table.Size = Table.Size + 1
 
 				Table.Look[Table.Count] = Table.Count
-				
+
 				Context.TrigMan[Table] = true
 			end )
 
@@ -528,11 +528,11 @@ function Component:OnPostRegisterClass( Name, Class )
 				table.insert( Table.Types, Index, Class.Short )
 
 				Table.Look[Index] = Index
-				
+
 				Context.TrigMan[Table] = true
-				
+
 				Table.Count = #Data
-				
+
 				Table.Size = Table.Size + 1
 			end )
 
@@ -546,7 +546,7 @@ function Component:OnPostRegisterClass( Name, Class )
    	EXPADV.ServerOperators( )
 	Table:AddVMOperator( "set", "t,h," .. Class.Short, "", Set )
 	Table:AddVMOperator( "get", "t,h," .. Class.Short, Class.Short, Get )
-	
+
 	/* --- --------------------------------------------------------------------------------
 		@: Values
 	   --- */
@@ -683,7 +683,7 @@ Table:NetRead(function()
 		Types[key] = type
 		Data[key] = Class.ReadFromNet()
 	end
-	
+
 	return { Data = Data, Types = Types, Look = Look, Size = Size, Count = #Data, HasChanged = true }
 end)
 
@@ -702,7 +702,7 @@ Component:AddFunctionHelper( "writeTable", "st:t", "Appends a table to the strea
 
 Component:AddVMFunction( "readTable", "st:", "t", function( Context, Trace, Stream )
 	Stream.R = Stream.R + 1
-	
+
 	if !Stream.T[Stream.R] then
 		Context:Throw( Trace, "stream", "Failed to read table from stream, stream returned void." )
 	elseif Stream.T[Stream.R] ~= "t" then
