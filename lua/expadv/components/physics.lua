@@ -191,7 +191,7 @@ Component:AddInlineFunction( "isFrozen", "p:", "b", "(IsValid(@value 1) and @val
 EXPADV.ServerOperators()
 
 Component:AddVMFunction( "applyForce", "p:v", "", function( Context, Trace, Phys, Pos )
-	if Phys:IsValid() and VectorNotHuge( Pos ) and EXPADV.PPCheck(Context, Phys:GetEntity( )) then
+	if Phys:IsValid() and VectorNotHuge( Pos ) and EXPADV.PPCheck(Context, Phys:GetEntity( )) and IsValid( Pos ) then
 		Phys:ApplyForceCenter(Pos)
 	end
 end)
@@ -199,7 +199,7 @@ end)
 Component:AddFunctionHelper( "applyForce", "p:v", "Applies a vector of force on the given physics object.")
 
 Component:AddVMFunction( "applyOffsetForce", "p:v,v", "", function( Context, Trace, Phys, Pos1, Pos2 )
-	if Phys:IsValid() and VectorNotHuge( Pos1 ) and VectorNotHuge( Pos2 ) and EXPADV.PPCheck(Context, Phys:GetEntity( )) then
+	if Phys:IsValid() and VectorNotHuge( Pos1 ) and VectorNotHuge( Pos2 ) and EXPADV.PPCheck(Context, Phys:GetEntity( )) and IsValid( Pos1 ) and IsValid( Pos2 ) then
 		Phys:ApplyForceOffset(Pos1, Pos2)
 	end
 end)
@@ -208,7 +208,7 @@ Component:AddFunctionHelper( "applyOffsetForce", "p:v,v", "Applies an offset vec
 
 Component:AddVMFunction( "applyAngForce", "p:a", "",
 	function( Context, Trace, Phys, Angle )
-		if Phys:IsValid() and AngleNotHuge(Angle )and EXPADV.PPCheck(Context,Phys:GetEntity()) then
+		if Phys:IsValid() and AngleNotHuge( Angle )and EXPADV.PPCheck(Context,Phys:GetEntity()) and IsValid( Angle ) then
 				if Angle.p != 0 or Angle.y != 0 or Angle.r != 0 then
 					
 					local pos = Phys:GetPos()
@@ -242,7 +242,7 @@ Component:AddVMFunction( "applyAngForce", "p:a", "",
 Component:AddFunctionHelper( "applyAngForce", "p:a", "Applies torque to the given physics object depending on the given angle")
 
 Component:AddVMFunction( "applyTorque", "p:v", "", function( Context, Trace, Phys, TQ )
-	if Phys:IsValid() and EXPADV.PPCheck(Context, Phys:GetEntity( )) then
+	if Phys:IsValid() and EXPADV.PPCheck(Context, Phys:GetEntity( )) and IsValid( TQ ) then
 		if TQ.x == 0 and TQ.y == 0 and TQ.z == 0 then return end
 
 		if Phys:GetEntity():GetMoveType() == MOVETYPE_VPHYSICS then
