@@ -8,20 +8,6 @@ local Component = EXPADV.AddComponent( "entity", true )
 Component.Author = "Ripmax"
 Component.Description = "Allows for advanced entity control."
 
-local function VectorNotHuge( Vec )
-	if Vec.x >= math.huge or Vec.x <= -math.huge then return false end
-	if Vec.y >= math.huge or Vec.y <= -math.huge then return false end
-	if Vec.z >= math.huge or Vec.z <= -math.huge then return false end
-	return true
-end
-
-local function AngleNotHuge( Vec )
-	if Vec.p >= math.huge or Vec.p <= -math.huge then return false end
-	if Vec.y >= math.huge or Vec.y <= -math.huge then return false end
-	if Vec.r >= math.huge or Vec.r <= -math.huge then return false end
-	return true
-end
-
 /* --- --------------------------------------------------------------------------------
 	@: Entity Class
    --- */
@@ -438,7 +424,7 @@ Component:AddPreparedFunction( "setMass", "e:n", "","if(@value 1:IsValid() && EX
 Component:AddFunctionHelper( "setMass", "e:n", "Sets the mass of the given entity.")
 
 Component:AddVMFunction( "applyForce", "e:v", "", function( Context, Trace, Target, Pos )
-	if Target:IsValid() and VectorNotHuge( Pos ) and EXPADV.PPCheck(Context, Target) and IsValid( Pos ) then
+	if Target:IsValid() and EXPADV.CheckForce( Pos ) and EXPADV.PPCheck(Context, Target) then
 		local Phys = Target:GetPhysicsObject()
 		if !Phys or !Phys:IsValid( ) then return end
 		if Target:GetMoveType() == MOVETYPE_VPHYSICS then Phys:ApplyForceCenter(Pos) end
@@ -448,7 +434,7 @@ end)
 Component:AddFunctionHelper( "applyForce", "e:v", "Applies a vector of force on the given entity.")
 
 Component:AddVMFunction( "applyOffsetForce", "e:v,v", "", function( Context, Trace, Target, Pos1, Pos2 )
-	if Target:IsValid() and VectorNotHuge( Pos1 ) and VectorNotHuge( Pos2 ) and EXPADV.PPCheck(Context, Target) and IsValid( Pos1 ) and IsValid( Pos2 ) then
+	if Target:IsValid() and EXPADV.CheckForce( Pos1 ) and EXPADV.CheckForce( Pos2 ) and EXPADV.PPCheck(Context, Target) then
 		local Phys = Target:GetPhysicsObject()
 		if !Phys or !Phys:IsValid( ) then return end
 		if Target:GetMoveType() == MOVETYPE_VPHYSICS then Phys:ApplyForceOffset(Pos1, Pos2) end
@@ -460,7 +446,7 @@ Component:AddFunctionHelper( "applyForceOffset", "e:v,v", "Applies an offset vec
 Component:AddVMFunction( "applyAngForce", "e:a", "",
 	function( Context, Trace, Target, Angle )
 
-		if Target:IsValid() and AngleNotHuge( Angle ) and EXPADV.PPCheck(Context,Target) and IsValid( Angle ) then
+		if Target:IsValid() and EXPADV.CheckForce( Angle ) and EXPADV.PPCheck(Context,Target) then
 			local Phys = Target:GetPhysicsObject()
 			if !Phys or !Phys:IsValid( ) then return end
 
@@ -498,7 +484,7 @@ Component:AddVMFunction( "applyAngForce", "e:a", "",
 Component:AddFunctionHelper( "applyAngForce", "e:a", "Applies torque to the given entity depending on the given angle")
 
 Component:AddVMFunction( "applyTorque", "e:v", "", function( Context, Trace, Target, TQ )
-	if Target:IsValid() and EXPADV.PPCheck(Context, Target) and IsValid( TQ ) then
+	if Target:IsValid() and EXPADV.PPCheck(Context, Target) and EXPADV.CheckForce( TQ ) then
 		local Phys = Target:GetPhysicsObject()
 		if !Phys or !Phys:IsValid( ) then return end
 		if TQ.x == 0 and TQ.y == 0 and TQ.z == 0 then return end
@@ -521,7 +507,7 @@ Component:AddVMFunction( "applyTorque", "e:v", "", function( Context, Trace, Tar
 
 			local dir = ( TQ:Cross(off) ):GetNormal()
 
-			if !VectorNotHuge( dir ) or !VectorNotHuge( off ) then return end
+			if !EXPADV.CheckForce( dir ) or !EXPADV.CheckForce( off ) then return end
 			Phys:ApplyForceOffset( dir, off )
 			Phys:ApplyForceOffset( dir * -1, off * -1 )
 		end

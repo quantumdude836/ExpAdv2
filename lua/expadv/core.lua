@@ -40,6 +40,14 @@ function describe(object, Message, first, ...)
 		MsgN("POINTER: ", object)
 	end
 end
+
+local min_force = -3.4E+38
+local max_force =  3.4E+38
+function EXPADV.CheckForce(Value)
+ 		return 	min_force < Value[1] and Value[1] < max_force and
+ 				min_force < Value[2] and Value[2] < max_force and
+ 				min_force < Value[3] and Value[3] < max_force
+end 
 /* --- --------------------------------------------------------------------------------
 	@: Sometimes We might need to convert objects into native.
    --- */
