@@ -634,7 +634,7 @@ function Compiler:Compile_TRY( Trace, Sequence, Catch, Final )
 
 		Final and Final.Prepare or "",
 	}
-
+	
 	return { Trace = Trace, Return = "", Prepare = table.concat( Native, "\n" ), FLAG = EXPADV_PREPARE }
 end
 
@@ -655,10 +655,9 @@ function Compiler:Compile_CATCH( Trace, MemRef, Accepted, Sequence, Catch )
 			Ass.Prepare,
 			Sequence.Prepare or "",
 			Sequence.Inline or "",
-			Catch and "else" .. Catch.Prepare or "",
-		"end"
+			Catch and "else" .. Catch.Prepare or "end"
 	}
-
+	
 	return { Trace = Trace, Return = "", Prepare = table.concat( Native, "\n" ), FLAG = EXPADV_PREPARE }
 end
 

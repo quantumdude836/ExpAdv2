@@ -3,7 +3,16 @@
 	@: Main Window
    --- */
 
-	local Main = vgui.Create("DPanel")
+	-- local Main = vgui.Create("DPanel")
+	local Main = vgui.Create("EditablePanel")
+	function Main:Paint( w, h ) 
+		surface.SetDrawColor(Color(0,0,0))
+		surface.DrawRect(0,0,w,h)
+	end 
+	
+	Main:SetKeyBoardInputEnabled( true )
+	Main:SetMouseInputEnabled( true )
+	
 	Main.TitleBar = vgui.Create("DPanel", Main)
 	Main.SideBar = vgui.Create("DPanel", Main)
 	Main.Canvas = vgui.Create("DPanel", Main)
@@ -18,7 +27,7 @@
 	Main.Divider = vgui.Create("DHorizontalDivider", Main.Canvas)
 	Main.Divider:SetLeft(Main.CanvasLeft)
 	Main.Divider:SetRight(Main.CanvasRight)
-	Main.Divider:SetDividerWidth(5)
+	Main.Divider:SetDividerWidth( 5 )
 	Main.Divider:SetLeftWidth( 200 )
 	Main.Divider:SetLeftMin( 200 )
 	Main.Divider:SetRightMin( 400 )
@@ -26,10 +35,10 @@
 	Main.CanvasLeft.Bar = vgui.Create("DPanel", Main.CanvasLeft)
 	Main.CanvasLeft.Canvas = vgui.Create("DPanel", Main.CanvasLeft)
 
-	Main:SetBackgroundColor(Color(0, 0, 0))
+	-- Main:SetBackgroundColor(Color(0, 0, 0))
 	Main.TitleBar:SetBackgroundColor(Color(50, 50, 50))
 	Main.SideBar:SetBackgroundColor(Color(50, 50, 50))
-	Main.Canvas:SetBackgroundColor(Color(25, 25, 52))
+	Main.Canvas:SetBackgroundColor(Color(65, 65, 117))
 
 	Main.CanvasLeft:SetBackgroundColor(Color(25, 25, 25))
 	Main.CanvasRight:SetBackgroundColor(Color(25, 25, 25))
@@ -42,7 +51,8 @@
 	Main.ValidateBar:SetBackgroundColor(Color(0, 255, 0))
 
 	Main.TitleText = vgui.Create("DLabel", Main.TitleBar)
-	Main.TitleText:SetFont("DefaultLarge")
+	-- Main.TitleText:SetFont("DefaultLarge")
+	Main.TitleText:SetFont("Trebuchet20")
 	Main.TitleText:SetText("Expression Advanced 2 - IDE(A) v2.0")
 	Main.TitleText:SizeToContents()
 
@@ -101,76 +111,76 @@
 
 	Main.PerformLayout = function(Main, w, h)
 		Main.TitleBar:SetPos(5, 5)
-		Main.TitleBar:SetSize(w - 45, 30)
+		Main.TitleBar:SetSize(w - 41, 30)
 
-		Main.NewButton:SetPos(205, 7)
+		Main.NewButton:SetPos(275, 7)
 		Main.NewButton:SetSize(16, 16)
 
-		Main.TabBar:SetPos(230, 5)
-		Main.TabBar:SetSize(w - 235 - 45, 20)
+		Main.TabBar:SetPos(300, 5)
+		Main.TabBar:SetSize(w - 305 - 41, 20)
 		Main.TabBar:InvalidateLayout(true)
 
-		Main.SideBar:SetPos(w - 35, 5)
-		Main.SideBar:SetSize(30, h - 10)
+		Main.SideBar:SetPos(w - 31, 5)
+		Main.SideBar:SetSize(26, h - 10)
 		
 		Main.CloseButton:SetPos(5, 5)
-		Main.CloseButton:SetSize(20, 20)
+		Main.CloseButton:SetSize(16, 16)
 		
-		Main.FontUpButton:SetPos(5, 30)
-		Main.FontUpButton:SetSize(20, 20)
+		Main.FontUpButton:SetPos(5, 26)
+		Main.FontUpButton:SetSize(16, 16)
 		
-		Main.FontDownButton:SetPos(5, 55)
-		Main.FontDownButton:SetSize(20, 20)
+		Main.FontDownButton:SetPos(5, 51)
+		Main.FontDownButton:SetSize(16, 16)
 
 		Main.VoiceButton:SetPos(5, h - 40)
-		Main.VoiceButton:SetSize(20, 20)
+		Main.VoiceButton:SetSize(16, 16)
 
 		Main.TitleText:SetPos(5, 5)
 
-		local cw, ch = w - 45, h - 45
+		local cw, ch = w - 41, h - 45
 
 		Main.Canvas:SetPos(5, 40)
 		Main.Canvas:SetSize(cw, ch)
 
-		Main.ValidateBar:SetPos(5, ch - 35)
-		Main.ValidateBar:SetSize(cw - 95, 30)
+		Main.ValidateBar:SetPos(5, ch - 31)
+		Main.ValidateBar:SetSize(cw - 87, 26)
 
-		Main.FileBar:SetPos(cw - 85, ch - 35)
-		Main.FileBar:SetSize(80, 30)
+		Main.FileBar:SetPos(cw - 77, ch - 31)
+		Main.FileBar:SetSize(72, 26)
 
 		Main.SaveButton:SetPos(5, 5)
-		Main.SaveButton:SetSize(20, 20)
+		Main.SaveButton:SetSize(16, 16)
 
-		Main.SaveAsButton:SetPos(30, 5)
-		Main.SaveAsButton:SetSize(20, 20)
+		Main.SaveAsButton:SetPos(26, 5)
+		Main.SaveAsButton:SetSize(16, 16)
 
-		Main.OpenButton:SetPos(55, 5)
-		Main.OpenButton:SetSize(20, 20)
+		Main.OpenButton:SetPos(51, 5)
+		Main.OpenButton:SetSize(16, 16)
 
 		Main.Divider:SetPos(5, 5)
-		Main.Divider:SetSize(cw - 10, ch - 45)
+		Main.Divider:SetSize(cw - 10, ch - 41)
 		
 		Main.CanvasLeft:InvalidateLayout(false)
 	end
 
 	Main.CanvasLeft.PerformLayout = function(CanvasLeft, w, h)
 		Main.CanvasLeft.Bar:SetPos(5, 5)
-		Main.CanvasLeft.Bar:SetSize(w - 10, 30)
+		Main.CanvasLeft.Bar:SetSize(w - 10, 26)
 
 		Main.SettingsButton:SetPos(5, 5)
-		Main.SettingsButton:SetSize(20, 20)
+		Main.SettingsButton:SetSize(16, 16)
 
 		Main.SessionButton:SetPos(30, 5)
-		Main.SessionButton:SetSize(20, 20)
+		Main.SessionButton:SetSize(16, 16)
 
-		Main.SoundButton:SetPos(55, 5)
-		Main.SoundButton:SetSize(20, 20)
+		Main.SoundButton:SetPos(51, 5)
+		Main.SoundButton:SetSize(16, 16)
 
-		Main.ComponentsButton:SetPos(w - 35, 5)
-		Main.ComponentsButton:SetSize(20, 20)
+		Main.ComponentsButton:SetPos(w - 31, 5)
+		Main.ComponentsButton:SetSize(16, 16)
 
-		Main.CanvasLeft.Canvas:SetPos(5, 40)
-		Main.CanvasLeft.Canvas:SetSize(w - 10, h - 45)
+		Main.CanvasLeft.Canvas:SetPos(5, 36)
+		Main.CanvasLeft.Canvas:SetSize(w - 10, h - 41)
 	end
 
 /* --- --------------------------------------------------------------------------------
@@ -187,13 +197,16 @@
 			return self:SetActiveTab(self.TabsByFile[path])
 		end
 
-		local pnl = vgui.Create("EA_Editor")
+		local pnl = vgui.Create("GOLEM_Editor")
 		local tab = self:NewTab(pnl, name or "generic")
-
+		
 		if path then
 			tab.file = path
 			self.TabsByFile[path] = tab
 		end
+		
+		self:SetActiveTab( tab )
+		self:RequestFocus( )
 	end
 
 	function Main:NewTab(panel, name)
@@ -276,6 +289,7 @@
 			local pnl = tab:GetPanel()
 			pnl:SetVisible(true)
 			pnl:Dock(FILL)
+			pnl:RequestFocus()
 
 			self.ActiveTab = tab
 		end
@@ -298,8 +312,8 @@
 	@: Main Window - Open
    --- */
 
-	Main:SetSize(ScrW() - 100, ScrH() - 100)
+	Main:SetSize(1200,800)
 	Main:Center()
 	Main:MakePopup()
 
-	timer.Simple(10, function() Main:Remove() end)
+	-- timer.Simple(10, function() Main:Remove() end)
