@@ -45,7 +45,7 @@ AngObject:AddVMOperator( "=", "n,a", "", function( Context, Trace, MemRef, Value
 	local Prev = Context.Memory[MemRef] or Angle( 0, 0, 0 )
 	
 	Context.Memory[MemRef] = Value
-	Context.Delta[MemRef] = Prev - (Value or Angle(0, 0, 0))
+	Context.Delta[MemRef] = (Value or Angle(0, 0, 0)) - Prev
 	Context.Trigger[MemRef] = Context.Trigger[MemRef] or ( Prev ~= Value )
 end )
 

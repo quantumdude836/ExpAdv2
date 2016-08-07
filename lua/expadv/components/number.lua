@@ -84,7 +84,7 @@ Number:AddVMOperator( "=", "n,n", "", function( Context, Trace, MemRef, Value )
    local Prev = Context.Memory[MemRef] or 0
 
    Context.Memory[MemRef] = Value
-   Context.Delta[MemRef] = Prev - (Value or 0)
+   Context.Delta[MemRef] = (Value or 0) - Prev 
    Context.Trigger[MemRef] = Context.Trigger[MemRef] or ( Prev ~= Value )
 end )
 
