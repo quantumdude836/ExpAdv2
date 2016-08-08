@@ -241,18 +241,18 @@ function PANEL:SaveFile( Path, SaveAs, Tab, bNoSound )
 	
 	MakeFolders( Path )
 	
-	file.Write( Path, "" .. Tab:GetText( ) .. "" .. self:GetCode( Tab ) .. "" )
+	file.Write( Path, "" .. (Tab:GetText( ) == "generic" and "" or Tab:GetText( )) .. "" .. self:GetCode( Tab ) .. "" )
 	Tab.LastEdit = nil
 	
 	if not bNoSound then
 		surface.PlaySound( "ambient/water/drip3.wav" )
 		self.ValidateButton:SetText( "Saved as " .. Path ) 
 	end
-	if not Tab.FilePath or string.lower( Tab.FilePath ) ~= string.lower( string.sub( Path, 9 ) ) then
+	if not Tab.FilePath or string.lower( Tab.FilePath ) ~= string.lower( Path ) then
 		if self.FileTabs[Tab.FilePath] then 
 			self.FileTabs[Tab.FilePath] = nil 
 		end 
-		Tab.FilePath = string.sub( Path, 9 )
+		Tab.FilePath = Path
 		self.FileTabs[Tab.FilePath] = Tab
 	end
 end
@@ -282,7 +282,7 @@ function PANEL:LoadFile( Path )
 	
 	self:AutoSave( )
 	local Title, Code = string.match( Data, "(.+)(.*)" )
-	self:NewTab( Code or Data, string.sub( Path, 9 ), Title )
+	self:NewTab( Code or Data, Path, Title )
 end
 
 function PANEL:SetSyntaxColorLine( func )
@@ -334,12 +334,12 @@ function PANEL:NewTab( Code, Path, Name )
 	end
 	
 	local TabName = Name
-	if not TabName and Path then
-		TabName = string.sub( Path, 0, #Path - 4 )
+	if not TabName or TabName == ""  then
+		TabName = Path and string.match( Path, "/([^%./]+)%.txt$" ) or "generic"
 	end
 	
 	local Editor = vgui.Create( "EA_Editor" )
-	local Sheet = self.TabHolder:AddSheet( TabName or "generic", Editor, "fugue/script-text.png" )
+	local Sheet = self.TabHolder:AddSheet( TabName, Editor, "fugue/script-text.png" )
 	self.TabHolder:SetActiveTab( Sheet.Tab )
 	Sheet.Panel:RequestFocus( )
 	
@@ -444,10 +444,18 @@ function PANEL:AutoSave( Tab )
 	file.Write( "expadv2/_autosave_.txt", code )
 end
 
+local function TempID( )
+	local id = {}
+	for i = 1, 10 do
+		id[i] = math.random( 0, 9 )
+	end
+	return table.concat( id )
+end 
+
 function PANEL:SaveTempFile( Tab )
 	if not ValidPanel( Tab ) then return end
 	local Code = Tab:GetPanel( ):GetCode( )
-	local Path = Tab.TempFile or "expadv2_temp/" .. math.random( 100000000, 1000000000 ) + math.random( 100000000, 1000000000 ) .. ".txt"
+	local Path = Tab.TempFile or "expadv2_temp/" .. TempID() .. ".txt"
 	MakeFolders( Path )
 	file.Write( Path, "" .. Tab:GetText( ) .. "" .. Code .. "" )
 	return Path
@@ -693,8 +701,6 @@ end
 ------------------------------------------------------------------------------------------------------
 function PANEL:DoAutoRefresh( )
 	for File, Tab in pairs(self.FileTabs) do
-		File = "expadv2/" .. File
-		
 		if file.Exists( File, "DATA" ) then
 			local Panel = Tab:GetPanel( )
 			
@@ -709,7 +715,7 @@ function PANEL:DoAutoRefresh( )
 				
 				local function YesFunc( ) 
 					if not IsValid( Panel ) then return end 
-					Panel:SetCode( self:GetFileCode( File ) ) 
+					Panel:SetCode( self:GetFileCode( File, true ) ) 
 				end 
 				
 				local Window = Derma_Query( Message, "Update tab?", "Refresh", YesFunc, "Ignore", function( ) end )

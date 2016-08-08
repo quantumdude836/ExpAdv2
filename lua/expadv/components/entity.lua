@@ -217,15 +217,13 @@ Component:AddFunctionHelper( "setGravity", "e:n", "Sets the gravity multiplier o
 	@: VEHICLES
    --- */
 
-EXPADV.SharedOperators()
+EXPADV.ServerOperators()
 
 Component:AddInlineFunction( "driver", "e:", "ply", "((@value 1:IsValid() && @value 1:IsVehicle() && @value 1:GetDriver():IsValid()) and @value 1:GetDriver() or Entity(0))")
 Component:AddFunctionHelper( "driver", "e:", "Gets the driver of the given vehicle.")
 
 Component:AddInlineFunction( "passenger", "e:", "ply", "((@value 1:IsValid() && @value 1:IsVehicle() && @value 1:GetPassenger(0):IsValid()) and @value 1:GetPassenger(0) or Entity(0))")
 Component:AddFunctionHelper( "passenger", "e:", "Gets the passenger of the given vehicle.")
-
-EXPADV.ServerOperators()
 
 Component:AddPreparedFunction( "lockPod", "e:b", "",
 [[if(@value 1:IsValid() && EXPADV.PPCheck(Context,@value 1) && @value 1:IsVehicle()) then
@@ -1020,10 +1018,6 @@ Component:AddFunctionHelper( "boneParent", "e:n", "The bode ID of the bone to ge
 /* --- --------------------------------------------------------------------------------
 	@: Entity Events
    --- */
-
-EXPADV.SharedEvents( )
-Component:AddEvent( "playerEnteredVehicle", "ply", "" )
-Component:AddEvent( "playerExitedVehicle", "ply", "" )
 
 EXPADV.ServerEvents( )
 Component:AddEvent( "onKill", "e,e,e", "" )
