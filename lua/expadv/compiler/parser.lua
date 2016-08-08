@@ -693,7 +693,7 @@ function Compiler:Expression_Variable( Trace )
 						end
 					end
 
-					self:RequireToken( "rpa", "Right parenthesis ( )), expected to close function perameters" )
+					self:RequireToken( "rpa", "Right parenthesis ( )), expected to close function parameters" )
 
 					return self:Compile_FUNC( Trace, Variable, Expressions )
 		else
@@ -789,7 +789,7 @@ function Compiler:Expression_17( Trace, Expression, Statment )
 					end
 				end
 
-				self:RequireToken( "rpa", "Right parenthesis ( ), expected to close function perameters" )
+				self:RequireToken( "rpa", "Right parenthesis ( ), expected to close function parameters" )
 
 				Expression = self:Compile_CALL( Trace, Expression, Inputs )
 			end
@@ -1095,11 +1095,9 @@ function Compiler:Statement_4( Trace )
 		for I = 1, #Perams do
 			local Peram = Perams[I]
 			local Test = Event.Input[I]
-			 
-			if !Test then
-				self:TraceError( Trace, "Invalid perameter #%i to event %s, for perameter expected", I, Name )
-			elseif Test ~= Peram[2] then
-				self:TraceError( Trace, "Invalid perameter #%i for event %s, %s expected got %s", I, Name, self:NiceClass( Test ) ,self:NiceClass( Peram[2] ) )
+			
+			if Test ~= Peram[2] then
+				self:TraceError( Trace, "Invalid parameter #%i for event %s, %s expected got %s", I, Name, self:NiceClass( Test ) ,self:NiceClass( Peram[2] ) )
 			end
 		end
 
