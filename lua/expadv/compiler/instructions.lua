@@ -321,13 +321,13 @@ function Compiler:Compile_EXP( Trace, Expression1, Expression2 )
 end
 
 function Compiler:Compile_TEN( Trace, Expression1, Expression2, Expression3 )
-	if Expression2.Return ~= Expression3.Return then
+	if Expression2.Return ~= Expression3.Return or Expression2.Return == "b" then
 		self:TraceError( Trace, "Ternary operator does not support '%s : %s ? %s'", self:NiceClass( Expression1.Return, Expression2.Return, Expression3.Return ) )
 	end
 	
 	Expression1 = self:Compile_IS( Trace, Expression1 )
 	
-	local Inline, Prepare = string.format( "(function()if(%s)then return %s else return %s end end)()", Expression1.Inline, Expression2.Inline, Expression3.Inline )
+	local Inline, Prepare = string.format( "(%s and %s or %s)", Expression1.Inline, Expression2.Inline, Expression3.Inline )
 	
 	if Expression1.Prepare or Expression2.Prepare or Expression3.Prepare then
 		Prepare = table.concat( { Expression1.Prepare or "", Expression2.Prepare or "", Expression3.Prepare or "" }, "\n" )
