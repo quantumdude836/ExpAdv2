@@ -324,15 +324,15 @@ function Compiler:Compile_TEN( Trace, Expression1, Expression2, Expression3 )
 	if Expression2.Return ~= Expression3.Return then
 		self:TraceError( Trace, "Ternary operator does not support '%s : %s ? %s'", self:NiceClass( Expression1.Return, Expression2.Return, Expression3.Return ) )
 	end
-
+	
 	Expression1 = self:Compile_IS( Trace, Expression1 )
-
-	local Inline, Prepare = string.format( "(%s and %s or %s)", Expression1.Inline, Expression2.Inline, Expression3.Inline )
+	
+	local Inline, Prepare = string.format( "(function()if(%s)then return %s else return %s end end)()", Expression1.Inline, Expression2.Inline, Expression3.Inline )
 	
 	if Expression1.Prepare or Expression2.Prepare or Expression3.Prepare then
 		Prepare = table.concat( { Expression1.Prepare or "", Expression2.Prepare or "", Expression3.Prepare or "" }, "\n" )
 	end
-
+		
 	return { Trace = Trace, Inline = Inline, Prepare = Prepare, Return = Expression2.Return, FLAG = Prepare and EXPADV_INLINEPREPARE or EXPADV_INLINE }
 end
 
@@ -579,34 +579,34 @@ end
 
 function Compiler:Compile_IF( Trace, Condition, Sequence, Else )
 	Condition = self:Compile_IS( Trace, Condition )
-
+	
 	local Native = { }
 	if Condition.Prepare then Native[#Native + 1] = Condition.Prepare end
 	if Else and Else.Prepare then Native[#Native + 1] = Else.Prepare end
-
+	
 	Native[#Native + 1] = "if ( " .. Condition.Inline .. " ) then"
-
+	
 	if Sequence.Prepare then Native[#Native + 1] = Sequence.Prepare end
 	if Sequence.Inline then Native[#Native + 1] = Sequence.Inline end
 	if Else and Else.Inline then Native[#Native + 1] = Else.Inline end
-
+	
 	Native[#Native + 1] = "end"
-
+	
 	return { Trace = Trace, Return = "", Prepare = table.concat( Native, "\n" ),FLAG = EXPADV_PREPARE }
 end
 
 function Compiler:Compile_ELSEIF( Trace, Condition, Sequence, Else )
 	Condition = self:Compile_IS( Trace, Condition )
-
+	
 	local Native = { }
 	if Else and Else.Prepare then Native[#Native + 1] = Else.Prepare end
-
+	
 	Native[#Native + 1] = "elseif ( " .. Condition.Inline .. " ) then"
-
+	
 	if Sequence.Prepare then Native[#Native + 1] = Sequence.Prepare end
 	if Sequence.Inline then Native[#Native + 1] = Sequence.Inline end
 	if Else and Else.Inline then Native[#Native + 1] = Else.Inline end
-
+	
 	return { Trace = Trace, Return = "", Inline = table.concat( Native, "\n" ), Prepare = Condition.Prepare, FLAG = EXPADV_PREPARE }
 end
 
