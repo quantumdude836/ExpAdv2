@@ -387,17 +387,16 @@ function Compiler:NextMemoryRef( )
 	return self.MemoryRef
 end
 
-
 function Compiler:TestCell( Trace, MemRef, ClassShort, Variable, Comparator )
 	local Cell = self.Cells[ MemRef ]
-
-	if !Cell and Variable then
-		self:TraceError( Trace, "%s of type %s does not exist", Variable, self:NiceClass( ClassShort ) )
+	
+	if not Cell and Variable then
+		self:TraceError( Trace, "%s of type %s does not exist", Variable, self:NiceClass( Class ) )
 	elseif ClassShort and ClassShort ~= "void" and Cell.Return ~= ClassShort and Variable then
 		self:TraceError( Trace, "%s of type %s can not be assigned as %s", Variable, self:NiceClass( Cell.Return, ClassShort ) )
-	elseif self.IsServerScript and !Cell.Server then
+	elseif self.IsServerScript and not Cell.Server then
 		self:TraceError( Trace, "%s of type %s is not avalible serverside", Variable, self:NiceClass( Cell.Return ) )
-	elseif self.IsClientScript and !Cell.Client then
+	elseif self.IsClientScript and not Cell.Client then
 		self:TraceError( Trace, "%s of type %s is not avalible clientside", Variable, self:NiceClass( Cell.Return ) )
 	else
 		return true
@@ -406,12 +405,12 @@ end
 
 function Compiler:FindCell( Trace, Variable, bError )
 	for Scope = self.ScopeID, 0, -1 do
-		if Scope == 0 then PrintTable(self.Scopes[ Scope ]) end
+		-- if Scope == 0 then PrintTable(self.Scopes[ Scope ]) end
 		local MemRef = self.Scopes[ Scope ][ Variable ]
 		
 		if MemRef then
 			local Cell = self.Cells[ MemRef ]
-
+			
 			if self.IsServerScript and !Cell.Server then
 				self:TraceError( Trace, "%s of type %s is not avalible serverside", Variable, self:NiceClass( Cell.Return ) )
 			elseif self.IsClientScript and !Cell.Client then
@@ -440,16 +439,16 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier, Comparator )
 		elseif !ClassObj.LoadOnClient then
 			self:TraceError( Trace, "%s is serverside only can not appear in shared code", ClassObj.Name )
 		end
-	elseif self.IsServerScript and !ClassObj.LoadOnServer then
+	elseif self.IsServerScript and not ClassObj.LoadOnServer then
 		self:TraceError( Trace, "%s Must not appear in serverside scripts.", ClassObj.Name )
-	elseif self.IsClientScript and !ClassObj.LoadOnClient then
+	elseif self.IsClientScript and not ClassObj.LoadOnClient then
 		self:TraceError( Trace, "%s Must not appear in clientside scripts.", ClassObj.Name )
 	end
 
-	if !Modifier then
+	if not Modifier then
 		local MemRef = self.Scope[ Variable ]
 
-		if MemRef and self:TestCell( Trace, MemRef, Class, Variable, Comparator ) then
+		if MemRef and self:TestCell( Trace, MemRef, Class.Short, Variable, Comparator ) then
 			return self.Cells[ MemRef ]
 		end
 
@@ -469,7 +468,7 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier, Comparator )
 	if Modifier == "static" then
 		local MemRef = self.Scope[ Variable ]
 
-		if MemRef and self:TestCell( Trace, MemRef, Class, Variable, Comparator ) then
+		if MemRef and self:TestCell( Trace, MemRef, Class.Short, Variable, Comparator ) then
 			return self.Cells[ MemRef ]
 		end
 
@@ -485,7 +484,7 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier, Comparator )
 	if Modifier == "global" then
 		local MemRef = self.Global[ Variable ]
 
-		if MemRef and self:TestCell( Trace, MemRef, Class, Variable, Comparator ) then
+		if MemRef and self:TestCell( Trace, MemRef, Class.Short, Variable, Comparator ) then
 			return self.Cells[ MemRef ]
 		else
 			MemRef = self:NextMemoryRef( )
@@ -510,7 +509,7 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier, Comparator )
 
 		local MemRef = self.Scope[ Variable ]
 
-		if MemRef and self:TestCell( Trace, MemRef, Class, Variable, Comparator ) then
+		if MemRef and self:TestCell( Trace, MemRef, Class.Short, Variable, Comparator ) then
 			return self.Cells[ MemRef ]
 		end
 
@@ -541,7 +540,7 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier, Comparator )
 
 			local MemRef = self.InPorts[ Variable ]
 
-			if MemRef and self:TestCell( Trace, MemRef, Class, Variable, Comparator ) then
+			if MemRef and self:TestCell( Trace, MemRef, Class.Short, Variable, Comparator ) then
 				return self.Cells[ MemRef ]
 			else
 				MemRef = self:NextMemoryRef( )
@@ -566,7 +565,7 @@ function Compiler:CreateVariable( Trace, Variable, Class, Modifier, Comparator )
 
 			local MemRef = self.OutPorts[ Variable ]
 
-			if MemRef and self:TestCell( Trace, MemRef, Class, Variable, Comparator ) then
+			if MemRef and self:TestCell( Trace, MemRef, Class.Short, Variable, Comparator ) then
 				return self.Cells[ MemRef ]
 			else
 				MemRef = self:NextMemoryRef( )
