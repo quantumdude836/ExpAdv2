@@ -391,7 +391,7 @@ function Compiler:TestCell( Trace, MemRef, ClassShort, Variable, Comparator )
 	local Cell = self.Cells[ MemRef ]
 	
 	if not Cell and Variable then
-		self:TraceError( Trace, "%s of type %s does not exist", Variable, self:NiceClass( Class ) )
+		self:TraceError( Trace, "%s of type %s does not exist", Variable, self:NiceClass( ClassShort ) )
 	elseif ClassShort and ClassShort ~= "void" and Cell.Return ~= ClassShort and Variable then
 		self:TraceError( Trace, "%s of type %s can not be assigned as %s", Variable, self:NiceClass( Cell.Return, ClassShort ) )
 	elseif self.IsServerScript and not Cell.Server then
