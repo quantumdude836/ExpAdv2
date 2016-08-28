@@ -227,16 +227,13 @@ end)
 	@: Player Events
    --- */
 
-EXPADV.ClientEvents( )
-
-Component:AddEvent( "playerChat", "ply,s,b", "s" )
-EXPADV.AddEventHelper( "playerChat", "Called when a player talks in chat the 3rd arument is teamchat and your can return a string to change the message." )
-
-
 EXPADV.SharedEvents( )
 
 Component:AddEvent( "playerNoClip", "ply,b", "" )
 EXPADV.AddEventHelper( "playerNoClip", "Called when a player starts or stops noclipping." )
+
+Component:AddEvent( "playerChat", "ply,s,b", "s" )
+EXPADV.AddEventHelper( "playerChat", "Called when a player sends a message, 3rd argument indicates teamchat. Return a string serverside to change the message." )
 
 
 EXPADV.ServerEvents( )
