@@ -159,7 +159,7 @@ end
 
 function Editor.Validate( Script )
 	if Editor.Instance then
-		return Editor.Instance:DoValidate( nil, nil, Script )
+		return Editor.Instance:DoValidate( false, Script )
 	end
 end
 

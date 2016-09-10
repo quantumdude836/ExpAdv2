@@ -841,7 +841,7 @@ local function compileRate()
 	local rate = EXPADV.ReadSetting( "compile_rate", 60 )
 
 	if rate <= 0 then
-		return 0, false
+		return 0.01, false
 	elseif rate > 99 then
 		return 0.99, true
 	end
@@ -859,54 +859,61 @@ function SoftCompiler:OnFail(err) end
 function SoftCompiler:OnCompletion(instruction) end
 function SoftCompiler:PostResume(percent) end
 
+local function docompile( self, Script, Files )
+	self:StartTokenizer( )
+		
+	EXPADV.CallHook( "PreCompileScript", self, Script, Files ) 
+	
+	local Status, Instruction = pcall( self.Sequence, self, {0, 0} )
+	
+	self.IsDone = true -- What ever happens this coroutine is done!
+	
+	if not Status then return self:OnFail(Instruction) end
+	
+	Instruction = self:FixPlaceHolders(Instruction)
+	
+	self:OnCompletion( Instruction )
+end 
+
 function EXPADV.NewSoftCompiler(Script, Files)
-	local self = EXPADV.CreateCompiler(Script, Files)
-
+	local self = EXPADV.CreateCompiler(Script, Files) 
+	
 	for k, v in pairs(SoftCompiler) do self[k] = v end
-
-	self.Thread = coroutine.create(function()
-		self:StartTokenizer( )
-		
-		EXPADV.CallHook("PreCompileScript", self, Script, Files)
-			
-		local Status, Instruction = pcall(self.Sequence, self, {0, 0})
-		
-		self.IsDone = true -- What ever happens this coroutine is done!
-
-		if !Status then return self:OnFail(Instruction) end
-
-		Instruction = self:FixPlaceHolders(Instruction)
-
-		self:OnCompletion(Instruction)
-	end) -- Yes, I know its not really a thread.
-
+	
+	self.Thread = coroutine.create( function( )
+		local Status, Err = pcall( docompile, self, Script, Files )
+		if not Status then 
+			self:OnFail( Err )
+		end 
+	end ) -- Yes, I know its not really a thread.
+	
 	return self
 end
 
-function SoftCompiler:Resume(Seconds)
+function SoftCompiler:Resume(Seconds) 
 	if self.IsDone then return true, 0 end -- Shouldn't happen
 	if Seconds >= 1 then return false, 0 end
-
+	
 	local Time, Hault = 0, false
-
+	
 	local function hook() Hault = (SysTime() - Time) >= Seconds end
-
+	
 	function self:CheckStatus()
 		if Hault then coroutine.yield() end
 	end -- I wish I could do this from the above hook :(
-
+		
 	Time = SysTime()
 	debug.sethook(hook, "", 500)
-
+	
 	coroutine.resume(self.Thread)
-
+	
 	debug.sethook()
 	Time = (SysTime() - Time) - Seconds
 	if Time > 1 then Time = 0 end
-
-	self:PostResume(math.ceil((self.Pos / self.Len) * 100))
-
-	return self.IsDone, Time
+	
+	self:PostResume( math.min( math.ceil( ( self.Pos / self.Len ) * 100 ), 100 ) )
+	
+	return coroutine.status( self.Thread ) == "dead" and true or self.IsDone, Time
 end
 
 /* --- --------------------------------------------------------------------------------
@@ -954,7 +961,7 @@ function EXPADV.StepCompilerQueue()
 	if count > threads then count = threads end
 
 	local finished = {}
-	local speed = ((engine.TickInterval() * compileRate()) / count) -- was 0.4 now 0.8
+	local speed = (FrameTime() * compileRate()) 
 	local nextSpeed = speed -- Allows us to make the most of this :D
 
 	-- MsgN("processing ", count, " out of ", #Queue)
@@ -979,9 +986,9 @@ end
 
 hook.Add("Tick", "expadv.compiler.queue", function()
 	local Ok, Error = pcall(EXPADV.StepCompilerQueue)
-
+	
 	if Ok then return end
-
+	
 	EXPADV.Msg("ExpAdv2: Compiler queue failed, " .. Error)
 end)
 

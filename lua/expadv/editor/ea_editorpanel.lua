@@ -149,8 +149,6 @@ function PANEL:Init( )
 
 	self.__bVoice = 0
 	self.__nMicAlpha = 0
-
-	timer.Create( "expadv.editor.validator", 1, 0, function( ) self:ResumeValidator( ) end )
 end
 
 function PANEL:SaveCoords( )
@@ -529,6 +527,23 @@ function PANEL:Open( Code, NewTab )
 	elseif Code then
 		self:SetCode( Code )
 	end
+	
+	if self.ChangeQueue then 
+		for File, _ in pairs( self.ChangeQueue ) do
+			local Message = string.format( "File %q has been changed outside of the editor, would you like to refresh?", File )
+			
+			local function YesFunc( ) 
+				if not IsValid( Panel ) then return end 
+				Panel:SetCode( self:GetFileCode( File, true ) ) 
+			end 
+			
+			local Window = Derma_Query( Message, "Update tab?", "Refresh", YesFunc, "Ignore", function( ) end )
+				
+			timer.Simple( 30, function( ) if IsValid( Window ) then Window:Close( ) end end )
+		end
+		
+		self.ChangeQueue = nil 
+	end 
 end
 
 function PANEL:ReciveDownload( DownloadData )
@@ -711,6 +726,13 @@ function PANEL:DoAutoRefresh( )
 			
 			if file.Time( File, "DATA" ) ~= Tab.LastEdit then 
 				Tab.LastEdit = file.Time( File, "DATA" )
+				
+				if not self:IsVisible( ) then 
+					self.ChangeQueue = self.ChangeQueue or { }
+					self.ChangeQueue[File] = true
+					continue 
+				end 
+				
 				local Message = string.format( "File %q has been changed outside of the editor, would you like to refresh?", File )
 				
 				local function YesFunc( ) 
@@ -735,30 +757,78 @@ end )
 ------------------------------------------------------------------------------------------------------
 --		NEW VALIDATOR
 ------------------------------------------------------------------------------------------------------
-
 function PANEL:DoValidate( Goto, Code )
-	
-	Code = Code or self:GetCode( )
-	
-	if !Code or Code == "" then
-		self:OnValidateError( false,"No code submited, compiler exited.")
-		return false
-	end
-	
-	local Status, Instance, Instruction = EXPADV.SolidCompile(Code, Files or {})
-	
-	if !Status then
-		self:OnValidateError(Goto, Instance)
-		return false
-	end
-	
-	self.ValidateButton:SetColor( Color( 0, 255, 0 ) )
-	self.ValidateButton:SetText( "Validation Successful!" )
+	if EXPADV.ReadSetting( "compile_rate", 60 ) == 0 then 
+		Code = Code or self:GetCode( )
+		
+		if not Code or Code == "" then
+			self:OnValidateError( false,"No code submited, compiler exited.")
+			return false
+		end
+		
+		local Status, Instance, Instruction = EXPADV.SolidCompile( Code, Files or { } )
+		
+		if not Status then
+			self:OnValidateError( Goto, Instance )
+			return false
+		end
+		
+		self.ValidateButton:SetColor( Color( 0, 255, 0 ) )
+		self.ValidateButton:SetText( "Validation Successful!" )
 
-	return true
+		return true
+	else 
+		if self.Validating then 
+			EXPADV.UnqueueCompiler( self.Proccess ) 
+			self.Validating = false 
+			
+			self.ValidateButton:SetColor( Color( 0, 0, 255 ) )
+			self.ValidateButton:SetText( "Compiling canceled" )
+			return false 
+		end 
+		Code = Code or self:GetCode( )
+		
+		if not Code or Code == "" then
+			self:OnValidateError( false, "No code submitted, compiler exited.")
+			return false
+		end
+		
+		self.Validating = true
+		local time = SysTime( )
+		self.Proccess = EXPADV.NewSoftCompiler( Code , Files or { } ) 
+		self.Proccess.Editor = self 
+		
+		function self.Proccess:OnCompletion( instruction )
+			time = SysTime( ) - time
+			self.Editor.Validating = false
+			self.Editor.ValidateButton:SetColor( Color( 0, 255, 0 ) )
+			self.Editor.ValidateButton:SetText( string.format( "Compiled in %fs", time ) )
+		end 
+
+		function self.Proccess:OnFail( err )
+			self.Editor:OnValidateError( Goto, err )
+		end 
+		
+		function self.Proccess:PostResume( percent )
+			if self.Editor.Validating then 
+				if self.Percent ~= percent then 
+					self.Editor.ValidateButton:SetColor( Color( 0, 0, 255 ) )
+					self.Editor.ValidateButton:SetText( string.format( "Compiling %d%%", percent ) )
+					self.Percent = percent 
+				end 
+			end 
+		end 
+		
+		self.ValidateButton:SetColor( Color( 0, 0, 255 ) )
+		self.ValidateButton:SetText( "Compiling" )
+		EXPADV.QueueCompiler( self.Proccess )
+		
+		return true
+	end 
 end
 
 function PANEL:OnValidateError( Goto, Error )
+	self.Validating = false
 	if Goto then
 		local Row, Col = Error:match( "at line ([0-9]+), char ([0-9]+)$" )
 		if not Row then Row, Col = Error:match( "at line ([0-9]+)$" ), 1 end
@@ -775,15 +845,6 @@ function PANEL:OnValidateError( Goto, Error )
 	
 	self.ValidateButton:SetText( Error )
 	self.ValidateButton:SetColor( Color( 255, 0, 0 ) )
-end
-
-function PANEL:ResumeValidator( )
-	if !self.Validator_Instance or !self.Validator_Instance.Running then
-		self.Validator_Instance = nil
-		return
-	end
-	
-	self.Validator_Instance:Resume( )
 end
 
 vgui.Register( "EA_EditorPanel", PANEL, "EA_Frame" )
