@@ -145,11 +145,11 @@ Component:AddFunctionHelper( "setAlpha", "c:n", "Sets the alpha value of a color
 	@: HSV2RGB
    --- */
 
-Component:AddInlineFunction( "hsv2rgb", "c", "c", "$HSVToColor(@value 1.r, @value 1.g, @value 1.b)")
-Component:AddFunctionHelper( "hsv2rgb", "c", "Converts hsv color to regular color")
+Component:AddInlineFunction( "hsv2rgb", "n,n,n", "c", "$HSVToColor(@value 1, @value 2, @value 3)")
+Component:AddFunctionHelper( "hsv2rgb", "n,n,n", "Converts hsv color to regular color (hue, saturation, value)")
 
-Component:AddInlineFunction( "rgb2hsv", "c", "c", "Color($ColorToHSV(@value 1.r, @value 1.g, @value 1.b))")
-Component:AddFunctionHelper( "rgb2hsv", "c", "Converts regular color to hsv color")
+Component:AddInlineFunction( "rgb2hsv", "c", "ar", "{__type = \"n\", $ColorToHSV(Color(@value 1.r, @value 1.g, @value 1.b))}")
+Component:AddFunctionHelper( "rgb2hsv", "c", "Converts regular color to hsv array (fields: 1 = hue, 2 = saturation, 3 = value)")
 
 /* --- --------------------------------------------------------------------------------
     @: Useful
