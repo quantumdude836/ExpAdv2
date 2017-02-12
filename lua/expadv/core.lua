@@ -588,7 +588,8 @@ hook.Add( "Expadv.PostLoadConfig", "expadv.quota", function( )
 	EXPADV.CreateSetting( "softquota", 100000 )
 	EXPADV.CreateSetting( "hardquota", 1000000 )
 	EXPADV.CreateSetting( "memorylimit", 5 )
-	EXPADV.CreateSetting( "net_max_bytes", 50000 )
+	EXPADV.CreateSetting( "net_max_bytes", 10000 ) -- Max bites that this gate can send per second.
+	EXPADV.CreateSetting( "net_max_transmissions", 25 ) -- Max net transmittions this gate can make per second.
 end )
 
 local function update( )
@@ -597,10 +598,15 @@ local function update( )
 	expadv_softquota = EXPADV.ReadSetting( "softquota", 100000 )
 	expadv_hardquota = EXPADV.ReadSetting( "hardquota", 1000000 )
 	expadv_memorylimit = EXPADV.ReadSetting( "memorylimit", 5 ) * 1024
-	expadv_netlimit = EXPADV.ReadSetting( "net_max_bytes", 50000 )
+	expadv_netlimit = EXPADV.ReadSetting( "net_max_bytes", 10000 ) 
+	expadv_netsend = EXPADV.ReadSetting( "net_max_transmissions", 25 )
 end
 
 update()
+
+if expadv_netlimit >= 50000 then
+	Config.settings.net_max_bytes = 10000;
+end -- Resets the setting for older clients.
 
 timer.Create( "expadv.quota", 1, 0, update )
 
@@ -609,20 +615,33 @@ timer.Create( "expadv.quota", 1, 0, update )
    --- */
 
 function EXPADV.DoNetMessage(Context, func, ...)
-	local Bytes = (Context.Data.net_bytes or 0) + net.BytesWritten()
-	
-	if Bytes <= expadv_netlimit then
-		Context.Data.net_bytes = Bytes
-		return true, func(...)
+	local Sends = (Context.Data.net_transmissions or 0) + 1;
+
+	if (Sends > expadv_netsend) then
+		return false
 	end
 
-	return false
+	local Bytes = (Context.Data.net_bytes or 0) + net.BytesWritten()
+	
+	if Bytes > expadv_netlimit then
+		return false;
+	end
+
+	Context.Data.net_transmissions = Sends;
+	Context.Data.net_bytes = Bytes
 end
 
-hook.Add("Expadv.UpdateContext", "expadv.netlimit",
-	function(Context)
-		Context.Data.net_bytes = nil
-	end)
+function EXPADV.ClearNetLimits()
+	for Context, _ in pairs( EXPADV.CONTEXT_REGISTERY ) do
+		local Data = Context.Data or {};
+		Data.net_transmissions = 0;
+		Data.net_bytes = 0;
+	end
+end
+
+timer.Create( "expadv.netLimits", 1, 0, function()
+	pcall(EXPADV.ClearNetLimits);
+end )
 
 /* --- --------------------------------------------------------------------------------
 	@: Editor Animation.

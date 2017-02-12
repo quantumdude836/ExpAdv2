@@ -403,6 +403,12 @@ EXPADV.AddFunctionHelper( nil, "netUsage", "", "Returns the current bytes used f
 EXPADV.AddInlineFunction( nil, "netLimit", "", "n", "(expadv_netlimit or 0)" )
 EXPADV.AddFunctionHelper( nil, "netLimit", "", "Returns the max bytes that can used for client and server sync." )
 
+EXPADV.AddInlineFunction( nil, "netTransmissions", "", "n", "(Context.Data.net_transmissions or 0)" )
+EXPADV.AddFunctionHelper( nil, "netTransmissions", "", "Returns the current amount of net transmissions used out of the limit (transmissions per second)." )
+
+EXPADV.AddInlineFunction( nil, "netTransmissionLimit", "", "n", "(expadv_netsend or 0)" )
+EXPADV.AddFunctionHelper( nil, "netTransmissionLimit", "", "Returns the limit of net transmissions (transmissions per second)." )
+
 /* --- -------------------------------------------------------------------------------
 	@: Events
    --- */
