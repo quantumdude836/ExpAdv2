@@ -1,5 +1,3 @@
-IMPORTANT NOTE: Support for this project has eneded.
-
 ExpAdv2
 =======
 
